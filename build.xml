@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="Env" default="default" basedir=".">
+    <description>Builds, tests, and runs the project Env.</description>
+    
+    <property description="Source Folder" name="SRC_DIR" location="src" />
+    <property description="Files for parsing etc." name="TOOLS_DIR" location="tools" />
+    <property description="Java Jars" name="JAVA_LIB_DIR" location="rhino" />
+    <property description="Rhino JS Engine" name="RHINO_JAR" location="${JAVA_LIB_DIR}/js.jar" />
+    <property description="JSLint Syntax Checking Engine" name="JSLINT_JAR" location="${JAVA_LIB_DIR}/jslint4java-1.2.1.jar" />
+
+    <property name="PREFIX"         location="${basedir}/javascript/"       description="Target parent folder for built files"   />
+    <property name="DOCS_DIR"       location="${PREFIX}/docs"               description="Folder for docs target"  />
+    <property name="TEST_DIR"       location="${PREFIX}/test"               description="Folder for test target"  />
+    <property name="DIST_DIR"       location="${PREFIX}/dist"               description="Folder for concatenated, min, lite and packed target" />
+
+    <!-- Files names for distribution -->
+    <property name="ENV_CORE"   		location="${DIST_DIR}/env.core.js" />
+    <property name="ENV_PARSER"   		location="${DIST_DIR}/env.parser.js" />
+    <property name="ENV_DOM"   			location="${DIST_DIR}/env.dom.js" />
+    <property name="ENV_HTML"   		location="${DIST_DIR}/env.html.js" />
+    <property name="ENV_XHR"   			location="${DIST_DIR}/env.xhr.js" />
+    <property name="ENV_LOCATION"   	location="${DIST_DIR}/env.location.js" />
+    <property name="ENV_COOKIE"   		location="${DIST_DIR}/env.cookie.js" />
+    <property name="ENV_RHINO"   		location="${DIST_DIR}/env.rhino.js" />
+    
+    <!-- BUILD TARGETS -->
+    <target name="default" depends="lint"/>
+    
+    <target name="all" depends="default"/>
+    
+    <target name="lint" depends="concat">
+        <java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
+            <arg value="${ENV_CORE}" />
+        </java>
+    </target>
+    
+    <target name="concat" description="Main ENV build">
+    	<!-- CORE -->
+        <echo message="Building ${ENV_CORE}" />
+        <mkdir dir="${DIST_DIR}" />
+        <concat destfile="${ENV_CORE}">
+            <fileset dir="${SRC_DIR}" includes="env.core.js" />
+        </concat>
+        <echo message="${ENV_CORE} built." />
+        
+    	<!-- ALL -->
+        <echo message="Building ${ENV_ALL}" />
+        <mkdir dir="${DIST_DIR}" />
+        <concat destfile="${ENV_ALL}">
+            <fileset dir="${SRC_DIR}" includes="env.core.js" />
+            <fileset dir="${SRC_DIR}" includes="env.parser.js" />
+            <fileset dir="${SRC_DIR}" includes="env.dom.js" />
+            <fileset dir="${SRC_DIR}" includes="env.html.js" />
+            <fileset dir="${SRC_DIR}" includes="env.xhr.js" />
+            <fileset dir="${SRC_DIR}" includes="env.location.js" />
+            <fileset dir="${SRC_DIR}" includes="env.cookie.js" />
+            <fileset dir="${SRC_DIR}" includes="env.rhino.js" />
+        </concat>
+        <echo message="${ENV_ALL} built." />
+    </target>
+    
+</project>
