@@ -1,5 +1,5 @@
 
-ENV = src/env.js
+ENV = dist/env.rhino.js
 TEST = test/test.js
 
 JAR = java -jar rhino/js.jar
@@ -8,4 +8,4 @@ test-rhino:
 	@@${JAR} ${TEST}
 
 run-rhino:
-	echo "load('src/env.js');window.location='test/index.html';" | ${JAR}
+	echo "load('dist/env.rhino.js');window.location='test/index.html';" | ${JAR}

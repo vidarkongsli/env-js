@@ -3,10 +3,8 @@
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008 John Resig, under the MIT License
  */
+ 
 
-// The window Object
+// The Window Object
 var window = this;
-(function(){
-
-	
-})();
+(function($w, $env){

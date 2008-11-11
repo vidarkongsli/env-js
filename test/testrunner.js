@@ -15,7 +15,6 @@ function test(name, fn){
 	if ( expected != -1 && expected != numTests )
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
-
 var orig = document.getElementById('main').innerHTML;
 
 /**

@@ -1,5 +1,5 @@
 /*
-*	env.html.js
+*	html.js
 *
 *	DOM Level 2 HTML
 */

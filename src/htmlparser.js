@@ -1,4 +1,7 @@
 /*
+*	env.parser.js
+*/
+/*
  * HTML Parser By John Resig (ejohn.org)
  * Original code by Erik Arvidsson, Mozilla Public License
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
@@ -62,7 +65,7 @@
 			if ( !stack.last() || !special[ stack.last() ] ) {
 
 				// Comment
-				if ( html.indexOf("<!--") == 0 ) {
+				if ( html.indexOf("<!--") === 0 ) {
 					index = html.indexOf("-->");
 	
 					if ( index >= 0 ) {
@@ -73,7 +76,7 @@
 					}
 	
 				// end tag
-				} else if ( html.indexOf("</") == 0 ) {
+				} else if ( html.indexOf("</") === 0 ) {
 					match = html.match( endTag );
 	
 					if ( match ) {
@@ -83,7 +86,7 @@
 					}
 	
 				// start tag
-				} else if ( html.indexOf("<") == 0 ) {
+				} else if ( html.indexOf("<") === 0 ) {
 					match = html.match( startTag );
 	
 					if ( match ) {
@@ -95,30 +98,20 @@
 
 				if ( chars ) {
 					index = html.indexOf("<");
-					
 					var text = index < 0 ? html : html.substring( 0, index );
 					html = index < 0 ? "" : html.substring( index );
-					
-					if ( handler.chars )
-						handler.chars( text );
+					if ( handler.chars ){handler.chars( text );}
 				}
-
 			} else {
 				html = html.replace(new RegExp("(.*)<\/" + stack.last() + "[^>]*>"), function(all, text){
-					text = text.replace(/<!--(.*?)-->/g, "$1")
-						.replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
-
-					if ( handler.chars )
-						handler.chars( text );
-
+					text = text.replace(/<!--(.*?)-->/g, "$1").
+						replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
+					if ( handler.chars ){handler.chars( text );}
 					return "";
 				});
-
 				parseEndTag( "", stack.last() );
 			}
-
-			if ( html == last )
-				throw "Parse Error: " + html;
+			if ( html == last ){throw "Parse Error: " + html;}
 			last = html;
 		}
 		
@@ -163,22 +156,23 @@
 		}
 
 		function parseEndTag( tag, tagName ) {
+		  var pos;
 			// If no tag name is provided, clean shop
-			if ( !tagName )
-				var pos = 0;
-				
+			if ( !tagName ){
+				pos = 0;
+			}else{
 			// Find the closest opened tag of the same type
-			else
-				for ( var pos = stack.length - 1; pos >= 0; pos-- )
-					if ( stack[ pos ] == tagName )
-						break;
-			
+				for ( pos = stack.length - 1; pos >= 0; pos-- ){
+					if ( stack[ pos ] == tagName ){ break; }
+				}
+  		}
 			if ( pos >= 0 ) {
 				// Close all the open elements, up the stack
-				for ( var i = stack.length - 1; i >= pos; i-- )
-					if ( handler.end )
+				for ( var i = stack.length - 1; i >= pos; i-- ){
+					if ( handler.end ){
 						handler.end( stack[ i ] );
-				
+  				}
+				}
 				// Remove the open elements from the stack
 				stack.length = pos;
 			}
@@ -222,21 +216,21 @@
 		};
 	
 		if ( !doc ) {
-			if ( typeof DOMDocument != "undefined" )
+			if ( typeof DOMDocument != "undefined" ){
 				doc = new DOMDocument();
-			else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument )
+			}else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument ){
 				doc = document.implementation.createDocument("", "", null);
-			else if ( typeof ActiveX != "undefined" )
+			}else if ( typeof ActiveX != "undefined" ){
 				doc = new ActiveXObject("Msxml.DOMDocument");
-			
-		} else
+			}
+		} else {
 			doc = doc.ownerDocument ||
 				doc.getOwnerDocument && doc.getOwnerDocument() ||
 				doc;
+		}
 		
 		var elems = [],
-			documentElement = doc.documentElement ||
-				doc.getDocumentElement && doc.getDocumentElement();
+			documentElement = doc.documentElement || doc.getDocumentElement && doc.getDocumentElement();
 				
 		// If we're dealing with an empty document then we
 		// need to pre-populate it with the HTML document structure
@@ -250,9 +244,11 @@
 		})();
 		
 		// Find all the unique elements
-		if ( doc.getElementsByTagName )
-			for ( var i in one )
-				one[ i ] = doc.getElementsByTagName( i )[0];
+		if ( doc.getElementsByTagName ){
+			for ( var i in one ){
+			   one[ i ] = doc.getElementsByTagName( i )[0];
+		  }
+		}
 		
 		// If we're working with a document, inject contents into
 		// the body element
@@ -305,5 +301,6 @@
 		for ( var i = 0; i < items.length; i++ )
 			obj[ items[i] ] = true;
 		return obj;
-	}
+	};
+	
 })();
