@@ -6,5 +6,8 @@
  
 
 // The Window Object
-var window = this;
+var __this__ = this;
+this.__defineGetter__('window', function(){
+  return __this__;
+});
 (function($w, $env){

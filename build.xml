@@ -40,22 +40,47 @@
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
             <fileset dir="${SRC_DIR}" includes="intro.js" />
-            <fileset dir="${SRC_DIR}" includes="window.js" />
-            <fileset dir="${SRC_DIR}" includes="location.js" />
-            <fileset dir="${SRC_DIR}" includes="history.js" />
-            <fileset dir="${SRC_DIR}" includes="navigator.js" />
-            <fileset dir="${SRC_DIR}" includes="timer.js" />
-            <fileset dir="${SRC_DIR}" includes="event.js" />
-            <fileset dir="${SRC_DIR}" includes="dom.js" />
-            <fileset dir="${SRC_DIR}" includes="document.js" />
-            <fileset dir="${SRC_DIR}" includes="html.js" />
-            <fileset dir="${SRC_DIR}" includes="xhr.js" />
-            <fileset dir="${SRC_DIR}" includes="css.js" />
-            <fileset dir="${SRC_DIR}" includes="cookie.js" />
-            <fileset dir="${SRC_DIR}" includes="screen.js" />
-            <fileset dir="${SRC_DIR}" includes="uievent.js" />
-            <fileset dir="${SRC_DIR}" includes="dialog.js" />
-            <fileset dir="${SRC_DIR}" includes="htmlparser.js" />
+            <fileset dir="${SRC_DIR}" includes="window/window.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/dom.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/document.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/attr.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/cdatasection.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/characterdata.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/comment.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/doctype.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/element.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/exception.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/fragment.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/implementation.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/instruction.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/nodelist.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/parser.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/text.js" />
+            <fileset dir="${SRC_DIR}" includes="html/html.js" />
+            <!--fileset dir="${SRC_DIR}" includes="html/htmlparser.js" /-->
+            <fileset dir="${SRC_DIR}" includes="html/document.js" />
+            <fileset dir="${SRC_DIR}" includes="html/element.js" />
+            <fileset dir="${SRC_DIR}" includes="html/form.js" />
+            <fileset dir="${SRC_DIR}" includes="html/collection.js" />
+            <fileset dir="${SRC_DIR}" includes="html/anchor.js" />
+            <fileset dir="${SRC_DIR}" includes="event/event.js" />
+            <fileset dir="${SRC_DIR}" includes="event/mouseevent.js" />
+            <fileset dir="${SRC_DIR}" includes="event/uievent.js" />
+            <fileset dir="${SRC_DIR}" includes="css/properties.js" />
+            <fileset dir="${SRC_DIR}" includes="css/rule.js" />
+            <fileset dir="${SRC_DIR}" includes="css/stylesheet.js" />
+            <fileset dir="${SRC_DIR}" includes="window/location.js" />
+            <fileset dir="${SRC_DIR}" includes="window/history.js" />
+            <fileset dir="${SRC_DIR}" includes="window/navigator.js" />
+            <fileset dir="${SRC_DIR}" includes="window/timer.js" />
+            <fileset dir="${SRC_DIR}" includes="window/event.js" />
+            <fileset dir="${SRC_DIR}" includes="window/xhr.js" />
+            <fileset dir="${SRC_DIR}" includes="window/css.js" />
+            <fileset dir="${SRC_DIR}" includes="window/screen.js" />
+            <fileset dir="${SRC_DIR}" includes="window/dialog.js" />
+            <fileset dir="${SRC_DIR}" includes="window/document.js" />
+            <fileset dir="${SRC_DIR}" includes="window/cookie.js" />
             <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <echo message="${ENV_DIST} built." />

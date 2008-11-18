@@ -88,20 +88,17 @@ function isObj(a, b, msg) {
 
 function serialArray( a ) {
 	var r = [];
-	
-	if ( a && a.length )
-        for ( var i = 0; i < a.length; i++ ) {
-            var str = a[i] ? a[i].nodeName : "";
-            if ( str ) {
-                str = str.toLowerCase();
-                if ( a[i].id )
-                    str += "#" + a[i].id;
-            } else
-                str = a[i];
-            r.push( str );
-        }
-
-	return "[ " + r.join(", ") + " ]"
+	if ( a && a.length ){
+    for ( var i = 0; i < a.length; i++ ) {
+      var str = a[i] ? a[i].nodeName : "";
+      if(str){
+        str = str.toLowerCase();
+        if ( a[i].id ){str += "#" + a[i].id;}
+      }else{ str = a[i]; }
+      r.push( str );
+    }
+  }
+	return "[ " + r.join(", ") + " ]";
 }
 
 /**

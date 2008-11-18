@@ -44,11 +44,8 @@ test("jQuery()", function() {
 
 	// can actually yield more than one, when iframes are included, the window is an array as well
 	equals( jQuery(window).length, 1, "Correct number of elements generated for window" );
-
 	equals( jQuery(document).length, 1, "Correct number of elements generated for document" );
-
 	equals( jQuery([1,2,3]).get(1), 2, "Test passing an array to the factory" );
-
 	equals( jQuery(document.body).get(0), jQuery('body').get(0), "Test passing an html node to the factory" );
 });
 
@@ -239,6 +236,7 @@ test("jQuery(selector, xml).text(str) - Loaded via XML document", function() {
 
 test("length", function() {
 	expect(1);
+	print(jQuery("p").length);
 	equals( jQuery("p").length, 6, "Get Number of Elements Found" );
 });
 

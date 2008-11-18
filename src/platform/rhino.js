@@ -4,9 +4,12 @@
 var __env__ = {};
 (function($env){
 	
+  $env.debug = function(){};
+  
   $env.log = function(){};
   //uncomment this if you want to get some internal log statementes
-  //$env.log = print;
+  $env.log = print;
+  $env.log("Initializing Rhino Platform Env");
   
   $env.error = function(msg, e){
     print("ERROR! : " + msg);
@@ -15,7 +18,7 @@ var __env__ = {};
   
   $env.hashCode = function(obj){
     return obj?obj.hashCode().toString():null;
-  }
+  };
 	//For Java the window.location object is a java.net.URL
 	$env.location = function(path, base){
 	  var protocol = new RegExp('(^\\w*\:)');
@@ -134,15 +137,33 @@ var __env__ = {};
 		}
 	};
 	
+	var htmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
+	htmlDocBuilder.setNamespaceAware(false);
+	htmlDocBuilder.setValidating(false);
+	
+	$env.parseHTML = function(htmlstring){
+		return htmlDocBuilder.newDocumentBuilder().parse(
+				  new java.io.ByteArrayInputStream(
+						(new java.lang.String(htmlstring)).getBytes("UTF8")));
+	};
+	
+	var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
+	xmlDocBuilder.setNamespaceAware(true);
+	xmlDocBuilder.setValidating(true);
+	
 	$env.parseXML = function(xmlstring){
-		return Packages.javax.xml.parsers.
-			DocumentBuilderFactory.newInstance().
-				newDocumentBuilder().parse(
+		return xmlDocBuilder.newDocumentBuilder().parse(
 				  new java.io.ByteArrayInputStream(
 						(new java.lang.String(xmlstring)).getBytes("UTF8")));
 	};
 	
-
+	
+  $env.xpath = function(expression, doc){
+    return Packages.javax.xml.xpath.
+      XPathFactory.newInstance().newXPath().
+        evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
+  };
+	
   $env.os_name        = java.lang.System.getProperty("os.name"); 
   $env.os_arch        = java.lang.System.getProperty("os.arch"); 
   $env.os_version     = java.lang.System.getProperty("os.version"); 

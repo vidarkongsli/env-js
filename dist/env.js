@@ -6,14 +6,18 @@
  
 
 // The Window Object
-var window = this;
+var __this__ = this;
+this.__defineGetter__('window', function(){
+  return __this__;
+});
 (function($w, $env){/*
 *	window.js
 *   - this file will be wrapped in a closure providing the window object as $w
 */
 // a logger or empty function available to all modules.
-var $log = $env.log;
-var $error = $env.error;
+var $log = $env.log,
+    $error = $env.error,
+    $debug = $env.debug;
 //The version of this application
 var $version = "0.1";
 //This should be hooked to git or svn or whatever
@@ -95,6 +99,7 @@ var $top;
 // the window property is identical to the self property.
 var $window = $w;
 
+$log("Initializing Window.");
 __extend__($w,{
   get closed(){return $closed;},
   get defaultStatus(){return $defaultStatus;},
@@ -116,7 +121,7 @@ __extend__($w,{
   get pageXOffest(){return $pageXOffset;},
   get pageYOffset(){return $pageYOffset;},
   get parent(){return $parent;},
-  get screen(){return $w.screen;},
+  //get screen(){return $screen;}, see screen.js
   get screenLeft(){return $screenLeft;},
   get screenTop(){return $screenTop;},
   get screenX(){return $screenX;},
@@ -203,114 +208,1504 @@ function __extend__(a,b) {
 function trim( str ){
  var start = -1,
   end = str.length;
-/*jsl:ignore*/
+ /*jsl:ignore*/
  while( str.charCodeAt(--end) < 33 );
  while( str.charCodeAt(++start) < 33 );
-/*jsl:end*/
+ /*jsl:end*/
  return str.slice( start, end + 1 );
-};/*
-*	location.js
-*   - requires env
+};
+
+//from jQuery
+function setArray( target, array ) {
+	// Resetting the length to 0, then using the native Array push
+	// is a super-fast way to populate an object with array-like properties
+	target.length = 0;
+	Array.prototype.push.apply( target, array );
+};
+/*
+*	dom.js
+*
+*	DOM Level 2 /DOM level 3 (partial)
+*	
+*	The Document Object is now private in scope but you can create new
+*	Documents via document.implementation.createDocument which
+*	now also exposes the DOM Level 3 function 'load(uri)'.
+*
 */
-	//the current location
-	var $location = $env.location('./');
+	// Helper method for generating the right
+	// DOM objects based upon the type
 	
-	$w.__defineSetter__("location", function(url){
-	  //$w.onunload();
-		$w.document.load(url);
-		$location = url;
-		setHistory($location);
+	var $nodeCache = {};//caches a reference to our implementation of the node
+	var $nodeImplCache = {};//reverse look-up : caches a reference to the env supplied implementors dom node
+	var $guid = (-1)*Math.pow(2,31);
+  function createGUID(){
+    /*jsl:ignore*/
+    return String(++$guid);
+    /*jsl:end*/
+  };
+	
+  // A handy utility method to convert the env supplied DOM Level 2 implementation
+  // into our window externalized implementaion.
+  // Its kept here since Node is the base class of all the DOM window level classes
+	function makeNode(node, doc ){
+		if ( node !== null && node !== undefined) {
+			if ( !$nodeCache[ $env.hashCode(node) ] ){
+        if( (document.__html__)&&(node.getNodeType()===$w.Node.ELEMENT_NODE)){
+          //$log("Caching HTML Node: " + node);
+          makeHTMLElement(node.getTagName().toUpperCase(), node);
+        }else if( (document.__html__)&&(node.getNodeType()===$w.Node.DOCUMENT_NODE)){
+          //$log("Caching HTML Document: " + node);
+          cacheNode( node, HTMLDocument );
+        }else{
+          $debug("Caching Node: " + node);
+          if(     node.getNodeType() === $w.Node.ELEMENT_NODE){cacheNode(node, Element);}
+          else if(node.getNodeType() === $w.Node.ATTRIBUTE_NODE){cacheNode(node, Attr);}
+          else if(node.getNodeType() === $w.Node.TEXT_NODE){cacheNode(node, Text);}
+          else if(node.getNodeType() === $w.Node.CDATA_SECTION_NODE){cacheNode(node, CDATASection);}
+          else if(node.getNodeType() === $w.Node.PROCESSING_INSTRUCTION_NODE){cacheNode(node, ProcessingInstruction);}
+          else if(node.getNodeType() === $w.Node.COMMENT_NODE){cacheNode(node, Comment);}
+          else if(node.getNodeType() === $w.Node.DOCUMENT_NODE){cacheNode( node, Document );}
+          else if(node.getNodeType() === $w.Node.DOCUMENT_TYPE_NODE){cacheNode(node, DocumentType);}
+          else if(node.getNodeType() === $w.Node.DOCUMENT_FRAGMENT_NODE){cacheNode(node, DocumentFragment);}
+          else{cacheNode(node, Node);}
+        }
+			}
+			//$log("Retreived Node from cache: " + $env.hashCode(node ) + " => "+ $nodeCache[$env.hashCode(node)]);
+			return $nodeCache[$env.hashCode(node)];
+		} else{ 
+		  //$log("makeNode => Node is null!");
+		  return null;
+	  }
+	};
+	
+
+  function cacheNode(node, constructor){
+    if(node && constructor){
+      var cachednode = new constructor( node );
+      $debug("Caching node "+ cachednode);
+      $nodeCache[$env.hashCode(node)] = cachednode;
+      $debug("Reversing lookup for node "+ cachednode.__$__);
+      $nodeImplCache[cachednode.__$__] = node;
+    }
+  };$log("Defining Document");
+/*
+* Document - DOM Level 2
+*  The Document object is not directly 
+*/
+$w.__defineGetter__('Document', function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Document = function(node){
+  var $dom = node, 
+      $id = createGUID(), 
+      $url; 
+  $debug("Document " +$id);
+  return __extend__(this,{
+		get defaultView(){ //TODO: why isnt this just 'return $w;'?
+			return { getComputedStyle: function(elem){
+				return { getPropertyValue: function(prop){
+					prop = prop.replace(/\-(\w)/g,function(m,c){ return c.toUpperCase(); });
+					var val = elem.style[prop];
+					if ( prop === "opacity" && val === "" ){ val = "1"; }return val;
+				}};
+			}};
+		},
+		get doctype(){return makeNode( $dom.getDoctype() );},
+		get documentElement(){ return makeNode( $dom.getDocumentElement() ); },
+	  get implementation(){ return $implementation; },
+		get nodeName() { return "#document"; },
+	  get styleSheets(){ return [];/*TODO*/ },
+		addEventListener        : $w.addEventListener,
+	  attachEvent             : $w.addEventListener,/*IE only subject to random, frustrating, obscure deprecation*/
+	  createAttribute         : function(name){return makeNode( $dom.createAttribute(name) );},
+	  createAttributeNS       : function(nsuri, qname){return makeNode($dom.createAttribute(nsuri, qname) );},
+	  createCDATASection      : function(data){return makeNode( $dom.createCDATASection(data) );},
+	  createComment           : function(data){return makeNode( $dom.createComment(data) );},
+	  createDocumentFragment  : function(){return $dom.createDocumentFragment();},
+	  createElement           : function(tagname){ return makeNode( $dom.createElement(tagname) );},
+	  createElementNS         : function(nsuri, qname){ return makeNode( $dom.createElementNS(nsuri, qname) );},
+		createEvent             : function(eventType){ 
+		  var event;
+		  if(eventType === "UIEvents"){ event = new UIEvent();}
+		  else if(eventType === "MouseEvents"){ event = new MouseEvent();}
+		  else{ event = new Event(); } 
+		  return event;
+	  },
+	  createExpression        : function(xpath, nsuriMap){ return null;/*TODO*/},
+	  createProcessingInstruction: function(target,data){ return makeNode( $dom.createProcessingInstruction(target, data) );},
+	  createTextNode          : function(data){ return makeNode( $dom.createTextNode(data) );},
+	  detachEvent             : window.detachEvent,/*IE only subject to random, frustrating, obscure deprecation*/
+		dispatchEvent           : window.dispatchEvent,
+	  evaluate                : function(xpath, context, nsuriMap, resulttype, result){ 
+		  $log("document.evaluate("+xpath+")");
+		  var nodelist = new NodeList($env.xpath(xpath, context?context:$dom));
+		  $log("length :=> "+nodelist.length);
+	    return nodelist;
+    },
+		getElementById          : function(id){
+      $debug("document.getElementById( "+id+" )");
+      var elem = makeNode( $dom.getElementById(id) );
+			return elem;
+		},
+		getElementsByTagName    : function(name){ 
+		  $debug("document.getElementsByTagName("+name+")");
+			return new NodeList( $dom.getElementsByTagName(name) );
+	  },
+		getElementsByTagNameNS  : function(nsuri,qname){ 
+		  $debug("document.getElementsByTagNameNS("+nsuri+", "+qname+")");
+		  return  new NodeList( $dom.getElementsByTagNameNS( nsuri,qname ) );
+	  },
+		importNode              : function(node, deep){
+		  return makeNode($dom.importNode($nodeImplCache[node.__$__], deep));
+	  },
+		adoptNode              : function(node){
+		  return makeNode($dom.adoptNode($nodeImplCache[node.__$__]));
+	  },
+		load: function(url){
+		  $log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
+			var _this = this;
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", url, $w.document.async);
+			xhr.onreadystatechange = function(){
+			  try{
+				  _this.loadXML(xhr.responseText);
+			  }catch(e){
+			    $error("Error Parsing XML - ",e);
+          _this.loadXML(
+            "<html><head></head><body>"+
+              "<h1>Parse Error</h1>"+
+              "<p>"+e.toString()+"</p>"+  
+            "</body></html>");
+		    }
+			  $url = url;
+				$log("Sucessfully loaded document.");
+				var event = document.createEvent();
+				event.initEvent("load");
+				$w.dispatchEvent( event );
+			};
+			xhr.send();
+		},
+		//This is actually IE specific but still convenient
+		loadXML                 : function(xmlString){ 
+		  $debug("Parsing document into internal dom");
+		  $dom = $env.parseHTML(xmlString);
+		  $nodeCache[$env.hashCode($dom)] = this;
+		  $nodeImplCache[$id] = $dom;
+		  $url = $url?$url:xmlString;
+		  $debug("Finished Parsing Document ("+$id+"), Internal DOM is set. => " + $dom);
+		  return this; 
+	  },
+	  normalizeDocument: function(){
+	    $log("Normalizing Document");
+	    $dom.normalizeDocument();
+	    $log("Finished Normalizing Document");
+    },
+	  get xml(){return this.doctype.xml + "\n" +this.documentElement.xml;},
+		removeEventListener     : window.removeEventListener,
+		toString: function(){ return "Document" +  (typeof $url == "string" ? ": " + $url : ""); },
+		get __$__(){return $id;}
+  });
+};$log("Defining Attr");
+/*
+* Attr - DOM Level 2
+*/
+$w.__defineGetter__("Attr", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Attr = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("Attr "+$id);
+  __extend__(this, new Node($dom, $id));
+  return __extend__(this, {
+    get name(){return String($dom.getName()); },
+    get ownerElement(){ return makeNode( $dom.getOwnerElement() );},
+    get specified(){ return makeNode( $dom.getSpecified() );},
+    get value(){return String($dom.getValue()); },
+    set value(value){return $dom.setValue(value); },
+    get xml(){return this.nodeName + "='" + this.nodeValue + "' ";}
+  });
+};$log("Defining CDATASection");
+/*
+* CDATASection - DOM Level 2
+*/
+$w.__defineGetter__("CDATASection", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var CDATASection = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("CDATASection "+$id);
+  __extend__(this, new Text($dom, $id));
+  return __extend__(this,{
+    get xml(){return "<![CDATA[" + this.nodeValue + "]]>";}
+  });
+};
+$debug("Defining CharacterData");
+/*
+* CharacterData - DOM Level 2
+*/
+$w.__defineGetter__("CharacterData", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var CharacterData = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("CharacterData "+$id);
+  __extend__(this, new Node($dom, $id));
+  return __extend__(this, {
+    get data(){return $dom.getData();},
+    set data(data){return $dom.setData(data);},
+    get length(){return $dom.getLength();},
+    appendData: function(arg){return $dom.appendData(arg);},
+    deleteData: function(offset, count){ return $dom.deleteData(offset, count);},
+    insertData: function(offset, arg){return $dom.insertData(offset, arg);},
+    replaceData: function(offset, count, arg){return $dom.replaceData(offset, count, arg);},
+    substringData: function(offset, count){return $dom.substringData(offset, count);}
+  });
+};$log("Defining Comment");
+/* 
+* Comment - DOM Level 2
+*/
+$w.__defineGetter__("Comment", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Comment = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("Comment "+$id);
+  __extend__(this, new CharacterData($dom, $id));
+  return __extend__(this,{
+    get xml(){return "<!-- " + this.nodeValue + " -->";}
+  });
+};
+
+	$log("Defining DocumentType");
+;/*
+* DocumentType - DOM Level 2
+*/
+$w.__defineGetter__('DocumentType', function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var DocumentType = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("DocumentType "+$id);
+  __extend__(this, new Node($dom, $id));
+  return __extend__(this, {
+    get internalSubset(){return $dom.getInternalSubset();},
+    get name(){return $dom.getName();},
+    get publicId(){return $dom.getPublicId();},
+    get systemId(){return $dom.getSystemId();},
+    get xml(){return '<!DOCTYPE ' +this.name+ ' PUBLIC "'+this.publicId+'" "'+this.systemId+'">';}
+  });
+};
+
+var __DocumentType__ = function(doctype){
+  $domparser.parseString('<!DOCTYPE ' +doctype.name||''+ 
+    ' PUBLIC "'+doctype.publicId||''+' '+'"'+
+    doctype.systemId||''+'"><asdf></asdf>').doctype;
+};$log("Defining Element");
+/*
+* Element - DOM Level 2
+*/
+$w.__defineGetter__("Element", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Element = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  
+  $debug("Element "+$id);
+  __extend__(this, new Node($dom, $id));
+  return __extend__(this, {
+  	get tagName(){ return $dom.getTagName(); },
+  	get attributes(){
+  	  //Simple way to emulate NamedNodeMap which is only
+  	  //ever used here
+  		var attrs = new NodeList($dom.getAttributes());
+  		if(!attrs||(attrs.length === undefined)){setArray(attrs,[]);}
+  		for ( var i = 0; i < attrs.length; i++ ){
+  		  attrs[attrs[i].nodeName] = attrs[i];
+  		}return attrs;
+  	},
+  	addEventListener: window.addEventListener,
+  	removeEventListener: window.removeEventListener,
+  	dispatchEvent: window.dispatchEvent,
+  	getAttribute: function(name){ return String($dom.getAttribute(name));},
+  	getAttributeNode: function(name){ return makeNode( $dom.getAttributeNode(name) ); },
+  	getAttributeNodeNS: function(nsuri,localname){ return makeNode( $dom.getAttributeNodeNS(nsuri,localname) ); },
+  	getElementsByTagName: function(name){ 
+  	  //$debug("element.getElementsByTagName("+name+")");
+  	  return new NodeList($dom.getElementsByTagName(name));
+	  },
+  	getElementsByTagNameNS: function(nsuri, localname){ return new NodeList( $dom.getElementsByTagNameNS(nsuri, localname) );},
+  	hasAttribute: function(name){return $dom.hasAttribute(name);},
+  	hasAttributeNS: function(nsuri,localname){return $dom.hasAttributeNS(nsuri,localname);},
+  	removeAttribute: function(name){ $dom.removeAttribute(name); },
+  	removeAttributeNode: function(node){ return makeNode($dom.removeAttributeNode($nodeImplCache[node.__$__])); },
+  	removeAttributeNS: function(nsuri,localname){ $dom.removeAttributeNS(nsuri, localname); },
+  	setAttribute: function(name,value){
+  	  $dom.setAttribute(name,value);
+  	  if(name === 'id' && this.ownerDocument.__html__){this.setIdAttribute(name,true);} 
+	  },
+  	setIdAttribute: function(name,bool){ $dom.setIdAttribute(name,bool); },
+  	setAttributeNode: function(node){ return makeNode($dom.setAttributeNode($nodeImplCache[node.__$__])); },
+  	setAttributeNodeNS: function(node){ return makeNode($dom.setAttributeNodeNS($nodeImplCache[node.__$__])); },
+  	setAttributeNS: function(nsuri,qname,value){ $dom.setAttributeNS(nsuri,qname,value); },
+  	toString: function(){ return "<" + this.tagName + (this.id ? "#" + this.id : "" ) + ">"; },
+  	get xml(){
+			var ret = "<" + this.tagName, attrs = this.attributes;
+			for ( var i = 0; i< attrs.length;i++ ){ ret += " " + attrs[i].xml; }
+			if ( this.childNodes.length || this.nodeName == "SCRIPT" ){
+			  ret += ">" + this.childNodes.xml + "</" + this.tagName + ">";
+			}else{
+				ret += "/>";
+			} return ret;
+		}
+  });
+};
+
+	/*
+* DOMException - DOM Level 2
+*/	
+
+// For now I'm passing on this since DOMExceptions can simply flow 
+// through the underlying env supplied dom implementation
+
+$log("Defining DocumentFragment");
+/* 
+* DocumentFragment - DOM Level 2
+*/
+$w.__defineGetter__("DocumentFragment", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var DocumentFragment = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("DocumentFragment " +$id);
+  __extend__(this, new Node($dom, $id));
+  // Nothing to extend as far as I know.  This and several other
+  // classes need to be moved off of window as the constructor, though available
+  // (by this I mean it wont throw a 'no such method') are not meant
+  // to be used directly. Instead the document.create* is meant to be used.
+  // Not perfectly sure how to implement this.  perhaps we have to examine
+  // the context inside the constructor
+};
+//DOMImplementation
+$log("Defining DOMImplementation");
+$w.__defineGetter__("DOMImplementation", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var DOMImplementation = function(){
+	return {
+		hasFeature: function(feature, version){
+			//TODO
+			return false;
+		},
+		createDocumentType: function(qname, publicid, systemid){
+			return new __DocumentType__({
+			  name:qname, publicId:publicid, systemId:systemid
+			});
+		},
+		createDocument:function(nsuri, qname, doctype){
+		  //TODO - this currently returns an empty doc
+		  //but needs to handle the args
+			return new HTMLDocument();
+		},
+		getFeature:function(feature, version){
+			//TODO or TODONT?
+		}
+	};
+};
+
+
+$log("Initializing document.implementation");
+var $implementation =  new DOMImplementation();$log("Defining ProcessingInstruction");
+/*
+* ProcessingInstruction - DOM Level 2
+*/
+$w.__defineGetter__('ProcessingInstruction', function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var ProcessingInstruction = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("ProcessingInstruction " +$id);
+  __extend__(this, new Node($dom, $id));
+  return __extend__(this, {
+    get data(){return $dom.getData();},
+    set data(data){return $dom.setData(data);},
+    get target(){return $dom.getTarget();}
+  });
+};$log("Defining Node");
+/*
+* Node - DOM Level 2
+*/	
+$w.__defineGetter__('Node', function(){
+  return __extend__(function(){
+        throw new Error("Object cannot be created in this context");
+      } , {
+  		ELEMENT_NODE    :1,
+  		ATTRIBUTE_NODE  :2,
+  		TEXT_NODE       :3,
+  		CDATA_SECTION_NODE: 4,
+  		PROCESSING_INSTRUCTION_NODE: 7,
+  		COMMENT_NODE: 8,
+  		DOCUMENT_NODE: 9,
+  		DOCUMENT_TYPE_NODE: 10,
+  		DOCUMENT_FRAGMENT_NODE: 11
 	});
+});
+
+var Node = function(node, id){
+  __extend__(this, {
+  		ELEMENT_NODE    :1,
+  		ATTRIBUTE_NODE  :2,
+  		TEXT_NODE       :3,
+  		CDATA_SECTION_NODE: 4,
+  		PROCESSING_INSTRUCTION_NODE: 7,
+  		COMMENT_NODE: 8,
+  		DOCUMENT_NODE: 9,
+  		DOCUMENT_TYPE_NODE: 10,
+  		DOCUMENT_FRAGMENT_NODE: 11
+	});
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("Node  "+$id);
+  return __extend__(this, {
+    get attributes(){ return null;},
+		get childNodes(){ return new NodeList( $dom.getChildNodes() ); },
+		get firstChild(){ return makeNode( $dom.getFirstChild() ); },
+		get lastChild(){ return makeNode( $dom.getLastChild() ); },
+		get localName(){ return  String($dom.getLocalName()); },
+		get namespaceURI(){ return  String($dom.getNamespaceURI()); },
+		get nextSibling() { return makeNode( $dom.getNextSibling() ); },
+		get nodeName() {return String($dom.getNodeName()); },
+		get nodeType(){ return Number($dom.getNodeType()); },
+		get nodeValue(){ return $dom.getNodeValue(); },
+		set nodeValue(value){ return $dom.setNodeValue(value); },
+		get ownerDocument(){ return makeNode(  $dom.getOwnerDocument() ); },
+		get parentNode() { return makeNode( $dom.getParentNode() ); },
+		get prefix() { return $dom.getPrefix(); },
+		set prefix(prefix) { return $dom.setPrefix(prefix); },
+		get previousSibling() { return makeNode( $dom.getPreviousSibling() ); },
+		get xml() { return this.nodeValue; },
+		appendChild: function(node){ $dom.appendChild( $nodeImplCache[node.__$__] ); },
+		cloneNode: function(deep){ return makeNode( $dom.cloneNode(deep) ); },
+		hasAttributes: function(){ return $dom.hasAttributes(); },
+		hasChildNodes: function(){ return $dom.hasChildNodes(); },
+		insertBefore: function(node,before){
+			$dom.insertBefore( $nodeImplCache[node.__$__], before ? $nodeImplCache[before.__$__] : before );
+		},
+		isSupported: function(feature,version){return $dom.isSupported(feature,version);},
+		normalize: function(){return $dom.normalize();},
+		removeChild: function(node){ 
+		  $dom.removeChild( $nodeImplCache[node.__$__] ); 
+		  $nodeCache[$nodeImplCache[node.__$__]]=null;
+		  delete $nodeCache[$nodeImplCache[node.__$__]];
+		  delete $nodeImplCache[node.__$__];
+		  node = null;
+		  delete node;
+	  },
+		replaceChild: function(newNode, oldNode){ 
+		  $dom.replaceChild( $nodeImplCache[newNode.__$__],$nodeImplCache[oldNode.__$__] ); 
+		  $nodeCache[$nodeImplCache[oldNode.__$__]]=null;
+		  delete $nodeCache[$nodeImplCache[oldNode.__$__]];
+		  delete $nodeImplCache[oldNode.__$__];
+		  oldNode = null;
+		  delete oldNode;
+	  },
+		toString: function(){ return '"' + this.nodeValue + '"'; },
+		get __$__(){return String($id);}
+  });
+};
+
+
+__extend__(Node, {
+		ELEMENT_NODE    :1,
+		ATTRIBUTE_NODE  :2,
+		TEXT_NODE       :3,
+		CDATA_SECTION_NODE: 4,
+		PROCESSING_INSTRUCTION_NODE: 7,
+		COMMENT_NODE: 8,
+		DOCUMENT_NODE: 9,
+		DOCUMENT_TYPE_NODE: 10,
+		DOCUMENT_FRAGMENT_NODE: 11
+});$log("Defining NodeList");
+/*
+* NodeList - DOM Level 2
+*/
+$w.__defineGetter__('NodeList', function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var NodeList = function(nodes){
+  function toArray(nodelist){
+    if(nodelist&&nodelist.getLength){
+      var node, nodeArray = [];
+  		for ( var i = 0; i < nodelist.getLength(); i++ ) {
+  		  node = makeNode( nodelist.item(i) );
+  		  if(node === null){$log(node + " = makeNode("+nodelist.item(i)+"); : NodeList");}
+  			nodeArray.push(node);
+  		}return nodeArray;
+	  }else{return [];}
+  };
+	setArray(this,toArray(nodes));
+	__extend__(this,{
+		toString: function(){ return "[ " + Array.prototype.join.apply(this,[","]) + " ]"; },
+  	item: function(index){return  this[index] ;},
+  	get xml(){
+  	  var xml = "";
+		  for(var i=0;i<this.length;i++){ xml +=  this[i].xml; }
+		  return xml;
+		}
+	});
+	return this;
+};$log("Defining DOMParser");
+/*
+* DOMParser
+*/
+$w.__defineGetter__('DOMParser', function(){
+  return function(){
+    return __extend__(this, {
+      parseFromString: function(xmlString){
+        $debug("Parsing XML String: " +xmlString);
+        return document.implementation.createDocument().loadXML(xmlString);
+      }
+    });
+  };
+});
+
+$log("Initializing Internal DOMParser.");
+//keep one around for internal use
+$domparser = new DOMParser();
+$log("Defining Text");
+/*
+* Text - DOM Level 2
+*/
+$w.__defineGetter__("Text", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Text = function(node, id){
+  var $dom = node, 
+      $id = id?id:createGUID();
+  $debug("Text " +$id);
+  __extend__(this, new CharacterData($dom, $id));
+  return __extend__(this, {
+    splitText: function(offset){return makeNode($dom.splitText(offset));}
+  });
+};
+/*
+*	html.js
+*
+*	DOM Level 2 HTML
+*/
+
+var correctHTMLIds = function (node){
+  var children;
+  try{
+    if(node.nodeType === Node.ELEMENT_NODE){
+        //$log("Setting ID Attribute " + node);
+        if(node.hasAttribute('id'))
+          node.setIdAttribute('id',true);
+      children = node.childNodes;
+      for(var i=0;i<children.length;i++){
+        correctHTMLIds(children.item(i));
+      }
+    }
+  }catch(e){$log(e);}
+};
+			
+//This extends makeNode by allowing HTML<T>Elements to be defined
+function makeHTMLElement(name, node){
+  //This is an html document so we need to use explicit interfaces per the 
+  if(     name.match(/A/)){cacheNode(node, HTMLAnchorElement);}
+  else if(name.match(/AREA/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/BASE/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/BLOCKQUOTE|Q/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/BODY/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/BR/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/BUTTON/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/CAPTION/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/COL|COLGROUP/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/DEL|INS/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/DIV/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/DL/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/FIELDSET/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/FORM/)){cacheNode(node, HTMLFormElement);}
+  else if(name.match(/FRAME/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/FRAMESET/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/H1|H2|H3|H4|H5|H6/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/HEAD/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/HR/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/HTML/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/IFRAME/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/IMG/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/INPUT/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/LABEL/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/LEGEND/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/LI/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/LINK/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/MAP/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/META/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/OBJECT/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/OL/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/OPTGROUP/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/OPTION/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/P/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/PARAM/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/PRE/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/SCRIPT/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/SELECT/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/STYLE/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TABLE/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TBODY|TFOOT|THEAD/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TD|TH/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TEXTAREA/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TITLE/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/TR/)){cacheNode(node, HTMLElement);}
+  else if(name.match(/UL/)){cacheNode(node, HTMLElement);}
+  else{
+    $debug("Caching HTML Element " + name);
+    cacheNode(node, HTMLElement);
+  }
+};
 	
-	$w.__defineGetter__("location", function(url){
-		var hash 	 = new RegExp('(\\#.*)'),
+$log("Defining HTMLDocument");
+/*
+* HTMLDocument - DOM Level 2
+*  The Document object is not directly 
+*/
+$w.__defineGetter__("HTMLDocument", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+var HTMLDocument = function(node){
+  var $url, 
+      $domain, 
+      $title = "", 
+      $lastModified = "",
+      $refferer = "",
+      $open = false;
+  __extend__(this, new Document(node));
+  return __extend__(this, {
+    get anchors(){return new HTMLCollection(this.getElementsByName('a'), 'Anchor');},
+    get applets(){return new HTMLCollection(this.getElementsByName('applet'), 'Applet');},
+    get body(){ return this.getElementsByName('body')[0];},
+    set body(html){return this.replaceNode(this.body,html);},
+    //set/get cookie see cookie.js
+    get domain(){return $domain||$w.location.domain;},
+    set domain(){return; /* TODO - requires a bit of thought to enforce domain restrictions */ },
+    get forms(){
+      $log("document.forms");
+      return new HTMLCollection(this.getElementsByName('form'), 'Form');
+    },
+    get images(){return new HTMLCollection(this.getElementsByName('img'), 'Image');},
+    get lastModified(){ return $lastModified; /* TODO */},
+    get links(){return new HTMLCollection(this.getElementsByName('link'), 'Link');},
+    get referrer(){return $refferer; /* TODO */},
+    get title(){return $title; /* TODO */},
+    set title(title){$title = title;},
+    get URL(){return $url; /* TODO*/},
+		close : function(){ $open = false;/* TODO */ },
+		getElementsByName : function(name){
+		  $debug("document.getElementsByName ( "+name+" )");
+		  return this.getElementsByTagName(name);
+	  },
+	  open : function(){ $open = true; /* TODO */ },
+	  write: function(htmlstring){ return;/* TODO */ },
+	  writeln: function(htmlstring){ this.write(htmlstring+'\n'); },
+		toString: function(){ return "Document" +  (typeof $url == "string" ? ": " + $url : ""); },
+		get innerHTML(){ return this.documentElement.outerHTML; },
+		get __html__(){return true;}
+  });
+};
+
+//This is useful as html elements that modify the dom must also run through the new 
+//nodes and determine if they are javascript tags and load it.  This is really the fun 
+//parts! ;)
+function execScripts( node ) {
+	if ( node.nodeName == "SCRIPT" ) {
+		if ( !node.getAttribute("src") ) {
+			eval.call( window, node.textContent );
+		}
+	} else {
+		var scripts = node.getElementsByTagName("script");
+		for ( var i = 0; i < scripts.length; i++ ) {
+			execScripts( node );
+		}
+	}
+};$log("Defining HTMLElement");
+/*
+* HTMLElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLElement", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLElement = function(node){
+  __extend__(this, new Element(node));  
+	registerEventAttrs(this);
+	return __extend__(this, {
+		get className() { return this.getAttribute("class") || ""; },
+		set className(val) { return this.setAttribute("class",trim(val)); },
+		get dir() { return this.getAttribute("dir") || ""; },
+		set dir(val) { return this.setAttribute("dir",val); },
+		get id() { return this.getAttribute("id") || ""; },
+		set id(val) { return this.setAttribute("id",val); },
+		get innerHTML(){  return this.childNodes.xml; },
+		set innerHTML(html){
+		  //$debug("htmlElement.innerHTML("+html+")");
+		  //Should be replaced with HTMLPARSER usage
+			html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
+				return m.toLowerCase();
+			}).replace(/&nbsp;/g, " ");
+			var doc = new DOMParser().
+			  parseFromString('<div>'+html+'</div>');
+      var elements, nodes = this.ownerDocument.importNode(doc.documentElement, true).childNodes;
+			while (this.firstChild){ this.removeChild( this.firstChild );}
+			for(var i = 0; i<nodes.length; i++ ){
+			  this.appendChild( nodes.item(i) );
+        correctHTMLIds(nodes.item(i));
+		  }
+		  delete doc;
+		},
+		get lang() { return this.getAttribute("lang") || ""; },
+		set lang(val) { return this.setAttribute("lang",val); },
+		offsetHeight: 0,
+		offsetWidth: 0,
+		offsetLeft: 0,
+		offsetRight: 0,
+		get offsetParent(){return;/* TODO */},
+		set offsetParent(element){return;/*TODO*/},
+		scrollHeight: 0,
+		scrollWidth: 0,
+		scrollLeft: 0, 
+		scrollRight: 0,
+		get style(){return null;},//new CSS2Properties(trim(this.getAttribute("style") || ""));},
+		get title() { return this.getAttribute("title") || ""; },
+		set title(val) { return this.setAttribute("title",val); },
+		//Not in the specs but I'll leave it here for now.
+		get outerHTML(){ return this.xml; },
+	  scrollIntoView: function(){/*TODO*/},
+		onclick: function(event){try{eval(this.getAttribute('onclick'));}catch(e){$error(e);}},
+		ondblclick: function(event){try{eval(this.getAttribute('ondblclick'));}catch(e){$error(e);}},
+		onkeydown: function(event){try{eval(this.getAttribute('onkeydown'));}catch(e){$error(e);}},
+		onkeypress: function(event){try{eval(this.getAttribute('onkeypress'));}catch(e){$error(e);}},
+		onkeyup: function(event){try{eval(this.getAttribute('onkeyup'));}catch(e){$error(e);}},
+		onmousedown: function(event){try{eval(this.getAttribute('onmousedown'));}catch(e){$error(e);}},
+		onmousemove: function(event){try{eval(this.getAttribute('onmousemove'));}catch(e){$error(e);}},
+		onmouseout: function(event){try{eval(this.getAttribute('onmouseout'));}catch(e){$error(e);}},
+		onmouseover: function(event){try{eval(this.getAttribute('onmouseover'));}catch(e){$error(e);}},
+		onmouseup: function(event){try{eval(this.getAttribute('onmouseup'));}catch(e){$error(e);}}
+	});
+};
+
+
+	var registerEventAttrs = function(elm){
+    if(elm.hasAttribute('onclick')){ elm.addEventListener('click', elm.onclick ); }
+    if(elm.hasAttribute('ondblclick')){ elm.addEventListener('dblclick', elm.onclick ); }
+    if(elm.hasAttribute('onkeydown')){ elm.addEventListener('keydown', elm.onclick ); }
+    if(elm.hasAttribute('onkeypress')){ elm.addEventListener('keypress', elm.onclick ); }
+    if(elm.hasAttribute('onkeyup')){ elm.addEventListener('keyup', elm.onclick ); }
+    if(elm.hasAttribute('onmousedown')){ elm.addEventListener('mousedown', elm.onclick ); }
+    if(elm.hasAttribute('onmousemove')){ elm.addEventListener('mousemove', elm.onclick ); }
+    if(elm.hasAttribute('onmouseout')){ elm.addEventListener('mouseout', elm.onclick ); }
+    if(elm.hasAttribute('onmouseover')){ elm.addEventListener('mouseover', elm.onclick ); }
+    if(elm.hasAttribute('onmouseup')){ elm.addEventListener('mouseup', elm.onclick ); }
+    return elm;
+	};
+	
+	var click = function(element){
+		var event = new Event({
+		  target:element,
+		  currentTarget:element
+		});
+		event.initEvent("click");
+		element.dispatchEvent(event);
+	};
+	var submit = function(element){
+		var event = new Event({
+		  target:element,
+		  currentTarget:element
+		});
+		event.initEvent("submit");
+		element.dispatchEvent(event);
+	};
+	var focus = function(element){
+		var event = new Event({
+		  target:element,
+		  currentTarget:element
+		});
+		event.initEvent("focus");
+		element.dispatchEvent(event);
+	};
+	var blur = function(element){
+		var event = new Event({
+		  target:element,
+		  currentTarget:element
+		});
+		event.initEvent("blur");
+		element.dispatchEvent(event);
+	};$log("Defining HTMLFormElement");
+/* 
+* HTMLAnchorElement - DOM Level 2
+*/
+$w.__defineGetter__("Form", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+$w.__defineGetter__("HTMLFormElement", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLFormElement = function(node){
+  __extend__(this, new HTMLElement(node));
+  return __extend__(this,{
+    get acceptCharset(){ return this.getAttribute('acceptCharset');},
+    set acceptCharset(acceptCharset){this.setAttribute('acceptCharset', acceptCharset);},
+    get action(){return this.getAttribute('action');},
+    set action(action){this.setAttribute('action', action);},
+    get elements() {return this.getElementsByTagName("*");},
+    get enctype(){return this.getAttribute('enctype');},
+    set enctype(enctype){this.setAttribute('enctype', enctype);},
+    get length() {return this.elements.length;},
+    get method(){return this.getAttribute('method');},
+    set method(action){this.setAttribute('method', method);},
+		get name() { return this.getAttribute("id") || ""; },
+		set name(val) { return this.setAttribute("id",val); },
+		get target() { return this.getAttribute("id") || ""; },
+		set target(val) { return this.setAttribute("id",val); },
+		submit:function(){submit(this);},
+		reset:function(){reset(this);}
+  });
+};
+
+
+			$log("Defining HTMLCollection");
+/*
+* HTMLCollection - DOM Level 2
+*/
+$w.__defineGetter__("HTMLCollection", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLCollection = function(nodelist, type){
+  var $items = [], 
+      $item, i;
+  if(type === "Anchor" ){
+    for(i=0;i<nodelist.length;i++){ 
+      //The name property is required to be add to the collection
+      if(nodelist.item(i).name){
+        item = new nodelist.item(i);
+        $items.push(item);
+        this[nodelist.item(i).name] = item;
+      }
+    }
+  }else if(type === "Link"){
+    for(i=0;i<nodelist.length;i++){ 
+      //The name property is required to be add to the collection
+      if(nodelist.item(i).href){
+        item = new nodelist.item(i);
+        $items.push(item);
+        this[nodelist.item(i).name] = item;
+      }
+    }
+  }else if(type === "Form"){
+    for(i=0;i<nodelist.length;i++){ 
+      //The name property is required to be add to the collection
+      if(nodelist.item(i).href){
+        item = new nodelist.item(i);
+        $items.push(item);
+        this[nodelist.item(i).name] = item;
+      }
+    }
+  }
+  setArray(this, $items);
+  return __extend__(this, {
+    item : function(i){return this[i];},
+    namedItem : function(name){return this[name];}
+  });
+};
+
+	$log("Defining HTMLAnchorElement");
+/* 
+* HTMLAnchorElement - DOM Level 2
+*/
+$w.__defineGetter__("Anchor", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+$w.__defineGetter__("HTMLAnchorElement", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLAnchorElement = function(node){
+	var hash 	 = new RegExp('(\\#.*)'),
 			hostname = new RegExp('\/\/([^\:\/]+)'),
 			pathname = new RegExp('(\/[^\\?\\#]*)'),
 			port 	 = new RegExp('\:(\\d+)\/'),
 			protocol = new RegExp('(^\\w*\:)'),
 			search 	 = new RegExp('(\\?[^\\#]*)');
-		return {
-			get hash(){
-				var m = hash.exec(this.href);
-				return m&&m.length>1?m[1]:"";
-			},
-			set hash(_hash){
-				//setting the hash is the only property of the location object
-				//that doesn't cause the window to reload
-				_hash = _hash.indexOf('#')===0?_hash:"#"+_hash;	
-				$location = this.protocol + this.host + this.pathname + 
-					this.search + _hash;
-				setHistory(_hash, "hash");
-			},
-			get host(){
-				return this.hostname + (this.port !== "")?":"+this.port:"";
-			},
-			set host(_host){
-				$w.location = this.protocol + _host + this.pathname + 
-					this.search + this.hash;
-			},
-			get hostname(){
-				var m = hostname.exec(this.href);
-				return m&&m.length>1?m[1]:"";
-			},
-			set hostname(_hostname){
-				$w.location = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
-				 	 this.pathname + this.search + this.hash;
-			},
-			get href(){
-				//This is the only env specific function
-				return $location;
-			},
-			set href(url){
-				$w.location = url;	
-			},
-			get pathname(){
-				var m = this.href;
-				m = pathname.exec(m.substring(m.indexOf(this.hostname)));
-				return m&&m.length>1?m[1]:"/";
-			},
-			set pathname(_pathname){
-				$w.location = this.protocol + this.host + _pathname + 
-					this.search + this.hash;
-			},
-			get port(){
-				var m = port.exec(this.href);
-				return m&&m.length>1?m[1]:"";
-			},
-			set port(_port){
-				$w.location = this.protocol + this.hostname + ":"+_port + this.pathname + 
-					this.search + this.hash;
-			},
-			get protocol(){
-				return protocol.exec(this.href)[0];
-			},
-			set protocol(_protocol){
-				$w.location = _protocol + this.host + this.pathname + 
-					this.search + this.hash;
-			},
-			get search(){
-				var m = search.exec(this.href);
-				return m&&m.length>1?m[1]:"";
-			},
-			set search(_search){
-				$w.location = this.protocol + this.host + this.pathname + 
-					_search + this.hash;
-			},
-			toString: function(){
-				return this.href;
-			},
-			reload: function(force){
-				//TODO
-			},
-			replace: function(url){
-				//TODO
-			}
-		};
-	});
+  __extend__(this, new HTMLElement(node));
+  return __extend__(this,{
+		get accessKey() { return this.getAttribute("id") || ""; },
+		set accessKey(val) { return this.setAttribute("id",val); },
+		get charset() { return this.getAttribute("id") || ""; },
+		set charset(val) { return this.setAttribute("id",val); },
+		get coords() { return this.getAttribute("id") || ""; },
+		set coords(val) { return this.setAttribute("id",val); },
+		get href() { return this.getAttribute("id") || ""; },
+		set href(val) { return this.setAttribute("id",val); },
+		get hreflang() { return this.getAttribute("id") || ""; },
+		set hreflang(val) { return this.setAttribute("id",val); },
+		get name() { return this.getAttribute("id") || ""; },
+		set name(val) { return this.setAttribute("id",val); },
+		get rel() { return this.getAttribute("id") || ""; },
+		set rel(val) { return this.setAttribute("id",val); },
+		get rev() { return this.getAttribute("id") || ""; },
+		set rev(val) { return this.setAttribute("id",val); },
+		get shape() { return this.getAttribute("id") || ""; },
+		set shape(val) { return this.setAttribute("id",val); },
+		get tabIndex() { return this.getAttribute("id") || ""; },
+		set tabIndex(val) { return this.setAttribute("id",val); },
+		get target() { return this.getAttribute("id") || ""; },
+		set target(val) { return this.setAttribute("id",val); },
+		get type() { return this.getAttribute("id") || ""; },
+		set type(val) { return this.setAttribute("id",val); },
+		blur:function(){blur(this);},
+		focus:function(){focus(this);},
+		get hash(){
+			var m = hash.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set hash(_hash){
+			//setting the hash is the only property of the location object
+			//that doesn't cause the window to reload
+			_hash = _hash.indexOf('#')===0?_hash:"#"+_hash;	
+			this.href = this.protocol + this.host + this.pathname + this.search + _hash;
+		},
+		get host(){
+			return this.hostname + (this.port !== "")?":"+this.port:"";
+		},
+		set host(_host){
+			this.href = this.protocol + _host + this.pathname + this.search + this.hash;
+		},
+		get hostname(){
+			var m = hostname.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set hostname(_hostname){
+			this.href = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
+			 	 this.pathname + this.search + this.hash;
+		},
+		get pathname(){
+			var m = this.href;
+			m = pathname.exec(m.substring(m.indexOf(this.hostname)));
+			return m&&m.length>1?m[1]:"/";
+		},
+		set pathname(_pathname){
+			this.href = this.protocol + this.host + _pathname + 
+				this.search + this.hash;
+		},
+		get port(){
+			var m = port.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set port(_port){
+			this.href = this.protocol + this.hostname + ":"+_port + this.pathname + 
+				this.search + this.hash;
+		},
+		get protocol(){
+			return protocol.exec(this.href)[0];
+		},
+		set protocol(_protocol){
+			this.href = _protocol + this.host + this.pathname + 
+				this.search + this.hash;
+		},
+		get search(){
+			var m = search.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set search(_search){
+			this.href = this.protocol + this.host + this.pathname + 
+				_search + this.hash;
+		}
+  });
+};
+
+
+			$log("Defining Event");
+/*
+* event.js
+*/
+$w.__defineGetter__("Event", function(){
+  __extend__(this,{
+    CAPTURING_PHASE : 1,
+    AT_TARGET       : 2,
+    BUBBLING_PHASE  : 3
+  });
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var Event = function(options){
+  if(options === undefined){options={target:window,currentTarget:window};}
+  __extend__(this,{
+    CAPTURING_PHASE : 1,
+    AT_TARGET       : 2,
+    BUBBLING_PHASE  : 3
+  });
+  $log("Creating new Event");
+  var $bubbles = options.bubbles?options.bubbles:true,
+      $cancelable = options.cancelable?options.cancelable:true,
+      $currentTarget = options.currentTarget?options.currentTarget:null,
+      $eventPhase = options.eventPhase?options.eventPhase:Event.CAPTURING_PHASE,
+      $target = options.eventPhase?options.eventPhase:document,
+      $timestamp = options.timestamp?options.timestamp:new Date().getTime().toString(),
+      $type = options.type?options.type:"";
+  return __extend__(this,{
+    get bubbles(){return $bubbles;},
+    get cancelable(){return $cancelable;},
+    get currentTarget(){return $currentTarget;},
+    get eventPhase(){return $eventPhase;},
+    get target(){return $target;},
+    get timestamp(){return $timestamp;},
+    get type(){return $type;},
+    initEvent: function(type,bubbles,cancelable){
+      $type=type?type:$type;
+      $bubbles=bubbles?bubbles:$bubbles;
+      $cancelable=cancelable?cancelable:$cancelable;
+    },
+    preventDefault: function(){return;/* TODO */},
+    stopPropagation: function(){return;/* TODO */}
+  });
+};
+
+$log("Defining MouseEvent");
+/*
+*	mouseevent.js
+*/
+$log("Defining MouseEvent");
+/*
+*	uievent.js
+*/
+
+var $onblur,
+    $onfocus,
+    $onresize;/*
+* CSS2Properties - DOM Level 2 CSS
+*/
+$w.__defineGetter__("CSS2Properties", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+
+var CSS2Properties = function(options){
+  var $styles = [];
+  var $styleMap = {};
+  for (var prop in $supportedStyles){
+    $styleMap[prop] = "";
+    this.__defineGetter__(prop, function(){return $styleMap[prop];});
+    if(!options.readonly){
+      //because the window.getComputedStyle return a CSS2Properties
+      //object that is read only we make the setter optional
+      this.__defineSetter__(prop, function(value){$styleMap[prop] = value;});
+    }
+  }
+  if(options.cssText){cssTextToStyles(options.cssText);}
+  function cssTextToStyles(cssText){
+    $styles=[];
+    var style, styles = cssText.split(';');
+    for ( var i = 0; i < styles.length; i++ ) {
+    	style = styles[i].split(':');
+    	if ( style.length == 2 ){
+  	    //keep a reference to the original name of the style which was set
+  	    $styles[i]=styles[i];
+  		  //camel case for dash case
+  		  //this could be done much better with a match with function arg
+  		  //but I'm tearing through this just to get a first pass
+    	  style[0] = trim(style[0]).split('-');
+    	  if(style[0].length == 2){
+    	    style[0] = style[0][0]+style[0][1].substring(0,1).toUpperCase()+
+    	      style[0][1].substring(1,style[0][1].length);
+    	  }else{
+    	    //No '-' dash present
+    	    style[0] = style[0][0];
+        }
+    	  if($styleMap[style[0]]){
+    	    //set the value internally with camelcase name so its exposed via the 'get'.
+    	    $styleMap[style[0]] = trim(style[1]);
+    	  };
+    	}
+    }
+    setArray(this, $styles);
+  };
+  
+  return __extend__(this, {
+    get cssText(){$styles.join(';');},
+    set cssText(cssText){ cssTextToStyles(cssText); }
+  });
+};
+
+//Obviously these arent all supported but by commenting out various sections
+//this provides a single location to configure what is exposed as supported.
+var $supportedStyles = {
+    azimuth:	"",
+    background:	"",
+    backgroundAttachment:	"",
+    backgroundColor:	"",
+    backgroundImage:	"",
+    backgroundPosition:	"",
+    backgroundRepeat:	"",
+    border:	"",
+    borderBottom:	"",
+    borderBottomColor:	"",
+    borderBottomStyle:	"",
+    borderBottomWidth:	"",
+    borderCollapse:	"",
+    borderColor:	"",
+    borderLeft:	"",
+    borderLeftColor:	"",
+    borderLeftStyle:	"",
+    borderLeftWidth:	"",
+    borderRight:	"",
+    borderRightColor:	"",
+    borderRightStyle:	"",
+    borderRightWidth:	"",
+    borderSpacing:	"",
+    borderStyle:	"",
+    borderTop:	"",
+    borderTopColor:	"",
+    borderTopStyle:	"",
+    borderTopWidth:	"",
+    borderWidth:	"",
+    bottom:	"",
+    captionSide:	"",
+    clear:	"",
+    clip:	"",
+    color:	"",
+    content:	"",
+    counterIncrement:	"",
+    counterReset:	"",
+    cssFloat:	"",
+    cue:	"",
+    cueAfter:	"",
+    cueBefore:	"",
+    cursor:	"",
+    direction:	"",
+    display:	"",
+    elevation:	"",
+    emptyCells:	"",
+    font:	"",
+    fontFamily:	"",
+    fontSize:	"",
+    fontSizeAdjust:	"",
+    fontStretch:	"",
+    fontStyle:	"",
+    fontVariant:	"",
+    fontWeight:	"",
+    height:	"",
+    left:	"",
+    letterSpacing:	"",
+    lineHeight:	"",
+    listStyle:	"",
+    listStyleImage:	"",
+    listStylePosition:	"",
+    listStyleType:	"",
+    margin:	"",
+    marginBottom:	"",
+    marginLeft:	"",
+    marginRight:	"",
+    marginTop:	"",
+    markerOffset:	"",
+    marks:	"",
+    maxHeight:	"",
+    maxWidth:	"",
+    minHeight:	"",
+    minWidth:	"",
+    opacity:	"",
+    orphans:	"",
+    outline:	"",
+    outlineColor:	"",
+    outlineOffset:	"",
+    outlineStyle:	"",
+    outlineWidth:	"",
+    overflow:	"",
+    overflowX:	"",
+    overflowY:	"",
+    padding:	"",
+    paddingBottom:	"",
+    paddingLeft:	"",
+    paddingRight:	"",
+    paddingTop:	"",
+    page:	"",
+    pageBreakAfter:	"",
+    pageBreakBefore:	"",
+    pageBreakInside:	"",
+    pause:	"",
+    pauseAfter:	"",
+    pauseBefore:	"",
+    pitch:	"",
+    pitchRange:	"",
+    position:	"",
+    quotes:	"",
+    richness:	"",
+    right:	"",
+    size:	"",
+    speak:	"",
+    speakHeader:	"",
+    speakNumeral:	"",
+    speakPunctuation:	"",
+    speechRate:	"",
+    stress:	"",
+    tableLayout:	"",
+    textAlign:	"",
+    textDecoration:	"",
+    textIndent:	"",
+    textShadow:	"",
+    textTransform:	"",
+    top:	"",
+    unicodeBidi:	"",
+    verticalAlign:	"",
+    visibility:	"",
+    voiceFamily:	"",
+    volume:	"",
+    whiteSpace:	"",
+    widows:	"",
+    width:	"",
+    wordSpacing:	"",
+    zIndex:	""
+};/* 
+* CSSRule - DOM Level 2
+*/
+$w.__defineGetter__("CSSRule", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var CSSRule = function(options){
+  var $style, 
+      $selectorText = options.selectorText?options.selectorText:"";
+      $style = new CSS2Properties({cssText:options.cssText?options.cssText:null});
+    return __extend__(this, {
+      get style(){return $style;},
+      get selectorText(){return $selectorText;},
+      set selectorText(selectorText){$selectorText = selectorText;}
+    });
+};
+/* 
+* CSSStyleSheet - DOM Level 2
+*/
+$w.__defineGetter__("CSSStyleSheet", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var CSSStyleSheet = function(options){
+    var $cssRules, 
+        $disabled = options.disabled?options.disabled:false,
+        $href = options.href?options.href:null,
+        $parentStyleSheet = options.parentStyleSheet?options.parentStyleSheet:null,
+        $title = options.title?options.title:"",
+        $type = "text/css";
+        
+    function parseStyleSheet(text){
+      //this is pretty ugly, but text is the entire text of a stylesheet
+      var cssRules = [];
+    	if (!text) text = "";
+    	text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
+    	// TODO: @import ?
+    	var blocks = text.split("}");
+    	blocks.pop();
+    	var i, len = blocks.length;
+    	var definition_block, properties, selectors;
+    	for (i=0; i<len; i++){
+    		definition_block = blocks[i].split("{");
+    		if(definition_block.length === 2){
+      		selectors = definition_block[0].split(",");
+      		for(var j=0;j<selectors.length;j++){
+      		  cssRules.push(new CSSRule({
+      		    selectorText:selectors[j],
+      		    cssText:definition_block[1]
+      		  }));
+      		}
+      		setArray($cssRules, cssRules);
+    		}
+    	}
+    };
+    parseStyleSheet(options.text);
+    return __extend__(this, {
+      get cssRules(){return $cssRules;},
+      get rule(){return $cssRules;},//IE - may be deprecated
+      get href(){return $href;},
+      get parentStyleSheet(){return $parentStyleSheet;},
+      get title(){return $title;},
+      get type(){return $type;},
+      addRule: function(selector, style, index){/*TODO*/},
+      deleteRule: function(index){/*TODO*/},
+      insertRule: function(rule, index){/*TODO*/},
+      removeRule: function(index){this.deleteRule(index);}//IE - may be deprecated
+    });
+};
+/*
+*	location.js
+*   - requires env
+*/
+$log("Initializing Window Location.");
+//the current location
+var $location = $env.location('./');
+
+$w.__defineSetter__("location", function(url){
+  //$w.onunload();
+	$w.document.load(url);
+	$location = url;
+	setHistory($location);
+});
+
+$w.__defineGetter__("location", function(url){
+	var hash 	 = new RegExp('(\\#.*)'),
+		hostname = new RegExp('\/\/([^\:\/]+)'),
+		pathname = new RegExp('(\/[^\\?\\#]*)'),
+		port 	 = new RegExp('\:(\\d+)\/'),
+		protocol = new RegExp('(^\\w*\:)'),
+		search 	 = new RegExp('(\\?[^\\#]*)');
+	return {
+		get hash(){
+			var m = hash.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set hash(_hash){
+			//setting the hash is the only property of the location object
+			//that doesn't cause the window to reload
+			_hash = _hash.indexOf('#')===0?_hash:"#"+_hash;	
+			$location = this.protocol + this.host + this.pathname + 
+				this.search + _hash;
+			setHistory(_hash, "hash");
+		},
+		get host(){
+			return this.hostname + (this.port !== "")?":"+this.port:"";
+		},
+		set host(_host){
+			$w.location = this.protocol + _host + this.pathname + 
+				this.search + this.hash;
+		},
+		get hostname(){
+			var m = hostname.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set hostname(_hostname){
+			$w.location = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
+			 	 this.pathname + this.search + this.hash;
+		},
+		get href(){
+			//This is the only env specific function
+			return $location;
+		},
+		set href(url){
+			$w.location = url;	
+		},
+		get pathname(){
+			var m = this.href;
+			m = pathname.exec(m.substring(m.indexOf(this.hostname)));
+			return m&&m.length>1?m[1]:"/";
+		},
+		set pathname(_pathname){
+			$w.location = this.protocol + this.host + _pathname + 
+				this.search + this.hash;
+		},
+		get port(){
+			var m = port.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set port(_port){
+			$w.location = this.protocol + this.hostname + ":"+_port + this.pathname + 
+				this.search + this.hash;
+		},
+		get protocol(){
+			return protocol.exec(this.href)[0];
+		},
+		set protocol(_protocol){
+			$w.location = _protocol + this.host + this.pathname + 
+				this.search + this.hash;
+		},
+		get search(){
+			var m = search.exec(this.href);
+			return m&&m.length>1?m[1]:"";
+		},
+		set search(_search){
+			$w.location = this.protocol + this.host + this.pathname + 
+				_search + this.hash;
+		},
+		toString: function(){
+			return this.href;
+		},
+		reload: function(force){
+			//TODO
+		},
+		replace: function(url){
+			//TODO
+		}
+	};
+});
+
 /*
 *	history.js
 */
 
+  $log("Initializing Window History.");
 	$currentHistoryIndex = 0;
 	$history = [];
 	
@@ -365,6 +1760,8 @@ function trim( str ){
 *	navigator.js
 *   - requires env
 */
+$log("Initializing Window Navigator.");
+
 var $appCodeName  = "EnvJS";//eg "Mozilla"
 var $appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
 
@@ -411,7 +1808,8 @@ $w.__defineGetter__("navigator", function(){
 *	timer.js
 */
 	
-// Timers
+
+$log("Initializing Window Timer.");
 
 var $timers = [];
 
@@ -439,9 +1837,8 @@ $w.clearInterval = $w.clearTimeout = function(num){
 	/*
 * event.js
 */
-	
 // Window Events
-
+$log("Initializing Window Event.");
 var $events = [{}],
     $onerror,
     $onload,
@@ -524,643 +1921,9 @@ $w.__defineGetter__('onunload', function(){
 $w.__defineSetter__('onunload', function(fn){
   //$w.addEventListener('unload', fn);
 });*//*
-*	dom.js
-*
-*	DOM Level 2 /DOM level 3 (partial)
-*	
-*	The DOMDocument is now private in scope but you can create new
-*	DOMDocuments via document.implementation.createDocument which
-*	now also exposes the DOM Level 3 function 'load(uri)'.
-*
-*/
-
-  // Helper method for generating the right
-	// DOM objects based upon the type
-	/*var obj_nodes = {};
-
-	function makeNode(node){
-	  $log("Making Node");
-		if ( node ) {
-			if ( !obj_nodes[node]){
-				obj_nodes[node] = node.getNodeType() == 1 ? new DOMElement( node ) :
-					(node.getNodeType() == 8 ? new DOMComment( node ) : new DOMNode( node )) ;
-  		}
-			return obj_nodes[node];
-		} else
-			return null;
-	};*/
-	// Helper method for generating the right
-	// DOM objects based upon the type
-	
-	var $nodeCache = {};//caches a reference to our implementation of the node
-	var $nodeImplCache = {};//reverse look-up : caches a reference to the env supplied implementors dom node
-	var $guid = (-1)*Math.pow(2,31);
-  function createGUID(){
-    return String(++$guid);
-  };
-	
-	function makeNode(node){
-		if ( node ) {
-			if ( !$nodeCache[ $env.hashCode(node) ] ){
-				if( node.getNodeType() == 1){
-				  $nodeCache[$env.hashCode(node)] = new DOMElement( node );
-				  $nodeImplCache[$nodeCache[$env.hashCode(node)].__guid__] = node;
-				}else{
-				  if(node.getNodeType() == 8){
-				    $nodeCache[$env.hashCode(node)] = new DOMComment( node );
-				    $nodeImplCache[$nodeCache[$env.hashCode(node)].__guid__] = node;
-				  }else{
-				    $nodeCache[$env.hashCode(node)] = new DOMNode( node );
-				    $nodeImplCache[$nodeCache[$env.hashCode(node)].__guid__] = node;
-			    }
-				}
-			}
-			return $nodeCache[$env.hashCode(node)];
-		} else{ 
-		  return null;
-	  }
-	}
-	
-	//DOMImplementation
-	var DOMImplementation = function(){
-		return {
-			hasFeature: function(feature, version){
-				//TODO
-				return false;
-			},
-			createDocumentType: function(qname, publicId, systemId){
-				//TODO
-			},
-			createDocument:function(namespace, qname, docType){
-				return new DOMDocument();
-			},
-			getFeature:function(feature, version){
-				//TODO or TODONT?
-			}
-		};
-	};
-	
-	// DOM Document
-$w.__defineGetter__('DOMDocument', function(){
-  var $dom, $id, $url;
-  return function(){
-    $id = createGUID();
-    return __extend__(this,{
-  		load: function(url){
-  		  $log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-  			var _this = this;
-  			var xhr = new XMLHttpRequest();
-  			xhr.open("GET", url, $w.document.async);
-  			xhr.onreadystatechange = function(){
-				  try{
-					  _this.loadXML(xhr.responseText);
-				  }catch(e){
-				    $error("Error Parsing XML - ",e);
-	          _this.loadXML(
-	            "<html><head></head><body>"+
-	              "<h1>Parse Error</h1>"+
-	              "<p>"+e.toString()+"</p>"+  
-	            "</body></html>");
-			    }
-  			  $url = url;
-      		if ( !$nodeCache[$dom] ){
-      			$nodeCache[$dom] = _this;
-    			}
-  				$log("Sucessfully loaded document.");
-  				var event = document.createEvent();
-  				event.initEvent("load");
-  				$w.dispatchEvent( event );
-  			};
-  			xhr.send();
-  		},
-  		//This is actuall IE specific but still convenient
-  		loadXML: function(xmlString){
-  		  $dom = $env.parseXML(xmlString);
-  		  return this;
-  		},
-  		get nodeType(){
-  			return 9;
-  		},
-  		createTextNode: function(text){
-  			return makeNode( $dom.createTextNode(
-  				text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")) );
-  		},
-  		createElement: function(name){
-  			return makeNode( $dom.createElement(name.toLowerCase()) );
-  		},
-  		getElementsByTagName: function(name){
-  			return new DOMNodeList( 
-  			  $dom.getElementsByTagName(
-  				  name.toLowerCase()) );
-  		},
-  		getElementsByName: function(name){
-  		  // why can't we just do ?: 
-  			//var elems = $dom.getElementsByTagName(name), ret = [];
-  			var elems = $dom.getElementsByTagName("*"), ret = [];
-  			ret.item = function(i){ return this[i]; };
-  			ret.getLength = function(){ return this.length; };
-  			for ( var i = 0; i < elems.length; i++ ) {
-  				var elem = elems.item(i);
-  				if ( elem.getAttribute("name") == name )
-  					ret.push( elem );
-  			}return new DOMNodeList( ret );
-  		},
-  		getElementById: function(id){
-  		  // why can't we just do ?: 
-  		  //return makeNode($dom.getElementById(id));
-  		  var elems = $dom.getElementsByTagName("*");
-  			
-  			for ( var i = 0; i < elems.length; i++ ) {
-  				var elem = elems.item(i);
-  				if ( elem.getAttribute("id") == id )
-  					return makeNode(elem);
-  			}
-  			
-  			return null;
-  		},
-  		get body(){
-  			return this.getElementsByTagName("body")[0];
-  		},
-  		get documentElement(){
-  			return makeNode( $dom.getDocumentElement() );
-  		},
-  		get ownerDocument(){
-  			return null;
-  		},
-  		addEventListener: window.addEventListener,
-  		removeEventListener: window.removeEventListener,
-  		dispatchEvent: window.dispatchEvent,
-  		get nodeName() {
-  			return "#document";
-  		},
-  		importNode: function(node, deep){
-  		  //need to replace this with some innerHtml magic
-  		  //because the ._dom is private in scope now
-  			return makeNode( $dom.importNode($nodeImplCache[node.__guid__], deep) );
-  		},
-  		toString: function(){
-  			return "Document" + 
-  			  (typeof $url == "string" ? ": " + $url : "");
-  		},
-  		get innerHTML(){
-  			return this.documentElement.outerHTML;
-  		},
-  		
-  		get defaultView(){
-  			return {
-  				getComputedStyle: function(elem){
-  					return {
-  						getPropertyValue: function(prop){
-  							prop = prop.replace(/\-(\w)/g,function(m,c){
-  								return c.toUpperCase();
-  							});
-  							var val = elem.style[prop];
-  							if ( prop === "opacity" && val === "" ){
-  								val = "1";
-  							}return val;
-  						}
-  					};
-  				}
-  			};
-  		},
-  		
-  		createEvent: function(){
-  			return {
-  				type: "",
-  				initEvent: function(type){
-  					this.type = type;
-  				}
-  			};
-  		},
-  		get __guid__(){return $id;}
-    });
-  };
-});
-
-function getDocument(node){
-	return $nodeCache[node];
-}
-	
-	// DOM NodeList
-
-$w.__defineGetter__("DOMNodeList", function(){
-  var $dom;
-  return function(list){
-		$dom = list;
-		this.length = list.getLength();
-		
-		for ( var i = 0; i < this.length; i++ ) {
-			var node = list.item(i);
-			this[i] = makeNode( node );
-		}
-		return __extend__(this,{
-  		toString: function(){
-  			return "[ " +
-  				Array.prototype.join.call( this, ", " ) + " ]";
-  		},
-  		get outerHTML(){
-  			return Array.prototype.map.call(
-  				this, function(node){return node.outerHTML;}).join('');
-  		}
-		});
-	};
-});
-	
-	// DOM Node
-	
-$w.__defineGetter__("DOMNode", function(){
-  var $dom, $id;
-  return function(node){
-    $id = createGUID();
-	  $dom = node;
-	  return __extend__(this, {
-  		get nodeType(){
-  			return $dom.getNodeType();
-  		},
-  		get nodeValue(){
-  			return $dom.getNodeValue();
-  		},
-  		get nodeName() {
-  			return $dom.getNodeName();
-  		},
-  		get childNodes(){
-  			return new DOMNodeList( $dom.getChildNodes() );
-  		},
-  		cloneNode: function(deep){
-  			return makeNode( $dom.cloneNode(deep) );
-  		},
-  		get ownerDocument(){
-  			return getDocument( $dom.ownerDocument );
-  		},
-  		get documentElement(){
-  			return makeNode( $dom.documentElement );
-  		},
-  		get parentNode() {
-  			return makeNode( $dom.getParentNode() );
-  		},
-  		get nextSibling() {
-  			return makeNode( $dom.getNextSibling() );
-  		},
-  		get previousSibling() {
-  			return makeNode( $dom.getPreviousSibling() );
-  		},
-  		toString: function(){
-  			return '"' + this.nodeValue + '"';
-  		},
-  		get outerHTML(){
-  			return this.nodeValue;
-  		},
-  		get __guid__(){return $id;}
-	  });
-  };
-});
-
-  // DOMComment
-
-$w.__defineGetter__("DOMComment", function(){
-	  $id = createGUID();
-  return function(node){
-    return __extend__(this, __extend__(new DOMNode(node),{
-      get nodeType(){
-  			return 8;
-  		},
-  		get outerHTML(){
-  			return "<!--" + this.nodeValue + "-->";
-  		}
-    }));
-  };
-});
-
-	// DOM Element
-
-$w.__defineGetter__("DOMElement", function(){
-	var $dom, $id;
-	return function(elem){
-	  $dom = elem;
-	  $id = createGUID();
-	  __extend__(this, new DOMNode($dom));
-		
-		// A lot of the methods defined below belong in HTML specific
-		// subclasses.  This is already unwieldy since most of these
-		//methods are meant for general xml consumption
-		__extend__(this, {
-  		get nodeName(){
-  			return this.tagName;
-  		},
-  		get tagName(){
-  			return $dom.getTagName().toUpperCase();
-  		},
-  		toString: function(){
-  			return "<" + this.tagName + (this.id ? "#" + this.id : "" ) + ">";
-  		},
-  		get outerHTML(){
-  			var ret = "<" + this.tagName, attr = this.attributes;
-  			
-  			for ( var i in attr )
-  				ret += " " + i + "='" + attr[i] + "'";
-  				
-  			if ( this.childNodes.length || this.nodeName == "SCRIPT" )
-  				ret += ">" + this.childNodes.outerHTML + 
-  					"</" + this.tagName + ">";
-  			else
-  				ret += "/>";
-  			
-  			return ret;
-  		},
-  		
-  		get attributes(){
-  			var attr = {}, attrs = $dom.getAttributes();
-  			for ( var i = 0; i < attrs.getLength(); i++ ){
-  				attr[ attrs.item(i).nodeName ] = attrs.item(i).nodeValue;
-				}return attr;
-  		},
-  		
-  		get innerHTML(){
-  			return this.childNodes.outerHTML;	
-  		},
-  		set innerHTML(html){
-  			html = html.replace(/<\/?([A-Z]+)/g, function(m){
-  				return m.toLowerCase();
-  			}).replace(/&nbsp;/g, " ");
-  			
-  			var dom = new DOMParser().parseFromString("<wrap>" + html + "</wrap>");
-  			var nodes = this.ownerDocument.importNode( dom.documentElement,  true ).childNodes;
-  				
-  			while (this.firstChild){
-  				this.removeChild( this.firstChild );
-				}
-  			
-  			for ( var i = 0; i < nodes.length; i++ )
-  				this.appendChild( nodes[i] );
-  		},
-  		
-  		get textContent(){
-  			function nav(nodes){
-  				var str = "";
-  				for ( var i = 0; i < nodes.length; i++ ){
-  					if ( nodes[i].nodeType == 3 ){
-  						str += nodes[i].nodeValue;
-  					}else if ( nodes[i].nodeType == 1 ){
-  						str += nav(nodes[i].childNodes);
-  					}
-  				} return str;
-  			} return nav(this.childNodes);
-  		},
-  		set textContent(text){
-  			while (this.firstChild)
-  				this.removeChild( this.firstChild );
-  			this.appendChild( this.ownerDocument.createTextNode(text));
-  		},
-  		
-  		style: {},
-  		clientHeight: 0,
-  		clientWidth: 0,
-  		offsetHeight: 0,
-  		offsetWidth: 0,
-  		
-  		get disabled() {
-  			var val = this.getAttribute("disabled");
-  			return val != "false" && !!val;
-  		},
-  		set disabled(val) { return this.setAttribute("disabled",val); },
-  		
-  		get checked() {
-  			var val = this.getAttribute("checked");
-  			return val != "false" && !!val;
-  		},
-  		set checked(val) { return this.setAttribute("checked",val); },
-  		
-  		get selected() {
-  			if ( !this._selectDone ) {
-  				this._selectDone = true;
-  				
-  				if ( this.nodeName == "OPTION" && !this.parentNode.getAttribute("multiple") ) {
-  					var opt = this.parentNode.getElementsByTagName("option");
-  					
-  					if ( this == opt[0] ) {
-  						var select = true;
-  						
-  						for ( var i = 1; i < opt.length; i++ ){
-  							if ( opt[i].selected ) {
-  								select = false;
-  								break;
-  							}
-  						}
-  						if ( select ){ this.selected = true; }
-  					}
-  				}
-  			}
-  			
-  			var val = this.getAttribute("selected");
-  			return val != "false" && !!val;
-  		},
-  		set selected(val) { return this.setAttribute("selected",val); },
-  
-  		get className() { return this.getAttribute("class") || ""; },
-  		set className(val) {
-  			return this.setAttribute("class",
-  				val.replace(/(^\s*|\s*$)/g,""));
-  		},
-  		
-  		get type() { return this.getAttribute("type") || ""; },
-  		set type(val) { return this.setAttribute("type",val); },
-  
-  		get defaultValue() { return this.getAttribute("defaultValue") || ""; },
-  		set defaultValue(val) { return this.setAttribute("defaultValue",val); },
-  
-  		get value() { return this.getAttribute("value") || ""; },
-  		set value(val) { return this.setAttribute("value",val); },
-  		
-  		get src() { return this.getAttribute("src") || ""; },
-  		set src(val) { return this.setAttribute("src",val); },
-  		
-  		get id() { return this.getAttribute("id") || ""; },
-  		set id(val) { return this.setAttribute("id",val); },
-  		
-  		getAttribute: function(name){
-  			return $dom.hasAttribute(name) ?
-  				new String( $dom.getAttribute(name) ) :
-  				null;
-  		},
-  		setAttribute: function(name,value){
-  			$dom.setAttribute(name,value);
-  		},
-  		removeAttribute: function(name){
-  			$dom.removeAttribute(name);
-  		},
-  		
-  		get childNodes(){
-  			return new DOMNodeList( $dom.getChildNodes() );
-  		},
-  		get firstChild(){
-  			return makeNode( $dom.getFirstChild() );
-  		},
-  		get lastChild(){
-  			return makeNode( $dom.getLastChild() );
-  		},
-  		appendChild: function(node){
-  		  //Because the dom implementation is private in scope now,
-  		  //we will need to fix these to use some innerHtml etc
-  		  //if required
-  			$dom.appendChild( $nodeImplCache[node.__guid__] );
-  		},
-  		insertBefore: function(node,before){
-  			$dom.insertBefore( $nodeImplCache[node.__guid__], before ? $nodeImplCache[before.__guid__] : before );
-  			
-  			execScripts( node );
-  			
-  			function execScripts( node ) {
-  				if ( node.nodeName == "SCRIPT" ) {
-  					if ( !node.getAttribute("src") ) {
-  						eval.call( window, node.textContent );
-  					}
-  				} else {
-  					var scripts = node.getElementsByTagName("script");
-  					for ( var i = 0; i < scripts.length; i++ ) {
-  						execScripts( node );
-  					}
-  				}
-  			}
-  		},
-  		removeChild: function(node){
-  			$dom.removeChild( $nodeImplCache[node.__guid__] );
-  		},
-  
-  		getElementsByTagName: function(name){
-  		  // why can't we just do ?: 
-  			//var elems = $dom.getElementsByTagName(name), ret = [];
-  			var elems = $dom.getElementsByTagName("*"), ret = [];
-  			ret.item = function(i){ return this[i]; };
-  			ret.getLength = function(){ return this.length; };
-  			for ( var i = 0; i < elems.length; i++ ) {
-  				var elem = elems.item(i);
-  				if ( elem.getAttribute("name") == name )
-  					ret.push( elem );
-  			}return new DOMNodeList( ret );
-			},
-  		
-  		addEventListener: window.addEventListener,
-  		removeEventListener: window.removeEventListener,
-  		dispatchEvent: window.dispatchEvent,
-  		
-  		click: function(){
-  			var event = document.createEvent();
-  			event.initEvent("click");
-  			this.dispatchEvent(event);
-  		},
-  		submit: function(){
-  			var event = document.createEvent();
-  			event.initEvent("submit");
-  			this.dispatchEvent(event);
-  		},
-  		focus: function(){
-  			var event = document.createEvent();
-  			event.initEvent("focus");
-  			this.dispatchEvent(event);
-  		},
-  		blur: function(){
-  			var event = document.createEvent();
-  			event.initEvent("blur");
-  			this.dispatchEvent(event);
-  		},
-  		get contentWindow(){
-  			return this.nodeName == "IFRAME" ? {
-  				document: this.contentDocument
-  			} : null;
-  		},
-  		get contentDocument(){
-  			if ( this.nodeName == "IFRAME" ) {
-  				if ( !this._doc )
-  					this._doc = HTMLtoDOM("<html><head><title></title></head><body></body></html>");
-  				return this._doc;
-  			} else { return null; }
-    	},
-  		get __guid__(){return $id;}
-		});
-		
-	  //All this constructor stuff belond in the HTML subclasses
-	  //and even more generally in the HTML specific element
-	  //subclass otherwise its going to become a mess
-  	this.style = {
-  		get opacity(){ return this._opacity; },
-  		set opacity(val){ this._opacity = val + ""; }
-  	};
-		
-		// Load CSS info
-		var styles = (this.getAttribute("style") || "").split(/\s*;\s*/);
-		for ( var i = 0; i < styles.length; i++ ) {
-			var style = styles[i].split(/\s*:\s*/);
-			if ( style.length == 2 )
-				this.style[ style[0] ] = style[1];
-		}
-		
-		if ( this.nodeName == "FORM" ) {
-			this.__defineGetter__("elements", function(){
-				return this.getElementsByTagName("*");
-			});
-			this.__defineGetter__("length", function(){
-				var elems = this.elements;
-				for ( var i = 0; i < elems.length; i++ ) {
-					this[i] = elems[i];
-				}
-				return elems.length;
-			});
-		}
-
-		if ( this.nodeName == "SELECT" ) {
-			this.__defineGetter__("options", function(){
-				return this.getElementsByTagName("option");
-			});
-		}
-
-		this.defaultValue = this.value;
-		return this;
-	};
-});
-
-$w.__defineGetter__('DOMParser', function(){
-  return function(){
-    return __extend__(this, {
-      parseFromString: function(xmlString){
-        return document.implementation.createDocument().loadXML(xmlString);
-      }
-    });
-  };
-});
-	
-	/*
-*	document.js
-*
-*	DOM Level 2 /DOM level 3 (partial)
-*	
-*	This file adds the document object to the window and allows you
-*	you to set the window.document using an html string or dom object.
-*
-*/
-
-// read only reference to the Document object
-var $document =  new DOMDocument();
-var $implementation =  new DOMImplementation();
-var $async = false;
-
-$w.__defineGetter__("document", function(){
-	return __extend__($document, {
-		get async(){ return $async;},
-		set async(async){ $async = async; },
-		get baseURI(){ return $env.location('./'); },
-		get implementation(){ return $implementation; },
-		get URL(){ return $w.location.href;  }
-	});
-});
-
-	
-	/*
-*	html.js
-*
-*	DOM Level 2 HTML
-*//*
 *	xhr.js
 */
+$log("Initializing Window XMLHttpRequest.");
 // XMLHttpRequest
 // Originally implemented by Yehuda Katz
 $w.XMLHttpRequest = function(){
@@ -1187,16 +1950,19 @@ XMLHttpRequest.prototype = {
 		
 		function makeRequest(){
 			$env.connection(self, function(){
+			  var responseXML = null;
 				self.__defineGetter__("responseXML", function(){
-					return responseXML;
-				});
-				if ( self.responseText.match(/^\s*</) ) {
-					try {
-						var doc = $w.document.implementation.createDocument();
-						doc._dom = $env.parseXML(responseText);
-						responseXML = doc;
-					} catch(e) { /*TODO: need to flag an error here*/}
-				}
+  				if ( self.responseText.match(/^\s*</) ) {
+  				  if(responseXML){return responseXML;}
+  				  else{
+    					try {
+    					  $log("parsing response text into xml document");
+    						responseXML = $domparser.parseFromString(self.responseText);
+  					    return responseXML;
+    					} catch(e) { return null;/*TODO: need to flag an error here*/}
+  					}
+  				}else{return null;}
+  			});
 			});
 			self.onreadystatechange();
 		}
@@ -1228,15 +1994,14 @@ XMLHttpRequest.prototype = {
 		}return null;
 	},
 	getAllResponseHeaders: function(){
-	  var header;
+	  var header, returnedHeaders = [];
 		if (this.readyState < 3){
 			throw new Error("INVALID_STATE_ERR");
 		} else {
-			var returnedHeaders = [];
 			for (header in this.responseHeaders){
 				returnedHeaders.push( header + ": " + this.responseHeaders[header] );
-			}return returnedHeaders.join("\r\n");
-		}
+			}
+		}return returnedHeaders.join("\r\n");
 	},
 	async: true,
 	readyState: 0,
@@ -1245,147 +2010,17 @@ XMLHttpRequest.prototype = {
 };/*
 *	css.js
 */
-
+$log("Initializing Window CSS");
 // returns a CSS2Properties object that represents the style
 // attributes and values used to render the specified element in this
-// window.  Any length values are alwasys expressed in pixel, or
+// window.  Any length values are always expressed in pixel, or
 // absolute values.
 $w.getComputedStyle = function(elt, pseudo_elt){
   //TODO
 };/*
-*	cookie.js
-*   - requires env
-*/
-
-var $cookies = {
-	persistent:{
-		//domain - key on domain name {
-			//path - key on path {
-				//name - key on name {
-					 //value : cookie value
-					 //other cookie properties
-				//}
-			//}
-		//}
-		//expire - provides a timestamp for expiring the cookie
-		//cookie - the cookie!
-	},
-	temporary:{//transient is a reserved word :(
-		//like above
-	}
-};
-
-//Window cookie
-$w.__defineSetter__("cookie", function(cookie){
-	var i,name,value,properties = {},attr,attrs = cookie.split(";");
-	//for now the strategy is to simply create a json object
-	//and post it to a file in the .cookies.js file.  I hate parsing
-	//dates so I decided not to implement support for 'expires' 
-	//(which is deprecated) and instead focus on the easier 'max-age'
-	//(which succeeds 'expires') 
-	cookie = {};//keyword properties of the cookie
-	for(i=0;i<attrs.length;i++){
-		attr = attrs[i].split("=");
-		if(attr.length > 0){
-			name = trim(attr[0]);
-			value = trim(attr[1]);
-			if(name=='max-age'){ 
-				//we'll have to set a timer to check these 
-				//and garbage collect expired cookies
-				cookie[name] = parseInt(value, 10);
-			} else if(name=='domain'){
-				if(domainValid(value)){
-					cookie['domain']=value;
-				}else{
-					cookie['domain']=$w.location.domain;
-				}
-			} else if(name=='path'){
-				//not sure of any special logic for path
-				cookie['path'] = value;
-			} else {
-				//its not a cookie keyword so store it in our array of properties
-				//and we'll serialize individually in a moment
-				properties[name] = value;
-			}
-		}else{
-			if(attr[0] == 'secure'){
-				cookie[attr[0]] = true;
-			}
-		}
-	}
-	if(!cookie['max-age']){
-		//it's a transient cookie so it only lasts as long as 
-		//the window.location remains the same
-		mergeCookie($cookies.temporary, cookie, properties);
-	}else if(cookie['max-age']===0){
-		//delete the cookies
-		//TODO
-	}else{
-		//the cookie is persistent
-		mergeCookie($cookies.persistent, cookie, properties);
-		persistCookies();
-	}
-});
-
-$w.__defineGetter__("cookie", function(c){
-	//The cookies that are returned must belong to the same domain
-	//and be at or below the current window.location.path.  Also
-	//we must check to see if the cookie was set to 'secure' in which
-	//case we must check our current location.protocol to make sure it's
-	//https:
-	var allcookies = [], i;
-	//TODO 	
-});
-
-
-
-var domainValid = function(domain){
-	//make sure the domain
-	//TODO 	
-};
-
-var mergeCookie = function(target, cookie, properties){
-	var name, now;
-	if(!target[cookie.domain]){
-		target[cookie.domain] = {};
-	}
-	if(!target[cookie.domain][cookie.path]){
-		target[cookie.domain][cookie.path] = {};
-	}
-	for(name in properties){
-		now = new Date().getTime();
-		target[cookie.domain][cookie.path][name] = {
-			value:properties[name],
-			"@env:secure":cookie.secure,
-			"@env:max-age":cookie['max-age'],
-			"@env:date-created":now,
-			"@env:expiration":now + cookie['max-age']
-		};
-	}
-};
-
-var persistCookies = function(){
-	//TODO
-	//I think it should be done via $env so it can be customized
-};
-
-var loadCookies = function(){
-	//TODO
-	//should also be configurable via $env	
-};
-
-//We simply use the default ajax get to load the .cookies.js file
-//if it doesn't exist we create it with a post.  Cookies are maintained
-//in memory, but serialized with each set.
-try{
-	//TODO - load cookies
-	loadCookies();
-}catch(e){
-	//TODO - fail gracefully
-}	
-	/*
 *	screen.js
 */
+$log("Initializing Window Screen.");
 
 var $availHeight  = 600,
     $availWidth   = 800,
@@ -1431,14 +2066,9 @@ $w.scrollBy = function(dx, dy){
 $w.scrollTo = function(x,y){
   //TODO
 };/*
-*	uievent.js
-*/
-
-var $onblur,
-    $onfocus,
-    $onresize;/*
 *	dialog.js
 */
+$log("Initializing Window Dialogs.");
 $w.alert = function(message){
  //TODO 
 };
@@ -1450,312 +2080,33 @@ $w.confirm = function(question){
 $w.prompt = function(message, defaultMsg){
   //TODO
 };/*
-*	env.parser.js
+*	document.js
+*
+*	DOM Level 2 /DOM level 3 (partial)
+*	
+*	This file adds the document object to the window and allows you
+*	you to set the window.document using an html string or dom object.
+*
 */
-/*
- * HTML Parser By John Resig (ejohn.org)
- * Original code by Erik Arvidsson, Mozilla Public License
- * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
- *
- * // Use like so:
- * HTMLParser(htmlString, {
- *     start: function(tag, attrs, unary) {},
- *     end: function(tag) {},
- *     chars: function(text) {},
- *     comment: function(text) {}
- * });
- *
- * // or to get an XML string:
- * HTMLtoXML(htmlString);
- *
- * // or to get an XML DOM Document
- * HTMLtoDOM(htmlString);
- *
- * // or to inject into an existing document/DOM node
- * HTMLtoDOM(htmlString, document);
- * HTMLtoDOM(htmlString, document.body);
- *
- */
 
-(function(){
+// read only reference to the Document object
 
-	// Regular Expressions for parsing tags and attributes
-	var startTag = /^<([\w:-]+)((?:\s+[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
-		endTag = /^<\/([\w:-]+)[^>]*>/,
-		attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g;
-		
-	// Empty Elements - HTML 4.01
-	var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
+$log("Initializing window.document.");
+var $document =  new HTMLDocument();
+var $async = false;
 
-	// Block Elements - HTML 4.01
-	var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
+$log("Adding window.document features.");
+$w.__defineGetter__("document", function(){
+	return __extend__($document, {
+		get async(){ return $async;},
+		set async(async){ $async = async; },
+		get baseURI(){ return $env.location('./'); },
+		get URL(){ return $w.location.href;  }
+	});
+});
 
-	// Inline Elements - HTML 4.01
-	var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
-
-	// Elements that you can, intentionally, leave open
-	// (and which close themselves)
-	var closeSelf = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
-
-	// Attributes that have their values filled in disabled="disabled"
-	var fillAttrs = makeMap("checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected");
-
-	// Special Elements (can contain anything)
-	var special = makeMap("script,style");
-
-	var HTMLParser = this.HTMLParser = function( html, handler ) {
-		var index, chars, match, stack = [], last = html;
-		stack.last = function(){
-			return this[ this.length - 1 ];
-		};
-
-		while ( html ) {
-			chars = true;
-
-			// Make sure we're not in a script or style element
-			if ( !stack.last() || !special[ stack.last() ] ) {
-
-				// Comment
-				if ( html.indexOf("<!--") === 0 ) {
-					index = html.indexOf("-->");
 	
-					if ( index >= 0 ) {
-						if ( handler.comment )
-							handler.comment( html.substring( 4, index ) );
-						html = html.substring( index + 3 );
-						chars = false;
-					}
-	
-				// end tag
-				} else if ( html.indexOf("</") === 0 ) {
-					match = html.match( endTag );
-	
-					if ( match ) {
-						html = html.substring( match[0].length );
-						match[0].replace( endTag, parseEndTag );
-						chars = false;
-					}
-	
-				// start tag
-				} else if ( html.indexOf("<") === 0 ) {
-					match = html.match( startTag );
-	
-					if ( match ) {
-						html = html.substring( match[0].length );
-						match[0].replace( startTag, parseStartTag );
-						chars = false;
-					}
-				}
-
-				if ( chars ) {
-					index = html.indexOf("<");
-					var text = index < 0 ? html : html.substring( 0, index );
-					html = index < 0 ? "" : html.substring( index );
-					if ( handler.chars ){handler.chars( text );}
-				}
-			} else {
-				html = html.replace(new RegExp("(.*)<\/" + stack.last() + "[^>]*>"), function(all, text){
-					text = text.replace(/<!--(.*?)-->/g, "$1").
-						replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
-					if ( handler.chars ){handler.chars( text );}
-					return "";
-				});
-				parseEndTag( "", stack.last() );
-			}
-			if ( html == last ){throw "Parse Error: " + html;}
-			last = html;
-		}
-		
-		// Clean up any remaining tags
-		parseEndTag();
-
-		function parseStartTag( tag, tagName, rest, unary ) {
-			if ( block[ tagName ] ) {
-				while ( stack.last() && inline[ stack.last() ] ) {
-					parseEndTag( "", stack.last() );
-				}
-			}
-
-			if ( closeSelf[ tagName ] && stack.last() == tagName ) {
-				parseEndTag( "", tagName );
-			}
-
-			unary = empty[ tagName ] || !!unary;
-
-			if ( !unary )
-				stack.push( tagName );
-			
-			if ( handler.start ) {
-				var attrs = [];
-	
-				rest.replace(attr, function(match, name) {
-					var value = arguments[2] ? arguments[2] :
-						arguments[3] ? arguments[3] :
-						arguments[4] ? arguments[4] :
-						fillAttrs[name] ? name : "";
-					
-					attrs.push({
-						name: name,
-						value: value,
-						escaped: value.replace(/(^|[^\\])"/g, '$1\\\"') //"
-					});
-				});
-	
-				if ( handler.start )
-					handler.start( tagName, attrs, unary );
-			}
-		}
-
-		function parseEndTag( tag, tagName ) {
-		  var pos;
-			// If no tag name is provided, clean shop
-			if ( !tagName ){
-				pos = 0;
-			}else{
-			// Find the closest opened tag of the same type
-				for ( pos = stack.length - 1; pos >= 0; pos-- ){
-					if ( stack[ pos ] == tagName ){ break; }
-				}
-  		}
-			if ( pos >= 0 ) {
-				// Close all the open elements, up the stack
-				for ( var i = stack.length - 1; i >= pos; i-- ){
-					if ( handler.end ){
-						handler.end( stack[ i ] );
-  				}
-				}
-				// Remove the open elements from the stack
-				stack.length = pos;
-			}
-		}
-	};
-	
-	this.HTMLtoXML = function( html ) {
-		var results = "";
-		
-		HTMLParser(html, {
-			start: function( tag, attrs, unary ) {
-				results += "<" + tag;
-		
-				for ( var i = 0; i < attrs.length; i++ )
-					results += " " + attrs[i].name + '="' + attrs[i].escaped + '"';
-		
-				results += (unary ? "/" : "") + ">";
-			},
-			end: function( tag ) {
-				results += "</" + tag + ">";
-			},
-			chars: function( text ) {
-				results += text;
-			},
-			comment: function( text ) {
-				results += "<!--" + text + "-->";
-			}
-		});
-		
-		return results;
-	};
-	
-	this.HTMLtoDOM = function( html, doc ) {
-		// There can be only one of these elements
-		var one = makeMap("html,head,body,title");
-		
-		// Enforce a structure for the document
-		var structure = {
-			link: "head",
-			base: "head"
-		};
-	
-		if ( !doc ) {
-			if ( typeof DOMDocument != "undefined" ){
-				doc = new DOMDocument();
-			}else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument ){
-				doc = document.implementation.createDocument("", "", null);
-			}else if ( typeof ActiveX != "undefined" ){
-				doc = new ActiveXObject("Msxml.DOMDocument");
-			}
-		} else {
-			doc = doc.ownerDocument ||
-				doc.getOwnerDocument && doc.getOwnerDocument() ||
-				doc;
-		}
-		
-		var elems = [],
-			documentElement = doc.documentElement || doc.getDocumentElement && doc.getDocumentElement();
-				
-		// If we're dealing with an empty document then we
-		// need to pre-populate it with the HTML document structure
-		if ( !documentElement && doc.createElement ) (function(){
-			var html = doc.createElement("html");
-			var head = doc.createElement("head");
-			head.appendChild( doc.createElement("title") );
-			html.appendChild( head );
-			html.appendChild( doc.createElement("body") );
-			doc.appendChild( html );
-		})();
-		
-		// Find all the unique elements
-		if ( doc.getElementsByTagName ){
-			for ( var i in one ){
-			   one[ i ] = doc.getElementsByTagName( i )[0];
-		  }
-		}
-		
-		// If we're working with a document, inject contents into
-		// the body element
-		var curParentNode = one.body;
-		
-		HTMLParser( html, {
-			start: function( tagName, attrs, unary ) {
-				// If it's a pre-built element, then we can ignore
-				// its construction
-				if ( one[ tagName ] ) {
-					curParentNode = one[ tagName ];
-					return;
-				}
-			
-				var elem = doc.createElement( tagName );
-				
-				for ( var attr in attrs )
-					elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
-				
-				if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] != "boolean" )
-					one[ structure[ tagName ] ].appendChild( elem );
-				
-				else if ( curParentNode && curParentNode.appendChild )
-					curParentNode.appendChild( elem );
-					
-				if ( !unary ) {
-					elems.push( elem );
-					curParentNode = elem;
-				}
-			},
-			end: function( tag ) {
-				elems.length -= 1;
-				
-				// Init the new parentNode
-				curParentNode = elems[ elems.length - 1 ];
-			},
-			chars: function( text ) {
-				curParentNode.appendChild( doc.createTextNode( text ) );
-			},
-			comment: function( text ) {
-				// create comment node
-			}
-		});
-		
-		return doc;
-	};
-
-	function makeMap(str){
-		var obj = {}, items = str.split(",");
-		for ( var i = 0; i < items.length; i++ )
-			obj[ items[i] ] = true;
-		return obj;
-	};
-	
-})();
-/*
+	/*
 *	outro.js
 */
 
