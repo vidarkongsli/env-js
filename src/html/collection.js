@@ -8,7 +8,7 @@ $w.__defineGetter__("HTMLCollection", function(){
   };
 });
 
-var HTMLCollection = function(nodelist, type){
+/*var HTMLCollection = function(nodelist, type){
   var $items = [], 
       $item, i;
   if(type === "Anchor" ){
@@ -44,6 +44,6 @@ var HTMLCollection = function(nodelist, type){
     item : function(i){return this[i];},
     namedItem : function(name){return this[name];}
   });
-};
+};*/
 
 	

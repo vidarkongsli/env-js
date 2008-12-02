@@ -41,22 +41,25 @@
         <concat destfile="${ENV_DIST}">
             <fileset dir="${SRC_DIR}" includes="intro.js" />
             <fileset dir="${SRC_DIR}" includes="window/window.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/dom.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/document.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/attr.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/cdatasection.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/xmlsax.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/xmlw3cdom.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/nodelist.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/namednodemap.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/namespace.js" />
             <fileset dir="${SRC_DIR}" includes="dom/characterdata.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/text.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/cdatasection.js" />
             <fileset dir="${SRC_DIR}" includes="dom/comment.js" />
             <fileset dir="${SRC_DIR}" includes="dom/doctype.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/attr.js" />
             <fileset dir="${SRC_DIR}" includes="dom/element.js" />
             <fileset dir="${SRC_DIR}" includes="dom/exception.js" />
             <fileset dir="${SRC_DIR}" includes="dom/fragment.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/implementation.js" />
             <fileset dir="${SRC_DIR}" includes="dom/instruction.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/nodelist.js" />
             <fileset dir="${SRC_DIR}" includes="dom/parser.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/text.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/implementation.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/html.js" />
             <!--fileset dir="${SRC_DIR}" includes="html/htmlparser.js" /-->
             <fileset dir="${SRC_DIR}" includes="html/document.js" />

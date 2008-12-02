@@ -6,7 +6,9 @@ window.onload = function(){
   print("Handling onload for test.js");
   // Load the test runner
   load("test/testrunner.js", "test/jquery.js");
+  print("Loaded test runner.");
   
+  print("Loading tests.");
   // Load the tests
   load(
     "test/unit/dom.js",

@@ -16,12 +16,15 @@ function test(name, fn){
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
 var orig = document.getElementById('main').innerHTML;
+	print(orig);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
 	document.getElementById('main').innerHTML = orig;
+	//print("\n\nORIGINAL:\n\n"+orig);
+	//print("\n\nRESET:\n\n"+document.getElementById('main').outerHTML);
 }
 
 var currentModule = "";

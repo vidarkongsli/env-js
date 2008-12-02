@@ -13,27 +13,76 @@ $w.__defineGetter__("HTMLFormElement", function(){
   };
 });
 
-var HTMLFormElement = function(node){
-  __extend__(this, new HTMLElement(node));
-  return __extend__(this,{
-    get acceptCharset(){ return this.getAttribute('acceptCharset');},
-    set acceptCharset(acceptCharset){this.setAttribute('acceptCharset', acceptCharset);},
-    get action(){return this.getAttribute('action');},
-    set action(action){this.setAttribute('action', action);},
-    get elements() {return this.getElementsByTagName("*");},
-    get enctype(){return this.getAttribute('enctype');},
-    set enctype(enctype){this.setAttribute('enctype', enctype);},
-    get length() {return this.elements.length;},
-    get method(){return this.getAttribute('method');},
-    set method(action){this.setAttribute('method', method);},
-		get name() { return this.getAttribute("id") || ""; },
-		set name(val) { return this.setAttribute("id",val); },
-		get target() { return this.getAttribute("id") || ""; },
-		set target(val) { return this.setAttribute("id",val); },
-		submit:function(){submit(this);},
-		reset:function(){reset(this);}
-  });
+var HTMLFormElement = function(ownerDocument){
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
 };
-
+HTMLFormElement.prototype = new HTMLElement;
+__extend__(HTMLFormElement.prototype,{
+    get acceptCharset(){ 
+        return this.getAttribute('acceptCharset');
+        
+    },
+    set acceptCharset(acceptCharset){
+        this.setAttribute('acceptCharset', acceptCharset);
+        
+    },
+    get action(){
+        return this.getAttribute('action');
+        
+    },
+    set action(action){
+        this.setAttribute('action', action);
+        
+    },
+    get elements() {
+        return this.getElementsByTagName("*");
+        
+    },
+    get enctype(){
+        return this.getAttribute('enctype');
+        
+    },
+    set enctype(enctype){
+        this.setAttribute('enctype', enctype);
+        
+    },
+    get length() {
+        return this.elements.length;
+        
+    },
+    get method(){
+        return this.getAttribute('method');
+        
+    },
+    set method(action){
+        this.setAttribute('method', method);
+        
+    },
+	get name() {
+	    return this.getAttribute("id") || ""; 
+	    
+    },
+	set name(val) { 
+	    return this.setAttribute("id",val); 
+	    
+    },
+	get target() { 
+	    return this.getAttribute("id") || ""; 
+	    
+    },
+	set target(val) { 
+	    return this.setAttribute("id",val); 
+	    
+    },
+	submit:function(){
+	    __submit__(this);
+	    
+    },
+	reset:function(){
+	    __reset__(this);
+	    
+    }
+});
 
 			

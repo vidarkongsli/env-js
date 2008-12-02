@@ -8,14 +8,25 @@ $w.__defineGetter__("Comment", function(){
   };
 });
 
-var Comment = function(node, id){
-  var $dom = node, 
-      $id = id?id:createGUID();
-  $debug("Comment "+$id);
-  __extend__(this, new CharacterData($dom, $id));
-  return __extend__(this,{
-    get xml(){return "<!-- " + this.nodeValue + " -->";}
-  });
-};
+/**
+ * @class  DOMComment - This represents the content of a comment, i.e., all the characters between the starting '<!--' and ending '-->'
+ * @extends DOMCharacterData
+ * @author Jon van Noort (jon@webarcana.com.au)
+ * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ */
+var DOMComment = function(ownerDocument) {
+  this.DOMCharacterData  = DOMCharacterData;
+  this.DOMCharacterData(ownerDocument);
 
-	
+  this.nodeName  = "#comment";
+  this.nodeType  = DOMNode.COMMENT_NODE;
+};
+DOMComment.prototype = new DOMCharacterData;
+__extend__(DOMComment.prototype, {
+    get xml(){
+        return "<!-- " + this.nodeValue + " -->";
+    },
+    toString : function(){
+        return "Comment #"+this._id;
+    }
+});

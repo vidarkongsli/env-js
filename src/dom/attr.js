@@ -3,22 +3,53 @@ $log("Defining Attr");
 * Attr - DOM Level 2
 */
 $w.__defineGetter__("Attr", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
 });
 
-var Attr = function(node, id){
-  var $dom = node, 
-      $id = id?id:createGUID();
-  $debug("Attr "+$id);
-  __extend__(this, new Node($dom, $id));
-  return __extend__(this, {
-    get name(){return String($dom.getName()); },
-    get ownerElement(){ return makeNode( $dom.getOwnerElement() );},
-    get specified(){ return makeNode( $dom.getSpecified() );},
-    get value(){return String($dom.getValue()); },
-    set value(value){return $dom.setValue(value); },
-    get xml(){return this.nodeName + "='" + this.nodeValue + "' ";}
-  });
+
+/**
+ * @class  DOMAttr - The Attr interface represents an attribute in an Element object
+ * @extends DOMNode
+ * @author Jon van Noort (jon@webarcana.com.au)
+ * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ */
+var DOMAttr = function(ownerDocument) {
+    //$log("\tcreating dom attribute");
+    this.DOMNode = DOMNode;
+    this.DOMNode(ownerDocument);
+    
+    this.name      = "";                    // the name of this attribute
+    this.specified = false;
+    this.value     = "";                    // the value of the attribute is returned as a string
+    this.nodeType  = DOMNode.ATTRIBUTE_NODE;
+    this.ownerElement = null;               // set when Attr is added to NamedNodeMap
+    
+    //$log("\tfincished creating dom attribute " + this);
 };
+DOMAttr.prototype = new DOMNode; 
+__extend__(DOMAttr.prototype, {
+    get name(){
+        return this.nodeName;
+    },
+    get value(){
+        return this.nodeValue;
+    },
+    set value(value){
+        // throw Exception if Attribute is readonly
+        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+            throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+        }
+        // delegate to node
+        this.specified = (this.value.length > 0);
+        this.nodeValue = value;
+    },
+    get xml(){
+        return this.nodeName + "='" + this.nodeValue + "' ";
+    },
+    toString : function(){
+        return "Attr #" + this._id + " " + this.name;
+    }
+});    
+

@@ -3,51 +3,137 @@ $log("Defining HTMLAnchorElement");
 * HTMLAnchorElement - DOM Level 2
 */
 $w.__defineGetter__("Anchor", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
 });
 $w.__defineGetter__("HTMLAnchorElement", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
 });
 
-var HTMLAnchorElement = function(node){
+var HTMLAnchorElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLAnchorElement.prototype = new HTMLElement;
+
+(function(){
+    
 	var hash 	 = new RegExp('(\\#.*)'),
-			hostname = new RegExp('\/\/([^\:\/]+)'),
-			pathname = new RegExp('(\/[^\\?\\#]*)'),
-			port 	 = new RegExp('\:(\\d+)\/'),
-			protocol = new RegExp('(^\\w*\:)'),
-			search 	 = new RegExp('(\\?[^\\#]*)');
-  __extend__(this, new HTMLElement(node));
-  return __extend__(this,{
-		get accessKey() { return this.getAttribute("id") || ""; },
-		set accessKey(val) { return this.setAttribute("id",val); },
-		get charset() { return this.getAttribute("id") || ""; },
-		set charset(val) { return this.setAttribute("id",val); },
-		get coords() { return this.getAttribute("id") || ""; },
-		set coords(val) { return this.setAttribute("id",val); },
-		get href() { return this.getAttribute("id") || ""; },
-		set href(val) { return this.setAttribute("id",val); },
-		get hreflang() { return this.getAttribute("id") || ""; },
-		set hreflang(val) { return this.setAttribute("id",val); },
-		get name() { return this.getAttribute("id") || ""; },
-		set name(val) { return this.setAttribute("id",val); },
-		get rel() { return this.getAttribute("id") || ""; },
-		set rel(val) { return this.setAttribute("id",val); },
-		get rev() { return this.getAttribute("id") || ""; },
-		set rev(val) { return this.setAttribute("id",val); },
-		get shape() { return this.getAttribute("id") || ""; },
-		set shape(val) { return this.setAttribute("id",val); },
-		get tabIndex() { return this.getAttribute("id") || ""; },
-		set tabIndex(val) { return this.setAttribute("id",val); },
-		get target() { return this.getAttribute("id") || ""; },
-		set target(val) { return this.setAttribute("id",val); },
-		get type() { return this.getAttribute("id") || ""; },
-		set type(val) { return this.setAttribute("id",val); },
-		blur:function(){blur(this);},
-		focus:function(){focus(this);},
+        hostname = new RegExp('\/\/([^\:\/]+)'),
+        pathname = new RegExp('(\/[^\\?\\#]*)'),
+        port 	 = new RegExp('\:(\\d+)\/'),
+        protocol = new RegExp('(^\\w*\:)'),
+        search 	 = new RegExp('(\\?[^\\#]*)');
+			
+    __extend__(HTMLAnchorElement.prototype, {
+		get accessKey() { 
+		    return this.getAttribute("accessKey") || ""; 
+		    
+	    },
+		set accessKey(val) { 
+		    return this.setAttribute("accessKey",val); 
+		    
+	    },
+		get charset() { 
+		    return this.getAttribute("charset") || ""; 
+		    
+	    },
+		set charset(val) { 
+		    return this.setAttribute("charset",val); 
+		    
+	    },
+		get coords() { 
+		    return this.getAttribute("coords") || ""; 
+		    
+	    },
+		set coords(val) { 
+		    return this.setAttribute("coords",val); 
+		    
+	    },
+		get href() { 
+		    return this.getAttribute("href") || ""; 
+		    
+	    },
+		set href(val) { 
+		    return this.setAttribute("href",val); 
+		    
+	    },
+		get hreflang() { 
+		    return this.getAttribute("hreflang") || ""; 
+		    
+	    },
+		set hreflang(val) { 
+		    return this.setAttribute("hreflang",val); 
+		    
+	    },
+		get name() { 
+		    return this.getAttribute("name") || ""; 
+		    
+	    },
+		set name(val) { 
+		    return this.setAttribute("name",val); 
+		    
+	    },
+		get rel() { 
+		    return this.getAttribute("rel") || ""; 
+		    
+	    },
+		set rel(val) { 
+		    return this.setAttribute("rel",val); 
+		    
+	    },
+		get rev() { 
+		    return this.getAttribute("rev") || ""; 
+		    
+	    },
+		set rev(val) { 
+		    return this.setAttribute("rev",val); 
+		    
+	    },
+		get shape() { 
+		    return this.getAttribute("shape") || ""; 
+		    
+	    },
+		set shape(val) { 
+		    return this.setAttribute("shape",val); 
+		    
+	    },
+		get tabIndex() { 
+		    return this.getAttribute("tab-index") || ""; 
+		    
+	    },
+		set tabIndex(val) { 
+		    return this.setAttribute("tab-index",val); 
+		    
+	    },
+		get target() { 
+		    return this.getAttribute("target") || ""; 
+		    
+	    },
+		set target(val) { 
+		    return this.setAttribute("target",val); 
+		    
+	    },
+		get type() { 
+		    return this.getAttribute("type") || ""; 
+		    
+	    },
+		set type(val) { 
+		    return this.setAttribute("type",val); 
+		    
+	    },
+		blur:function(){
+		    blur(this);
+		    
+	    },
+		focus:function(){
+		    focus(this);
+		    
+	    },
 		get hash(){
 			var m = hash.exec(this.href);
 			return m&&m.length>1?m[1]:"";
@@ -105,7 +191,6 @@ var HTMLAnchorElement = function(node){
 				_search + this.hash;
 		}
   });
-};
 
-
+})();
 			

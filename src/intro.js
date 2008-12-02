@@ -10,4 +10,6 @@ var __this__ = this;
 this.__defineGetter__('window', function(){
   return __this__;
 });
+try{
 (function($w, $env){
+        

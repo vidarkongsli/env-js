@@ -194,17 +194,17 @@ function __extend__(a,b) {
 // this might be a good utility function to provide in the env.core
 // as in might be useful to the parser and other areas as well
 function trim( str ){
- var start = -1,
-  end = str.length;
- /*jsl:ignore*/
- while( str.charCodeAt(--end) < 33 );
- while( str.charCodeAt(++start) < 33 );
- /*jsl:end*/
- return str.slice( start, end + 1 );
+    var start = -1,
+    end = str.length;
+    /*jsl:ignore*/
+    while( str.charCodeAt(--end) < 33 );
+    while( str.charCodeAt(++start) < 33 );
+    /*jsl:end*/
+    return str.slice( start, end + 1 );
 };
 
 //from jQuery
-function setArray( target, array ) {
+function __setArray__( target, array ) {
 	// Resetting the length to 0, then using the native Array push
 	// is a super-fast way to populate an object with array-like properties
 	target.length = 0;

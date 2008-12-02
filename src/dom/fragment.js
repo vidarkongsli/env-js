@@ -3,20 +3,37 @@ $log("Defining DocumentFragment");
 * DocumentFragment - DOM Level 2
 */
 $w.__defineGetter__("DocumentFragment", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
 });
 
-var DocumentFragment = function(node, id){
-  var $dom = node, 
-      $id = id?id:createGUID();
-  $debug("DocumentFragment " +$id);
-  __extend__(this, new Node($dom, $id));
-  // Nothing to extend as far as I know.  This and several other
-  // classes need to be moved off of window as the constructor, though available
-  // (by this I mean it wont throw a 'no such method') are not meant
-  // to be used directly. Instead the document.create* is meant to be used.
-  // Not perfectly sure how to implement this.  perhaps we have to examine
-  // the context inside the constructor
+/**
+ * @class  DOMDocumentFragment - DocumentFragment is a "lightweight" or "minimal" Document object.
+ * @extends DOMNode
+ * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
+ * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ */
+var DOMDocumentFragment = function(ownerDocument) {
+  this.DOMNode = DOMNode;
+  this.DOMNode(ownerDocument);
+  this.nodeName  = "#document-fragment";
+  this.nodeType = DOMNode.DOCUMENT_FRAGMENT_NODE;
 };
+DOMDocumentFragment.prototype = new DOMNode;
+__extend__(DOMDocumentFragment.prototype,{
+    get xml(){
+        var xml = "",
+            count = this.childNodes.length;
+        
+        // create string concatenating the serialized ChildNodes
+        for (var i = 0; i < count; i++) {
+            xml += this.childNodes.item(i).xml;
+        }
+        
+        return xml;
+    },
+    toString : function(){
+        return "DocumentFragment #"+this._id;
+    }
+});

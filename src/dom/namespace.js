@@ -30,12 +30,6 @@ __extend__(DOMNamespace.prototype, {
     set value(value){
         this.nodeValue = String(value);
     },
-    getValue:function(){
-        return this.value;
-    },
-    setValue:function(value){
-        this.value = value;
-    },
     get xml(){
         var ret = "";
 

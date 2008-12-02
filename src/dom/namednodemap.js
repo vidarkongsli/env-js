@@ -13,6 +13,7 @@ var DOMNamedNodeMap = function(ownerDocument, parentNode) {
     //$log("\t\tcreating dom namednodemap");
     this.DOMNodeList = DOMNodeList;
     this.DOMNodeList(ownerDocument, parentNode);
+    __setArray__(this, []);
 };
 DOMNamedNodeMap.prototype = new DOMNodeList;
 __extend__(DOMNamedNodeMap.prototype, {
@@ -23,7 +24,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         var itemIndex = __findNamedItemIndex__(this, name);
         
         if (itemIndex > -1) {                          // found it!
-            ret = this._nodes[itemIndex];                // return NamedNode
+            ret = this[itemIndex];                // return NamedNode
         }
         
         return ret;                                    // if node is not found, default value null is returned
@@ -52,21 +53,22 @@ __extend__(DOMNamedNodeMap.prototype, {
       var ret = null;
     
       if (itemIndex > -1) {                          // found it!
-            ret = this._nodes[itemIndex];                // use existing Attribute
+            ret = this[itemIndex];                // use existing Attribute
         
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
             else {
-              this._nodes[itemIndex] = arg;                // over-write existing NamedNode
+              this[itemIndex] = arg;                // over-write existing NamedNode
             }
       }
       else {
-            this._nodes[this.length] = arg;              // add new NamedNode
+            //this[this.length] = arg;              // add new NamedNode
+            Array.prototype.push.apply(this, [arg]);
       }
     
-      this.length = this._nodes.length;              // update length
+      //this.length = this._nodes.length;              // update length
     
       arg.ownerElement = this.parentNode;            // update ownerElement
     
@@ -89,7 +91,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           }
         
           // get Node
-          var oldNode = this._nodes[itemIndex];
+          var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
           if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
@@ -106,7 +108,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
           if (itemIndex > -1) {                          // found it!
-            ret = this._nodes[itemIndex];                // return NamedNode
+            ret = this[itemIndex];                // return NamedNode
           }
         
           return ret;                                    // if node is not found, default value null is returned
@@ -135,20 +137,21 @@ __extend__(DOMNamedNodeMap.prototype, {
           var ret = null;
         
           if (itemIndex > -1) {                          // found it!
-            ret = this._nodes[itemIndex];                // use existing Attribute
+            ret = this[itemIndex];                // use existing Attribute
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
             else {
-              this._nodes[itemIndex] = arg;                // over-write existing NamedNode
+              this[itemIndex] = arg;                // over-write existing NamedNode
             }
           }
           else {
-            this._nodes[this.length] = arg;              // add new NamedNode
+            //this[this.length] = arg;              // add new NamedNode
+            Array.prototype.push.apply(this, [arg]);
           }
         
-          this.length = this._nodes.length;              // update length
+          //this.length = this._nodes.length;              // update length
         
           arg.ownerElement = this.parentNode;
         
@@ -173,7 +176,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           }
         
           // get Node
-          var oldNode = this._nodes[itemIndex];
+          var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
           if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
@@ -187,12 +190,12 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // create string containing concatenation of all (but last) Attribute string values (separated by spaces)
           for (var i=0; i < this.length -1; i++) {
-            ret += this._nodes[i].xml +" ";
+            ret += this[i].xml +" ";
           }
         
           // add last Attribute to string (without trailing space)
           if (this.length > 0) {
-            ret += this._nodes[this.length -1].xml;
+            ret += this[this.length -1].xml;
           }
         
           return ret;
@@ -212,15 +215,15 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
   var ret = -1;
 
   // loop through all nodes
-  for (var i=0; i<namednodemap._nodes.length; i++) {
+  for (var i=0; i<namednodemap.length; i++) {
     // compare name to each node's nodeName
     if(isnsmap){
-        if (namednodemap._nodes[i].localName == localName) {         // found it!
+        if (namednodemap[i].localName == localName) {         // found it!
           ret = i;
           break;
         }
     }else{
-        if (namednodemap._nodes[i].name == name) {         // found it!
+        if (namednodemap[i].name == name) {         // found it!
           ret = i;
           break;
         }
@@ -244,9 +247,9 @@ var __findNamedItemNSIndex__ = function(namednodemap, namespaceURI, localName) {
   // test that localName is not null
   if (localName) {
     // loop through all nodes
-    for (var i=0; i<namednodemap._nodes.length; i++) {
+    for (var i=0; i<namednodemap.length; i++) {
       // compare name to each node's namespaceURI and localName
-      if ((namednodemap._nodes[i].namespaceURI == namespaceURI) && (namednodemap._nodes[i].localName == localName)) {
+      if ((namednodemap[i].namespaceURI == namespaceURI) && (namednodemap[i].localName == localName)) {
         ret = i;                                 // found it!
         break;
       }
@@ -311,9 +314,9 @@ var __cloneNamedNodes__ = function(namednodemap, parentNode, isnsmap) {
     new DOMNamedNodeMap(namednodemap.ownerDocument, parentNode);
 
   // create list containing clones of all children
-  for (var i=0; i < namednodemap._nodes.length; i++) {
-      $log("cloning node in named node map :" + namednodemap._nodes[i]);
-    __appendChild__(cloneNamedNodeMap, namednodemap._nodes[i].cloneNode(false));
+  for (var i=0; i < namednodemap.length; i++) {
+      $log("cloning node in named node map :" + namednodemap[i]);
+    __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
   }
 
   return cloneNamedNodeMap;
@@ -335,6 +338,7 @@ var DOMNamespaceNodeMap = function(ownerDocument, parentNode) {
     //$log("\t\t\tcreating dom namespacednodemap");
     this.DOMNamedNodeMap = DOMNamedNodeMap;
     this.DOMNamedNodeMap(ownerDocument, parentNode);
+    __setArray__(this, []);
 };
 DOMNamespaceNodeMap.prototype = new DOMNamedNodeMap;
 __extend__(DOMNamespaceNodeMap.prototype, {
@@ -342,19 +346,19 @@ __extend__(DOMNamespaceNodeMap.prototype, {
           var ret = "";
         
           // identify namespaces declared local to this Element (ie, not inherited)
-          for (var ind = 0; ind < this._nodes.length; ind++) {
+          for (var ind = 0; ind < this.length; ind++) {
             // if namespace declaration does not exist in the containing node's, parentNode's namespaces
             var ns = null;
             try {
-                var ns = this.parentNode.parentNode._namespaces.getNamedItem(this._nodes[ind].localName);
+                var ns = this.parentNode.parentNode._namespaces.getNamedItem(this[ind].localName);
             }
             catch (e) {
                 //breaking to prevent default namespace being inserted into return value
                 break;
             }
-            if (!(ns && (""+ ns.nodeValue == ""+ this._nodes[ind].nodeValue))) {
+            if (!(ns && (""+ ns.nodeValue == ""+ this[ind].nodeValue))) {
               // display the namespace declaration
-              ret += this._nodes[ind].xml +" ";
+              ret += this[ind].xml +" ";
             }
           }
         

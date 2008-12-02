@@ -35,7 +35,7 @@ var CSSStyleSheet = function(options){
       		    cssText:definition_block[1]
       		  }));
       		}
-      		setArray($cssRules, cssRules);
+      		__setArray__($cssRules, cssRules);
     		}
     	}
     };
