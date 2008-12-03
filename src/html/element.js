@@ -31,14 +31,6 @@ __extend__(HTMLElement.prototype, {
 		    return this.setAttribute("dir",val); 
 		    
 	    },
-		/*get id() { 
-		    return this.getAttribute("id") || "";
-		    
-	    },
-		set id(val) { 
-		    return this.setAttribute("id",val); 
-		    
-	    },*/
 		get innerHTML(){  
 		    return this.childNodes.xml; 
 		    
@@ -60,7 +52,7 @@ __extend__(HTMLElement.prototype, {
 			}
 			while(parent.firstChild != null){
 			    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-			    this.appendChild( parent.removeChild( parent.firstChild) );
+			    this.appendChild( parent.removeChild( parent.firstChild ) );
 		    }
 		    //Mark for garbage collection
 		    doc = null;
@@ -77,8 +69,14 @@ __extend__(HTMLElement.prototype, {
 		offsetWidth: 0,
 		offsetLeft: 0,
 		offsetRight: 0,
-		get offsetParent(){return;/* TODO */},
-		set offsetParent(element){return;/*TODO*/},
+		get offsetParent(){
+		    /* TODO */
+		    return;
+	    },
+		set offsetParent(element){
+		    /* TODO */
+		    return;
+	    },
 		scrollHeight: 0,
 		scrollWidth: 0,
 		scrollLeft: 0, 
@@ -101,31 +99,97 @@ __extend__(HTMLElement.prototype, {
 		    return this.xml; 
 		    
 	    },
-	    scrollIntoView: function(){/*TODO*/},
-		onclick: function(event){try{eval(this.getAttribute('onclick'));}catch(e){$error(e);}},
-		ondblclick: function(event){try{eval(this.getAttribute('ondblclick'));}catch(e){$error(e);}},
-		onkeydown: function(event){try{eval(this.getAttribute('onkeydown'));}catch(e){$error(e);}},
-		onkeypress: function(event){try{eval(this.getAttribute('onkeypress'));}catch(e){$error(e);}},
-		onkeyup: function(event){try{eval(this.getAttribute('onkeyup'));}catch(e){$error(e);}},
-		onmousedown: function(event){try{eval(this.getAttribute('onmousedown'));}catch(e){$error(e);}},
-		onmousemove: function(event){try{eval(this.getAttribute('onmousemove'));}catch(e){$error(e);}},
-		onmouseout: function(event){try{eval(this.getAttribute('onmouseout'));}catch(e){$error(e);}},
-		onmouseover: function(event){try{eval(this.getAttribute('onmouseover'));}catch(e){$error(e);}},
-		onmouseup: function(event){try{eval(this.getAttribute('onmouseup'));}catch(e){$error(e);}}
+	    scrollIntoView: function(){
+	        /*TODO*/
+	        return;
+	    
+        },
+		onclick: function(event){
+		    try{
+		        eval(this.getAttribute('onclick'));
+		    }catch(e){
+		        $error(e);
+	        }
+	    },
+		ondblclick: function(event){
+		    try{
+		        eval(this.getAttribute('ondblclick'));
+		    }catch(e){
+		        $error(e);}},
+		onkeydown: function(event){
+		    try{
+		        eval(this.getAttribute('onkeydown'));
+		    }catch(e){
+		        $error(e);}},
+		onkeypress: function(event){
+		    try{
+		        eval(this.getAttribute('onkeypress'));
+		    }catch(e){
+		        $error(e);}},
+		onkeyup: function(event){
+		    try{
+		        eval(this.getAttribute('onkeyup'));
+		    }catch(e){
+		        $error(e);}},
+		onmousedown: function(event){
+		    try{
+		        eval(this.getAttribute('onmousedown'));
+		    }catch(e){
+		        $error(e);}},
+		onmousemove: function(event){
+		    try{
+		        eval(this.getAttribute('onmousemove'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseout: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseout'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseover: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseover'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseup: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseup'));
+		    }catch(e){
+		        $error(e);}}
 });
 
 
 var registerEventAttrs = function(elm){
-    if(elm.hasAttribute('onclick')){ elm.addEventListener('click', elm.onclick ); }
-    if(elm.hasAttribute('ondblclick')){ elm.addEventListener('dblclick', elm.onclick ); }
-    if(elm.hasAttribute('onkeydown')){ elm.addEventListener('keydown', elm.onclick ); }
-    if(elm.hasAttribute('onkeypress')){ elm.addEventListener('keypress', elm.onclick ); }
-    if(elm.hasAttribute('onkeyup')){ elm.addEventListener('keyup', elm.onclick ); }
-    if(elm.hasAttribute('onmousedown')){ elm.addEventListener('mousedown', elm.onclick ); }
-    if(elm.hasAttribute('onmousemove')){ elm.addEventListener('mousemove', elm.onclick ); }
-    if(elm.hasAttribute('onmouseout')){ elm.addEventListener('mouseout', elm.onclick ); }
-    if(elm.hasAttribute('onmouseover')){ elm.addEventListener('mouseover', elm.onclick ); }
-    if(elm.hasAttribute('onmouseup')){ elm.addEventListener('mouseup', elm.onclick ); }
+    if(elm.hasAttribute('onclick')){ 
+        elm.addEventListener('click', elm.onclick ); 
+    }
+    if(elm.hasAttribute('ondblclick')){ 
+        elm.addEventListener('dblclick', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeydown')){ 
+        elm.addEventListener('keydown', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeypress')){ 
+        elm.addEventListener('keypress', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeyup')){ 
+        elm.addEventListener('keyup', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmousedown')){ 
+        elm.addEventListener('mousedown', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmousemove')){ 
+        elm.addEventListener('mousemove', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseout')){ 
+        elm.addEventListener('mouseout', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseover')){ 
+        elm.addEventListener('mouseover', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseup')){ 
+        elm.addEventListener('mouseup', elm.onclick ); 
+    }
     return elm;
 };
 	

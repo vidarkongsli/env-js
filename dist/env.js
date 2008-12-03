@@ -480,17 +480,13 @@ __extend__(DOMNamedNodeMap.prototype, {
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
-            }
-            else {
+            } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
             }
-      }
-      else {
-            //this[this.length] = arg;              // add new NamedNode
+      } else {
+            // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
       }
-    
-      //this.length = this._nodes.length;              // update length
     
       arg.ownerElement = this.parentNode;            // update ownerElement
     
@@ -563,18 +559,13 @@ __extend__(DOMNamedNodeMap.prototype, {
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
-            }
-            else {
+            } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
             }
-          }
-          else {
-            //this[this.length] = arg;              // add new NamedNode
+          }else {
+            // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
           }
-        
-          //this.length = this._nodes.length;              // update length
-        
           arg.ownerElement = this.parentNode;
         
         
@@ -1775,7 +1766,7 @@ __extend__(DOMElement.prototype, {
   	removeEventListener:  window.removeEventListener,
   	dispatchEvent:        window.dispatchEvent,
     getAttribute: function(name) {
-        var ret = "";
+        var ret = null;
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
         if (attr) {
@@ -4408,14 +4399,6 @@ __extend__(HTMLElement.prototype, {
 		    return this.setAttribute("dir",val); 
 		    
 	    },
-		/*get id() { 
-		    return this.getAttribute("id") || "";
-		    
-	    },
-		set id(val) { 
-		    return this.setAttribute("id",val); 
-		    
-	    },*/
 		get innerHTML(){  
 		    return this.childNodes.xml; 
 		    
@@ -4437,7 +4420,7 @@ __extend__(HTMLElement.prototype, {
 			}
 			while(parent.firstChild != null){
 			    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-			    this.appendChild( parent.removeChild( parent.firstChild) );
+			    this.appendChild( parent.removeChild( parent.firstChild ) );
 		    }
 		    //Mark for garbage collection
 		    doc = null;
@@ -4454,8 +4437,14 @@ __extend__(HTMLElement.prototype, {
 		offsetWidth: 0,
 		offsetLeft: 0,
 		offsetRight: 0,
-		get offsetParent(){return;/* TODO */},
-		set offsetParent(element){return;/*TODO*/},
+		get offsetParent(){
+		    /* TODO */
+		    return;
+	    },
+		set offsetParent(element){
+		    /* TODO */
+		    return;
+	    },
 		scrollHeight: 0,
 		scrollWidth: 0,
 		scrollLeft: 0, 
@@ -4478,31 +4467,97 @@ __extend__(HTMLElement.prototype, {
 		    return this.xml; 
 		    
 	    },
-	    scrollIntoView: function(){/*TODO*/},
-		onclick: function(event){try{eval(this.getAttribute('onclick'));}catch(e){$error(e);}},
-		ondblclick: function(event){try{eval(this.getAttribute('ondblclick'));}catch(e){$error(e);}},
-		onkeydown: function(event){try{eval(this.getAttribute('onkeydown'));}catch(e){$error(e);}},
-		onkeypress: function(event){try{eval(this.getAttribute('onkeypress'));}catch(e){$error(e);}},
-		onkeyup: function(event){try{eval(this.getAttribute('onkeyup'));}catch(e){$error(e);}},
-		onmousedown: function(event){try{eval(this.getAttribute('onmousedown'));}catch(e){$error(e);}},
-		onmousemove: function(event){try{eval(this.getAttribute('onmousemove'));}catch(e){$error(e);}},
-		onmouseout: function(event){try{eval(this.getAttribute('onmouseout'));}catch(e){$error(e);}},
-		onmouseover: function(event){try{eval(this.getAttribute('onmouseover'));}catch(e){$error(e);}},
-		onmouseup: function(event){try{eval(this.getAttribute('onmouseup'));}catch(e){$error(e);}}
+	    scrollIntoView: function(){
+	        /*TODO*/
+	        return;
+	    
+        },
+		onclick: function(event){
+		    try{
+		        eval(this.getAttribute('onclick'));
+		    }catch(e){
+		        $error(e);
+	        }
+	    },
+		ondblclick: function(event){
+		    try{
+		        eval(this.getAttribute('ondblclick'));
+		    }catch(e){
+		        $error(e);}},
+		onkeydown: function(event){
+		    try{
+		        eval(this.getAttribute('onkeydown'));
+		    }catch(e){
+		        $error(e);}},
+		onkeypress: function(event){
+		    try{
+		        eval(this.getAttribute('onkeypress'));
+		    }catch(e){
+		        $error(e);}},
+		onkeyup: function(event){
+		    try{
+		        eval(this.getAttribute('onkeyup'));
+		    }catch(e){
+		        $error(e);}},
+		onmousedown: function(event){
+		    try{
+		        eval(this.getAttribute('onmousedown'));
+		    }catch(e){
+		        $error(e);}},
+		onmousemove: function(event){
+		    try{
+		        eval(this.getAttribute('onmousemove'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseout: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseout'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseover: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseover'));
+		    }catch(e){
+		        $error(e);}},
+		onmouseup: function(event){
+		    try{
+		        eval(this.getAttribute('onmouseup'));
+		    }catch(e){
+		        $error(e);}}
 });
 
 
 var registerEventAttrs = function(elm){
-    if(elm.hasAttribute('onclick')){ elm.addEventListener('click', elm.onclick ); }
-    if(elm.hasAttribute('ondblclick')){ elm.addEventListener('dblclick', elm.onclick ); }
-    if(elm.hasAttribute('onkeydown')){ elm.addEventListener('keydown', elm.onclick ); }
-    if(elm.hasAttribute('onkeypress')){ elm.addEventListener('keypress', elm.onclick ); }
-    if(elm.hasAttribute('onkeyup')){ elm.addEventListener('keyup', elm.onclick ); }
-    if(elm.hasAttribute('onmousedown')){ elm.addEventListener('mousedown', elm.onclick ); }
-    if(elm.hasAttribute('onmousemove')){ elm.addEventListener('mousemove', elm.onclick ); }
-    if(elm.hasAttribute('onmouseout')){ elm.addEventListener('mouseout', elm.onclick ); }
-    if(elm.hasAttribute('onmouseover')){ elm.addEventListener('mouseover', elm.onclick ); }
-    if(elm.hasAttribute('onmouseup')){ elm.addEventListener('mouseup', elm.onclick ); }
+    if(elm.hasAttribute('onclick')){ 
+        elm.addEventListener('click', elm.onclick ); 
+    }
+    if(elm.hasAttribute('ondblclick')){ 
+        elm.addEventListener('dblclick', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeydown')){ 
+        elm.addEventListener('keydown', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeypress')){ 
+        elm.addEventListener('keypress', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onkeyup')){ 
+        elm.addEventListener('keyup', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmousedown')){ 
+        elm.addEventListener('mousedown', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmousemove')){ 
+        elm.addEventListener('mousemove', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseout')){ 
+        elm.addEventListener('mouseout', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseover')){ 
+        elm.addEventListener('mouseover', elm.onclick ); 
+    }
+    if(elm.hasAttribute('onmouseup')){ 
+        elm.addEventListener('mouseup', elm.onclick ); 
+    }
     return elm;
 };
 	
@@ -4938,11 +4993,15 @@ $w.__defineGetter__("CSS2Properties", function(){
 
 var CSS2Properties = function(options){
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
+    var cssDebugString = this.toString();
+    if(cssDebugString != ''){
+        $log(cssDebugString);
+    }
 };
 __extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
-        Array.prototype.apply.join(this,';\n');
+        return Array.prototype.apply.join(this,[';\n']);
     },
     set cssText(cssText){ 
         __cssTextToStyles__(this, cssText); 
@@ -4953,8 +5012,8 @@ __extend__(CSS2Properties.prototype, {
     getPropertyPriority : function(){
         
     },
-    getPropertyValue : function(){
-        
+    getPropertyValue : function(name){
+        return this[name];
     },
     item : function(index){
         return this[index];
@@ -4964,6 +5023,13 @@ __extend__(CSS2Properties.prototype, {
     },
     setProperty: function(){
         
+    },
+    toString:function(){
+        if (this.length >0){
+            return "{\n\t"+Array.prototype.join.apply(this,[';\n\t'])+"}\n";
+        }else{
+            return '';
+        }
     }
 });
 
@@ -5070,7 +5136,7 @@ var __supportedStyles__ = {
     maxWidth:	"",
     minHeight:	"",
     minWidth:	"",
-    opacity:	"",
+    opacity:	1,
     orphans:	"",
     outline:	"",
     outlineColor:	"",
@@ -5705,16 +5771,16 @@ $w.prompt = function(message, defaultMsg){
 // read only reference to the Document object
 
 $log("Initializing window.document.");
-var $document =  new HTMLDocument($implementation);
 var $async = false;
-__extend__($document, {
+__extend__(HTMLDocument.prototype, {
 	get async(){ return $async;},
 	set async(async){ $async = async; },
 	get baseURI(){ return $env.location('./'); },
 	get URL(){ return $w.location.href;  }
 });
 	
-$log("Adding window.document features.");
+
+var $document =  new HTMLDocument($implementation);
 $w.__defineGetter__("document", function(){
 	return $document;
 });

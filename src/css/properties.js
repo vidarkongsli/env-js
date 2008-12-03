@@ -10,11 +10,15 @@ $w.__defineGetter__("CSS2Properties", function(){
 
 var CSS2Properties = function(options){
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
+    var cssDebugString = this.toString();
+    if(cssDebugString != ''){
+        $log(cssDebugString);
+    }
 };
 __extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
-        Array.prototype.apply.join(this,';\n');
+        return Array.prototype.apply.join(this,[';\n']);
     },
     set cssText(cssText){ 
         __cssTextToStyles__(this, cssText); 
@@ -25,8 +29,8 @@ __extend__(CSS2Properties.prototype, {
     getPropertyPriority : function(){
         
     },
-    getPropertyValue : function(){
-        
+    getPropertyValue : function(name){
+        return this[name];
     },
     item : function(index){
         return this[index];
@@ -36,6 +40,13 @@ __extend__(CSS2Properties.prototype, {
     },
     setProperty: function(){
         
+    },
+    toString:function(){
+        if (this.length >0){
+            return "{\n\t"+Array.prototype.join.apply(this,[';\n\t'])+"}\n";
+        }else{
+            return '';
+        }
     }
 });
 
@@ -142,7 +153,7 @@ var __supportedStyles__ = {
     maxWidth:	"",
     minHeight:	"",
     minWidth:	"",
-    opacity:	"",
+    opacity:	1,
     orphans:	"",
     outline:	"",
     outlineColor:	"",

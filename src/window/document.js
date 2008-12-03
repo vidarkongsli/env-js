@@ -11,16 +11,16 @@
 // read only reference to the Document object
 
 $log("Initializing window.document.");
-var $document =  new HTMLDocument($implementation);
 var $async = false;
-__extend__($document, {
+__extend__(HTMLDocument.prototype, {
 	get async(){ return $async;},
 	set async(async){ $async = async; },
 	get baseURI(){ return $env.location('./'); },
 	get URL(){ return $w.location.href;  }
 });
 	
-$log("Adding window.document features.");
+
+var $document =  new HTMLDocument($implementation);
 $w.__defineGetter__("document", function(){
 	return $document;
 });

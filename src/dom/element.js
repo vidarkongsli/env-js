@@ -31,7 +31,7 @@ __extend__(DOMElement.prototype, {
   	removeEventListener:  window.removeEventListener,
   	dispatchEvent:        window.dispatchEvent,
     getAttribute: function(name) {
-        var ret = "";
+        var ret = null;
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
         if (attr) {

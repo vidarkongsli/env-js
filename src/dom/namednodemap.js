@@ -58,17 +58,13 @@ __extend__(DOMNamedNodeMap.prototype, {
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
-            }
-            else {
+            } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
             }
-      }
-      else {
-            //this[this.length] = arg;              // add new NamedNode
+      } else {
+            // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
       }
-    
-      //this.length = this._nodes.length;              // update length
     
       arg.ownerElement = this.parentNode;            // update ownerElement
     
@@ -141,18 +137,13 @@ __extend__(DOMNamedNodeMap.prototype, {
             // throw Exception if DOMAttr is readonly
             if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
-            }
-            else {
+            } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
             }
-          }
-          else {
-            //this[this.length] = arg;              // add new NamedNode
+          }else {
+            // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
           }
-        
-          //this.length = this._nodes.length;              // update length
-        
           arg.ownerElement = this.parentNode;
         
         
