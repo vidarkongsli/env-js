@@ -1,27 +1,22 @@
-$log("Defining HTMLAnchorElement");
+$log("Defining Anchor");
 /* 
-* HTMLAnchorElement - DOM Level 2
+* Anchor - DOM Level 2
 */
 $w.__defineGetter__("Anchor", function(){
     return function(){
         throw new Error("Object cannot be created in this context");
     };
 });
-$w.__defineGetter__("HTMLAnchorElement", function(){
-    return function(){
-        throw new Error("Object cannot be created in this context");
-    };
-});
 
-var HTMLAnchorElement = function(ownerDocument) {
+var Anchor = function(ownerDocument) {
     //$log("creating anchor element");
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    this.HTMLAnchorElement = HTMLAnchorElement;
+    this.HTMLAnchorElement(ownerDocument);
 };
-HTMLAnchorElement.prototype = new HTMLElement;
+Anchor.prototype = new Anchor;
 
 (function(){
-    
+    //static regular expressions
 	var hash 	 = new RegExp('(\\#.*)'),
         hostname = new RegExp('\/\/([^\:\/]+)'),
         pathname = new RegExp('(\/[^\\?\\#]*)'),
@@ -29,111 +24,7 @@ HTMLAnchorElement.prototype = new HTMLElement;
         protocol = new RegExp('(^\\w*\:)'),
         search 	 = new RegExp('(\\?[^\\#]*)');
 			
-    __extend__(HTMLAnchorElement.prototype, {
-		get accessKey() { 
-		    return this.getAttribute("accessKey") || ""; 
-		    
-	    },
-		set accessKey(val) { 
-		    return this.setAttribute("accessKey",val); 
-		    
-	    },
-		get charset() { 
-		    return this.getAttribute("charset") || ""; 
-		    
-	    },
-		set charset(val) { 
-		    return this.setAttribute("charset",val); 
-		    
-	    },
-		get coords() { 
-		    return this.getAttribute("coords") || ""; 
-		    
-	    },
-		set coords(val) { 
-		    return this.setAttribute("coords",val); 
-		    
-	    },
-		get href() { 
-		    return this.getAttribute("href") || ""; 
-		    
-	    },
-		set href(val) { 
-		    return this.setAttribute("href",val); 
-		    
-	    },
-		get hreflang() { 
-		    return this.getAttribute("hreflang") || ""; 
-		    
-	    },
-		set hreflang(val) { 
-		    return this.setAttribute("hreflang",val); 
-		    
-	    },
-		get name() { 
-		    return this.getAttribute("name") || ""; 
-		    
-	    },
-		set name(val) { 
-		    return this.setAttribute("name",val); 
-		    
-	    },
-		get rel() { 
-		    return this.getAttribute("rel") || ""; 
-		    
-	    },
-		set rel(val) { 
-		    return this.setAttribute("rel",val); 
-		    
-	    },
-		get rev() { 
-		    return this.getAttribute("rev") || ""; 
-		    
-	    },
-		set rev(val) { 
-		    return this.setAttribute("rev",val); 
-		    
-	    },
-		get shape() { 
-		    return this.getAttribute("shape") || ""; 
-		    
-	    },
-		set shape(val) { 
-		    return this.setAttribute("shape",val); 
-		    
-	    },
-		get tabIndex() { 
-		    return this.getAttribute("tab-index") || ""; 
-		    
-	    },
-		set tabIndex(val) { 
-		    return this.setAttribute("tab-index",val); 
-		    
-	    },
-		get target() { 
-		    return this.getAttribute("target") || ""; 
-		    
-	    },
-		set target(val) { 
-		    return this.setAttribute("target",val); 
-		    
-	    },
-		get type() { 
-		    return this.getAttribute("type") || ""; 
-		    
-	    },
-		set type(val) { 
-		    return this.setAttribute("type",val); 
-		    
-	    },
-		blur:function(){
-		    blur(this);
-		    
-	    },
-		focus:function(){
-		    focus(this);
-		    
-	    },
+    __extend__(Anchor.prototype, {
 		get hash(){
 			var m = hash.exec(this.href);
 			return m&&m.length>1?m[1]:"";

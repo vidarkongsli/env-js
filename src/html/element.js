@@ -12,11 +12,13 @@ var HTMLElement = function(ownerDocument) {
     this.DOMElement = DOMElement;
     this.DOMElement(ownerDocument);
     //$log("\nfinished creating html element");
+    
+    this.$css2props = null;
 };
 HTMLElement.prototype = new DOMElement;
 __extend__(HTMLElement.prototype, {
 		get className() { 
-		    return this.getAttribute("class") || ""; 
+		    return this.getAttribute("class")||""; 
 		    
 	    },
 		set className(val) { 
@@ -24,7 +26,7 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		get dir() { 
-		    return this.getAttribute("dir") || ""; 
+		    return this.getAttribute("dir")||"ltr"; 
 		    
 	    },
 		set dir(val) { 
@@ -58,15 +60,19 @@ __extend__(HTMLElement.prototype, {
 		    doc = null;
 		},
 		get lang() { 
-		    return this.getAttribute("lang") || ""; 
+		    return this.getAttribute("lang")||""; 
 		    
 	    },
 		set lang(val) { 
 		    return this.setAttribute("lang",val); 
 		    
 	    },
-		offsetHeight: 0,
-		offsetWidth: 0,
+		get offsetHeight(){
+		    return Number(this.style["height"].replace("px",""));
+		},
+		get offsetWidth(){
+		    return Number(this.style["width"].replace("px",""));
+		},
 		offsetLeft: 0,
 		offsetRight: 0,
 		get offsetParent(){
@@ -82,12 +88,16 @@ __extend__(HTMLElement.prototype, {
 		scrollLeft: 0, 
 		scrollRight: 0,
 		get style(){
-		    return new CSS2Properties({
-		        cssText:this.getAttribute("style")
-	        });
+		    if(this.$css2props === null){
+		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        this.$css2props = new CSS2Properties({
+    		        cssText:this.getAttribute("style")
+    	        });
+	        }
+	        return this.$css2props
 		},
 		get title() { 
-		    return this.getAttribute("title") || ""; 
+		    return this.getAttribute("title")||""; 
 		    
 	    },
 		set title(val) { 
@@ -115,12 +125,16 @@ __extend__(HTMLElement.prototype, {
 		    try{
 		        eval(this.getAttribute('ondblclick'));
 		    }catch(e){
-		        $error(e);}},
+		        $error(e)
+		    }
+	    },
 		onkeydown: function(event){
 		    try{
 		        eval(this.getAttribute('onkeydown'));
 		    }catch(e){
-		        $error(e);}},
+		        $error(e);
+		    }
+	    },
 		onkeypress: function(event){
 		    try{
 		        eval(this.getAttribute('onkeypress'));
@@ -158,8 +172,7 @@ __extend__(HTMLElement.prototype, {
 		        $error(e);}}
 });
 
-
-var registerEventAttrs = function(elm){
+var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 
         elm.addEventListener('click', elm.onclick ); 
     }
@@ -193,7 +206,7 @@ var registerEventAttrs = function(elm){
     return elm;
 };
 	
-var click = function(element){
+var __click__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -201,7 +214,7 @@ var click = function(element){
 	event.initEvent("click");
 	element.dispatchEvent(event);
 };
-var submit = function(element){
+var __submit__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -209,7 +222,7 @@ var submit = function(element){
 	event.initEvent("submit");
 	element.dispatchEvent(event);
 };
-var focus = function(element){
+var __focus__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -217,7 +230,7 @@ var focus = function(element){
 	event.initEvent("focus");
 	element.dispatchEvent(event);
 };
-var blur = function(element){
+var __blur__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element

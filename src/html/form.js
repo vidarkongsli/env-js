@@ -20,11 +20,11 @@ var HTMLFormElement = function(ownerDocument){
 HTMLFormElement.prototype = new HTMLElement;
 __extend__(HTMLFormElement.prototype,{
     get acceptCharset(){ 
-        return this.getAttribute('acceptCharset');
+        return this.getAttribute('accept-charset');
         
     },
     set acceptCharset(acceptCharset){
-        this.setAttribute('acceptCharset', acceptCharset);
+        this.setAttribute('accept-charset', acceptCharset);
         
     },
     get action(){
@@ -60,19 +60,19 @@ __extend__(HTMLFormElement.prototype,{
         
     },
 	get name() {
-	    return this.getAttribute("id") || ""; 
+	    return this.getAttribute("name") || ""; 
 	    
     },
 	set name(val) { 
-	    return this.setAttribute("id",val); 
+	    return this.setAttribute("name",val); 
 	    
     },
 	get target() { 
-	    return this.getAttribute("id") || ""; 
+	    return this.getAttribute("target") || ""; 
 	    
     },
 	set target(val) { 
-	    return this.setAttribute("id",val); 
+	    return this.setAttribute("target",val); 
 	    
     },
 	submit:function(){

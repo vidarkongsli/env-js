@@ -32,55 +32,55 @@ __extend__(HTMLDocument.prototype, {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
-            //$log("HTMLDocument.createElement( "+tagName+" )");
+          //$log("HTMLDocument.createElement( "+tagName+" )");
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
-          if(     tagName.match(/A/)){node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/AREA/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BASE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BLOCKQUOTE|Q/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BODY/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BUTTON/)){node = new HTMLElement(this);}
-          else if(tagName.match(/CAPTION/)){node = new HTMLElement(this);}
-          else if(tagName.match(/COL|COLGROUP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DEL|INS/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DIV/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FIELDSET/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FORM/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FRAME/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FRAMESET/)){node = new HTMLElement(this);}
-          else if(tagName.match(/H1|H2|H3|H4|H5|H6/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HEAD/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HTML/)){node = new HTMLElement(this);}
-          else if(tagName.match(/IFRAME/)){node = new HTMLElement(this);}
-          else if(tagName.match(/IMG/)){node = new HTMLElement(this);}
-          else if(tagName.match(/INPUT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LABEL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LEGEND/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LI/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LINK/)){node = new HTMLElement(this);}
-          else if(tagName.match(/MAP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/META/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OBJECT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OPTGROUP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OPTION/)){node = new HTMLElement(this);;}
-          else if(tagName.match(/P/)){node = new HTMLElement(this);}
-          else if(tagName.match(/PARAM/)){node = new HTMLElement(this);}
-          else if(tagName.match(/PRE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/SCRIPT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/SELECT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/STYLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TABLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TD|TH/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TEXTAREA/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TITLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/UL/)){node = new HTMLElement(this);}
+          if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
+          else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
+          else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
+          else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
+          else if(tagName.match(/BODY/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
+          else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
+          else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
+          else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
+          else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
+          else if(tagName.match(/^FRAME$/))             {node = new HTMLFrameElement(this);}
+          else if(tagName.match(/FRAMESET/))            {node = new HTMLFrameSetElement(this);}
+          else if(tagName.match(/H1|H2|H3|H4|H5|H6/))   {node = new HTMLElement(this);}
+          else if(tagName.match(/HEAD/))                {node = new HTMLHeadElement(this);}
+          else if(tagName.match(/HR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/HTML/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/IFRAME/))              {node = new HTMLIFrameElement(this);}
+          else if(tagName.match(/IMG/))                 {node = new HTMLImageElement(this);}
+          else if(tagName.match(/INPUT/))               {node = new HTMLInputElement(this);}
+          else if(tagName.match(/LABEL/))               {node = new HTMLLabelElement(this);}
+          else if(tagName.match(/LEGEND/))              {node = new HTMLLegendElement(this);}
+          else if(tagName.match(/^LI$/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/LINK/))                {node = new HTMLLinkElement(this);}
+          else if(tagName.match(/MAP/))                 {node = new HTMLMapElement(this);}
+          else if(tagName.match(/META/))                {node = new HTMLMetaElement(this);}
+          else if(tagName.match(/OBJECT/))              {node = new HTMLObjectElement(this);}
+          else if(tagName.match(/OL/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/OPTGROUP/))            {node = new HTMLOptGroupElement(this);}
+          else if(tagName.match(/OPTION/))              {node = new HTMLOptionElement(this);;}
+          else if(tagName.match(/^P$/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/PARAM/))               {node = new HTMLParamElement(this);}
+          else if(tagName.match(/PRE/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
+          else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
+          else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
+          else if(tagName.match(/TABLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLElement(this);}
+          else if(tagName.match(/TD|TH/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
+          else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
           else{
             node = new HTMLElement(this);
           }
@@ -95,15 +95,15 @@ __extend__(HTMLDocument.prototype, {
           return node;
     },
     get anchors(){
-        return new HTMLCollection(this.getElementsByName('a'), 'Anchor');
+        return new HTMLCollection(this.getElementsByTagName('a'), 'Anchor');
         
     },
     get applets(){
-        return new HTMLCollection(this.getElementsByName('applet'), 'Applet');
+        return new HTMLCollection(this.getElementsByTagName('applet'), 'Applet');
         
     },
     get body(){ 
-        var nodelist = this.getElementsByName('body');
+        var nodelist = this.getElementsByTagName('body');
         return nodelist.item(0);
         
     },
@@ -123,10 +123,10 @@ __extend__(HTMLDocument.prototype, {
     },
     get forms(){
       $log("document.forms");
-      return new HTMLCollection(this.getElementsByName('form'), 'Form');
+      return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
     },
     get images(){
-        return new HTMLCollection(this.getElementsByName('img'), 'Image');
+        return new HTMLCollection(this.getElementsByTagName('img'), 'Image');
         
     },
     get lastModified(){ 
@@ -135,7 +135,7 @@ __extend__(HTMLDocument.prototype, {
     
     },
     get links(){
-        return new HTMLCollection(this.getElementsByName('link'), 'Link');
+        return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
         
     },
     get referrer(){
@@ -153,8 +153,20 @@ __extend__(HTMLDocument.prototype, {
 	    this._open = false;
     },
 	getElementsByName : function(name){
-		  $debug("document.getElementsByName ( "+name+" )");
-		  return this.getElementsByTagName(name);
+        //$debug("document.getElementsByName ( "+name+" )");
+        //returns a real Array + the DOMNodeList
+        var retNodes = __extend__([],new DOMNodeList(this, this.documentElement)),
+          node;
+        // loop through all Elements in the 'all' collection
+        var all = this.all;
+        for (var i=0; i < all.length; i++) {
+            node = all[i];
+            if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
+                //$log("Found node by name " + name);
+                retNodes.push(node);
+            }
+        }
+        return retNodes;
 	},
 	open : function(){ 
 	    /* TODO */
@@ -184,7 +196,7 @@ __extend__(HTMLDocument.prototype, {
 //This is useful as html elements that modify the dom must also run through the new 
 //nodes and determine if they are javascript tags and load it.  This is really the fun 
 //parts! ;)
-function execScripts( node ) {
+function __execScripts__( node ) {
 	if ( node.nodeName == "SCRIPT" ) {
 		if ( !node.getAttribute("src") ) {
 			eval.call( window, node.textContent );
@@ -192,7 +204,7 @@ function execScripts( node ) {
 	} else {
 		var scripts = node.getElementsByTagName("script");
 		for ( var i = 0; i < scripts.length; i++ ) {
-			execScripts( node );
+			__execScripts__( node );
 		}
 	}
 };

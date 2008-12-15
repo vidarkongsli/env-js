@@ -1,0 +1,44 @@
+$log("Defining HTMLParamElement");
+/* 
+* HTMLParamElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLParamElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLParamElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLParamElement.prototype = new HTMLElement;
+__extend__(HTMLParamElement.prototype, {
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+    get valueType(){
+        return this.getAttribute('valuetype');
+    },
+    set valueType(value){
+        this.setAttribute('valuetype',value);
+    },
+});
+
+			
