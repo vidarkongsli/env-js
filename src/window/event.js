@@ -54,21 +54,25 @@ $w.dispatchEvent = function(event){
   }
 };
 $w.dispatchEvent = function(event){
-  $log("dispatching event " + event.type);
-  //the window scope defines the $event object, for IE(^^^) compatibility;
-  $event = event;
-	if ( event.type ) {
-		if ( this.uuid && $events[this.uuid][event.type] ) {
-			var self = this;
-		  $log("Triggering event handler "+ this.uuid + " for " + event.type);
-			$events[this.uuid][event.type].forEach(function(fn){
-				fn.call( self, event );
-			});
-		}	
-		if ( this["on" + event.type] ){
-			this["on" + event.type].call( self, event );
-		}
-	}
+    $log("dispatching event " + event.type);
+    //the window scope defines the $event object, for IE(^^^) compatibility;
+    $event = event;
+    if(!event.target)
+        event.target = this;
+    if ( event.type ) {
+        if ( this.uuid && events[this.uuid][event.type] ) {
+            var _this = this;
+            events[this.uuid][event.type].forEach(function(fn){
+                fn.call( _this, event );
+            });
+        }
+    
+        if ( this["on" + event.type] )
+            this["on" + event.type].call( _this, event );
+    }
+    if(this.parentNode){
+        this.parentNode.dispatchEvent.call(this.parentNode,event);
+    }
 };
 	
 $w.__defineGetter__('onerror', function(){

@@ -4368,7 +4368,7 @@ __extend__(HTMLDocument.prototype, {
           //$log("HTMLDocument.createElement( "+tagName+" )");
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
-          if(     tagName.match(/^A$/))                   {node = new HTMLAnchorElement(this);}
+          if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
           else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
@@ -4382,7 +4382,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
           else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
-          else if(tagName.match(/^FRAME$/))               {node = new HTMLFrameElement(this);}
+          else if(tagName.match(/^FRAME$/))             {node = new HTMLFrameElement(this);}
           else if(tagName.match(/FRAMESET/))            {node = new HTMLFrameSetElement(this);}
           else if(tagName.match(/H1|H2|H3|H4|H5|H6/))   {node = new HTMLElement(this);}
           else if(tagName.match(/HEAD/))                {node = new HTMLHeadElement(this);}
@@ -4393,7 +4393,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/INPUT/))               {node = new HTMLInputElement(this);}
           else if(tagName.match(/LABEL/))               {node = new HTMLLabelElement(this);}
           else if(tagName.match(/LEGEND/))              {node = new HTMLLegendElement(this);}
-          else if(tagName.match(/^LI$/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/^LI$/))                {node = new HTMLElement(this);}
           else if(tagName.match(/LINK/))                {node = new HTMLLinkElement(this);}
           else if(tagName.match(/MAP/))                 {node = new HTMLMapElement(this);}
           else if(tagName.match(/META/))                {node = new HTMLMetaElement(this);}
@@ -4401,7 +4401,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/OL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/OPTGROUP/))            {node = new HTMLOptGroupElement(this);}
           else if(tagName.match(/OPTION/))              {node = new HTMLOptionElement(this);;}
-          else if(tagName.match(/^P$/))                   {node = new HTMLElement(this);}
+          else if(tagName.match(/^P$/))                 {node = new HTMLElement(this);}
           else if(tagName.match(/PARAM/))               {node = new HTMLParamElement(this);}
           else if(tagName.match(/PRE/))                 {node = new HTMLElement(this);}
           else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
@@ -4495,7 +4495,7 @@ __extend__(HTMLDocument.prototype, {
         for (var i=0; i < all.length; i++) {
             node = all[i];
             if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
-                $log("Found node by name " + name);
+                //$log("Found node by name " + name);
                 retNodes.push(node);
             }
         }
@@ -6167,10 +6167,10 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('label',value);
     },
     get selected(){
-        return this.getAttribute('selected');
+        return (this.getAttribute('selected')==='selected');
     },
-    set selected(value){
-        this.setAttribute('selected',value);
+    set selected(){
+        this.setAttribute('selected','selected');
     },
     get value(){
         return this.getAttribute('value');
@@ -6972,24 +6972,29 @@ $w.__defineGetter__("navigator", function(){
 
 $log("Initializing Window Timer.");
 
+//private
 var $timers = [];
 
 $w.setTimeout = function(fn, time){
 	var num;
-	return num = $w.setInterval(function(){
+	return num = window.setInterval(function(){
 		fn();
-		$w.clearInterval(num);
+		window.clearInterval(num);
 	}, time);
 };
 
-$w.setInterval = function(fn, time){
+window.setInterval = function(fn, time){
 	var num = $timers.length;
-	$timers[num] = $env.timer(fn, time);
-	$timers[num].start();
+	if(time===0){
+	    fn();
+	}else{
+    	$timers[num] = $env.timer(fn, time);
+    	$timers[num].start();
+	}
 	return num;
 };
 
-$w.clearInterval = $w.clearTimeout = function(num){
+window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
 		$timers[num].stop();
 		delete $timers[num];
@@ -7051,21 +7056,25 @@ $w.dispatchEvent = function(event){
   }
 };
 $w.dispatchEvent = function(event){
-  $log("dispatching event " + event.type);
-  //the window scope defines the $event object, for IE(^^^) compatibility;
-  $event = event;
-	if ( event.type ) {
-		if ( this.uuid && $events[this.uuid][event.type] ) {
-			var self = this;
-		  $log("Triggering event handler "+ this.uuid + " for " + event.type);
-			$events[this.uuid][event.type].forEach(function(fn){
-				fn.call( self, event );
-			});
-		}	
-		if ( this["on" + event.type] ){
-			this["on" + event.type].call( self, event );
-		}
-	}
+    $log("dispatching event " + event.type);
+    //the window scope defines the $event object, for IE(^^^) compatibility;
+    $event = event;
+    if(!event.target)
+        event.target = this;
+    if ( event.type ) {
+        if ( this.uuid && events[this.uuid][event.type] ) {
+            var _this = this;
+            events[this.uuid][event.type].forEach(function(fn){
+                fn.call( _this, event );
+            });
+        }
+    
+        if ( this["on" + event.type] )
+            this["on" + event.type].call( _this, event );
+    }
+    if(this.parentNode){
+        this.parentNode.dispatchEvent.call(this.parentNode,event);
+    }
 };
 	
 $w.__defineGetter__('onerror', function(){
