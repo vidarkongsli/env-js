@@ -5,24 +5,29 @@
 
 $log("Initializing Window Timer.");
 
+//private
 var $timers = [];
 
 $w.setTimeout = function(fn, time){
 	var num;
-	return num = $w.setInterval(function(){
+	return num = window.setInterval(function(){
 		fn();
-		$w.clearInterval(num);
+		window.clearInterval(num);
 	}, time);
 };
 
-$w.setInterval = function(fn, time){
+window.setInterval = function(fn, time){
 	var num = $timers.length;
-	$timers[num] = $env.timer(fn, time);
-	$timers[num].start();
+	if(time===0){
+	    fn();
+	}else{
+    	$timers[num] = $env.timer(fn, time);
+    	$timers[num].start();
+	}
 	return num;
 };
 
-$w.clearInterval = $w.clearTimeout = function(num){
+window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
 		$timers[num].stop();
 		delete $timers[num];
