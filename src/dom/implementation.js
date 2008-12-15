@@ -430,8 +430,7 @@ function __parseLoop__(impl, doc, p) {
 					var child = children.item(j);
 					if (child.nodeType == DOMNode.TEXT_NODE) {
 						var childData = child.data;
-						childData = trim(childData, true, true);
-						childData.replace(/ +/g, ' ');
+						childData.replace(/\s/g, ' ');
 						child.data = childData;
 					}
 				}
@@ -449,8 +448,7 @@ function __parseLoop__(impl, doc, p) {
 		var node = textNodesList[i];
 		if (node.parentNode != null) {
 			var nodeData = node.data;
-			nodeData = trim(nodeData, true, true);
-			nodeData.replace(/ +/g, ' ');
+			nodeData.replace(/\s/g, ' ');
 			node.data = nodeData;
 		}
 	}

@@ -363,7 +363,7 @@ __extend__(DOMNode.prototype, {
     cloneNode: function(deep) {
         // use importNode to clone this Node
         //do not throw any exceptions
-        $log("cloning node");
+        //$log("cloning node");
         try {
             return this.ownerDocument.importNode(this, deep);
         } catch (e) {

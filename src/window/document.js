@@ -24,6 +24,3 @@ var $document =  new HTMLDocument($implementation);
 $w.__defineGetter__("document", function(){
 	return $document;
 });
-
-	
-	

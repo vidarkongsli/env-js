@@ -284,25 +284,15 @@ __extend__(DOMDocument.prototype, {
           return node;
     },
     getElementById : function(elementId) {
-        //  return this._ids[elementId];
-          var retNode = null;
-          //as we loop through note a list of null pointers and clean them up when we finish
-          var nullpointers = [];
-          //$log("searching for element by id. document.all.length " + this.all.length);
+          var retNode = null,
+              node;
           // loop through all Elements in the 'all' collection
           var all = this.all;
           for (var i=0; i < all.length; i++) {
-            var node = all[i];
-            /*if( node == null || node == undefined){
-                nullpointers.push[i];
-                continue;
-            }*/
+            node = all[i];
             // if id matches & node is alive (ie, connected (in)directly to the documentElement)
             if (node.id == elementId) {
-                //$log("id = " + node.id  );
                 if((node.ownerDocument.documentElement._id == this.documentElement._id)){
-                    //$log(" node.ownerDocument.documentElement == this.documentElement" + 
-                    //    (node.ownerDocument.documentElement._id == this.documentElement._id));
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -310,9 +300,6 @@ __extend__(DOMDocument.prototype, {
             }
           }
           
-          /*for(i=0;i<nullpointers.length;i++){
-              this.all.splice(nullpointers[i]-i,1);
-          }*/
           if(retNode == null){$log("Couldn't find id " + elementId);}
           return retNode;
     },

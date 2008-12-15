@@ -45,7 +45,12 @@ __extend__(DOMNodeList.prototype, {
         
         // create string containing the concatenation of the string values of each child
         for (var i=0; i < this.length; i++) {
-            ret += this[i].xml;
+            if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                //add a single space between adjacent text nodes
+                ret += " "+this[i].xml;
+            }else{
+                ret += this[i].xml;
+            }
         }
         
         return ret;

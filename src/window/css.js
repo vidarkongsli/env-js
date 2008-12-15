@@ -8,4 +8,7 @@ $log("Initializing Window CSS");
 // absolute values.
 $w.getComputedStyle = function(elt, pseudo_elt){
   //TODO
+  //this is a naive implementation
+  $log("Getting computed style");
+  return elt?elt.style:new CSS2Properties({cssText:""});
 };

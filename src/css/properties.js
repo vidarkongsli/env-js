@@ -9,13 +9,10 @@ $w.__defineGetter__("CSS2Properties", function(){
 
 
 var CSS2Properties = function(options){
+    __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
-    var cssDebugString = this.toString();
-    if(cssDebugString != ''){
-        $log(cssDebugString);
-    }
 };
-__extend__(CSS2Properties.prototype, __supportedStyles__);
+//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);
@@ -30,7 +27,18 @@ __extend__(CSS2Properties.prototype, {
         
     },
     getPropertyValue : function(name){
-        return this[name];
+		var camelCase = name.replace(/\-(\w)/g, function(all, letter){
+			return letter.toUpperCase();
+		});
+        var i, value = this[camelCase];
+        if(value === undefined){
+            for(i=0;i<this.length;i++){
+                if(this[i]===name){
+                    return this[i];
+                }
+            }
+        }
+        return value;
     },
     item : function(index){
         return this[index];
@@ -52,26 +60,24 @@ __extend__(CSS2Properties.prototype, {
 
 var __cssTextToStyles__ = function(css2props, cssText){
     var styleArray=[];
-    var style, styles = cssText.split(';');
+    var style, name, value, camelCaseName, w3cName, styles = cssText.split(';');
     for ( var i = 0; i < styles.length; i++ ) {
+        //$log("Adding style property " + styles[i]);
     	style = styles[i].split(':');
     	if ( style.length == 2 ){
     	    //keep a reference to the original name of the style which was set
-    	    styleArray[i]=styles[i];
+    	    //this is the w3c style setting method.
+    	    styleArray[styleArray.length] = w3cName = styles[i];
             //camel case for dash case
-            //this could be done much better with a match with function arg
-            //but I'm tearing through this just to get a first pass
-    	    style[0] = trim(style[0]).split('-');
-            if(style[0].length == 2){
-                style[0] = style[0][0]+style[0][1].substring(0,1).toUpperCase()+
-                    style[0][1].substring(1,style[0][1].length);
-            }else{
-                //No '-' dash present
-                style[0] = style[0][0];
-            }
-            if(css2props[style[0]]){
+    	    value = trim(style[1]);
+            camelCaseName = trim(style[0].replace(/\-(\w)/g, function(all, letter){
+				return letter.toUpperCase();
+			}));
+            //$log('CSS Style Name:  ' + camelCaseName);
+            if(css2props[camelCaseName]!==undefined){
                 //set the value internally with camelcase name 
-                css2props[style[0]] = trim(style[1]);
+                //$log('Setting css ' + camelCaseName + ' to ' + value);
+                css2props[camelCaseName] = value;
             };
     	}
     }
@@ -79,8 +85,10 @@ var __cssTextToStyles__ = function(css2props, cssText){
 };
 //Obviously these arent all supported but by commenting out various sections
 //this provides a single location to configure what is exposed as supported.
+//These will likely need to be functional getters/setters in the future to deal with
+//the variation on input formulations
 var __supportedStyles__ = {
-    azimuth:	"",
+    azimuth: "",
     background:	"",
     backgroundAttachment:	"",
     backgroundColor:	"",

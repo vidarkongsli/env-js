@@ -271,7 +271,12 @@ __extend__(DOMNodeList.prototype, {
         
         // create string containing the concatenation of the string values of each child
         for (var i=0; i < this.length; i++) {
-            ret += this[i].xml;
+            if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                //add a single space between adjacent text nodes
+                ret += " "+this[i].xml;
+            }else{
+                ret += this[i].xml;
+            }
         }
         
         return ret;
@@ -1143,7 +1148,7 @@ __extend__(DOMNode.prototype, {
     cloneNode: function(deep) {
         // use importNode to clone this Node
         //do not throw any exceptions
-        $log("cloning node");
+        //$log("cloning node");
         try {
             return this.ownerDocument.importNode(this, deep);
         } catch (e) {
@@ -1434,10 +1439,10 @@ var DOMCharacterData = function(ownerDocument) {
 DOMCharacterData.prototype = new DOMNode;
 __extend__(DOMCharacterData.prototype,{
     get data(){
-        return this.nodeValue;
+        return String(this.nodeValue);
     },
     set data(data){
-        this.nodeValue = data;
+        this.nodeValue = String(data);
     },
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
@@ -3648,8 +3653,7 @@ function __parseLoop__(impl, doc, p) {
 					var child = children.item(j);
 					if (child.nodeType == DOMNode.TEXT_NODE) {
 						var childData = child.data;
-						childData = trim(childData, true, true);
-						childData.replace(/ +/g, ' ');
+						childData.replace(/\s/g, ' ');
 						child.data = childData;
 					}
 				}
@@ -3667,8 +3671,7 @@ function __parseLoop__(impl, doc, p) {
 		var node = textNodesList[i];
 		if (node.parentNode != null) {
 			var nodeData = node.data;
-			nodeData = trim(nodeData, true, true);
-			nodeData.replace(/ +/g, ' ');
+			nodeData.replace(/\s/g, ' ');
 			node.data = nodeData;
 		}
 	}
@@ -4068,25 +4071,15 @@ __extend__(DOMDocument.prototype, {
           return node;
     },
     getElementById : function(elementId) {
-        //  return this._ids[elementId];
-          var retNode = null;
-          //as we loop through note a list of null pointers and clean them up when we finish
-          var nullpointers = [];
-          //$log("searching for element by id. document.all.length " + this.all.length);
+          var retNode = null,
+              node;
           // loop through all Elements in the 'all' collection
           var all = this.all;
           for (var i=0; i < all.length; i++) {
-            var node = all[i];
-            /*if( node == null || node == undefined){
-                nullpointers.push[i];
-                continue;
-            }*/
+            node = all[i];
             // if id matches & node is alive (ie, connected (in)directly to the documentElement)
             if (node.id == elementId) {
-                //$log("id = " + node.id  );
                 if((node.ownerDocument.documentElement._id == this.documentElement._id)){
-                    //$log(" node.ownerDocument.documentElement == this.documentElement" + 
-                    //    (node.ownerDocument.documentElement._id == this.documentElement._id));
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -4094,9 +4087,6 @@ __extend__(DOMDocument.prototype, {
             }
           }
           
-          /*for(i=0;i<nullpointers.length;i++){
-              this.all.splice(nullpointers[i]-i,1);
-          }*/
           if(retNode == null){$log("Couldn't find id " + elementId);}
           return retNode;
     },
@@ -4203,55 +4193,55 @@ __extend__(HTMLDocument.prototype, {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
-            //$log("HTMLDocument.createElement( "+tagName+" )");
+          //$log("HTMLDocument.createElement( "+tagName+" )");
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
-          if(     tagName.match(/A/)){node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/AREA/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BASE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BLOCKQUOTE|Q/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BODY/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/BUTTON/)){node = new HTMLElement(this);}
-          else if(tagName.match(/CAPTION/)){node = new HTMLElement(this);}
-          else if(tagName.match(/COL|COLGROUP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DEL|INS/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DIV/)){node = new HTMLElement(this);}
-          else if(tagName.match(/DL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FIELDSET/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FORM/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FRAME/)){node = new HTMLElement(this);}
-          else if(tagName.match(/FRAMESET/)){node = new HTMLElement(this);}
-          else if(tagName.match(/H1|H2|H3|H4|H5|H6/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HEAD/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/HTML/)){node = new HTMLElement(this);}
-          else if(tagName.match(/IFRAME/)){node = new HTMLElement(this);}
-          else if(tagName.match(/IMG/)){node = new HTMLElement(this);}
-          else if(tagName.match(/INPUT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LABEL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LEGEND/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LI/)){node = new HTMLElement(this);}
-          else if(tagName.match(/LINK/)){node = new HTMLElement(this);}
-          else if(tagName.match(/MAP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/META/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OBJECT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OL/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OPTGROUP/)){node = new HTMLElement(this);}
-          else if(tagName.match(/OPTION/)){node = new HTMLElement(this);;}
-          else if(tagName.match(/P/)){node = new HTMLElement(this);}
-          else if(tagName.match(/PARAM/)){node = new HTMLElement(this);}
-          else if(tagName.match(/PRE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/SCRIPT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/SELECT/)){node = new HTMLElement(this);}
-          else if(tagName.match(/STYLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TABLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TD|TH/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TEXTAREA/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TITLE/)){node = new HTMLElement(this);}
-          else if(tagName.match(/TR/)){node = new HTMLElement(this);}
-          else if(tagName.match(/UL/)){node = new HTMLElement(this);}
+          if(     tagName.match(/^A$/))                   {node = new HTMLAnchorElement(this);}
+          else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
+          else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
+          else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
+          else if(tagName.match(/BODY/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
+          else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
+          else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
+          else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
+          else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
+          else if(tagName.match(/^FRAME$/))               {node = new HTMLFrameElement(this);}
+          else if(tagName.match(/FRAMESET/))            {node = new HTMLFrameSetElement(this);}
+          else if(tagName.match(/H1|H2|H3|H4|H5|H6/))   {node = new HTMLElement(this);}
+          else if(tagName.match(/HEAD/))                {node = new HTMLHeadElement(this);}
+          else if(tagName.match(/HR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/HTML/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/IFRAME/))              {node = new HTMLIFrameElement(this);}
+          else if(tagName.match(/IMG/))                 {node = new HTMLImageElement(this);}
+          else if(tagName.match(/INPUT/))               {node = new HTMLInputElement(this);}
+          else if(tagName.match(/LABEL/))               {node = new HTMLLabelElement(this);}
+          else if(tagName.match(/LEGEND/))              {node = new HTMLLegendElement(this);}
+          else if(tagName.match(/^LI$/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/LINK/))                {node = new HTMLLinkElement(this);}
+          else if(tagName.match(/MAP/))                 {node = new HTMLMapElement(this);}
+          else if(tagName.match(/META/))                {node = new HTMLMetaElement(this);}
+          else if(tagName.match(/OBJECT/))              {node = new HTMLObjectElement(this);}
+          else if(tagName.match(/OL/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/OPTGROUP/))            {node = new HTMLOptGroupElement(this);}
+          else if(tagName.match(/OPTION/))              {node = new HTMLOptionElement(this);;}
+          else if(tagName.match(/^P$/))                   {node = new HTMLElement(this);}
+          else if(tagName.match(/PARAM/))               {node = new HTMLParamElement(this);}
+          else if(tagName.match(/PRE/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
+          else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
+          else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
+          else if(tagName.match(/TABLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLElement(this);}
+          else if(tagName.match(/TD|TH/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
+          else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
           else{
             node = new HTMLElement(this);
           }
@@ -4266,15 +4256,15 @@ __extend__(HTMLDocument.prototype, {
           return node;
     },
     get anchors(){
-        return new HTMLCollection(this.getElementsByName('a'), 'Anchor');
+        return new HTMLCollection(this.getElementsByTagName('a'), 'Anchor');
         
     },
     get applets(){
-        return new HTMLCollection(this.getElementsByName('applet'), 'Applet');
+        return new HTMLCollection(this.getElementsByTagName('applet'), 'Applet');
         
     },
     get body(){ 
-        var nodelist = this.getElementsByName('body');
+        var nodelist = this.getElementsByTagName('body');
         return nodelist.item(0);
         
     },
@@ -4294,10 +4284,10 @@ __extend__(HTMLDocument.prototype, {
     },
     get forms(){
       $log("document.forms");
-      return new HTMLCollection(this.getElementsByName('form'), 'Form');
+      return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
     },
     get images(){
-        return new HTMLCollection(this.getElementsByName('img'), 'Image');
+        return new HTMLCollection(this.getElementsByTagName('img'), 'Image');
         
     },
     get lastModified(){ 
@@ -4306,7 +4296,7 @@ __extend__(HTMLDocument.prototype, {
     
     },
     get links(){
-        return new HTMLCollection(this.getElementsByName('link'), 'Link');
+        return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
         
     },
     get referrer(){
@@ -4324,8 +4314,20 @@ __extend__(HTMLDocument.prototype, {
 	    this._open = false;
     },
 	getElementsByName : function(name){
-		  $debug("document.getElementsByName ( "+name+" )");
-		  return this.getElementsByTagName(name);
+        //$debug("document.getElementsByName ( "+name+" )");
+        //returns a real Array + the DOMNodeList
+        var retNodes = __extend__([],new DOMNodeList(this, this.documentElement)),
+          node;
+        // loop through all Elements in the 'all' collection
+        var all = this.all;
+        for (var i=0; i < all.length; i++) {
+            node = all[i];
+            if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
+                $log("Found node by name " + name);
+                retNodes.push(node);
+            }
+        }
+        return retNodes;
 	},
 	open : function(){ 
 	    /* TODO */
@@ -4355,7 +4357,7 @@ __extend__(HTMLDocument.prototype, {
 //This is useful as html elements that modify the dom must also run through the new 
 //nodes and determine if they are javascript tags and load it.  This is really the fun 
 //parts! ;)
-function execScripts( node ) {
+function __execScripts__( node ) {
 	if ( node.nodeName == "SCRIPT" ) {
 		if ( !node.getAttribute("src") ) {
 			eval.call( window, node.textContent );
@@ -4363,7 +4365,7 @@ function execScripts( node ) {
 	} else {
 		var scripts = node.getElementsByTagName("script");
 		for ( var i = 0; i < scripts.length; i++ ) {
-			execScripts( node );
+			__execScripts__( node );
 		}
 	}
 };$log("Defining HTMLElement");
@@ -4380,11 +4382,13 @@ var HTMLElement = function(ownerDocument) {
     this.DOMElement = DOMElement;
     this.DOMElement(ownerDocument);
     //$log("\nfinished creating html element");
+    
+    this.$css2props = null;
 };
 HTMLElement.prototype = new DOMElement;
 __extend__(HTMLElement.prototype, {
 		get className() { 
-		    return this.getAttribute("class") || ""; 
+		    return this.getAttribute("class")||""; 
 		    
 	    },
 		set className(val) { 
@@ -4392,7 +4396,7 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		get dir() { 
-		    return this.getAttribute("dir") || ""; 
+		    return this.getAttribute("dir")||"ltr"; 
 		    
 	    },
 		set dir(val) { 
@@ -4426,15 +4430,19 @@ __extend__(HTMLElement.prototype, {
 		    doc = null;
 		},
 		get lang() { 
-		    return this.getAttribute("lang") || ""; 
+		    return this.getAttribute("lang")||""; 
 		    
 	    },
 		set lang(val) { 
 		    return this.setAttribute("lang",val); 
 		    
 	    },
-		offsetHeight: 0,
-		offsetWidth: 0,
+		get offsetHeight(){
+		    return Number(this.style["height"].replace("px",""));
+		},
+		get offsetWidth(){
+		    return Number(this.style["width"].replace("px",""));
+		},
 		offsetLeft: 0,
 		offsetRight: 0,
 		get offsetParent(){
@@ -4450,12 +4458,16 @@ __extend__(HTMLElement.prototype, {
 		scrollLeft: 0, 
 		scrollRight: 0,
 		get style(){
-		    return new CSS2Properties({
-		        cssText:this.getAttribute("style")
-	        });
+		    if(this.$css2props === null){
+		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        this.$css2props = new CSS2Properties({
+    		        cssText:this.getAttribute("style")
+    	        });
+	        }
+	        return this.$css2props
 		},
 		get title() { 
-		    return this.getAttribute("title") || ""; 
+		    return this.getAttribute("title")||""; 
 		    
 	    },
 		set title(val) { 
@@ -4483,12 +4495,16 @@ __extend__(HTMLElement.prototype, {
 		    try{
 		        eval(this.getAttribute('ondblclick'));
 		    }catch(e){
-		        $error(e);}},
+		        $error(e)
+		    }
+	    },
 		onkeydown: function(event){
 		    try{
 		        eval(this.getAttribute('onkeydown'));
 		    }catch(e){
-		        $error(e);}},
+		        $error(e);
+		    }
+	    },
 		onkeypress: function(event){
 		    try{
 		        eval(this.getAttribute('onkeypress'));
@@ -4526,8 +4542,7 @@ __extend__(HTMLElement.prototype, {
 		        $error(e);}}
 });
 
-
-var registerEventAttrs = function(elm){
+var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 
         elm.addEventListener('click', elm.onclick ); 
     }
@@ -4561,7 +4576,7 @@ var registerEventAttrs = function(elm){
     return elm;
 };
 	
-var click = function(element){
+var __click__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -4569,7 +4584,7 @@ var click = function(element){
 	event.initEvent("click");
 	element.dispatchEvent(event);
 };
-var submit = function(element){
+var __submit__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -4577,7 +4592,7 @@ var submit = function(element){
 	event.initEvent("submit");
 	element.dispatchEvent(event);
 };
-var focus = function(element){
+var __focus__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
@@ -4585,101 +4600,15 @@ var focus = function(element){
 	event.initEvent("focus");
 	element.dispatchEvent(event);
 };
-var blur = function(element){
+var __blur__ = function(element){
 	var event = new Event({
 	  target:element,
 	  currentTarget:element
 	});
 	event.initEvent("blur");
 	element.dispatchEvent(event);
-};$log("Defining HTMLFormElement");
-/* 
-* HTMLAnchorElement - DOM Level 2
-*/
-$w.__defineGetter__("Form", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
-});
-$w.__defineGetter__("HTMLFormElement", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
-});
-
-var HTMLFormElement = function(ownerDocument){
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
 };
-HTMLFormElement.prototype = new HTMLElement;
-__extend__(HTMLFormElement.prototype,{
-    get acceptCharset(){ 
-        return this.getAttribute('acceptCharset');
-        
-    },
-    set acceptCharset(acceptCharset){
-        this.setAttribute('acceptCharset', acceptCharset);
-        
-    },
-    get action(){
-        return this.getAttribute('action');
-        
-    },
-    set action(action){
-        this.setAttribute('action', action);
-        
-    },
-    get elements() {
-        return this.getElementsByTagName("*");
-        
-    },
-    get enctype(){
-        return this.getAttribute('enctype');
-        
-    },
-    set enctype(enctype){
-        this.setAttribute('enctype', enctype);
-        
-    },
-    get length() {
-        return this.elements.length;
-        
-    },
-    get method(){
-        return this.getAttribute('method');
-        
-    },
-    set method(action){
-        this.setAttribute('method', method);
-        
-    },
-	get name() {
-	    return this.getAttribute("id") || ""; 
-	    
-    },
-	set name(val) { 
-	    return this.setAttribute("id",val); 
-	    
-    },
-	get target() { 
-	    return this.getAttribute("id") || ""; 
-	    
-    },
-	set target(val) { 
-	    return this.setAttribute("id",val); 
-	    
-    },
-	submit:function(){
-	    __submit__(this);
-	    
-    },
-	reset:function(){
-	    __reset__(this);
-	    
-    }
-});
-
-			$log("Defining HTMLCollection");
+$log("Defining HTMLCollection");
 /*
 * HTMLCollection - DOM Level 2
 */
@@ -4731,11 +4660,6 @@ $w.__defineGetter__("HTMLCollection", function(){
 /* 
 * HTMLAnchorElement - DOM Level 2
 */
-$w.__defineGetter__("Anchor", function(){
-    return function(){
-        throw new Error("Object cannot be created in this context");
-    };
-});
 $w.__defineGetter__("HTMLAnchorElement", function(){
     return function(){
         throw new Error("Object cannot be created in this context");
@@ -4748,9 +4672,132 @@ var HTMLAnchorElement = function(ownerDocument) {
     this.HTMLElement(ownerDocument);
 };
 HTMLAnchorElement.prototype = new HTMLElement;
+__extend__(HTMLAnchorElement.prototype, {
+	get accessKey() { 
+	    return this.getAttribute("accesskey") || ""; 
+	    
+    },
+	set accessKey(val) { 
+	    return this.setAttribute("accesskey",val); 
+	    
+    },
+	get charset() { 
+	    return this.getAttribute("charset") || ""; 
+	    
+    },
+	set charset(val) { 
+	    return this.setAttribute("charset",val); 
+	    
+    },
+	get coords() { 
+	    return this.getAttribute("coords") || ""; 
+	    
+    },
+	set coords(val) { 
+	    return this.setAttribute("coords",val); 
+	    
+    },
+	get href() { 
+	    return this.getAttribute("href") || ""; 
+	    
+    },
+	set href(val) { 
+	    return this.setAttribute("href",val); 
+	    
+    },
+	get hreflang() { 
+	    return this.getAttribute("hreflang") || ""; 
+	    
+    },
+	set hreflang(val) { 
+	    return this.setAttribute("hreflang",val); 
+	    
+    },
+	get name() { 
+	    return this.getAttribute("name") || ""; 
+	    
+    },
+	set name(val) { 
+	    return this.setAttribute("name",val); 
+	    
+    },
+	get rel() { 
+	    return this.getAttribute("rel") || ""; 
+	    
+    },
+	set rel(val) { 
+	    return this.setAttribute("rel",val); 
+	    
+    },
+	get rev() { 
+	    return this.getAttribute("rev") || ""; 
+	    
+    },
+	set rev(val) { 
+	    return this.setAttribute("rev",val); 
+	    
+    },
+	get shape() { 
+	    return this.getAttribute("shape") || ""; 
+	    
+    },
+	set shape(val) { 
+	    return this.setAttribute("shape",val); 
+	    
+    },
+	get tabIndex() { 
+	    return this.getAttribute("tabindex") || ""; 
+	    
+    },
+	set tabIndex(val) { 
+	    return this.setAttribute("tabindex",val); 
+	    
+    },
+	get target() { 
+	    return this.getAttribute("target") || ""; 
+	    
+    },
+	set target(val) { 
+	    return this.setAttribute("target",val); 
+	    
+    },
+	get type() { 
+	    return this.getAttribute("type") || ""; 
+	    
+    },
+	set type(val) { 
+	    return this.setAttribute("type",val); 
+	    
+    },
+	blur:function(){
+	    __blur__(this);
+	    
+    },
+	focus:function(){
+	    __focus__(this);
+	    
+    }
+});
+
+			$log("Defining Anchor");
+/* 
+* Anchor - DOM Level 2
+*/
+$w.__defineGetter__("Anchor", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var Anchor = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLAnchorElement = HTMLAnchorElement;
+    this.HTMLAnchorElement(ownerDocument);
+};
+Anchor.prototype = new Anchor;
 
 (function(){
-    
+    //static regular expressions
 	var hash 	 = new RegExp('(\\#.*)'),
         hostname = new RegExp('\/\/([^\:\/]+)'),
         pathname = new RegExp('(\/[^\\?\\#]*)'),
@@ -4758,111 +4805,7 @@ HTMLAnchorElement.prototype = new HTMLElement;
         protocol = new RegExp('(^\\w*\:)'),
         search 	 = new RegExp('(\\?[^\\#]*)');
 			
-    __extend__(HTMLAnchorElement.prototype, {
-		get accessKey() { 
-		    return this.getAttribute("accessKey") || ""; 
-		    
-	    },
-		set accessKey(val) { 
-		    return this.setAttribute("accessKey",val); 
-		    
-	    },
-		get charset() { 
-		    return this.getAttribute("charset") || ""; 
-		    
-	    },
-		set charset(val) { 
-		    return this.setAttribute("charset",val); 
-		    
-	    },
-		get coords() { 
-		    return this.getAttribute("coords") || ""; 
-		    
-	    },
-		set coords(val) { 
-		    return this.setAttribute("coords",val); 
-		    
-	    },
-		get href() { 
-		    return this.getAttribute("href") || ""; 
-		    
-	    },
-		set href(val) { 
-		    return this.setAttribute("href",val); 
-		    
-	    },
-		get hreflang() { 
-		    return this.getAttribute("hreflang") || ""; 
-		    
-	    },
-		set hreflang(val) { 
-		    return this.setAttribute("hreflang",val); 
-		    
-	    },
-		get name() { 
-		    return this.getAttribute("name") || ""; 
-		    
-	    },
-		set name(val) { 
-		    return this.setAttribute("name",val); 
-		    
-	    },
-		get rel() { 
-		    return this.getAttribute("rel") || ""; 
-		    
-	    },
-		set rel(val) { 
-		    return this.setAttribute("rel",val); 
-		    
-	    },
-		get rev() { 
-		    return this.getAttribute("rev") || ""; 
-		    
-	    },
-		set rev(val) { 
-		    return this.setAttribute("rev",val); 
-		    
-	    },
-		get shape() { 
-		    return this.getAttribute("shape") || ""; 
-		    
-	    },
-		set shape(val) { 
-		    return this.setAttribute("shape",val); 
-		    
-	    },
-		get tabIndex() { 
-		    return this.getAttribute("tab-index") || ""; 
-		    
-	    },
-		set tabIndex(val) { 
-		    return this.setAttribute("tab-index",val); 
-		    
-	    },
-		get target() { 
-		    return this.getAttribute("target") || ""; 
-		    
-	    },
-		set target(val) { 
-		    return this.setAttribute("target",val); 
-		    
-	    },
-		get type() { 
-		    return this.getAttribute("type") || ""; 
-		    
-	    },
-		set type(val) { 
-		    return this.setAttribute("type",val); 
-		    
-	    },
-		blur:function(){
-		    blur(this);
-		    
-	    },
-		focus:function(){
-		    focus(this);
-		    
-	    },
+    __extend__(Anchor.prototype, {
 		get hash(){
 			var m = hash.exec(this.href);
 			return m&&m.length>1?m[1]:"";
@@ -4922,6 +4865,1382 @@ HTMLAnchorElement.prototype = new HTMLElement;
   });
 
 })();
+			$log("Defining HTMLAreaElement");
+/* 
+* HTMLAreaElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLAreaElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLAreaElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLAreaElement.prototype = new HTMLElement;
+__extend__(HTMLAreaElement.prototype, {
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt',value);
+    },
+    get coords(){
+        return this.getAttribute('coords');
+    },
+    set coords(value){
+        this.setAttribute('coords',value);
+    },
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get noHref(){
+        return this.hasAttribute('href');
+    },
+    get shape(){
+        //TODO
+        return 0;
+    },
+    get tabIndex(){
+        return this.getAttribute('tabindex');
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',value);
+    },
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    }
+});
+
+			$log("Defining HTMLBaseElement");
+/* 
+* HTMLBaseElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLBaseElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLBaseElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLBaseElement.prototype = new HTMLElement;
+__extend__(HTMLBaseElement.prototype, {
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    }
+});
+
+			$log("Defining HTMLQuoteElement");
+/* 
+* HTMLQuoteElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLQuoteElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLQuoteElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLQuoteElement.prototype = new HTMLElement;
+__extend__(HTMLQuoteElement.prototype, {
+    get cite(){
+        return this.getAttribute('cite');
+    },
+    set cite(value){
+        this.setAttribute('cite',value);
+    }
+});
+
+			$log("Defining HTMLButtonElement");
+/* 
+* HTMLButtonElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLButtonElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLButtonElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLButtonElement.prototype = new HTMLElement;
+__extend__(HTMLButtonElement.prototype, {
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get tabIndex(){
+        return Number(this.getAttribute('tabindex'));
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',Number(value));
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    }
+});
+
+			$log("Defining HTMLTableColElement");
+/* 
+* HTMLTableColElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLTableColElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLTableColElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLTableColElement.prototype = new HTMLElement;
+__extend__(HTMLTableColElement.prototype, {
+    get align(){
+        return this.getAttribute('align');
+    },
+    set align(value){
+        this.setAttribute('align', value);
+    },
+    get ch(){
+        return this.getAttribute('ch');
+    },
+    set ch(value){
+        this.setAttribute('ch', value);
+    },
+    get chOff(){
+        return this.getAttribute('ch');
+    },
+    set chOff(value){
+        this.setAttribute('ch', value);
+    },
+    get span(){
+        return this.getAttribute('span');
+    },
+    set span(value){
+        this.setAttribute('span', value);
+    },
+    get vAlign(){
+        return this.getAttribute('valign');
+    },
+    set vAlign(value){
+        this.setAttribute('valign', value);
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width', value);
+    }
+});
+
+			$log("Defining HTMLModElement");
+/* 
+* HTMLModElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLModElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLModElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLModElement.prototype = new HTMLElement;
+__extend__(HTMLModElement.prototype, {
+    get cite(){
+        return this.getAttribute('cite');
+    },
+    set cite(value){
+        this.setAttribute('cite', value);
+    },
+    get dateTime(){
+        return this.getAttribute('datetime');
+    },
+    set dateTime(value){
+        this.setAttribute('datetime', value);
+    }
+});
+
+			$log("Defining HTMLFieldSetElement");
+/* 
+* HTMLFieldSetElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLFieldSetElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLFieldSetElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLFieldSetElement.prototype = new HTMLElement;
+__extend__(HTMLFieldSetElement.prototype, {
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    }
+});
+
+			$log("Defining HTMLFormElement");
+/* 
+* HTMLAnchorElement - DOM Level 2
+*/
+$w.__defineGetter__("Form", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+$w.__defineGetter__("HTMLFormElement", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLFormElement = function(ownerDocument){
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLFormElement.prototype = new HTMLElement;
+__extend__(HTMLFormElement.prototype,{
+    get acceptCharset(){ 
+        return this.getAttribute('accept-charset');
+        
+    },
+    set acceptCharset(acceptCharset){
+        this.setAttribute('accept-charset', acceptCharset);
+        
+    },
+    get action(){
+        return this.getAttribute('action');
+        
+    },
+    set action(action){
+        this.setAttribute('action', action);
+        
+    },
+    get elements() {
+        return this.getElementsByTagName("*");
+        
+    },
+    get enctype(){
+        return this.getAttribute('enctype');
+        
+    },
+    set enctype(enctype){
+        this.setAttribute('enctype', enctype);
+        
+    },
+    get length() {
+        return this.elements.length;
+        
+    },
+    get method(){
+        return this.getAttribute('method');
+        
+    },
+    set method(action){
+        this.setAttribute('method', method);
+        
+    },
+	get name() {
+	    return this.getAttribute("name") || ""; 
+	    
+    },
+	set name(val) { 
+	    return this.setAttribute("name",val); 
+	    
+    },
+	get target() { 
+	    return this.getAttribute("target") || ""; 
+	    
+    },
+	set target(val) { 
+	    return this.setAttribute("target",val); 
+	    
+    },
+	submit:function(){
+	    __submit__(this);
+	    
+    },
+	reset:function(){
+	    __reset__(this);
+	    
+    }
+});
+
+			$log("Defining HTMLFrameElement");
+/* 
+* HTMLFrameElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLFrameElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLFrameElement = function(ownerDocument) {
+    //$log("creating frame element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLFrameElement.prototype = new HTMLElement;
+__extend__(HTMLFrameElement.prototype, {
+    get frameBorder(){
+        return this.getAttribute('border')||"";
+    },
+    set frameBorder(value){
+        this.setAttribute('border', value);
+    },
+    get longDesc(){
+        return this.getAttribute('longdesc')||"";
+    },
+    set longDesc(value){
+        this.setAttribute('longdesc', value);
+    },
+    get marginHeight(){
+        return this.getAttribute('marginheight')||"";
+    },
+    set marginHeight(value){
+        this.setAttribute('marginheight', value);
+    },
+    get marginWidth(){
+        return this.getAttribute('marginwidth')||"";
+    },
+    set marginWidth(value){
+        this.setAttribute('marginwidth', value);
+    },
+    get name(){
+        return this.getAttribute('name')||"";
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get noResize(){
+        return this.getAttribute('noresize')||"";
+    },
+    set noResize(value){
+        this.setAttribute('noresize', value);
+    },
+    get scrolling(){
+        return this.getAttribute('scrolling')||"";
+    },
+    set scrolling(value){
+        this.setAttribute('scrolling', value);
+    },
+    get src(){
+        return this.getAttribute('src')||"";
+    },
+    set src(value){
+        this.setAttribute('src', value);
+    },
+    get contentDocument(){
+        $log("getting content document for (i)frame");
+        if(!this._content){
+            this._content = new HTMLDocument($implementation);
+            if(this.src.length > 0){
+                $log("Loading frame content from " + this.src);
+                try{
+                    this._content.load(this.src);
+                }catch(e){
+                    $error("failed to load " + this.src);
+                }
+            }
+        }
+        return true;
+    }
+});
+
+			$log("Defining HTMLFrameSetElement");
+/* 
+* HTMLFrameSetElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLFrameSetElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLFrameSetElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLFrameSetElement.prototype = new HTMLElement;
+__extend__(HTMLFrameSetElement.prototype, {
+    get cols(){
+        return this.getAttribute('cols');
+    },
+    set cols(value){
+        this.setAttribute('cols', value);
+    },
+    get rows(){
+        return this.getAttribute('rows');
+    },
+    set rows(value){
+        this.setAttribute('rows', value);
+    }
+});
+
+			$log("Defining HTMLHeadElement");
+/* 
+* HTMLHeadElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLHeadElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLHeadElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLHeadElement.prototype = new HTMLElement;
+__extend__(HTMLHeadElement.prototype, {
+    get profile(){
+        return this.getAttribute('profile');
+    },
+    set profile(value){
+        this.setAttribute('profile', value);
+    },
+});
+
+			$log("Defining HTMLIFrameElement");
+/* 
+* HTMLIFrameElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLIFrameElement", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+var HTMLIFrameElement = function(ownerDocument) {
+    //$log("creating iframe element");
+    this.HTMLFrameElement = HTMLFrameElement;
+    this.HTMLFrameElement(ownerDocument);
+};
+HTMLIFrameElement.prototype = new HTMLFrameElement;
+__extend__(HTMLIFrameElement.prototype, {
+	get height() { 
+	    return this.getAttribute("height") || ""; 
+    },
+	set height(val) { 
+	    return this.setAttribute("height",val); 
+    },
+	get width() { 
+	    return this.getAttribute("width") || ""; 
+    },
+	set width(val) { 
+	    return this.setAttribute("width",val); 
+    }
+});
+
+
+			$log("Defining HTMLImageElement");
+/* 
+* HTMLImageElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLImageElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLImageElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLImageElement.prototype = new HTMLElement;
+__extend__(HTMLImageElement.prototype, {
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt', value);
+    },
+    get height(){
+        return this.getAttribute('height');
+    },
+    set height(value){
+        this.setAttribute('height', value);
+    },
+    get isMap(){
+        return this.hasAttribute('map');
+    },
+    set useMap(value){
+        this.setAttribute('map', value);
+    },
+    get longDesc(){
+        return this.getAttribute('longdesc');
+    },
+    set longDesc(value){
+        this.setAttribute('longdesc', value);
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get src(){
+        return this.getAttribute('src');
+    },
+    set src(value){
+        this.setAttribute('src', value);
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width', value);
+    }
+});
+
+			$log("Defining HTMLInputElement");
+/* 
+* HTMLInputElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLInputElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLInputElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLInputElement.prototype = new HTMLElement;
+__extend__(HTMLInputElement.prototype, {
+    get defaultValue(){
+        return this.getAttribute('defaultValue');
+    },
+    set defaultValue(value){
+        this.setAttribute('defaultValue', value);
+    },
+    get defaultChecked(){
+        return this.getAttribute('defaultChecked');
+    },
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get access(){
+        return this.getAttribute('access');
+    },
+    set access(value){
+        this.setAttribute('access', value);
+    },
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt', value);
+    },
+    get checked(){
+        return (this.getAttribute('checked')==='checked');
+    },
+    set checked(){
+        this.setAttribute('checked', 'checked');
+    },
+    get disabled(){
+        return (this.getAttribute('disabled')==='disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled', 'disabled');
+    },
+    get maxLength(){
+        return Number(this.getAttribute('maxlength')||'0');
+    },
+    set maxLength(value){
+        this.setAttribute('maxlength', value);
+    },
+    get name(){
+        return this.getAttribute('name')||'';
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get readOnly(){
+        return (this.getAttribute('readonly')==='readonly');
+    },
+    set readOnly(value){
+        this.setAttribute('readonly', 'readonly');
+    },
+    get size(){
+        return this.getAttribute('size');
+    },
+    set size(value){
+        this.setAttribute('size', value);
+    },
+    get src(){
+        return this.getAttribute('src');
+    },
+    set src(value){
+        this.setAttribute('src', value);
+    },
+    get tabIndex(){
+        return Number(this.getAttribute('tabindex'));
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',Number(value));
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get useMap(){
+        return this.getAttribute('map');
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+	blur:function(){
+	    __blur__(this);
+	    
+    },
+	focus:function(){
+	    __focus__(this);
+	    
+    },
+	select:function(){
+	    __select__(this);
+	    
+    },
+	click:function(){
+	    __click__(this);
+	    
+    }
+});
+
+			$log("Defining HTMLLabelElement");
+/* 
+* HTMLLabelElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLLabelElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLLabelElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLLabelElement.prototype = new HTMLElement;
+__extend__(HTMLLabelElement.prototype, {
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get htmlFor(){
+        return this.getAttribute('for');
+    },
+    set htmlFor(value){
+        this.setAttribute('for',value);
+    },
+});
+
+			$log("Defining HTMLLegendElement");
+/* 
+* HTMLLegendElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLLegendElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLLegendElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLLegendElement.prototype = new HTMLElement;
+__extend__(HTMLLegendElement.prototype, {
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    }
+});
+
+			/**
+* Link - HTMLElement 
+*/
+$w.__defineGetter__("Link", function(){
+  return function(){
+    throw new Error("Object cannot be created in this context");
+  };
+});
+
+
+$log("Defining HTMLLinkElement");
+/* 
+* HTMLLinkElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLLinkElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLLinkElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLLinkElement.prototype = new HTMLElement;
+__extend__(HTMLLinkElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get charset(){
+        return this.getAttribute('charset');
+    },
+    set charset(value){
+        this.setAttribute('charset',value);
+    },
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get hreflang(){
+        return this.getAttribute('hreflang');
+    },
+    set hreflang(value){
+        this.setAttribute('hreflang',value);
+    },
+    get media(){
+        return this.getAttribute('media');
+    },
+    set media(value){
+        this.setAttribute('media',value);
+    },
+    get rel(){
+        return this.getAttribute('rel');
+    },
+    set rel(value){
+        this.setAttribute('rel',value);
+    },
+    get rev(){
+        return this.getAttribute('rev');
+    },
+    set rev(value){
+        this.setAttribute('rev',value);
+    },
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    }
+});
+
+			
+
+			$log("Defining HTMLMapElement");
+/* 
+* HTMLMapElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLMapElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLMapElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLMapElement.prototype = new HTMLElement;
+__extend__(HTMLMapElement.prototype, {
+    get areas(){
+        return this.getElementsByTagName('area');
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    }
+});
+
+			$log("Defining HTMLMetaElement");
+/* 
+* HTMLMetaElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLMetaElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLMetaElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLMetaElement.prototype = new HTMLElement;
+__extend__(HTMLMetaElement.prototype, {
+    get content(){
+        return this.getAttribute('content');
+    },
+    set content(value){
+        this.setAttribute('content',value);
+    },
+    get httpEquiv(){
+        return this.getAttribute('http-equiv');
+    },
+    set httpEquiv(value){
+        this.setAttribute('http-equiv',value);
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get scheme(){
+        return this.getAttribute('scheme');
+    },
+    set scheme(value){
+        this.setAttribute('scheme',value);
+    }
+});
+
+			$log("Defining HTMLObjectElement");
+/* 
+* HTMLObjectElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLObjectElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLObjectElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLObjectElement.prototype = new HTMLElement;
+__extend__(HTMLObjectElement.prototype, {
+    get code(){
+        return this.getAttribute('code');
+    },
+    set code(value){
+        this.setAttribute('code',value);
+    },
+    get archive(){
+        return this.getAttribute('archive');
+    },
+    set archive(value){
+        this.setAttribute('archive',value);
+    },
+    get codeBase(){
+        return this.getAttribute('codebase');
+    },
+    set codeBase(value){
+        this.setAttribute('codebase',value);
+    },
+    get codeType(){
+        return this.getAttribute('codetype');
+    },
+    set codeType(value){
+        this.setAttribute('codetype',value);
+    },
+    get data(){
+        return this.getAttribute('data');
+    },
+    set data(value){
+        this.setAttribute('data',value);
+    },
+    get declare(){
+        return this.getAttribute('declare');
+    },
+    set declare(value){
+        this.setAttribute('declare',value);
+    },
+    get height(){
+        return this.getAttribute('height');
+    },
+    set height(value){
+        this.setAttribute('height',value);
+    },
+    get standby(){
+        return this.getAttribute('standby');
+    },
+    set standby(value){
+        this.setAttribute('standby',value);
+    },
+    get tabIndex(){
+        return this.getAttribute('tabindex');
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get useMap(){
+        return this.getAttribute('usemap');
+    },
+    set useMap(value){
+        this.setAttribute('usemap',value);
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width',value);
+    },
+    get contentDocument(){
+        return this.ownerDocument;
+    }
+});
+
+			$log("Defining HTMLOptGroupElement");
+/* 
+* HTMLOptGroupElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLOptGroupElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLOptGroupElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLOptGroupElement.prototype = new HTMLElement;
+__extend__(HTMLOptGroupElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get label(){
+        return this.getAttribute('label');
+    },
+    set label(value){
+        this.setAttribute('label',value);
+    },
+});
+
+			$log("Defining HTMLOptionElement");
+/* 
+* HTMLOptionElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLOptionElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLOptionElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLOptionElement.prototype = new HTMLElement;
+__extend__(HTMLOptionElement.prototype, {
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get defaultSelected(){
+        return this.getAttribute('defaultSelected');
+    },
+    set defaultSelected(value){
+        this.setAttribute('defaultSelected',value);
+    },
+    get text(){
+        return this.nodeValue;
+    },
+    get index(){
+        var options = this.parent.childNodes;
+        for(var i; i<options.length;i++){
+            if(this == options[i])
+                return i;
+        }
+        return -1;
+    },
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get label(){
+        return this.getAttribute('label');
+    },
+    set label(value){
+        this.setAttribute('label',value);
+    },
+    get selected(){
+        return this.getAttribute('selected');
+    },
+    set selected(value){
+        this.setAttribute('selected',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    }
+});
+
+			$log("Defining HTMLParamElement");
+/* 
+* HTMLParamElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLParamElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLParamElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLParamElement.prototype = new HTMLElement;
+__extend__(HTMLParamElement.prototype, {
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+    get valueType(){
+        return this.getAttribute('valuetype');
+    },
+    set valueType(value){
+        this.setAttribute('valuetype',value);
+    },
+});
+
+			$log("Defining HTMLScriptElement");
+/* 
+* HTMLScriptElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLScriptElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLScriptElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLScriptElement.prototype = new HTMLElement;
+__extend__(HTMLScriptElement.prototype, {
+    get text(){
+        return this.nodeValue;
+    },
+    get htmlFor(){
+        return this.getAttribute('for');
+    },
+    set htmlFor(value){
+        this.setAttribute('for',value);
+    },
+    get event(){
+        return this.getAttribute('event');
+    },
+    set event(value){
+        this.setAttribute('event',value);
+    },
+    get charset(){
+        return this.getAttribute('charset');
+    },
+    set charset(value){
+        this.setAttribute('charset',value);
+    },
+    get defer(){
+        return this.getAttribute('defer');
+    },
+    set defer(value){
+        this.setAttribute('defer',value);
+    },
+    get src(){
+        return this.getAttribute('src');
+    },
+    set src(value){
+        this.setAttribute('src',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    }
+});
+
+			$log("Defining HTMLSelectElement");
+/* 
+* HTMLSelectElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLSelectElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLSelectElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLSelectElement.prototype = new HTMLElement;
+__extend__(HTMLSelectElement.prototype, {
+    get type(){
+        return this.getAttribute('type');
+    },
+    get selectedIndex(){
+        var options = this.options;
+        for(var i=0;i<options.length;i++){
+            if(options[i].selected){
+                return i;
+            }
+        };
+        return -1;
+    },
+    set selectedIndex(value){
+        this.options[Number(value)].selected = 'selected';
+    },
+    get value(){
+        return this.getAttribute('value')||'';
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+    get length(){
+        return this.options.length;
+    },
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get options(){
+        return this.getElementsByTagName('option');
+    },
+    get disabled(){
+        return (this.getAttribute('disabled')==='disabled');
+    },
+    set disabled(){
+        this.setAttribute('disabled','disabled');
+    },
+    get multiple(){
+        return this.getAttribute('multiple');
+    },
+    set multiple(value){
+        this.setAttribute('multiple',value);
+    },
+    get name(){
+        return this.getAttribute('name')||'';
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get size(){
+        return Number(this.getAttribute('size'));
+    },
+    set size(value){
+        this.setAttribute('size',value);
+    },
+    get tabIndex(){
+        return Number(this.getAttribute('tabindex'));
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',value);
+    },
+    add : function(){
+        __add__(this);
+    },
+    remove : function(){
+        __remove__(this);
+    },
+    blur: function(){
+        __blur__(this);
+    },
+    focus: function(){
+        __focus__(this);
+    }
+});
+
+			$log("Defining HTMLStyleElement");
+/* 
+* HTMLStyleElement - DOM Level 2
+*/
+$w.__defineGetter__("HTMLStyleElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLStyleElement = function(ownerDocument) {
+    //$log("creating anchor element");
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLStyleElement.prototype = new HTMLElement;
+__extend__(HTMLStyleElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get media(){
+        return this.getAttribute('media');
+    },
+    set media(value){
+        this.setAttribute('media',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+});
+
 			$log("Defining Event");
 /*
 * event.js
@@ -4992,13 +6311,10 @@ $w.__defineGetter__("CSS2Properties", function(){
 
 
 var CSS2Properties = function(options){
+    __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
-    var cssDebugString = this.toString();
-    if(cssDebugString != ''){
-        $log(cssDebugString);
-    }
 };
-__extend__(CSS2Properties.prototype, __supportedStyles__);
+//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);
@@ -5013,7 +6329,18 @@ __extend__(CSS2Properties.prototype, {
         
     },
     getPropertyValue : function(name){
-        return this[name];
+		var camelCase = name.replace(/\-(\w)/g, function(all, letter){
+			return letter.toUpperCase();
+		});
+        var i, value = this[camelCase];
+        if(value === undefined){
+            for(i=0;i<this.length;i++){
+                if(this[i]===name){
+                    return this[i];
+                }
+            }
+        }
+        return value;
     },
     item : function(index){
         return this[index];
@@ -5035,26 +6362,24 @@ __extend__(CSS2Properties.prototype, {
 
 var __cssTextToStyles__ = function(css2props, cssText){
     var styleArray=[];
-    var style, styles = cssText.split(';');
+    var style, name, value, camelCaseName, w3cName, styles = cssText.split(';');
     for ( var i = 0; i < styles.length; i++ ) {
+        //$log("Adding style property " + styles[i]);
     	style = styles[i].split(':');
     	if ( style.length == 2 ){
     	    //keep a reference to the original name of the style which was set
-    	    styleArray[i]=styles[i];
+    	    //this is the w3c style setting method.
+    	    styleArray[styleArray.length] = w3cName = styles[i];
             //camel case for dash case
-            //this could be done much better with a match with function arg
-            //but I'm tearing through this just to get a first pass
-    	    style[0] = trim(style[0]).split('-');
-            if(style[0].length == 2){
-                style[0] = style[0][0]+style[0][1].substring(0,1).toUpperCase()+
-                    style[0][1].substring(1,style[0][1].length);
-            }else{
-                //No '-' dash present
-                style[0] = style[0][0];
-            }
-            if(css2props[style[0]]){
+    	    value = trim(style[1]);
+            camelCaseName = trim(style[0].replace(/\-(\w)/g, function(all, letter){
+				return letter.toUpperCase();
+			}));
+            //$log('CSS Style Name:  ' + camelCaseName);
+            if(css2props[camelCaseName]!==undefined){
                 //set the value internally with camelcase name 
-                css2props[style[0]] = trim(style[1]);
+                //$log('Setting css ' + camelCaseName + ' to ' + value);
+                css2props[camelCaseName] = value;
             };
     	}
     }
@@ -5062,8 +6387,10 @@ var __cssTextToStyles__ = function(css2props, cssText){
 };
 //Obviously these arent all supported but by commenting out various sections
 //this provides a single location to configure what is exposed as supported.
+//These will likely need to be functional getters/setters in the future to deal with
+//the variation on input formulations
 var __supportedStyles__ = {
-    azimuth:	"",
+    azimuth: "",
     background:	"",
     backgroundAttachment:	"",
     backgroundColor:	"",
@@ -5696,6 +7023,9 @@ $log("Initializing Window CSS");
 // absolute values.
 $w.getComputedStyle = function(elt, pseudo_elt){
   //TODO
+  //this is a naive implementation
+  $log("Getting computed style");
+  return elt?elt.style:new CSS2Properties({cssText:""});
 };/*
 *	screen.js
 */
@@ -5784,9 +7114,7 @@ var $document =  new HTMLDocument($implementation);
 $w.__defineGetter__("document", function(){
 	return $document;
 });
-
-	
-	/*
+/*
 *	outro.js
 */
 

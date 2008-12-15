@@ -814,9 +814,9 @@ jQuery.extend({
 				val -= Math.round(padding + border);
 			}
 
-			if ( jQuery(elem).is(":visible") )
+			if ( jQuery(elem).is(":visible") ){
 				getWH();
-			else
+			}else
 				jQuery.swap( elem, props, getWH );
 
 			return Math.max(0, val);
@@ -1116,8 +1116,9 @@ jQuery.extend({
 			return letter.toUpperCase();
 		});
 
-		if ( set )
+		if ( set ){
 			elem[ name ] = value;
+		}
 
 		return elem[ name ];
 	},
@@ -1258,7 +1259,14 @@ jQuery.each({
 	prevAll: function(elem){return jQuery.dir(elem,"previousSibling");},
 	siblings: function(elem){return jQuery.sibling(elem.parentNode.firstChild,elem);},
 	children: function(elem){return jQuery.sibling(elem.firstChild);},
-	contents: function(elem){return jQuery.nodeName(elem,"iframe")?elem.contentDocument||elem.contentWindow.document:jQuery.makeArray(elem.childNodes);}
+	contents: function(elem){
+	    if(jQuery.nodeName(elem,"iframe")){
+	        print("element.contentDocument :" + elem.contentDocument);
+	    }
+	    return jQuery.nodeName(elem,"iframe")?
+	        elem.contentDocument||elem.contentWindow.document:
+	        jQuery.makeArray(elem.childNodes);
+    }
 }, function(name, fn){
 	jQuery.fn[ name ] = function( selector ) {
 		var ret = jQuery.map( this, fn );

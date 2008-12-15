@@ -1168,7 +1168,8 @@ test("val(String/Number)", function() {
 	var j = jQuery("#nonnodes").contents();
 	j.val("asdf");
 	equals( j.val(), "asdf", "Check node,textnode,comment with val()" );
-	j.removeAttr("value");
+	print("removeAttr");
+	//j.removeAttr("value");
 });
 
 var scriptorder = 0;
@@ -1331,7 +1332,7 @@ test("addClass(String)", function() {
 	div.addClass("test");
 	var pass = true;
 	for ( var i = 0; i < div.size(); i++ ) {
-	 if ( div.get(i).className.indexOf("test") == -1 ) pass = false;
+	    if ( div.get(i).className.indexOf("test") == -1 ) pass = false;
 	}
 	ok( pass, "Add Class" );
 
