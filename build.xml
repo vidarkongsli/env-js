@@ -110,7 +110,7 @@
             <fileset dir="${SRC_DIR}" includes="window/screen.js" />
             <fileset dir="${SRC_DIR}" includes="window/dialog.js" />
             <fileset dir="${SRC_DIR}" includes="window/document.js" />
-            <fileset dir="${SRC_DIR}" includes="window/cookie.js" />
+            <fileset dir="${SRC_DIR}" includes="html/cookie.js" />
             <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <echo message="${ENV_DIST} built." />
