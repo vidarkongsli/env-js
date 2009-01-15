@@ -6842,6 +6842,13 @@ $w.setTimeout = function(fn, time){
 
 window.setInterval = function(fn, time){
 	var num = $timers.length;
+	
+    if (typeof fn == 'string') {
+        var fnstr = fn; 
+        fn = function() { 
+            eval(fnstr); 
+        }; 
+    }
 	if(time===0){
 	    fn();
 	}else{
