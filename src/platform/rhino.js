@@ -16,6 +16,10 @@ var __env__ = {};
     print(e);
   };
   
+  $env.lineSource = function(e){
+      return e.rhinoException.lineSource();
+  };
+  
   $env.hashCode = function(obj){
     return obj?obj.hashCode().toString():null;
   };

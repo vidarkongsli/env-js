@@ -7158,5 +7158,5 @@ $w.__defineGetter__("document", function(){
 })(window, __env__); 
 
 }catch(e){
-    __env__.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +e.rhinoException.lineSource());
+    __env__.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +__env__.lineSource(e));
 }
