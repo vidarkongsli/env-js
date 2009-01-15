@@ -397,7 +397,8 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._DTD) {                    // ignore DTD events
     }
     else if(iEvt == XMLP._ERROR) {
-      throw(new DOMException(DOMException.SYNTAX_ERR));
+        $error("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
+        throw(new DOMException(DOMException.SYNTAX_ERR));
       // alert("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
       // break;
     }

@@ -158,16 +158,35 @@ var __env__ = {};
 	};
 	
 	
-  $env.xpath = function(expression, doc){
+    $env.xpath = function(expression, doc){
     return Packages.javax.xml.xpath.
       XPathFactory.newInstance().newXPath().
         evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
-  };
+    };
+    
+    $env.os_name        = java.lang.System.getProperty("os.name"); 
+    $env.os_arch        = java.lang.System.getProperty("os.arch"); 
+    $env.os_version     = java.lang.System.getProperty("os.version"); 
+    $env.lang           = java.lang.System.getProperty("user.lang"); 
+    $env.platform       = "Rhino ";//how do we get the version
 	
-  $env.os_name        = java.lang.System.getProperty("os.name"); 
-  $env.os_arch        = java.lang.System.getProperty("os.arch"); 
-  $env.os_version     = java.lang.System.getProperty("os.version"); 
-  $env.lang           = java.lang.System.getProperty("user.lang"); 
-  $env.platform       = "Rhino ";//how do we get the version
-	
+    
+    $env.loadScripts = safeScript;
+    function safeScript(){
+      //do nothing  
+    };
+    
+    function localScripts(){
+        //try loading locally
+        var scripts = document.getElementsByTagName('script');
+        for(var i=0;i<scipts.length;i++){
+            if(scripts[i].getAttribute('type') == 'text/javascript'){
+                try{
+                    load(scripts[i].src);
+                }catch(e){
+                    $error("Error loading script." , e);
+                }
+            }
+        }
+    };
 })(__env__);
