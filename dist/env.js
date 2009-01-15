@@ -3641,7 +3641,8 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._DTD) {                    // ignore DTD events
     }
     else if(iEvt == XMLP._ERROR) {
-      throw(new DOMException(DOMException.SYNTAX_ERR));
+        $error("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
+        throw(new DOMException(DOMException.SYNTAX_ERR));
       // alert("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
       // break;
     }
@@ -3875,7 +3876,12 @@ __extend__(DOMDocument.prototype, {
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);
         // populate Document with Parsed Nodes
-        __parseLoop__(this.implementation, doc, parser);
+        try {
+            __parseLoop__(this.implementation, doc, parser);
+        } catch (e) {
+            $error(this.implementation.translateErrCode(e.code))
+        }
+
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
         doc._parseComplete = true;
         if(this === $document){
@@ -3896,10 +3902,11 @@ __extend__(DOMDocument.prototype, {
                 $error("Error Parsing XML - ",e);
                 _this.loadXML(
                 "<html><head></head><body>"+
-                  "<h1>Parse Error</h1>"+
-                  "<p>"+e.toString()+"</p>"+  
+                    "<h1>Parse Error</h1>"+
+                    "<p>"+e.toString()+"</p>"+  
                 "</body></html>");
             }
+            $env.loadScripts();
             _this._url = url;
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
