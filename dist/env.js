@@ -6894,24 +6894,7 @@ $w.removeEventListener = function(type, fn){
 			return f != fn;
 		});
 };
-$w.dispatchEvent = function(event){
-  if(!event.target)
-    event.target = this;
-  if ( event.type ) {
-    if ( this.uuid && events[this.uuid][event.type] ) {
-      var self = this;
-      events[this.uuid][event.type].forEach(function(fn){
-        fn.call( self, event );
-    });
-  }
-    
-  if ( this["on" + event.type] )
-    this["on" + event.type].call( self, event );
-  }
-  if(this.parentNode){
-    this.parentNode.dispatchEvent.call(this.parentNode,event);
-  }
-};
+
 $w.dispatchEvent = function(event){
     $log("dispatching event " + event.type);
     //the window scope defines the $event object, for IE(^^^) compatibility;
@@ -6919,9 +6902,9 @@ $w.dispatchEvent = function(event){
     if(!event.target)
         event.target = this;
     if ( event.type ) {
-        if ( this.uuid && events[this.uuid][event.type] ) {
+        if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;
-            events[this.uuid][event.type].forEach(function(fn){
+            $events[this.uuid][event.type].forEach(function(fn){
                 fn.call( _this, event );
             });
         }
