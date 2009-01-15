@@ -41,12 +41,13 @@ var DOMDocument = function(implementation) {
     //$log("\tfinished creating dom document " + this);
 };
 DOMDocument.prototype = new DOMNode;
-__extend__(DOMDocument.prototype, {
-	addEventListener        : window.addEventListener,
-	removeEventListener     : window.removeEventListener,
-    attachEvent             : window.addEventListener,/*IE only subject to deprecation*/
-    detachEvent             : window.detachEvent,/*IE only subject to  deprecation*/
-	dispatchEvent           : window.dispatchEvent,
+__extend__(DOMDocument.prototype, {	
+    addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
+	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
+	attachEvent             : function(){ window.addEventListener.apply(this, arguments) },
+	detachEvent             : function(){ window.removeEventListener.apply(this, arguments) },
+	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
+
     get styleSheets(){ 
         return [];/*TODO*/ 
     },

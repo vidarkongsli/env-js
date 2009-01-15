@@ -26,10 +26,10 @@ var DOMElement = function(ownerDocument) {
     //$log("\nfinished creating dom element " + this);
 };
 DOMElement.prototype = new DOMNode;
-__extend__(DOMElement.prototype, {
-  	addEventListener:     window.addEventListener,
-  	removeEventListener:  window.removeEventListener,
-  	dispatchEvent:        window.dispatchEvent,
+__extend__(DOMElement.prototype, {	
+    addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
+	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
+	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
