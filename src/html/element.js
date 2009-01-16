@@ -40,9 +40,9 @@ __extend__(HTMLElement.prototype, {
 		set innerHTML(html){
 		    //$debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
-			html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
-				return m.toLowerCase();
-			}).replace(/&nbsp;/g, " ");
+			//html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
+			//	return m.toLowerCase();
+			//}).replace(/&nbsp;/g, " ");
 			var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
             var parent = this.ownerDocument.importNode(doc.documentElement, true);

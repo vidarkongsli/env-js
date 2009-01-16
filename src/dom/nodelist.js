@@ -19,7 +19,7 @@ $w.__defineGetter__('NodeList', function(){
  */
 var DOMNodeList = function(ownerDocument, parentNode) {
     //$log("\t\tcreating dom nodelist");
-    var nodes = new Array();
+    var nodes = [];
     
     this.length = 0;
     this.parentNode = parentNode;

@@ -245,7 +245,7 @@ $w.__defineGetter__('NodeList', function(){
  */
 var DOMNodeList = function(ownerDocument, parentNode) {
     //$log("\t\tcreating dom nodelist");
-    var nodes = new Array();
+    var nodes = [];
     
     this.length = 0;
     this.parentNode = parentNode;
@@ -821,7 +821,6 @@ var DOMNode = function(ownerDocument) {
 
   this.nodeName = "";                            // The name of this node
   this.nodeValue = "";                           // The value of this node
-  this.nodeType = 0;                             // A code representing the type of the underlying object
 
   // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
   // However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null
@@ -843,7 +842,6 @@ var DOMNode = function(ownerDocument) {
   this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
 
   this._readonly = false;
-  //$log("\tfinished creating dom node");
 };
 
 // nodeType constants
@@ -1404,18 +1402,18 @@ var DOMNamespace = function(ownerDocument) {
   // If the user changes the value of the attribute (even if it ends up having the same value as the default value)
   // then the specified flag is automatically flipped to true
   this.specified = false;
-
-  this.value     = "";                           // the value of the attribute is returned as a string
-
-  this.nodeType  = DOMNode.NAMESPACE_NODE;
 };
 DOMNamespace.prototype = new DOMNode;
 __extend__(DOMNamespace.prototype, {
     get value(){
+        // the value of the attribute is returned as a string
         return this.nodeValue;
     },
     set value(value){
         this.nodeValue = String(value);
+    },
+    get nodeType(){
+        return DOMNode.NAMESPACE_NODE;
     },
     get xml(){
         var ret = "";
@@ -1454,8 +1452,6 @@ $w.__defineGetter__("CharacterData", function(){
 var DOMCharacterData = function(ownerDocument) {
   this.DOMNode  = DOMNode;
   this.DOMNode(ownerDocument);
-  this.data   = "";
-  this.length = 0;
 };
 DOMCharacterData.prototype = new DOMNode;
 __extend__(DOMCharacterData.prototype,{
@@ -1578,7 +1574,6 @@ DOMText = function(ownerDocument) {
   this.DOMCharacterData(ownerDocument);
 
   this.nodeName  = "#text";
-  this.nodeType  = DOMNode.TEXT_NODE;
 };
 DOMText.prototype = new DOMCharacterData;
 __extend__(DOMText.prototype,{
@@ -1622,6 +1617,9 @@ __extend__(DOMText.prototype,{
         
         return inode;
     },
+    get nodeType(){
+        return DOMNode.TEXT_NODE;
+    },
     get xml(){
         return __escapeXML__(""+ this.nodeValue);
     },
@@ -1652,10 +1650,12 @@ var DOMCDATASection = function(ownerDocument) {
   this.DOMText(ownerDocument);
 
   this.nodeName  = "#cdata-section";
-  this.nodeType  = DOMNode.CDATA_SECTION_NODE;
 };
 DOMCDATASection.prototype = new DOMText;
 __extend__(DOMCDATASection.prototype,{
+    get nodeType(){
+        return DOMNode.CDATA_SECTION_NODE;
+    },
     get xml(){
         return "<![CDATA[" + this.nodeValue + "]]>";
     },
@@ -1683,10 +1683,12 @@ var DOMComment = function(ownerDocument) {
   this.DOMCharacterData(ownerDocument);
 
   this.nodeName  = "#comment";
-  this.nodeType  = DOMNode.COMMENT_NODE;
 };
 DOMComment.prototype = new DOMCharacterData;
 __extend__(DOMComment.prototype, {
+    get nodeType(){
+        return DOMNode.COMMENT_NODE;
+    },
     get xml(){
         return "<!-- " + this.nodeValue + " -->";
     },
@@ -1725,20 +1727,22 @@ var DOMAttr = function(ownerDocument) {
     //$log("\tcreating dom attribute");
     this.DOMNode = DOMNode;
     this.DOMNode(ownerDocument);
-    
-    this.name      = "";                    // the name of this attribute
+                   
     this.specified = false;
-    this.value     = "";                    // the value of the attribute is returned as a string
-    this.nodeType  = DOMNode.ATTRIBUTE_NODE;
     this.ownerElement = null;               // set when Attr is added to NamedNodeMap
     
     //$log("\tfincished creating dom attribute " + this);
 };
 DOMAttr.prototype = new DOMNode; 
 __extend__(DOMAttr.prototype, {
+    // the name of this attribute
     get name(){
         return this.nodeName;
     },
+    set name(name){
+        this.nodeName = name;
+    },
+    // the value of the attribute is returned as a string
     get value(){
         return this.nodeValue;
     },
@@ -1750,6 +1754,9 @@ __extend__(DOMAttr.prototype, {
         // delegate to node
         this.specified = (this.value.length > 0);
         this.nodeValue = value;
+    },
+    get nodeType(){
+        return DOMNode.ATTRIBUTE_NODE;
     },
     get xml(){
         return this.nodeName + "='" + this.nodeValue + "' ";
@@ -1780,14 +1787,19 @@ $w.__defineGetter__("Element", function(){
 var DOMElement = function(ownerDocument) {
     //$log("\tcreating dom element");
     this.DOMNode  = DOMNode;
-    this.DOMNode(ownerDocument);
-    this.tagName = "";                             // The name of the element.
+    this.DOMNode(ownerDocument);                   
     this.id = "";                                  // the ID of the element
-    this.nodeType = DOMNode.ELEMENT_NODE;
     //$log("\nfinished creating dom element " + this);
 };
 DOMElement.prototype = new DOMNode;
 __extend__(DOMElement.prototype, {	
+    // The name of the element.
+    get tagName(){
+        return this.nodeName;  
+    },
+    set tagName(name){
+        this.nodeName = name;  
+    },
     addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
 	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
 	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
@@ -1958,6 +1970,9 @@ __extend__(DOMElement.prototype, {
         // delegate to DOMNamedNodeMap._hasAttributeNS
         return __hasAttributeNS__(this.attributes, namespaceURI, localName);
     },
+    get nodeType(){
+        return DOMNode.ELEMENT_NODE;
+    },
     get xml() {
         var ret = "";
         
@@ -2029,10 +2044,12 @@ var DOMDocumentFragment = function(ownerDocument) {
   this.DOMNode = DOMNode;
   this.DOMNode(ownerDocument);
   this.nodeName  = "#document-fragment";
-  this.nodeType = DOMNode.DOCUMENT_FRAGMENT_NODE;
 };
 DOMDocumentFragment.prototype = new DOMNode;
 __extend__(DOMDocumentFragment.prototype,{
+    get nodeType(){
+        return DOMNode.DOCUMENT_FRAGMENT_NODE;
+    },
     get xml(){
         var xml = "",
             count = this.childNodes.length;
@@ -2068,13 +2085,6 @@ $w.__defineGetter__('ProcessingInstruction', function(){
 var DOMProcessingInstruction = function(ownerDocument) {
   this.DOMNode  = DOMNode;
   this.DOMNode(ownerDocument);
-  // The target of this processing instruction.
-  // XML defines this as being the first token following the markup that begins the processing instruction.
-  this.target = "";
-  // The content of this processing instruction.
-  // This is from the first non white space character after the target to the character immediately preceding the ?>
-  this.data   = "";
-  this.nodeType  = DOMNode.PROCESSING_INSTRUCTION_NODE;
 };
 DOMProcessingInstruction.prototype = new DOMNode;
 __extend__(DOMProcessingInstruction.prototype, {
@@ -2089,7 +2099,13 @@ __extend__(DOMProcessingInstruction.prototype, {
         this.nodeValue = data;
     },
     get target(){
+      // The target of this processing instruction.
+      // XML defines this as being the first token following the markup that begins the processing instruction.
+      // The content of this processing instruction.
         return this.nodeName;
+    },
+    get nodeType(){
+        return DOMNode.PROCESSING_INSTRUCTION_NODE;
     },
     get xml(){
         return "<?" + this.nodeName +" "+ this.nodeValue + " ?>";
@@ -2438,7 +2454,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     strN = this.m_xml.substring(iNB, iNE + 1);
     strV = this.m_xml.substring(iVB + 1, iVE);
-
+    
     if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ATT_LT_NAME);
     }
@@ -2575,9 +2591,9 @@ XMLP.prototype._parseElement = function(iB) {
             return this._setErr(XMLP.ERR_ELM_NAME);
         }
     }
-    // end hack -- original code below
+    // end hack -- original code below 
 
-    /*
+    /* 
     if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB)
         return this._setErr(XMLP.ERR_ELM_NAME);
     */
@@ -2602,7 +2618,7 @@ XMLP.prototype._parseElement = function(iB) {
     }
 
     strN = this.m_xml.substring(iB, iNE);
-
+    
     if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ELM_LT_NAME);
     }
@@ -3377,20 +3393,20 @@ __extend__(DOMImplementation.prototype,{
  * @return : DOMDocument
  */
 function __parseLoop__(impl, doc, p) {
-  var iEvt, iNode, iAttr, strName;
-  iNodeParent = doc;
-
-  var el_close_count = 0;
-
-  var entitiesList = new Array();
-  var textNodesList = new Array();
-
-  // if namespaceAware, add default namespace
-  if (impl.namespaceAware) {
+    var iEvt, iNode, iAttr, strName;
+    iNodeParent = doc;
+    
+    var el_close_count = 0;
+    
+    var entitiesList = new Array();
+    var textNodesList = new Array();
+    
+    // if namespaceAware, add default namespace
+    if (impl.namespaceAware) {
     var iNS = doc.createNamespace(""); // add the default-default namespace
-    iNS.value = "http://www.w3.org/2000/xmlns/";
-    doc._namespaces.setNamedItem(iNS);
-  }
+        iNS.value = "http://www.w3.org/2000/xmlns/";
+        doc._namespaces.setNamedItem(iNS);
+    }
 
   // loop until SAX parser stops emitting events
   while(true) {
@@ -3643,8 +3659,6 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._ERROR) {
         $error("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
         throw(new DOMException(DOMException.SYNTAX_ERR));
-      // alert("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
-      // break;
     }
     else if(iEvt == XMLP._NONE) {                   // no more events
       if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
@@ -3807,7 +3821,7 @@ function __parseQName__(qualifiedName) {
 $log("Initializing document.implementation");
 var $implementation =  new DOMImplementation();
 $implementation.namespaceAware = false;
-$implementation.errorChecking = true;$log("Defining Document");
+$implementation.errorChecking = false;$log("Defining Document");
 /*
 * Document - DOM Level 2
 *  The Document object is not directly 
@@ -3838,7 +3852,6 @@ var DOMDocument = function(implementation) {
     //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
-    this.nodeType = DOMNode.DOCUMENT_NODE;
     this._id = 0;
     this._lastId = 0;
     this._parseComplete = false;                   // initially false, set to true by parser
@@ -3938,11 +3951,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.tagName  = tagName;
-          node.nodeName = tagName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
-          //$log("Document.all.length " + this.all.length);
         
           return node;
     },
@@ -3958,10 +3966,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -3971,10 +3975,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -3984,10 +3984,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -4002,29 +3998,23 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.target    = target;
-          node.nodeName  = target;
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
     createAttribute : function(name) {
-          // throw Exception if the name string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
+        // throw Exception if the name string contains an illegal character
+        if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
+        }
         
-          // create DOMAttr specifying 'this' as ownerDocument
-          var node = new DOMAttr(this);
+        // create DOMAttr specifying 'this' as ownerDocument
+        var node = new DOMAttr(this);
         
-          // assign values to properties (and aliases)
-          node.name     = name;
-          node.nodeName = name;
+        // assign values to properties (and aliases)
+        node.name     = name;
         
-          return node;
+        return node;
     },
     createElementNS : function(namespaceURI, qualifiedName) {
         //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
@@ -4046,14 +4036,10 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.namespaceURI = namespaceURI;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
           node.tagName      = qualifiedName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
         
           return node;
     },
@@ -4076,7 +4062,6 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.namespaceURI = namespaceURI;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
@@ -4091,7 +4076,6 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
           node.name         = qualifiedName;
@@ -4121,6 +4105,9 @@ __extend__(DOMDocument.prototype, {
     },
     normalizeDocument: function(){
 	    this.documentElement.normalize();
+    },
+    get nodeType(){
+        return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         return this.documentElement.xml;
@@ -4277,11 +4264,6 @@ __extend__(HTMLDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.tagName  = tagName;
-          node.nodeName = tagName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
-          //$log("Document.all.length " + this.all.length);
           return node;
     },
     get anchors(){
@@ -4442,9 +4424,9 @@ __extend__(HTMLElement.prototype, {
 		set innerHTML(html){
 		    //$debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
-			html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
-				return m.toLowerCase();
-			}).replace(/&nbsp;/g, " ");
+			//html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
+			//	return m.toLowerCase();
+			//}).replace(/&nbsp;/g, " ");
 			var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
             var parent = this.ownerDocument.importNode(doc.documentElement, true);

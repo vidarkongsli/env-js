@@ -36,7 +36,6 @@ var DOMNode = function(ownerDocument) {
 
   this.nodeName = "";                            // The name of this node
   this.nodeValue = "";                           // The value of this node
-  this.nodeType = 0;                             // A code representing the type of the underlying object
 
   // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
   // However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null
@@ -58,7 +57,6 @@ var DOMNode = function(ownerDocument) {
   this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
 
   this._readonly = false;
-  //$log("\tfinished creating dom node");
 };
 
 // nodeType constants

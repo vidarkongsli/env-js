@@ -19,20 +19,22 @@ var DOMAttr = function(ownerDocument) {
     //$log("\tcreating dom attribute");
     this.DOMNode = DOMNode;
     this.DOMNode(ownerDocument);
-    
-    this.name      = "";                    // the name of this attribute
+                   
     this.specified = false;
-    this.value     = "";                    // the value of the attribute is returned as a string
-    this.nodeType  = DOMNode.ATTRIBUTE_NODE;
     this.ownerElement = null;               // set when Attr is added to NamedNodeMap
     
     //$log("\tfincished creating dom attribute " + this);
 };
 DOMAttr.prototype = new DOMNode; 
 __extend__(DOMAttr.prototype, {
+    // the name of this attribute
     get name(){
         return this.nodeName;
     },
+    set name(name){
+        this.nodeName = name;
+    },
+    // the value of the attribute is returned as a string
     get value(){
         return this.nodeValue;
     },
@@ -44,6 +46,9 @@ __extend__(DOMAttr.prototype, {
         // delegate to node
         this.specified = (this.value.length > 0);
         this.nodeValue = value;
+    },
+    get nodeType(){
+        return DOMNode.ATTRIBUTE_NODE;
     },
     get xml(){
         return this.nodeName + "='" + this.nodeValue + "' ";

@@ -18,10 +18,12 @@ var DOMDocumentFragment = function(ownerDocument) {
   this.DOMNode = DOMNode;
   this.DOMNode(ownerDocument);
   this.nodeName  = "#document-fragment";
-  this.nodeType = DOMNode.DOCUMENT_FRAGMENT_NODE;
 };
 DOMDocumentFragment.prototype = new DOMNode;
 __extend__(DOMDocumentFragment.prototype,{
+    get nodeType(){
+        return DOMNode.DOCUMENT_FRAGMENT_NODE;
+    },
     get xml(){
         var xml = "",
             count = this.childNodes.length;

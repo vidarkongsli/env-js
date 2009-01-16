@@ -17,8 +17,6 @@ $w.__defineGetter__("CharacterData", function(){
 var DOMCharacterData = function(ownerDocument) {
   this.DOMNode  = DOMNode;
   this.DOMNode(ownerDocument);
-  this.data   = "";
-  this.length = 0;
 };
 DOMCharacterData.prototype = new DOMNode;
 __extend__(DOMCharacterData.prototype,{

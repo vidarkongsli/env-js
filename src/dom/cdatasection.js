@@ -20,10 +20,12 @@ var DOMCDATASection = function(ownerDocument) {
   this.DOMText(ownerDocument);
 
   this.nodeName  = "#cdata-section";
-  this.nodeType  = DOMNode.CDATA_SECTION_NODE;
 };
 DOMCDATASection.prototype = new DOMText;
 __extend__(DOMCDATASection.prototype,{
+    get nodeType(){
+        return DOMNode.CDATA_SECTION_NODE;
+    },
     get xml(){
         return "<![CDATA[" + this.nodeValue + "]]>";
     },

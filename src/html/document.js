@@ -87,11 +87,6 @@ __extend__(HTMLDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.tagName  = tagName;
-          node.nodeName = tagName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
-          //$log("Document.all.length " + this.all.length);
           return node;
     },
     get anchors(){

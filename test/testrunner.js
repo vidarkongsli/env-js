@@ -16,7 +16,7 @@ function test(name, fn){
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
 var orig = document.getElementById('main').innerHTML;
-	print(orig);
+	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.

@@ -133,20 +133,20 @@ __extend__(DOMImplementation.prototype,{
  * @return : DOMDocument
  */
 function __parseLoop__(impl, doc, p) {
-  var iEvt, iNode, iAttr, strName;
-  iNodeParent = doc;
-
-  var el_close_count = 0;
-
-  var entitiesList = new Array();
-  var textNodesList = new Array();
-
-  // if namespaceAware, add default namespace
-  if (impl.namespaceAware) {
+    var iEvt, iNode, iAttr, strName;
+    iNodeParent = doc;
+    
+    var el_close_count = 0;
+    
+    var entitiesList = new Array();
+    var textNodesList = new Array();
+    
+    // if namespaceAware, add default namespace
+    if (impl.namespaceAware) {
     var iNS = doc.createNamespace(""); // add the default-default namespace
-    iNS.value = "http://www.w3.org/2000/xmlns/";
-    doc._namespaces.setNamedItem(iNS);
-  }
+        iNS.value = "http://www.w3.org/2000/xmlns/";
+        doc._namespaces.setNamedItem(iNS);
+    }
 
   // loop until SAX parser stops emitting events
   while(true) {
@@ -399,8 +399,6 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._ERROR) {
         $error("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
         throw(new DOMException(DOMException.SYNTAX_ERR));
-      // alert("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
-      // break;
     }
     else if(iEvt == XMLP._NONE) {                   // no more events
       if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
@@ -563,4 +561,4 @@ function __parseQName__(qualifiedName) {
 $log("Initializing document.implementation");
 var $implementation =  new DOMImplementation();
 $implementation.namespaceAware = false;
-$implementation.errorChecking = true;
+$implementation.errorChecking = false;

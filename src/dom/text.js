@@ -22,7 +22,6 @@ DOMText = function(ownerDocument) {
   this.DOMCharacterData(ownerDocument);
 
   this.nodeName  = "#text";
-  this.nodeType  = DOMNode.TEXT_NODE;
 };
 DOMText.prototype = new DOMCharacterData;
 __extend__(DOMText.prototype,{
@@ -65,6 +64,9 @@ __extend__(DOMText.prototype,{
         }
         
         return inode;
+    },
+    get nodeType(){
+        return DOMNode.TEXT_NODE;
     },
     get xml(){
         return __escapeXML__(""+ this.nodeValue);

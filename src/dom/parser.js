@@ -338,7 +338,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     strN = this.m_xml.substring(iNB, iNE + 1);
     strV = this.m_xml.substring(iVB + 1, iVE);
-
+    
     if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ATT_LT_NAME);
     }
@@ -475,9 +475,9 @@ XMLP.prototype._parseElement = function(iB) {
             return this._setErr(XMLP.ERR_ELM_NAME);
         }
     }
-    // end hack -- original code below
+    // end hack -- original code below 
 
-    /*
+    /* 
     if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB)
         return this._setErr(XMLP.ERR_ELM_NAME);
     */
@@ -502,7 +502,7 @@ XMLP.prototype._parseElement = function(iB) {
     }
 
     strN = this.m_xml.substring(iB, iNE);
-
+    
     if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ELM_LT_NAME);
     }

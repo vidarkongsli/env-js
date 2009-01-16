@@ -19,10 +19,12 @@ var DOMComment = function(ownerDocument) {
   this.DOMCharacterData(ownerDocument);
 
   this.nodeName  = "#comment";
-  this.nodeType  = DOMNode.COMMENT_NODE;
 };
 DOMComment.prototype = new DOMCharacterData;
 __extend__(DOMComment.prototype, {
+    get nodeType(){
+        return DOMNode.COMMENT_NODE;
+    },
     get xml(){
         return "<!-- " + this.nodeValue + " -->";
     },

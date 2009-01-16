@@ -17,18 +17,18 @@ var DOMNamespace = function(ownerDocument) {
   // If the user changes the value of the attribute (even if it ends up having the same value as the default value)
   // then the specified flag is automatically flipped to true
   this.specified = false;
-
-  this.value     = "";                           // the value of the attribute is returned as a string
-
-  this.nodeType  = DOMNode.NAMESPACE_NODE;
 };
 DOMNamespace.prototype = new DOMNode;
 __extend__(DOMNamespace.prototype, {
     get value(){
+        // the value of the attribute is returned as a string
         return this.nodeValue;
     },
     set value(value){
         this.nodeValue = String(value);
+    },
+    get nodeType(){
+        return DOMNode.NAMESPACE_NODE;
     },
     get xml(){
         var ret = "";

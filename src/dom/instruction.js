@@ -18,13 +18,6 @@ $w.__defineGetter__('ProcessingInstruction', function(){
 var DOMProcessingInstruction = function(ownerDocument) {
   this.DOMNode  = DOMNode;
   this.DOMNode(ownerDocument);
-  // The target of this processing instruction.
-  // XML defines this as being the first token following the markup that begins the processing instruction.
-  this.target = "";
-  // The content of this processing instruction.
-  // This is from the first non white space character after the target to the character immediately preceding the ?>
-  this.data   = "";
-  this.nodeType  = DOMNode.PROCESSING_INSTRUCTION_NODE;
 };
 DOMProcessingInstruction.prototype = new DOMNode;
 __extend__(DOMProcessingInstruction.prototype, {
@@ -39,7 +32,13 @@ __extend__(DOMProcessingInstruction.prototype, {
         this.nodeValue = data;
     },
     get target(){
+      // The target of this processing instruction.
+      // XML defines this as being the first token following the markup that begins the processing instruction.
+      // The content of this processing instruction.
         return this.nodeName;
+    },
+    get nodeType(){
+        return DOMNode.PROCESSING_INSTRUCTION_NODE;
     },
     get xml(){
         return "<?" + this.nodeName +" "+ this.nodeValue + " ?>";

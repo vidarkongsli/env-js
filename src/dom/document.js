@@ -29,7 +29,6 @@ var DOMDocument = function(implementation) {
     //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
-    this.nodeType = DOMNode.DOCUMENT_NODE;
     this._id = 0;
     this._lastId = 0;
     this._parseComplete = false;                   // initially false, set to true by parser
@@ -129,11 +128,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.tagName  = tagName;
-          node.nodeName = tagName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
-          //$log("Document.all.length " + this.all.length);
         
           return node;
     },
@@ -149,10 +143,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -162,10 +152,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -175,10 +161,6 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
@@ -193,29 +175,23 @@ __extend__(DOMDocument.prototype, {
         
           // assign values to properties (and aliases)
           node.target    = target;
-          node.nodeName  = target;
           node.data      = data;
-          node.nodeValue = data;
-        
-          // set initial length
-          node.length    = data.length;
         
           return node;
     },
     createAttribute : function(name) {
-          // throw Exception if the name string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
+        // throw Exception if the name string contains an illegal character
+        if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
+        }
         
-          // create DOMAttr specifying 'this' as ownerDocument
-          var node = new DOMAttr(this);
+        // create DOMAttr specifying 'this' as ownerDocument
+        var node = new DOMAttr(this);
         
-          // assign values to properties (and aliases)
-          node.name     = name;
-          node.nodeName = name;
+        // assign values to properties (and aliases)
+        node.name     = name;
         
-          return node;
+        return node;
     },
     createElementNS : function(namespaceURI, qualifiedName) {
         //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
@@ -237,14 +213,10 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.namespaceURI = namespaceURI;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
           node.tagName      = qualifiedName;
-        
-          // add Element to 'all' collection
-          //this.all[this.all.length] = node;
         
           return node;
     },
@@ -267,7 +239,6 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.namespaceURI = namespaceURI;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
@@ -282,7 +253,6 @@ __extend__(DOMDocument.prototype, {
           var qname = __parseQName__(qualifiedName);
         
           // assign values to properties (and aliases)
-          node.nodeName     = qualifiedName;
           node.prefix       = qname.prefix;
           node.localName    = qname.localName;
           node.name         = qualifiedName;
@@ -312,6 +282,9 @@ __extend__(DOMDocument.prototype, {
     },
     normalizeDocument: function(){
 	    this.documentElement.normalize();
+    },
+    get nodeType(){
+        return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         return this.documentElement.xml;

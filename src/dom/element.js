@@ -19,14 +19,19 @@ $w.__defineGetter__("Element", function(){
 var DOMElement = function(ownerDocument) {
     //$log("\tcreating dom element");
     this.DOMNode  = DOMNode;
-    this.DOMNode(ownerDocument);
-    this.tagName = "";                             // The name of the element.
+    this.DOMNode(ownerDocument);                   
     this.id = "";                                  // the ID of the element
-    this.nodeType = DOMNode.ELEMENT_NODE;
     //$log("\nfinished creating dom element " + this);
 };
 DOMElement.prototype = new DOMNode;
 __extend__(DOMElement.prototype, {	
+    // The name of the element.
+    get tagName(){
+        return this.nodeName;  
+    },
+    set tagName(name){
+        this.nodeName = name;  
+    },
     addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
 	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
 	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
@@ -196,6 +201,9 @@ __extend__(DOMElement.prototype, {
     hasAttributeNS : function(namespaceURI, localName) {
         // delegate to DOMNamedNodeMap._hasAttributeNS
         return __hasAttributeNS__(this.attributes, namespaceURI, localName);
+    },
+    get nodeType(){
+        return DOMNode.ELEMENT_NODE;
     },
     get xml() {
         var ret = "";
