@@ -3,14 +3,14 @@
 */
 // Window Events
 $log("Initializing Window Event.");
-var $events = [{}],
+var $events = [],
     $onerror,
     $onload,
     $onunload;
 
 $w.addEventListener = function(type, fn){
   $log("adding event listener " + type);
-	if ( !this.uuid || this == window ) {
+	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
 	}
@@ -23,7 +23,7 @@ $w.addEventListener = function(type, fn){
 };
 
 $w.removeEventListener = function(type, fn){
-  if ( !this.uuid || this == window ) {
+  if ( !this.uuid ) {
     this.uuid = $events.length;
     $events[this.uuid] = {};
   }
