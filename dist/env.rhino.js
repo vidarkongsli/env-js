@@ -4523,6 +4523,9 @@ __extend__(HTMLDocument.prototype, {
         return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
         
     },
+    get location(){
+        return $w.location
+    },
     get referrer(){
         /* TODO */
         return this._refferer; 
