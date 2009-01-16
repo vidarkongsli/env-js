@@ -1,0 +1,36 @@
+env.js : A pure JavaScript browser environment.
+Developed by John Resig (http://ejohn.org)
+
+Major Contributers:
+Chris Thatcher (http://github.com/thatcher)
+
+GitHub repositories:
+http://github.com/jeresig/env-js/
+http://github.com/thatcher/env-js/
+
+Mailing List:
+http://groups.google.com/group/envjs
+
+Lighthouse (Bug Tracking):
+http://envjs.lighthouseapp.com/projects/21590-envjs/
+
+Original blog post:
+http://ejohn.org/projects/bringing-the-browser-to-the-server/
+
+Rhino (Java-based JavaScript engine)
+http://www.mozilla.org/rhino/
+
+
+Building:
+* run "ant concat"
+* Creates a platform-agnostic "dist/env.js" file and a Rhino-specific "dist/env.rhino.js" file.
+
+Installing:
+* Include the proper env.js file for your platform.
+    load('env.rhino.js'); //if in a Rhino script
+* Set the window location to an HTML file you want env.js to model:
+    window.location = "some/file.html";
+* (See the test/test.js file for a more elaborate setup.)
+
+Testing:
+* run "make rhino-test"
