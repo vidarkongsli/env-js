@@ -7082,6 +7082,10 @@ $w.resizeTo = function(width, height){
   $height = (height <= $availHeight) ? height : $availHeight;
 };
 
+
+$w.scroll = function(x,y){
+  //TODO
+};
 $w.scrollBy = function(dx, dy){
   //TODO
 };
