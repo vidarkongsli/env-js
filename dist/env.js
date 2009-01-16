@@ -131,7 +131,7 @@ __extend__($w,{
   get self(){return $self;},
   get status(){return $status;},
   set status(_status){$status = _status;},
-  get top(){return $top;},
+  get top(){return $top || $window;},
   get window(){return $window;}
 });
 
