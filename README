@@ -25,12 +25,34 @@ Building:
 * run "ant concat"
 * Creates a platform-agnostic "dist/env.js" file and a Rhino-specific "dist/env.rhino.js" file.
 
-Installing:
-* Include the proper env.js file for your platform.
-    load('env.rhino.js'); //if in a Rhino script
-* Set the window location to an HTML file you want env.js to model:
-    window.location = "some/file.html";
-* (See the test/test.js file for a more elaborate setup.)
-
 Testing:
 * run "make rhino-test"
+
+Installing:
+1) Include the proper env.js file for your platform.
+    load('env.rhino.js'); //if in a Rhino script
+
+2) Tell env.js to load an HTML file from your file system that it should model:
+    window.location = "some/file.html";
+
+3) Optionally trigger "document ready" events in one of these ways:
+
+  a) standard window.load method:
+    load('env.rhino.js');
+    window.onload = function() { /* do something after DOM is loaded */};
+    window.location = "some/file.html";
+    
+  b) jQuery ready method:
+    load('env.rhino.js');
+    load('jquery-1.2.6.js');
+    window.location = "some/file.html";
+    load('some-code-that-sets-up-jquery-onready-behaviors.js')
+    jQuery.ready();
+
+  c) Other JavaScript frameworks have their own methods of setup, but the general pattern is:
+    // load env.js
+    // load your framework
+    // tell env.js the base DOM to model
+    // run any setup code for your framework
+    // tell the framework that the document is loaded
+    
