@@ -13,9 +13,9 @@ window.onload = function(){
   // Load the tests
   load(
     "test/unit/dom.js",
-    "test/unit/core.js",
-    "test/unit/selector.js",
-    "test/unit/event.js"
+    "test/unit/core.js"//,
+    //"test/unit/selector.js",
+    //"test/unit/event.js"
   );
   var end = new Date().getTime();
   
@@ -23,7 +23,26 @@ window.onload = function(){
   // Display the results
   results();
   
-  print("Tests took : " + (end - start)/1000 + "seconds");
+  var tab = "                ";//16
+  print("\n\nTOTAL TIME : " + (end - start)/1000 + " SECONDS");
+  print("\nPROFILE");
+  print("ASPECT \n" +  
+        " | # OF CALLS "+tab.substring(0,tab.length-String(calls).length)+ 
+        " | MIN "+tab.substring(0,tab.length-"MIN".length)+
+        " | MAX "+tab.substring(0,tab.length-"MAX".length)+
+        " | AVG "+tab.substring(0,tab.length-"AVG".length)+
+        " | OWN "+tab.substring(0,tab.length-"OWN".length)+" |");
+  for( var profile in window.$profile){
+        var stats = window.$profiler.stats(window.$profile[profile].times);
+        var calls = window.$profile[profile].callCount;
+        print(  profile+" \n | "+
+                calls+" "+tab.substring(0,tab.length-String(calls).length)+" | "+
+                stats.min+" "+tab.substring(0,tab.length-String(stats.min).length)+" | "+
+                stats.max+" "+tab.substring(0,tab.length-String(stats.max).length)+" | "+
+                stats.avg+" "+tab.substring(0,tab.length-String(stats.avg).length)+" | "+
+                stats.own+" "+tab.substring(0,tab.length-String(stats.own).length)+" |");
+  }
+  
 };
 
 window.location = "test/index.html";

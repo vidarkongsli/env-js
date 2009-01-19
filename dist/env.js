@@ -6854,14 +6854,14 @@ window.clearInterval = window.clearTimeout = function(num){
 */
 // Window Events
 $log("Initializing Window Event.");
-var $events = [{}],
+var $events = [],
     $onerror,
     $onload,
     $onunload;
 
 $w.addEventListener = function(type, fn){
   $log("adding event listener " + type);
-	if ( !this.uuid || this == window ) {
+	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
 	}
@@ -6874,7 +6874,7 @@ $w.addEventListener = function(type, fn){
 };
 
 $w.removeEventListener = function(type, fn){
-  if ( !this.uuid || this == window ) {
+  if ( !this.uuid ) {
     this.uuid = $events.length;
     $events[this.uuid] = {};
   }
@@ -7105,7 +7105,631 @@ $w.confirm = function(question){
 
 $w.prompt = function(message, defaultMsg){
   //TODO
-};/*
+};/**
+* jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
+* http://jquery-aop.googlecode.com/
+*
+* Licensed under the MIT license:
+* http://www.opensource.org/licenses/mit-license.php
+*
+* Version: 1.1
+*/
+window.$profiler;
+
+(function() {
+
+	var _after	= 1;
+	var _before	= 2;
+	var _around	= 3;
+	var _intro  = 4;
+	var _regexEnabled = true;
+
+	/**
+	 * Private weaving function.
+	 */
+	var weaveOne = function(source, method, advice) {
+
+		var old = source[method];
+
+		var aspect;
+		if (advice.type == _after)
+			aspect = function() {
+				var returnValue = old.apply(this, arguments);
+				return advice.value.apply(this, [returnValue, method]);
+			};
+		else if (advice.type == _before)
+			aspect = function() {
+				advice.value.apply(this, [arguments, method]);
+				return old.apply(this, arguments);
+			};
+		else if (advice.type == _intro)
+			aspect = function() {
+				return advice.value.apply(this, arguments);
+			};
+		else if (advice.type == _around) {
+			aspect = function() {
+				var invocation = { object: this, args: arguments };
+				return advice.value.apply(invocation.object, [{ arguments: invocation.args, method: method, proceed : 
+					function() {
+						return old.apply(invocation.object, invocation.args);
+					}
+				}] );
+			};
+		}
+
+		aspect.unweave = function() { 
+			source[method] = old;
+			pointcut = source = aspect = old = null;
+		};
+
+		source[method] = aspect;
+
+		return aspect;
+
+	};
+
+
+	/**
+	 * Private weaver and pointcut parser.
+	 */
+	var weave = function(pointcut, advice)
+	{
+
+		var source = (typeof(pointcut.target.prototype) != 'undefined') ? pointcut.target.prototype : pointcut.target;
+		var advices = [];
+
+		// If it's not an introduction and no method was found, try with regex...
+		if (advice.type != _intro && typeof(source[pointcut.method]) == 'undefined')
+		{
+
+			for (var method in source)
+			{
+				if (source[method] != null && source[method] instanceof Function && method.match(pointcut.method))
+				{
+					advices[advices.length] = weaveOne(source, method, advice);
+				}
+			}
+
+			if (advices.length == 0)
+				throw 'No method: ' + pointcut.method;
+
+		} 
+		else
+		{
+			// Return as an array of one element
+			advices[0] = weaveOne(source, pointcut.method, advice);
+		}
+
+		return _regexEnabled ? advices : advices[0];
+
+	};
+
+	window.$profiler = 
+	{
+		/**
+		 * Creates an advice after the defined point-cut. The advice will be executed after the point-cut method 
+		 * has completed execution successfully, and will receive one parameter with the result of the execution.
+		 * This function returns an array of weaved aspects (Function).
+		 *
+		 * @example jQuery.aop.after( {target: window, method: 'MyGlobalMethod'}, function(result) { alert('Returned: ' + result); } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.after( {target: String, method: 'indexOf'}, function(index) { alert('Result found at: ' + index + ' on:' + this); } );
+		 * @result Array<Function>
+		 *
+		 * @name after
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
+		 * @param Function advice Function containing the code that will get called after the execution of the point-cut. It receives one parameter
+		 *                        with the result of the point-cut's execution.
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		after : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _after, value: advice } );
+		},
+
+		/**
+		 * Creates an advice before the defined point-cut. The advice will be executed before the point-cut method 
+		 * but cannot modify the behavior of the method, or prevent its execution.
+		 * This function returns an array of weaved aspects (Function).
+		 *
+		 * @example jQuery.aop.before( {target: window, method: 'MyGlobalMethod'}, function() { alert('About to execute MyGlobalMethod'); } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.before( {target: String, method: 'indexOf'}, function(index) { alert('About to execute String.indexOf on: ' + this); } );
+		 * @result Array<Function>
+		 *
+		 * @name before
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
+		 * @param Function advice Function containing the code that will get called before the execution of the point-cut.
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		before : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _before, value: advice } );
+		},
+
+
+		/**
+		 * Creates an advice 'around' the defined point-cut. This type of advice can control the point-cut method execution by calling
+		 * the functions '.proceed()' on the 'invocation' object, and also, can modify the arguments collection before sending them to the function call.
+		 * This function returns an array of weaved aspects (Function).
+		 *
+		 * @example jQuery.aop.around( {target: window, method: 'MyGlobalMethod'}, function(invocation) {
+		 *                alert('# of Arguments: ' + invocation.arguments.length); 
+		 *                return invocation.proceed(); 
+		 *          } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.around( {target: String, method: 'indexOf'}, function(invocation) { 
+		 *                alert('Searching: ' + invocation.arguments[0] + ' on: ' + this); 
+		 *                return invocation.proceed(); 
+		 *          } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.around( {target: window, method: /Get(\d+)/}, function(invocation) {
+		 *                alert('Executing ' + invocation.method); 
+		 *                return invocation.proceed(); 
+		 *          } );
+		 * @desc Matches all global methods starting with 'Get' and followed by a number.
+		 * @result Array<Function>
+		 *
+		 *
+		 * @name around
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved. Regex are supported, but not on built-in objects.
+		 * @param Function advice Function containing the code that will get called around the execution of the point-cut. This advice will be called with one
+		 *                        argument containing one function '.proceed()', the collection of arguments '.arguments', and the matched method name '.method'.
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		around : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _around, value: advice } );
+		},
+
+		/**
+		 * Creates an introduction on the defined point-cut. This type of advice replaces any existing methods with the same
+		 * name. To restore them, just unweave it.
+		 * This function returns an array with only one weaved aspect (Function).
+		 *
+		 * @example jQuery.aop.introduction( {target: window, method: 'MyGlobalMethod'}, function(result) { alert('Returned: ' + result); } );
+		 * @result Array<Function>
+		 *
+		 * @example jQuery.aop.introduction( {target: String, method: 'log'}, function() { alert('Console: ' + this); } );
+		 * @result Array<Function>
+		 *
+		 * @name introduction
+		 * @param Map pointcut Definition of the point-cut to apply the advice. A point-cut is the definition of the object/s and method/s to be weaved.
+		 * @option Object target Target object to be weaved. 
+		 * @option String method Name of the function to be weaved.
+		 * @param Function advice Function containing the code that will be executed on the point-cut. 
+		 *
+		 * @type Array<Function>
+		 * @cat Plugins/General
+		 */
+		introduction : function(pointcut, advice)
+		{
+			return weave( pointcut, { type: _intro, value: advice } );
+		},
+		
+		/**
+		 * Configures global options.
+		 *
+		 * @name setup
+		 * @param Map settings Configuration options.
+		 * @option Boolean regexMatch Enables/disables regex matching of method names.
+		 *
+		 * @example jQuery.aop.setup( { regexMatch: false } );
+		 * @desc Disable regex matching.
+		 *
+		 * @type Void
+		 * @cat Plugins/General
+		 */
+		setup: function(settings)
+		{
+			_regexEnabled = settings.regexMatch;
+		}
+	};
+
+})();
+
+
+var $profile = window.$profile = {};
+
+
+var __profile__ = function(id, invocation){
+    var start = new Date().getTime();
+    var retval = invocation.proceed(); 
+    var finish = new Date().getTime();
+    $profile[id] = $profile[id] ? $profile[id] : {};
+    $profile[id].callCount = $profile[id].callCount !== undefined ? 
+        $profile[id].callCount+1 : 0;
+    $profile[id].times = $profile[id].times ? $profile[id].times : [];
+    $profile[id].times[$profile[id].callCount++] = (finish-start);
+    return retval;
+};
+
+
+window.$profiler.stats = function(raw){
+    var max     = 0,
+        avg     = -1,
+        min     = 10000000,
+        own     = 0;
+    for(var i = 0;i<raw.length;i++){
+        if(raw[i] > 0){
+            own += raw[i];
+        };
+        if(raw[i] > max){
+            max = raw[i];
+        }
+        if(raw[i] < min){
+            min = raw[i];
+        }
+    }
+    avg = Math.floor(own/raw.length);
+    return {
+        min: min,
+        max: max,
+        avg: avg,
+        own: own
+    };
+};
+
+if(__env__.profile){
+    /**
+    *   CSS2Properties
+    */
+    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyCSSValue"}, function(invocation) {
+        return __profile__("CSS2Properties.getPropertyCSSValue", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyPriority"}, function(invocation) {
+        return __profile__("CSS2Properties.getPropertyPriority", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyValue"}, function(invocation) {
+        return __profile__("CSS2Properties.getPropertyValue", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"item"}, function(invocation) {
+        return __profile__("CSS2Properties.item", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"removeProperty"}, function(invocation) {
+        return __profile__("CSS2Properties.removeProperty", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"setProperty"}, function(invocation) {
+        return __profile__("CSS2Properties.setProperty", invocation);
+    });  
+    window.$profiler.around({ target: CSS2Properties,  method:"toString"}, function(invocation) {
+        return __profile__("CSS2Properties.toString", invocation);
+    });  
+               
+    
+    /**
+    *   DOMNode
+    */
+                    
+    window.$profiler.around({ target: DOMNode,  method:"hasAttributes"}, function(invocation) {
+        return __profile__("DOMNode.hasAttributes", invocation);
+    });          
+    window.$profiler.around({ target: DOMNode,  method:"insertBefore"}, function(invocation) {
+        return __profile__("DOMNode.insertBefore", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"replaceChild"}, function(invocation) {
+        return __profile__("DOMNode.replaceChild", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"removeChild"}, function(invocation) {
+        return __profile__("DOMNode.removeChild", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"replaceChild"}, function(invocation) {
+        return __profile__("DOMNode.replaceChild", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"appendChild"}, function(invocation) {
+        return __profile__("DOMNode.appendChild", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"hasChildNodes"}, function(invocation) {
+        return __profile__("DOMNode.hasChildNodes", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"cloneNode"}, function(invocation) {
+        return __profile__("DOMNode.cloneNode", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"normalize"}, function(invocation) {
+        return __profile__("DOMNode.normalize", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"isSupported"}, function(invocation) {
+        return __profile__("DOMNode.isSupported", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"getElementsByTagName"}, function(invocation) {
+        return __profile__("DOMNode.getElementsByTagName", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"getElementsByTagNameNS"}, function(invocation) {
+        return __profile__("DOMNode.getElementsByTagNameNS", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"importNode"}, function(invocation) {
+        return __profile__("DOMNode.importNode", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"contains"}, function(invocation) {
+        return __profile__("DOMNode.contains", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNode,  method:"compareDocumentPosition"}, function(invocation) {
+        return __profile__("DOMNode.compareDocumentPosition", invocation);
+    }); 
+    
+    /**
+    *   DOMDocument
+    */
+    window.$profiler.around({ target: DOMDocument,  method:"addEventListener"}, function(invocation) {
+        return __profile__("DOMDocument.addEventListener", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"removeEventListener"}, function(invocation) {
+        return __profile__("DOMDocument.removeEventListener", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"attachEvent"}, function(invocation) {
+        return __profile__("DOMDocument.attachEvent", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"detachEvent"}, function(invocation) {
+        return __profile__("DOMDocument.detachEvent", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"dispatchEvent"}, function(invocation) {
+        return __profile__("DOMDocument.dispatchEvent", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"loadXML"}, function(invocation) {
+        return __profile__("DOMDocument.loadXML", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"load"}, function(invocation) {
+        return __profile__("DOMDocument.load", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createEvent"}, function(invocation) {
+        return __profile__("DOMDocument.createEvent", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createExpression"}, function(invocation) {
+        return __profile__("DOMDocument.createExpression", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createElement"}, function(invocation) {
+        return __profile__("DOMDocument.createElement", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createDocumentFragment"}, function(invocation) {
+        return __profile__("DOMDocument.createDocumentFragment", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createTextNode"}, function(invocation) {
+        return __profile__("DOMDocument.createTextNode", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createComment"}, function(invocation) {
+        return __profile__("DOMDocument.createComment", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createCDATASection"}, function(invocation) {
+        return __profile__("DOMDocument.createCDATASection", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createProcessingInstruction"}, function(invocation) {
+        return __profile__("DOMDocument.createProcessingInstruction", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createAttribute"}, function(invocation) {
+        return __profile__("DOMDocument.createAttribute", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createElementNS"}, function(invocation) {
+        return __profile__("DOMDocument.createElementNS", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createAttributeNS"}, function(invocation) {
+        return __profile__("DOMDocument.createAttributeNS", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"createNamespace"}, function(invocation) {
+        return __profile__("DOMDocument.createNamespace", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"getElementById"}, function(invocation) {
+        return __profile__("DOMDocument.getElementById", invocation);
+    });
+    window.$profiler.around({ target: DOMDocument,  method:"normalizeDocument"}, function(invocation) {
+        return __profile__("DOMDocument.normalizeDocument", invocation);
+    });
+    
+    /**
+    *   DOMNodeList
+    */      
+    window.$profiler.around({ target: DOMNodeList,  method:"item"}, function(invocation) {
+        return __profile__("DOMNode.item", invocation);
+    }); 
+    window.$profiler.around({ target: DOMNodeList,  method:"toString"}, function(invocation) {
+        return __profile__("DOMNode.toString", invocation);
+    }); 
+    
+    /**
+    *   XMLP
+    */      
+    window.$profiler.around({ target: XMLP,  method:"_addAttribute"}, function(invocation) {
+        return __profile__("XMLP._addAttribute", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_checkStructure"}, function(invocation) {
+        return __profile__("XMLP._checkStructure", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_clearAttributes"}, function(invocation) {
+        return __profile__("XMLP._clearAttributes", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_findAttributeIndex"}, function(invocation) {
+        return __profile__("XMLP._findAttributeIndex", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getAttributeCount"}, function(invocation) {
+        return __profile__("XMLP.getAttributeCount", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getAttributeName"}, function(invocation) {
+        return __profile__("XMLP.getAttributeName", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getAttributeValue"}, function(invocation) {
+        return __profile__("XMLP.getAttributeValue", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getAttributeValueByName"}, function(invocation) {
+        return __profile__("XMLP.getAttributeValueByName", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getColumnNumber"}, function(invocation) {
+        return __profile__("XMLP.getColumnNumber", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getContentBegin"}, function(invocation) {
+        return __profile__("XMLP.getContentBegin", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getContentEnd"}, function(invocation) {
+        return __profile__("XMLP.getContentEnd", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getLineNumber"}, function(invocation) {
+        return __profile__("XMLP.getLineNumber", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"getName"}, function(invocation) {
+        return __profile__("XMLP.getName", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"next"}, function(invocation) {
+        return __profile__("XMLP.next", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parse"}, function(invocation) {
+        return __profile__("XMLP._parse", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parse"}, function(invocation) {
+        return __profile__("XMLP._parse", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseAttribute"}, function(invocation) {
+        return __profile__("XMLP._parseAttribute", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseCDATA"}, function(invocation) {
+        return __profile__("XMLP._parseCDATA", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseComment"}, function(invocation) {
+        return __profile__("XMLP._parseComment", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseDTD"}, function(invocation) {
+        return __profile__("XMLP._parseDTD", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseElement"}, function(invocation) {
+        return __profile__("XMLP._parseElement", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseEntity"}, function(invocation) {
+        return __profile__("XMLP._parseEntity", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parsePI"}, function(invocation) {
+        return __profile__("XMLP._parsePI", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_parseText"}, function(invocation) {
+        return __profile__("XMLP._parseText", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_replaceEntities"}, function(invocation) {
+        return __profile__("XMLP._replaceEntities", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_replaceEntity"}, function(invocation) {
+        return __profile__("XMLP._replaceEntity", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_setContent"}, function(invocation) {
+        return __profile__("XMLP._setContent", invocation);
+    }); 
+    window.$profiler.around({ target: XMLP,  method:"_setErr"}, function(invocation) {
+        return __profile__("XMLP._setErr", invocation);
+    }); 
+    
+    
+    /**
+    *   SAXDriver
+    */      
+    window.$profiler.around({ target: SAXDriver,  method:"parse"}, function(invocation) {
+        return __profile__("SAXDriver.parse", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"setDocumentHandler"}, function(invocation) {
+        return __profile__("SAXDriver.setDocumentHandler", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"setErrorHandler"}, function(invocation) {
+        return __profile__("SAXDriver.setErrorHandler", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"setLexicalHandler"}, function(invocation) {
+        return __profile__("SAXDriver.setLexicalHandler", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getColumnNumber"}, function(invocation) {
+        return __profile__("SAXDriver.getColumnNumber", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getLineNumber"}, function(invocation) {
+        return __profile__("SAXDriver.getLineNumber", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getMessage"}, function(invocation) {
+        return __profile__("SAXDriver.getMessage", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getPublicId"}, function(invocation) {
+        return __profile__("SAXDriver.getPublicId", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getSystemId"}, function(invocation) {
+        return __profile__("SAXDriver.getSystemId", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getLength"}, function(invocation) {
+        return __profile__("SAXDriver.getLength", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getName"}, function(invocation) {
+        return __profile__("SAXDriver.getName", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getValue"}, function(invocation) {
+        return __profile__("SAXDriver.getValue", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"getValueByName"}, function(invocation) {
+        return __profile__("SAXDriver.getValueByName", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"_fireError"}, function(invocation) {
+        return __profile__("SAXDriver._fireError", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"_fireEvent"}, function(invocation) {
+        return __profile__("SAXDriver._fireEvent", invocation);
+    }); 
+    window.$profiler.around({ target: SAXDriver,  method:"_parseLoop"}, function(invocation) {
+        return __profile__("SAXDriver._parseLoop", invocation);
+    }); 
+    
+    /**
+    *   SAXStrings
+    window.$profiler.around({ target: SAXStrings,  method:"getColumnNumber"}, function(invocation) {
+        return __profile__("SAXStrings.getColumnNumber", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"getLineNumber"}, function(invocation) {
+        return __profile__("SAXStrings.getLineNumber", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"indexOfNonWhitespace"}, function(invocation) {
+        return __profile__("SAXStrings.indexOfNonWhitespace", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"indexOfWhitespace"}, function(invocation) {
+        return __profile__("SAXStrings.indexOfWhitespace", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"isEmpty"}, function(invocation) {
+        return __profile__("SAXStrings.isEmpty", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"lastIndexOfNonWhitespace"}, function(invocation) {
+        return __profile__("SAXStrings.lastIndexOfNonWhitespace", invocation);
+    }); 
+    window.$profiler.around({ target: SAXStrings,  method:"replace"}, function(invocation) {
+        return __profile__("SAXStrings.replace", invocation);
+    });     
+    */  
+    
+    /**
+    *   Stack - SAX Utility
+    window.$profiler.around({ target: Stack,  method:"clear"}, function(invocation) {
+        return __profile__("Stack.clear", invocation);
+    }); 
+    window.$profiler.around({ target: Stack,  method:"count"}, function(invocation) {
+        return __profile__("Stack.count", invocation);
+    }); 
+    window.$profiler.around({ target: Stack,  method:"destroy"}, function(invocation) {
+        return __profile__("Stack.destroy", invocation);
+    }); 
+    window.$profiler.around({ target: Stack,  method:"peek"}, function(invocation) {
+        return __profile__("Stack.peek", invocation);
+    }); 
+    window.$profiler.around({ target: Stack,  method:"pop"}, function(invocation) {
+        return __profile__("Stack.pop", invocation);
+    }); 
+    window.$profiler.around({ target: Stack,  method:"push"}, function(invocation) {
+        return __profile__("Stack.push", invocation);
+    }); 
+    */
+}
+      
+/*
 *	document.js
 *
 *	DOM Level 2 /DOM level 3 (partial)
@@ -7126,6 +7750,7 @@ __extend__(HTMLDocument.prototype, {
 	get URL(){ return $w.location.href;  }
 });
 	
+
 
 var $document =  new HTMLDocument($implementation);
 $w.__defineGetter__("document", function(){

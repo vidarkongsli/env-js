@@ -3,26 +3,31 @@
 */
 var __env__ = {};
 (function($env){
-	
-  $env.debug = function(){};
-  
-  $env.log = function(){};
-  //uncomment this if you want to get some internal log statementes
-  $env.log = print;
-  $env.log("Initializing Rhino Platform Env");
-  
-  $env.error = function(msg, e){
-    print("ERROR! : " + msg);
-    print(e);
-  };
-  
-  $env.lineSource = function(e){
-      return e.rhinoException.lineSource();
-  };
-  
-  $env.hashCode = function(obj){
-    return obj?obj.hashCode().toString():null;
-  };
+
+	//set this to true and see profile/profile.js to select which methods
+	//to profile
+    $env.profile = false;
+    
+    $env.debug = function(){};
+    
+    $env.log = function(){};
+    //uncomment this if you want to get some internal log statementes
+    $env.log = print;
+    $env.log("Initializing Rhino Platform Env");
+    
+    $env.error = function(msg, e){
+        print("ERROR! : " + msg);
+        print(e);
+    };
+    
+    $env.lineSource = function(e){
+        return e.rhinoException.lineSource();
+    };
+    
+    $env.hashCode = function(obj){
+        return obj?obj.hashCode().toString():null;
+    };
+    
 	//For Java the window.location object is a java.net.URL
 	$env.location = function(path, base){
 	  var protocol = new RegExp('(^\\w*\:)');
