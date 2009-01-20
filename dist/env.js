@@ -11,7 +11,7 @@ this.__defineGetter__('window', function(){
   return __this__;
 });
 try{
-(function($w, $env){
+(function($w, $env, $policy){
         /*
 *	window.js
 *   - this file will be wrapped in a closure providing the window object as $w
@@ -1137,7 +1137,6 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
-    
       return newChild;
     },
     hasChildNodes : function() {
@@ -3930,7 +3929,6 @@ __extend__(DOMDocument.prototype, {
                     "<p>"+e.toString()+"</p>"+  
                 "</body></html>");
             }
-            $env.loadScripts();
             _this._url = url;
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
@@ -4401,6 +4399,7 @@ $w.__defineGetter__("HTMLElement", function(){
         throw new Error("Object cannot be created in this context");
     };
 });
+
 var HTMLElement = function(ownerDocument) {
     //$log("\tcreating html element");
     this.DOMElement = DOMElement;
@@ -4434,10 +4433,7 @@ __extend__(HTMLElement.prototype, {
 		set innerHTML(html){
 		    //$debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
-			//html = (html?html:"").replace(/<\/?([A-Z]+)/g, function(m){
-			//	return m.toLowerCase();
-			//}).replace(/&nbsp;/g, " ");
-			var doc = new DOMParser().
+		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
             var parent = this.ownerDocument.importNode(doc.documentElement, true);
             
@@ -6089,6 +6085,11 @@ var HTMLScriptElement = function(ownerDocument) {
     //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+    $log("loading script via policy");
+    var _this = this;
+    $w.setTimeout(function(){
+        $policy.loadScripts(_this);
+    }, 1);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
@@ -6623,9 +6624,9 @@ var $location = $env.location('./');
 
 $w.__defineSetter__("location", function(url){
   //$w.onunload();
-	$w.document.load(url);
-	$location = url;
+	$location = $env.location(url);
 	setHistory($location);
+	$w.document.load($location);
 });
 
 $w.__defineGetter__("location", function(url){
@@ -6775,8 +6776,8 @@ $w.__defineGetter__("location", function(url){
 */
 $log("Initializing Window Navigator.");
 
-var $appCodeName  = "EnvJS";//eg "Mozilla"
-var $appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
+var $appCodeName  = $env.appCodeName;//eg "Mozilla"
+var $appName      = $env.appName;//eg "Gecko/20070309 Firefox/2.0.0.3"
 
 // Browser Navigator
 $w.__defineGetter__("navigator", function(){	
@@ -7919,7 +7920,7 @@ try{
 *	outro.js
 */
 
-})(window, __env__); 
+})(window, __env__, __policy__); 
 
 }catch(e){
     __env__.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +__env__.lineSource(e));

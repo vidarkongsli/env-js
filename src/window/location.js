@@ -8,9 +8,9 @@ var $location = $env.location('./');
 
 $w.__defineSetter__("location", function(url){
   //$w.onunload();
-	$w.document.load(url);
-	$location = url;
+	$location = $env.location(url);
 	setHistory($location);
+	$w.document.load($location);
 });
 
 $w.__defineGetter__("location", function(url){

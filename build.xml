@@ -121,6 +121,7 @@
         <echo message="Building ${ENV_RHINO}" />
         <concat destfile="${ENV_RHINO}">
             <fileset dir="${SRC_DIR}"  includes="platform/rhino.js" />
+            <fileset dir="${SRC_DIR}"  includes="policy/policy.js" />
             <fileset dir="${DIST_DIR}" includes="env.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />

@@ -12,6 +12,11 @@ var HTMLScriptElement = function(ownerDocument) {
     //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+    $log("loading script via policy");
+    var _this = this;
+    $w.setTimeout(function(){
+        $policy.loadScripts(_this);
+    }, 1);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {

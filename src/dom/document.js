@@ -91,7 +91,6 @@ __extend__(DOMDocument.prototype, {
                     "<p>"+e.toString()+"</p>"+  
                 "</body></html>");
             }
-            $env.loadScripts();
             _this._url = url;
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();

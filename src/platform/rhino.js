@@ -21,7 +21,7 @@ var __env__ = {};
     
     $env.error = function(msg, e){
         print("ERROR! : " + msg);
-        print(e);
+        print(e||"");
     };
     
     $env.lineSource = function(e){
@@ -183,23 +183,25 @@ var __env__ = {};
     $env.lang           = java.lang.System.getProperty("user.lang"); 
     $env.platform       = "Rhino ";//how do we get the version
 	
-    
-    $env.loadScripts = safeScript;
-    function safeScript(){
+    $env.safeScript = function(){
       //do nothing  
     };
     
-    function localScripts(){
-        //try loading locally
-        var scripts = document.getElementsByTagName('script');
-        for(var i=0;i<scipts.length;i++){
-            if(scripts[i].getAttribute('type') == 'text/javascript'){
-                try{
-                    load(scripts[i].src);
-                }catch(e){
-                    $error("Error loading script." , e);
-                }
+    
+    $env.loadLocalScripts = function(script){
+        try{
+            if(script.type == 'text/javascript'){
+                    if(script.src){
+                        print("loading script :" + script.src);
+                        load($env.location(script.src, window.location + '/../'));
+                    }else{
+                        print("loading script :" + script.text);
+                        eval(script.text);
+                    }
             }
+        }catch(e){
+            print("Error loading script." , e);
         }
     };
+    
 })(__env__);

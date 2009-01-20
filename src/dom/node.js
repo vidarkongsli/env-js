@@ -352,7 +352,6 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
-    
       return newChild;
     },
     hasChildNodes : function() {
