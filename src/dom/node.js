@@ -425,7 +425,7 @@ __extend__(DOMNode.prototype, {
         //turns namespace checking off in ._isValidNamespace
         this.ownerDocument._performingImportNodeOperation = true;
         
-        try {
+        //try {
             if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
                 if (!this.ownerDocument.implementation.namespaceAware) {
                     // create a local Element (with the name of the importedNode)
@@ -501,13 +501,13 @@ __extend__(DOMNode.prototype, {
             //reset _performingImportNodeOperation
             this.ownerDocument._performingImportNodeOperation = false;
             return importNode;
-        } catch (eAny) {
+        /*} catch (eAny) {
             //reset _performingImportNodeOperation
             this.ownerDocument._performingImportNodeOperation = false;
             
             //re-throw the exception
             throw eAny;
-        }//djotemp
+        }//djotemp*/
     },
     contains : function(node){
             while(node && node != this ){
@@ -558,7 +558,6 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     
     return nodeList;
 };
-
 
 /**
  * @method DOMNode._getElementsByTagNameNSRecursive - implements getElementsByTagName()

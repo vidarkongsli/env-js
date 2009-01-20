@@ -55,20 +55,14 @@ __extend__(DOMDocument.prototype, {
     },
     loadXML : function(xmlStr) {
         // create SAX Parser
-        var parser;
+        var parser = new XMLP(String(xmlStr));
         
-        try {
-            parser = new XMLP(String(xmlStr));
-        }catch (e) {
-            $error("Error Creating the SAX Parser. \n\n\t"+e+"\n\n\t Did you include xmlsax.js or tinyxmlsax.js\
-                     in your web page?\nThe SAX parser is needed to populate XML for <SCRIPT>'s \
-                     W3C DOM Parser with data.");
-        }
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
+            //HTMLtoDOM(xmlStr, doc);
         } catch (e) {
             $error(this.implementation.translateErrCode(e.code))
         }

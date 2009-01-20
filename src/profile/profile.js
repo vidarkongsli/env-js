@@ -118,6 +118,7 @@ if(__env__.profile){
         return __profile__("DOMNode.compareDocumentPosition", invocation);
     }); 
     
+    
     /**
     *   DOMDocument
     */
@@ -184,6 +185,21 @@ if(__env__.profile){
     window.$profiler.around({ target: DOMDocument,  method:"normalizeDocument"}, function(invocation) {
         return __profile__("DOMDocument.normalizeDocument", invocation);
     });
+    
+    
+    /**
+    *   HTMLDocument
+    */      
+    window.$profiler.around({ target: HTMLDocument,  method:"createElement"}, function(invocation) {
+        return __profile__("HTMLDocument.createElement", invocation);
+    }); 
+    
+    /**
+    *   DOMParser
+    */      
+    window.$profiler.around({ target: DOMParser,  method:"parseFromString"}, function(invocation) {
+        return __profile__("DOMParser.parseFromString", invocation);
+    }); 
     
     /**
     *   DOMNodeList
@@ -337,7 +353,8 @@ if(__env__.profile){
     }); 
     
     /**
-    *   SAXStrings
+    *   SAXStrings    
+    */
     window.$profiler.around({ target: SAXStrings,  method:"getColumnNumber"}, function(invocation) {
         return __profile__("SAXStrings.getColumnNumber", invocation);
     }); 
@@ -358,8 +375,7 @@ if(__env__.profile){
     }); 
     window.$profiler.around({ target: SAXStrings,  method:"replace"}, function(invocation) {
         return __profile__("SAXStrings.replace", invocation);
-    });     
-    */  
+    }); 
     
     /**
     *   Stack - SAX Utility

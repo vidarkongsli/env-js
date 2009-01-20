@@ -21,7 +21,7 @@ var __env__ = {};
     };
     
     $env.lineSource = function(e){
-        return e.rhinoException.lineSource();
+        return e.rhinoException?e.rhinoException.lineSource():"(line ?)";
     };
     
     $env.hashCode = function(obj){

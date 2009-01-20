@@ -2,21 +2,20 @@ $log("Defining DOMParser");
 /*
 * DOMParser
 */
-$w.__defineGetter__('DOMParser', function(){
-  return function(){
-    return __extend__(this, {
-      parseFromString: function(xmlString){
+
+var DOMParser = function(){};
+__extend__(DOMParser.prototype,{
+    parseFromString: function(xmlString){
         //$log("Parsing XML String: " +xmlString);
         return document.implementation.createDocument().loadXML(xmlString);
-      }
-    });
-  };
+    }
 });
 
 $log("Initializing Internal DOMParser.");
 //keep one around for internal use
 $domparser = new DOMParser();
 
+$w.__defineGetter__('DOMParser', DOMParser);
 // =========================================================================
 //
 // xmlsax.js - an XML SAX parser in JavaScript.
@@ -276,27 +275,31 @@ XMLP.prototype._parse = function() {
 	if(this.m_iP == this.m_xml.length) {
         return XMLP._NONE;
     }
-
-    if(this.m_iP == this.m_xml.indexOf("<?",        this.m_iP)) {
-        return this._parsePI     (this.m_iP + 2);
+    
+    if(this.m_iP == this.m_xml.indexOf("<", this.m_iP)){
+        if(this.m_xml.charAt(this.m_iP+1) == "?") {
+            return this._parsePI(this.m_iP + 2);
+        }
+        else if(this.m_xml.charAt(this.m_iP+1) == "!") {
+            if(this.m_xml.charAt(this.m_iP+2) == "D") {
+                return this._parseDTD(this.m_iP + 9);
+            }
+            else if(this.m_xml.charAt(this.m_iP+2) == "-") {
+                return this._parseComment(this.m_iP + 4);
+            }
+            else if(this.m_xml.charAt(this.m_iP+2) == "[") {
+                return this._parseCDATA(this.m_iP + 9);
+            }
+        }
+        else{
+            return this._parseElement(this.m_iP + 1);
+        }
     }
-    else if(this.m_iP == this.m_xml.indexOf("<!DOCTYPE", this.m_iP)) {
-        return this._parseDTD    (this.m_iP + 9);
-    }
-    else if(this.m_iP == this.m_xml.indexOf("<!--",      this.m_iP)) {
-        return this._parseComment(this.m_iP + 4);
-    }
-    else if(this.m_iP == this.m_xml.indexOf("<![CDATA[", this.m_iP)) {
-        return this._parseCDATA  (this.m_iP + 9);
-    }
-    else if(this.m_iP == this.m_xml.indexOf("<",         this.m_iP)) {
-        return this._parseElement(this.m_iP + 1);
-    }
-    else if(this.m_iP == this.m_xml.indexOf("&",         this.m_iP)) {
-        return this._parseEntity (this.m_iP + 1);
+    else if(this.m_iP == this.m_xml.indexOf("&", this.m_iP)) {
+        return this._parseEntity(this.m_iP + 1);
     }
     else{
-        return this._parseText   (this.m_iP);
+        return this._parseText(this.m_iP);
     }
 	
 
@@ -327,7 +330,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
     }
 
     cQuote = this.m_xml.charAt(iVB);
-    if(SAXStrings.QUOTES.indexOf(cQuote) == -1) {
+    if(_SAXStrings.QUOTES.indexOf(cQuote) == -1) {
         return this._setErr(XMLP.ERR_ATT_VALUES);
     }
 
@@ -358,8 +361,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     if(this._findAttributeIndex(strN) == -1) {
         this._addAttribute(strN, strV);
-    }
-    else {
+    }else {
         return this._setErr(XMLP.ERR_ATT_DUP);
     }
 
@@ -416,11 +418,11 @@ XMLP.prototype._parseDTD = function(iB) {
 
     while(true) {
         // DEBUG: Remove
-        if(iE == iLast) {
+        /*if(iE == iLast) {
             return this._setErr(XMLP.ERR_INFINITELOOP);
         }
 
-        iLast = iE;
+        iLast = iE;*/
         // DEBUG: Remove End
 
         iE = this.m_xml.indexOf(strClose, iB);
@@ -470,11 +472,11 @@ XMLP.prototype._parseElement = function(iB) {
     //djohack
     //hack to allow for elements with single character names to be recognized
 
-    if (iE - iB != 1 ) {
+    /*if (iE - iB != 1 ) {
         if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB) {
             return this._setErr(XMLP.ERR_ELM_NAME);
         }
-    }
+    }*/
     // end hack -- original code below 
 
     /* 
@@ -491,8 +493,8 @@ XMLP.prototype._parseElement = function(iB) {
         this.m_iP = iNE;
         while(this.m_iP < iDE) {
             // DEBUG: Remove
-            if(this.m_iP == iLast) return this._setErr(XMLP.ERR_INFINITELOOP);
-            iLast = this.m_iP;
+            //if(this.m_iP == iLast) return this._setErr(XMLP.ERR_INFINITELOOP);
+            //iLast = this.m_iP;
             // DEBUG: Remove End
 
 
@@ -503,9 +505,9 @@ XMLP.prototype._parseElement = function(iB) {
 
     strN = this.m_xml.substring(iB, iNE);
     
-    if(strN.indexOf("<") != -1) {
+    /*if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ELM_LT_NAME);
-    }
+    }*/
 
     this.m_name = strN;
     this.m_iP = iE + 1;
@@ -949,15 +951,16 @@ SAXDriver.prototype._parseLoop = function(parser) {
 *   Description: a useful object containing string manipulation functions
 **/
 
-var SAXStrings = function() {};
+var _SAXStrings = function() {};
 
 
-SAXStrings.WHITESPACE = " \t\n\r";
-SAXStrings.QUOTES = "\"'";
+_SAXStrings.WHITESPACE = " \t\n\r";
+_SAXStrings.NONWHITESPACE = /\S/;
+_SAXStrings.QUOTES = "\"'";
 
 
-SAXStrings.getColumnNumber = function(strD, iP) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.getColumnNumber = function(strD, iP) {
+    if((strD === null) || (strD.length === 0)) {
         return -1;
     }
     iP = iP || strD.length;
@@ -972,8 +975,8 @@ SAXStrings.getColumnNumber = function(strD, iP) {
 }  // end function getColumnNumber
 
 
-SAXStrings.getLineNumber = function(strD, iP) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.getLineNumber = function(strD, iP) {
+    if((strD === null) || (strD.length === 0)) {
         return -1;
     }
     iP = iP || strD.length;
@@ -982,64 +985,76 @@ SAXStrings.getLineNumber = function(strD, iP) {
 }  // end function getLineNumber
 
 
-SAXStrings.indexOfNonWhitespace = function(strD, iB, iE) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.indexOfNonWhitespace = function(strD, iB, iE) {
+    if((strD === null) || (strD.length === 0)) {
         return -1;
     }
     iB = iB || 0;
     iE = iE || strD.length;
 
-    for(var i = iB; i < iE; i++){
-        if(SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1) {
+    //var i = strD.substring(iB, iE).search(_SAXStrings.NONWHITESPACE);
+    //return i < 0 ? i : iB + i;
+    
+    while( strD.charCodeAt(iB++) < 33 );
+    return (iB > iE)?-1:iB-1;
+    /*for(var i = iB; i < iE; i++){
+        if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1) {
             return i;
         }
     }
-    return -1;
+    return -1;*/
 
 }  // end function indexOfNonWhitespace
 
 
-SAXStrings.indexOfWhitespace = function(strD, iB, iE) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.indexOfWhitespace = function(strD, iB, iE) {
+    if((strD === null) || (strD.length === 0)) {
         return -1;
     }
     iB = iB || 0;
     iE = iE || strD.length;
 
-    for(var i = iB; i < iE; i++) {
-        if(SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) != -1) {
+
+    while( strD.charCodeAt(iB++) >= 33 );
+    return (iB > iE)?-1:iB-1;
+    
+    /*for(var i = iB; i < iE; i++) {
+        if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) != -1) {
             return i;
         }
     }
-    return -1;
+    return -1;*/
 }  // end function indexOfWhitespace
 
 
-SAXStrings.isEmpty = function(strD) {
+_SAXStrings.prototype.isEmpty = function(strD) {
 
     return (strD == null) || (strD.length == 0);
 
 }
 
 
-SAXStrings.lastIndexOfNonWhitespace = function(strD, iB, iE) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.lastIndexOfNonWhitespace = function(strD, iB, iE) {
+    if((strD === null) || (strD.length === 0)) {
         return -1;
     }
     iB = iB || 0;
     iE = iE || strD.length;
 
-    for(var i = iE - 1; i >= iB; i--){
-        if(SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1){
+    while( (iE >= iB) && strD.charCodeAt(--iE) < 33 );
+    return (iE < iB)?-1:iE;
+    
+    /*for(var i = iE - 1; i >= iB; i--){
+        if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1){
             return i;
         }
     }
-    return -1;
+    return -1;*/
 }
 
 
-SAXStrings.replace = function(strD, iB, iE, strF, strR) {
-    if(SAXStrings.isEmpty(strD)) {
+_SAXStrings.prototype.replace = function(strD, iB, iE, strF, strR) {
+    if((strD == null) || (strD.length == 0)) {
         return "";
     }
     iB = iB || 0;
@@ -1047,7 +1062,9 @@ SAXStrings.replace = function(strD, iB, iE, strF, strR) {
 
     return strD.substring(iB, iE).split(strF).join(strR);
 
-}
+};
+
+var SAXStrings = new _SAXStrings();
 
 
 

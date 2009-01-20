@@ -15,16 +15,28 @@ function test(name, fn){
 	if ( expected != -1 && expected != numTests )
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
-var orig = document.getElementById('main').innerHTML;
-	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig);
+var orig = document.getElementById('main').cloneNode(true);
+	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
-	document.getElementById('main').innerHTML = orig;
-	//print("\n\nORIGINAL:\n\n"+orig);
-	//print("\n\nRESET:\n\n"+document.getElementById('main').outerHTML);
+    
+	var main = document.getElementById('main');
+	
+	while(main.firstChild != null){
+	    //$log('innerHTML - removing child '+ this.firstChild.xml);
+	    main.removeChild( main.firstChild );
+    }
+    
+    var parent = main.ownerDocument.importNode(orig, true);
+            
+	while(parent.firstChild != null){
+	    //$log('innerHTML - appending child '+ parent.firstChild.xml);
+	    main.appendChild( parent.removeChild( parent.firstChild ) );
+    }
+    parent = null;
 }
 
 var currentModule = "";

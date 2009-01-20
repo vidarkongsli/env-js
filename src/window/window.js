@@ -58,7 +58,7 @@ var $outerHeight = $innerHeight, $outerWidth = $innerWidth;
 
 // Read-only properties that specify the number of pixels that the current document has been scrolled
 //to the right and down.  These are not supported by IE.
-var $pageXOffset = 0, $pageYOffest = 0;
+var $pageXOffset = 0, $pageYOffset = 0;
 
 //A read-only reference to the Window object that contains this window or frame.  If the window is
 // a top-level window, parent refers to the window itself.  If this window is a frame, this property
