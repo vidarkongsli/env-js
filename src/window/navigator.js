@@ -4,8 +4,8 @@
 */
 $log("Initializing Window Navigator.");
 
-var $appCodeName  = "EnvJS";//eg "Mozilla"
-var $appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
+var $appCodeName  = $env.appCodeName;//eg "Mozilla"
+var $appName      = $env.appName;//eg "Gecko/20070309 Firefox/2.0.0.3"
 
 // Browser Navigator
 $w.__defineGetter__("navigator", function(){	

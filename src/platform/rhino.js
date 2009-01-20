@@ -3,6 +3,10 @@
 */
 var __env__ = {};
 (function($env){
+    
+    //You can emulate different user agents by overriding these after loading env
+    $env.appCodeName  = "EnvJS";//eg "Mozilla"
+    $env.appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
 
 	//set this to true and see profile/profile.js to select which methods
 	//to profile
