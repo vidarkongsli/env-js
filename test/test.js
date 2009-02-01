@@ -13,9 +13,13 @@ window.onload = function(){
   // Load the tests
   load(
     "test/unit/dom.js",
-    "test/unit/core.js"//,
+    "test/unit/core.js",
     //"test/unit/selector.js",
-    //"test/unit/event.js"
+    //"test/unit/event.js",
+    
+    //NOTE: keep this test last because Prototype pollutes
+    //the namespace and several DOM objects
+    "test/unit/prototypecompat.js"
   );
   var end = new Date().getTime();
   
