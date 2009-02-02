@@ -26,7 +26,7 @@ __extend__(DOMComment.prototype, {
         return DOMNode.COMMENT_NODE;
     },
     get xml(){
-        return "<!-- " + this.nodeValue + " -->";
+        return "<!--" + this.nodeValue + "-->";
     },
     toString : function(){
         return "Comment #"+this._id;

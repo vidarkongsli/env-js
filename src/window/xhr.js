@@ -30,17 +30,17 @@ XMLHttpRequest.prototype = {
 			$env.connection(self, function(){
 			  var responseXML = null;
 				self.__defineGetter__("responseXML", function(){
-  				if ( self.responseText.match(/^\s*</) ) {
-  				  if(responseXML){return responseXML;}
-  				  else{
-    					try {
-    					  $log("parsing response text into xml document");
-    						responseXML = $domparser.parseFromString(self.responseText);
-  					    return responseXML;
-    					} catch(e) { return null;/*TODO: need to flag an error here*/}
-  					}
-  				}else{return null;}
-  			});
+      				if ( self.responseText.match(/^\s*</) ) {
+      				  if(responseXML){return responseXML;}
+      				  else{
+        					try {
+        					    $log("parsing response text into xml document");
+        						responseXML = $domparser.parseFromString(self.responseText)+"";
+                                return responseXML;
+        					} catch(e) { return null;/*TODO: need to flag an error here*/}
+      					}
+      				}else{return null;}
+      			});
 			});
 			self.onreadystatechange();
 		}

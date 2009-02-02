@@ -206,6 +206,7 @@ __extend__(DOMElement.prototype, {
         return DOMNode.ELEMENT_NODE;
     },
     get xml() {
+        //$log("Serializing " + this);
         var ret = "";
         
         // serialize namespace declarations

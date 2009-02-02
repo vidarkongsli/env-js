@@ -142,7 +142,7 @@ var __env__ = {};
 				stream.close();
 
 				xhr.responseText = java.nio.charset.Charset.forName(contentEncoding).
-					decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString();
+					decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
 				
 		}
 		if(responseHandler){
@@ -157,7 +157,7 @@ var __env__ = {};
 	$env.parseHTML = function(htmlstring){
 		return htmlDocBuilder.newDocumentBuilder().parse(
 				  new java.io.ByteArrayInputStream(
-						(new java.lang.String(htmlstring)).getBytes("UTF8")));
+						(new java.lang.String(htmlstring)).getBytes("UTF8")))+"";
 	};
 	
 	var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -167,7 +167,7 @@ var __env__ = {};
 	$env.parseXML = function(xmlstring){
 		return xmlDocBuilder.newDocumentBuilder().parse(
 				  new java.io.ByteArrayInputStream(
-						(new java.lang.String(xmlstring)).getBytes("UTF8")));
+						(new java.lang.String(xmlstring)).getBytes("UTF8")))+"";
 	};
 	
 	
@@ -187,20 +187,29 @@ var __env__ = {};
       //do nothing  
     };
     
+    $env.scriptTypes = {
+        "text/javascript"   :false,
+        "text/envjs"        :true
+    };
     
-    $env.loadLocalScripts = function(script){
+    $env.loadLocalScript = function(script){
+        var types, i;
         try{
-            if(script.type == 'text/javascript'){
-                    if(script.src){
-                        print("loading script :" + script.src);
-                        load($env.location(script.src, window.location + '/../'));
+            types = script.type?script.type.split(";"):[];
+            for(i=0;i<types.length;i++){
+                if($env.scriptTypes[types[i]]){
+                    if(script.src ){
+                        print("loading both script :" + script.src);
+                        load($env.location(script.src, window.location+"/../"));
                     }else{
-                        print("loading script :" + script.text);
+                        print("loading inline script :" + script.text);
                         eval(script.text);
                     }
+                }
             }
         }catch(e){
-            print("Error loading script." , e);
+            print("Error loading script.");
+            print(e);
         }
     };
     

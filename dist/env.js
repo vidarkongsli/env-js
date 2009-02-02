@@ -208,14 +208,18 @@ function __extend__(a,b) {
 // this might be a good utility function to provide in the env.core
 // as in might be useful to the parser and other areas as well
 function trim( str ){
+    return (str || "").replace( /^\s+|\s+$/g, "" );
+    
+};
+/*function trim( str ){
     var start = -1,
     end = str.length;
-    /*jsl:ignore*/
+    /*jsl:ignore*
     while( str.charCodeAt(--end) < 33 );
     while( str.charCodeAt(++start) < 33 );
-    /*jsl:end*/
+    /*jsl:end*
     return str.slice( start, end + 1 );
-};
+};*/
 
 //from jQuery
 function __setArray__( target, array ) {
@@ -271,11 +275,13 @@ __extend__(DOMNodeList.prototype, {
         
         // create string containing the concatenation of the string values of each child
         for (var i=0; i < this.length; i++) {
-            if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
-                //add a single space between adjacent text nodes
-                ret += " "+this[i].xml;
-            }else{
-                ret += this[i].xml;
+            if(this[i]){
+                if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                    //add a single space between adjacent text nodes
+                    ret += " "+this[i].xml;
+                }else{
+                    ret += this[i].xml;
+                }
             }
         }
         
@@ -1137,6 +1143,17 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
+      //check to see if this is a script element and apply a script loading strategy
+      //the check against the ownerDocument isnt really enough to support frames in
+      // the long run, but for now it's ok
+      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
+         newChild.ownerDocument == window.document &&
+         newChild.nodeName.toUpperCase() == "SCRIPT"){
+             
+        $log("loading script via policy");
+        $policy.loadScript(newChild);
+          
+      }
       return newChild;
     },
     hasChildNodes : function() {
@@ -1688,7 +1705,7 @@ __extend__(DOMComment.prototype, {
         return DOMNode.COMMENT_NODE;
     },
     get xml(){
-        return "<!-- " + this.nodeValue + " -->";
+        return "<!--" + this.nodeValue + "-->";
     },
     toString : function(){
         return "Comment #"+this._id;
@@ -1972,6 +1989,7 @@ __extend__(DOMElement.prototype, {
         return DOMNode.ELEMENT_NODE;
     },
     get xml() {
+        //$log("Serializing " + this);
         var ret = "";
         
         // serialize namespace declarations
@@ -3730,6 +3748,7 @@ function __parseLoop__(impl, doc, p) {
   }
 };
 
+
 /**
  * @method DOMImplementation._isNamespaceDeclaration - Return true, if attributeName is a namespace declaration
  * @author Jon van Noort (jon@webarcana.com.au)
@@ -3864,7 +3883,6 @@ var DOMDocument = function(implementation) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
-    //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -3900,9 +3918,11 @@ __extend__(DOMDocument.prototype, {
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
-            //HTMLtoDOM(xmlStr, doc);
+            //doc = html2dom(xmlStr+"", doc);
+        	//$log("\nhtml2xml\n" + doc.xml);
         } catch (e) {
-            $error(this.implementation.translateErrCode(e.code))
+            //$error(this.implementation.translateErrCode(e.code))
+            $error(e);
         }
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
@@ -3915,7 +3935,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var _this = this;
+        var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
         xhr.onreadystatechange = function(){
@@ -3930,6 +3950,15 @@ __extend__(DOMDocument.prototype, {
                 "</body></html>");
             }
             _this._url = url;
+            
+        	$log("Loading scripts.");
+            scripts = document.getElementsByTagName('script');
+            /*for(var prop in $policy){
+                $log("$policy."+prop+" ="+$policy[prop]);
+            }*/
+            for(var i=0;i<scripts.length;i++){
+                $policy.loadScript(scripts[i]);
+            }
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
         	event.initEvent("load");
@@ -4118,6 +4147,7 @@ __extend__(DOMDocument.prototype, {
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
+        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 
@@ -4183,6 +4213,345 @@ var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribut
     
       return valid;
 };
+/*
+*	parser.js
+*/
+/*
+ * HTML Parser By John Resig (ejohn.org)
+ * Original code by Erik Arvidsson, Mozilla Public License
+ * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
+ *
+ * // Use like so:
+ * HTMLParser(htmlString, {
+ *     start: function(tag, attrs, unary) {},
+ *     end: function(tag) {},
+ *     chars: function(text) {},
+ *     comment: function(text) {}
+ * });
+ *
+ * // or to get an XML string:
+ * HTMLtoXML(htmlString);
+ *
+ * // or to get an XML DOM Document
+ * HTMLtoDOM(htmlString);
+ *
+ * // or to inject into an existing document/DOM node
+ * HTMLtoDOM(htmlString, document);
+ * HTMLtoDOM(htmlString, document.body);
+ *
+ */
+ var html2dom, html2xml;
+
+(function(){
+
+	// Regular Expressions for parsing tags and attributes
+	var startTag = /^<([\w\:\-]+)((?:\s+[\w\:\-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+        endTag = /^<\/([\w\:\-]+)[^>]*>/,
+        attr = /([\w\:\-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g; 	
+	// Empty Elements - HTML 4.01
+	var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
+
+	// Block Elements - HTML 4.01
+	var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
+
+	// Inline Elements - HTML 4.01
+	var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
+
+	// Elements that you can, intentionally, leave open
+	// (and which close themselves)
+	var closeSelf = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
+
+	// Attributes that have their values filled in disabled="disabled"
+	var fillAttrs = makeMap("checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected");
+
+	// Special Elements (can contain anything)
+	var special = makeMap("script,style");
+
+	var HTMLParser  = function( html, handler ) {
+		var index, chars, match, stack = [], last = html;
+		stack.last = function(){
+			return this[ this.length - 1 ];
+		};
+
+		while ( html ) {
+		    //$log("HTMLParser: chunking... ");
+			chars = true;
+
+			// Make sure we're not in a script or style element
+			if ( !stack.last() || !special[ stack.last() ] ) {
+            
+		        //$log("HTMLParser: ... ");
+				// Comment
+				if ( html.indexOf("<!--") === 0 ) {
+		            //$log("HTMLParser: comment ");
+					index = html.indexOf("-->");
+	
+					if ( index >= 0 ) {
+						if ( handler.comment )
+							handler.comment( html.substring( 4, index ) );
+						html = html.substring( index + 3 );
+						chars = false;
+					}
+	
+				// end tag
+				} else if ( html.indexOf("</") === 0 ) {
+		            //$log("HTMLParser: endtag ");
+					match = html.match( endTag );
+	
+					if ( match ) {
+		                //$log("HTMLParser: endtag match : "+match[0]);
+						html = html.substring( match[0].length );
+						match[0].replace( endTag, parseEndTag );
+						chars = false;
+					}
+	
+				// start tag
+				} else if ( html.indexOf("<") === 0 ) {
+		            //$log("HTMLParser: starttag ");
+					match = html.match( startTag );
+	
+					if ( match ) {
+		                //$log("HTMLParser: starttag match : "+match[0]);
+						html = html.substring( match[0].length );
+						match[0].replace( startTag, parseStartTag );
+						chars = false;
+					}
+				}
+
+				if ( chars ) {
+		            //$log("HTMLParser: other ");
+					index = html.indexOf("<");
+					var text = index < 0 ? html : html.substring( 0, index );
+					html = index < 0 ? "" : html.substring( index );
+					if ( handler.chars ){
+		                //$log("HTMLParser: chars " + text);
+					    handler.chars( text );
+				    }
+				}
+			} else {
+		        //$log("HTMLParser: special ");
+				html = html.replace(new RegExp("(.*)<\/" + stack.last() + "[^>]*>"), function(all, text){
+					text = text.replace(/<!--(.*?)-->/g, "$1").
+						replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
+					if ( handler.chars ){
+		                //$log("HTMLParser: special chars " + text);
+					    handler.chars( text );
+				    }
+					return "";
+				});
+				parseEndTag( "", stack.last() );
+			}
+			if ( html == last ){throw "Parse Error: " + html;}
+			last = html;
+		}
+		
+		// Clean up any remaining tags
+		parseEndTag();
+
+		function parseStartTag( tag, tagName, rest, unary ) {
+			if ( block[ tagName ] ) {
+				while ( stack.last() && inline[ stack.last() ] ) {
+					parseEndTag( "", stack.last() );
+				}
+			}
+
+			if ( closeSelf[ tagName ] && stack.last() == tagName ) {
+				parseEndTag( "", tagName );
+			}
+
+			unary = empty[ tagName ] || !!unary;
+
+			if ( !unary )
+				stack.push( tagName );
+			
+			if ( handler.start ) {
+				var attrs = [];
+	
+				rest.replace(attr, function(match, name) {
+					var value = arguments[2] ? arguments[2] :
+						arguments[3] ? arguments[3] :
+						arguments[4] ? arguments[4] :
+						fillAttrs[name] ? name : "";
+					
+					attrs.push({
+						name: name,
+						value: value,
+						escaped: value.replace(/(^|[^\\])"/g, '$1\\\"') //"
+					});
+				});
+	
+				if ( handler.start ){
+				    //$log("unary ? : "+unary);
+					handler.start( tagName, attrs, unary );
+				}
+			}
+		}
+
+		function parseEndTag( tag, tagName ) {
+		  var pos;
+			// If no tag name is provided, clean shop
+			if ( !tagName ){
+				pos = 0;
+			}else{
+			// Find the closest opened tag of the same type
+				for ( pos = stack.length - 1; pos >= 0; pos-- ){
+					//$log("parseEndTag : "+stack[ pos ] );
+					if ( stack[ pos ] == tagName ){ 
+					    break; 
+				    }
+				}
+            }
+			if ( pos >= 0 ) {
+				// Close all the open elements, up the stack
+				for ( var i = stack.length - 1; i >= pos; i-- ){
+                    if ( handler.end ){
+					    //$log("end : "+stack[ i ] );
+                        handler.end( stack[ i ] );
+                    }
+				}
+				// Remove the open elements from the stack
+				//$log("setting stack length : " + stack.length + " -> " +pos );
+				stack.length = pos;
+			}
+		}
+	};
+	
+	html2xml = function( html ) {
+		var results = "";
+		
+		HTMLParser(html, {
+			start: function( tag, attrs, unary ) {
+				results += "<" + tag;
+		
+				for ( var i = 0; i < attrs.length; i++ )
+					results += " " + attrs[i].name + '="' + attrs[i].escaped + '"';
+		
+				results += (unary ? "/" : "") + ">";
+			},
+			end: function( tag ) {
+				results += "</" + tag + ">";
+			},
+			chars: function( text ) {
+				results += text;
+			},
+			comment: function( text ) {
+				results += "<!--" + text + "-->";
+			}
+		});
+		
+		return results;
+	};
+	
+	html2dom = function( html, doc ) {
+		// There can be only one of these elements
+		var one = makeMap("html,head,body,title");
+		
+		// Enforce a structure for the document
+		/*var structure = {
+			link: "head",
+			base: "head"
+		};*/
+	
+		if ( !doc ) {
+			if ( typeof DOMDocument != "undefined" ){
+				doc = new DOMDocument();
+			}else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument ){
+				doc = document.implementation.createDocument("", "", null);
+			}else if ( typeof ActiveX != "undefined" ){
+				doc = new ActiveXObject("Msxml.DOMDocument");
+			}
+		} else {
+			doc = doc.ownerDocument ||
+				doc.getOwnerDocument && doc.getOwnerDocument() ||
+				doc;
+		}
+		
+		var elems = [],
+			documentElement = doc.documentElement || doc.getDocumentElement && doc.getDocumentElement();
+				
+		// If we're dealing with an empty document then we
+		// need to pre-populate it with the HTML document structure
+		/*if ( !documentElement && doc.createElement ) (function(){
+		    //$log("HTMLtoDOM: adding structure... ");
+			var html = doc.createElement("html");
+			var head = doc.createElement("head");
+			head.appendChild( doc.createElement("title") );
+			html.appendChild( head );
+			html.appendChild( doc.createElement("body") );
+			doc.appendChild( html );
+			doc.documentElement = html;
+		})();*/
+		
+		// Find all the unique elements
+		/*if ( doc.getElementsByTagName ){
+			for ( var i in one ){
+			   one[ i ] = doc.getElementsByTagName( i )[0];
+            }
+		}*/
+		
+		// If we're working with a document, inject contents into
+		// the body element
+		var curParentNode;// = one.body;
+		
+		//$log("HTMLtoDOM: Parsing... ");
+		HTMLParser( html, {
+			start: function( tagName, attrs, unary ) {
+			    
+				var elem;
+		        //$log("HTMLtoDOM: createElement... " + tagName);
+				elem = doc.createElement( tagName );
+			
+				
+				for ( var attr in attrs ){
+		            //$log("HTMLtoDOM: setAttribute... " +  attrs[ attr ].name);
+					elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
+				}
+				
+				if ( !doc.documentElement ){		            
+				    //$log("HTMLtoDOM: documentElement... " +  elem.nodeName);
+		            doc.documentElement = elem;
+			        doc.appendChild( elem );
+				}
+				
+				else if ( curParentNode && curParentNode.appendChild ){
+		            //$log("HTMLtoDOM: curParentNode.appendChild... " +  curParentNode.nodeName + " -> " +elem.nodeName);
+					curParentNode.appendChild( elem );
+				}
+					
+				if ( !unary ) {
+				    //$log("start : push into elems[] " + tagName);
+					elems.push( elem );
+					curParentNode = elem;
+				}
+			},
+			end: function( tag ) {
+			    //$log(tag + " : elems.lengths : "+elems.length);
+			    elems.length -= 1;
+				
+				// Init the new parentNode
+				curParentNode = elems[ elems.length - 1 ];
+
+			},
+			chars: function( text ) {
+				curParentNode.appendChild( doc.createTextNode( text ) );
+			},
+			comment: function( text ) {
+				curParentNode.appendChild( doc.createComment( text ) );
+			}
+		});
+				
+        //$log("HTMLtoDOM: doc... " + doc);
+		return doc;
+	};
+
+	function makeMap(str){
+		var obj = {}, items = str.split(",");
+		for ( var i = 0; i < items.length; i++ )
+			obj[ items[i] ] = true;
+		return obj;
+	};
+	
+})( );
 $log("Defining HTMLDocument");
 /*
 * HTMLDocument - DOM Level 2
@@ -4479,7 +4848,7 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        //$log("Initializing new css2props for html element : " + this.getAttribute("style"));
 		        this.$css2props = new CSS2Properties({
     		        cssText:this.getAttribute("style")
     	        });
@@ -6085,11 +6454,6 @@ var HTMLScriptElement = function(ownerDocument) {
     //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
-    $log("loading script via policy");
-    var _this = this;
-    $w.setTimeout(function(){
-        $policy.loadScripts(_this);
-    }, 1);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
@@ -6982,17 +7346,17 @@ XMLHttpRequest.prototype = {
 			$env.connection(self, function(){
 			  var responseXML = null;
 				self.__defineGetter__("responseXML", function(){
-  				if ( self.responseText.match(/^\s*</) ) {
-  				  if(responseXML){return responseXML;}
-  				  else{
-    					try {
-    					  $log("parsing response text into xml document");
-    						responseXML = $domparser.parseFromString(self.responseText);
-  					    return responseXML;
-    					} catch(e) { return null;/*TODO: need to flag an error here*/}
-  					}
-  				}else{return null;}
-  			});
+      				if ( self.responseText.match(/^\s*</) ) {
+      				  if(responseXML){return responseXML;}
+      				  else{
+        					try {
+        					    $log("parsing response text into xml document");
+        						responseXML = $domparser.parseFromString(self.responseText)+"";
+                                return responseXML;
+        					} catch(e) { return null;/*TODO: need to flag an error here*/}
+      					}
+      				}else{return null;}
+      			});
 			});
 			self.onreadystatechange();
 		}

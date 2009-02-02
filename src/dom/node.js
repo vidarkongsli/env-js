@@ -352,6 +352,17 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
+      //check to see if this is a script element and apply a script loading strategy
+      //the check against the ownerDocument isnt really enough to support frames in
+      // the long run, but for now it's ok
+      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
+         newChild.ownerDocument == window.document &&
+         newChild.nodeName.toUpperCase() == "SCRIPT"){
+             
+        $log("loading script via policy");
+        $policy.loadScript(newChild);
+          
+      }
       return newChild;
     },
     hasChildNodes : function() {

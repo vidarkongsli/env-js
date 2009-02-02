@@ -15,14 +15,16 @@ function test(name, fn){
 	if ( expected != -1 && expected != numTests )
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
+//var orig = document.getElementById('main').innerHTML;
 var orig = document.getElementById('main').cloneNode(true);
-	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
+//print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
     
+    //document.getElementById('main').innerHTML = orig;
 	var main = document.getElementById('main');
 	
 	while(main.firstChild != null){

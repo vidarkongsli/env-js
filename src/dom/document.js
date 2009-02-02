@@ -26,7 +26,6 @@ var DOMDocument = function(implementation) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
-    //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -62,9 +61,11 @@ __extend__(DOMDocument.prototype, {
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
-            //HTMLtoDOM(xmlStr, doc);
+            //doc = html2dom(xmlStr+"", doc);
+        	//$log("\nhtml2xml\n" + doc.xml);
         } catch (e) {
-            $error(this.implementation.translateErrCode(e.code))
+            //$error(this.implementation.translateErrCode(e.code))
+            $error(e);
         }
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
@@ -77,7 +78,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var _this = this;
+        var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
         xhr.onreadystatechange = function(){
@@ -92,6 +93,15 @@ __extend__(DOMDocument.prototype, {
                 "</body></html>");
             }
             _this._url = url;
+            
+        	$log("Loading scripts.");
+            scripts = document.getElementsByTagName('script');
+            /*for(var prop in $policy){
+                $log("$policy."+prop+" ="+$policy[prop]);
+            }*/
+            for(var i=0;i<scripts.length;i++){
+                $policy.loadScript(scripts[i]);
+            }
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
         	event.initEvent("load");
@@ -280,6 +290,7 @@ __extend__(DOMDocument.prototype, {
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
+        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 

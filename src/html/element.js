@@ -87,7 +87,7 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        //$log("Initializing new css2props for html element : " + this.getAttribute("style"));
 		        this.$css2props = new CSS2Properties({
     		        cssText:this.getAttribute("style")
     	        });
