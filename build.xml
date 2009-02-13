@@ -126,5 +126,11 @@
         </concat>
         <echo message="${ENV_RHINO} built." />
     </target>
-    
+
+    <target name="test" description="Run the tests">
+      <java fork="true" jar="rhino/js.jar">
+        <arg value="test/test.js"/>
+      </java>
+    </target>
+
 </project>
