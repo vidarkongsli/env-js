@@ -1,14 +1,12 @@
 module("dom");
 
 test("Basic requirements", function() {
-	expect(7);
+	expect(5);
 	ok( Array.prototype.push, "Array.push()" );
 	ok( Function.prototype.apply, "Function.apply()" );
 	ok( document.getElementById, "getElementById" );
 	ok( document.getElementsByTagName, "getElementsByTagName" );
 	ok( RegExp, "RegExp" );
-	ok( jQuery, "jQuery" );
-	ok( $, "$" );
 });
 
 test("document.getElementById", function() {
@@ -34,5 +32,3 @@ test("element.getElementsByTagName", function() {
   var body = document.getElementById('body');
   try{ok (body.getElementsByTagName('h1').length == 1, "Can get NodeList length : Expected 1 , Got " + body.getElementsByTagName('h1').length);}catch(e){print(e);}
 });
-
-//print(document.xml);

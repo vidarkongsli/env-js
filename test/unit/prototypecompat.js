@@ -1,5 +1,5 @@
 //FYI: shipped with Rails 2.2.2
-load("test/prototype-1.6.0.3.js")
+load("test/vendor/prototype-1.6.0.3.js")
 
 module("prototypecompat")
 
