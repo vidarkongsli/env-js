@@ -26,7 +26,7 @@ __extend__(DOMProcessingInstruction.prototype, {
     },
     set data(data){
         // throw Exception if DOMNode is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;

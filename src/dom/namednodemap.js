@@ -31,7 +31,7 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItem : function(arg) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
             if (this.ownerDocument != arg.ownerDocument) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
@@ -56,7 +56,7 @@ __extend__(DOMNamedNodeMap.prototype, {
             ret = this[itemIndex];                // use existing Attribute
         
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -74,7 +74,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var ret = null;
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -82,7 +82,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemIndex__(this, name);
         
           // throw Exception if there is no node named name in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -90,7 +90,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -111,14 +111,14 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItemNS : function(arg) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNamedNodeMap is readonly
             if (this._readonly || (this.parentNode && this.parentNode._readonly)) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if arg was not created by this Document
-            if (this.ownerDocument != arg.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(arg)) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -135,7 +135,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -154,7 +154,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -162,7 +162,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
           // throw Exception if there is no matching node in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -170,7 +170,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         

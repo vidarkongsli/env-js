@@ -7,6 +7,7 @@ $log("Initializing Window XMLHttpRequest.");
 $w.XMLHttpRequest = function(){
 	this.headers = {};
 	this.responseHeaders = {};
+	$log("creating xhr");
 };
 
 XMLHttpRequest.prototype = {
@@ -24,25 +25,27 @@ XMLHttpRequest.prototype = {
 	},
 	getResponseHeader: function(header){ },
 	send: function(data){
-		var self = this;
+		var _this = this;
 		
 		function makeRequest(){
-			$env.connection(self, function(){
+			$env.connection(_this, function(){
 			  var responseXML = null;
-				self.__defineGetter__("responseXML", function(){
-      				if ( self.responseText.match(/^\s*</) ) {
-      				  if(responseXML){return responseXML;}
-      				  else{
+				_this.__defineGetter__("responseXML", function(){
+      				if ( _this.responseText.match(/^\s*</) ) {
+      				  if(responseXML){
+      				      return responseXML;
+      				      
+  				      }else{
         					try {
         					    $log("parsing response text into xml document");
-        						responseXML = $domparser.parseFromString(self.responseText)+"";
+        						responseXML = $domparser.parseFromString(_this.responseText+"");
                                 return responseXML;
         					} catch(e) { return null;/*TODO: need to flag an error here*/}
       					}
       				}else{return null;}
       			});
 			});
-			self.onreadystatechange();
+			_this.onreadystatechange();
 		}
 		if (this.async){
 		  $log("XHR sending asynch;");

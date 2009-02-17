@@ -8,7 +8,7 @@ window.onload = function(){
   
   
   // Display the results
-  results();
+  //results();
   
   var tab = "                ";//16
   print("\n\nTOTAL TIME : " + (__endTime__ - __startTime__)/1000 + " SECONDS");

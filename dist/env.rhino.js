@@ -8,8 +8,8 @@ var __env__ = {};
     $env.appCodeName  = "EnvJS";//eg "Mozilla"
     $env.appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
 
-	//set this to true and see profile/profile.js to select which methods
-	//to profile
+    //set this to true and see profile/profile.js to select which methods
+    //to profile
     $env.profile = false;
     
     $env.debug = function(){};
@@ -32,145 +32,149 @@ var __env__ = {};
         return obj?obj.hashCode().toString():null;
     };
     
-	//For Java the window.location object is a java.net.URL
-	$env.location = function(path, base){
-	  var protocol = new RegExp('(^\\w*\:)');
-		var m = protocol.exec(path);
-		if(m&&m.length>1){
-			return new java.net.URL(path).toString();
-		}else if(base){
-		  return new java.net.URL(base + '/' + path).toString();
-		}else{
-			//return an absolute url from a relative to the file system
-			return new java.io.File(path).toURL().toString();
-		}
-	};
-	
-	//For Java the window.timer is created using the java.lang.Thread in combination
-	//with the java.lang.Runnable
-	$env.timer = function(fn, time){
-		return new java.lang.Thread(new java.lang.Runnable({
-			run: function(){
-				while (true){
-					java.lang.Thread.currentThread().sleep(time);
-					fn();
-				}
-			}
-		}));
-	};	
-	
-	//Since we're running in rhino I guess we can safely assume
-	//java is 'enabled'.  I'm sure this requires more thought
-	//than I've given it here
-	$env.javaEnabled = true;	
-	
-	
-	//Used in the XMLHttpRquest implementation to run a
-	// request in a seperate thread
-	$env.runAsync = function(fn){
-		(new java.lang.Thread(new java.lang.Runnable({
-			run: fn
-		}))).start();
-	};
-	
-	//Used to write to a local file
-	$env.writeToFile = function(text, url){
-		var out = new java.io.FileWriter( 
-			new java.io.File( 
-				new java.net.URI(url.toString())));				
-		out.write( text, 0, text.length );
-		out.flush();
-		out.close();
-	};
-	
-	//Used to delete a local file
-	$env.deleteFile = function(url){
-		var file = new java.io.File( new java.net.URI( url ) );
+    //For Java the window.location object is a java.net.URL
+    $env.location = function(path, base){
+      var protocol = new RegExp('(^\\w*\:)');
+        var m = protocol.exec(path);
+        if(m&&m.length>1){
+            return new java.net.URL(path).toString();
+        }else if(base){
+          return new java.net.URL(base + '/' + path).toString();
+        }else{
+            //return an absolute url from a relative to the file system
+            return new java.io.File(path).toURL().toString();
+        }
+    };
+    
+    //For Java the window.timer is created using the java.lang.Thread in combination
+    //with the java.lang.Runnable
+    $env.timer = function(fn, time){
+        //print("wating for timer "+time);
+        return new java.lang.Thread(new java.lang.Runnable({
+            run: function(){
+                while (true){
+                    java.lang.Thread.currentThread().sleep(time);
+                    //print("calling in timer "+time);
+                    fn();
+                }
+            }
+        }));
+    };	
+    
+    //Since we're running in rhino I guess we can safely assume
+    //java is 'enabled'.  I'm sure this requires more thought
+    //than I've given it here
+    $env.javaEnabled = true;	
+    
+    
+    //Used in the XMLHttpRquest implementation to run a
+    // request in a seperate thread
+    $env.runAsync = function(fn){
+        print("running async");
+        (new java.lang.Thread(new java.lang.Runnable({
+            run: fn
+        }))).start();
+    };
+    
+    //Used to write to a local file
+    $env.writeToFile = function(text, url){
+        print("writing text to url : " + url);
+        var out = new java.io.FileWriter( 
+            new java.io.File( 
+                new java.net.URI(url.toString())));	
+        out.write( text, 0, text.length );
+        out.flush();
+        out.close();
+    };
+    
+    //Used to delete a local file
+    $env.deleteFile = function(url){
+        var file = new java.io.File( new java.net.URI( url ) );
         file["delete"]();
-	};
-	
-	$env.connection = function(xhr, responseHandler){
-		var url = java.net.URL(xhr.url);//, $w.location);
-	  var connection;
-		if ( /^file\:/.test(url) ) {
-			if ( xhr.method == "PUT" ) {
-				var text =  data || "" ;
-				$env.writeToFile(text, url);
-			} else if ( xhr.method == "DELETE" ) {
-				$env.deleteFile(url);
-			} else {
-				connection = url.openConnection();
-				connection.connect();
-			}
-		} else { 
-			connection = url.openConnection();
-			connection.setRequestMethod( xhr.method );
-			
-			// Add headers to Java connection
-			for (var header in xhr.headers){
-				connection.addRequestProperty(header, xhr.headers[header]);
-		  }connection.connect();
-			
-			// Stick the response headers into responseHeaders
-			for (var i = 0; ; i++) { 
-				var headerName = connection.getHeaderFieldKey(i); 
-				var headerValue = connection.getHeaderField(i); 
-				if (!headerName && !headerValue) break; 
-				if (headerName)
-					xhr.responseHeaders[headerName] = headerValue;
-			}
-		}
-		if(connection){
-				xhr.readyState = 4;
-				xhr.status = parseInt(connection.responseCode,10) || undefined;
-				xhr.statusText = connection.responseMessage || "";
-				
-				var contentEncoding = connection.getContentEncoding() || "utf-8",
-					stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
-   							new java.util.zip.GZIPInputStream(connection.getInputStream()) :
-   							connection.getInputStream(),
-					baos = new java.io.ByteArrayOutputStream(),
-   				buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
-					length,
-					responseXML = null;
+    };
+    
+    $env.connection = function(xhr, responseHandler){
+        var url = java.net.URL(xhr.url);//, $w.location);
+      var connection;
+        if ( /^file\:/.test(url) ) {
+            if ( xhr.method == "PUT" ) {
+                var text =  data || "" ;
+                $env.writeToFile(text, url);
+            } else if ( xhr.method == "DELETE" ) {
+                $env.deleteFile(url);
+            } else {
+                connection = url.openConnection();
+                connection.connect();
+            }
+        } else { 
+            connection = url.openConnection();
+            connection.setRequestMethod( xhr.method );
+            
+            // Add headers to Java connection
+            for (var header in xhr.headers){
+                connection.addRequestProperty(header, xhr.headers[header]);
+          }connection.connect();
+            
+            // Stick the response headers into responseHeaders
+            for (var i = 0; ; i++) { 
+                var headerName = connection.getHeaderFieldKey(i); 
+                var headerValue = connection.getHeaderField(i); 
+                if (!headerName && !headerValue) break; 
+                if (headerName)
+                    xhr.responseHeaders[headerName] = headerValue;
+            }
+        }
+        if(connection){
+                xhr.readyState = 4;
+                xhr.status = parseInt(connection.responseCode,10) || undefined;
+                xhr.statusText = connection.responseMessage || "";
+                
+                var contentEncoding = connection.getContentEncoding() || "utf-8",
+                    stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
+                            new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+                            connection.getInputStream(),
+                    baos = new java.io.ByteArrayOutputStream(),
+                buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+                    length,
+                    responseXML = null;
 
-				while ((length = stream.read(buffer)) != -1) {
-					baos.write(buffer, 0, length);
-				}
+                while ((length = stream.read(buffer)) != -1) {
+                    baos.write(buffer, 0, length);
+                }
 
-				baos.close();
-				stream.close();
+                baos.close();
+                stream.close();
 
-				xhr.responseText = java.nio.charset.Charset.forName(contentEncoding).
-					decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-				
-		}
-		if(responseHandler){
-		  responseHandler();
-		}
-	};
-	
-	var htmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
-	htmlDocBuilder.setNamespaceAware(false);
-	htmlDocBuilder.setValidating(false);
-	
-	$env.parseHTML = function(htmlstring){
-		return htmlDocBuilder.newDocumentBuilder().parse(
-				  new java.io.ByteArrayInputStream(
-						(new java.lang.String(htmlstring)).getBytes("UTF8")))+"";
-	};
-	
-	var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
-	xmlDocBuilder.setNamespaceAware(true);
-	xmlDocBuilder.setValidating(true);
-	
-	$env.parseXML = function(xmlstring){
-		return xmlDocBuilder.newDocumentBuilder().parse(
-				  new java.io.ByteArrayInputStream(
-						(new java.lang.String(xmlstring)).getBytes("UTF8")))+"";
-	};
-	
-	
+                xhr.responseText = java.nio.charset.Charset.forName(contentEncoding).
+                    decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
+                
+        }
+        if(responseHandler){
+          responseHandler();
+        }
+    };
+    
+    var htmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
+    htmlDocBuilder.setNamespaceAware(false);
+    htmlDocBuilder.setValidating(false);
+    
+    $env.parseHTML = function(htmlstring){
+        return htmlDocBuilder.newDocumentBuilder().parse(
+                  new java.io.ByteArrayInputStream(
+                        (new java.lang.String(htmlstring)).getBytes("UTF8")))+"";
+    };
+    
+    var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
+    xmlDocBuilder.setNamespaceAware(true);
+    xmlDocBuilder.setValidating(true);
+    
+    $env.parseXML = function(xmlstring){
+        return xmlDocBuilder.newDocumentBuilder().parse(
+                  new java.io.ByteArrayInputStream(
+                        (new java.lang.String(xmlstring)).getBytes("UTF8")))+"";
+    };
+    
+    
     $env.xpath = function(expression, doc){
     return Packages.javax.xml.xpath.
       XPathFactory.newInstance().newXPath().
@@ -182,7 +186,7 @@ var __env__ = {};
     $env.os_version     = java.lang.System.getProperty("os.version"); 
     $env.lang           = java.lang.System.getProperty("user.lang"); 
     $env.platform       = "Rhino ";//how do we get the version
-	
+    
     $env.safeScript = function(){
       //do nothing  
     };
@@ -193,14 +197,16 @@ var __env__ = {};
     };
     
     $env.loadLocalScript = function(script){
-        var types, i;
+        print("loading script " + script.src + " type : "+ script.type);
+        var types, type, src, i, base;
         try{
             types = script.type?script.type.split(";"):[];
             for(i=0;i<types.length;i++){
                 if($env.scriptTypes[types[i]]){
-                    if(script.src ){
+                    if(script.src){
                         print("loading both script :" + script.src);
-                        load($env.location(script.src, window.location+"/../"));
+                        base = "" + window.location;
+                        load($env.location(script.src, base.substring(0, base.lastIndexOf("/"))));
                     }else{
                         print("loading inline script :" + script.text);
                         eval(script.text);
@@ -629,6 +635,10 @@ var __appendChild__ = function(nodelist, newChild) {
     if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
         // append the children of DocumentFragment
         Array.prototype.push.apply(nodelist, newChild.childNodes);
+        Array.prototype.push.apply(nodelist, 
+            (newChild.childNodes instanceof Array) ?
+                newChild.childNodes : [newChild.childNodes]);
+
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
@@ -690,7 +700,7 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItem : function(arg) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
             if (this.ownerDocument != arg.ownerDocument) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
@@ -715,7 +725,7 @@ __extend__(DOMNamedNodeMap.prototype, {
             ret = this[itemIndex];                // use existing Attribute
         
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -733,7 +743,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var ret = null;
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -741,7 +751,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemIndex__(this, name);
         
           // throw Exception if there is no node named name in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -749,7 +759,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -770,14 +780,14 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItemNS : function(arg) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNamedNodeMap is readonly
             if (this._readonly || (this.parentNode && this.parentNode._readonly)) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if arg was not created by this Document
-            if (this.ownerDocument != arg.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(arg)) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -794,7 +804,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -813,7 +823,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -821,7 +831,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
           // throw Exception if there is no matching node in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -829,7 +839,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -1046,7 +1056,7 @@ var DOMNode = function(ownerDocument) {
   if (ownerDocument) {
     this._id = ownerDocument._genId();           // generate unique internal id
   }
-
+  
   this.namespaceURI = "";                        // The namespace URI of this node (Level 2)
   this.prefix       = "";                        // The namespace prefix of this node (Level 2)
   this.localName    = "";                        // The localName of this node (Level 2)
@@ -1103,14 +1113,14 @@ __extend__(DOMNode.prototype, {
         var prevNode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
             
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
             
@@ -1125,7 +1135,7 @@ __extend__(DOMNode.prototype, {
             var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
             
             // throw Exception if there is no child node with this id
-            if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
               throw(new DOMException(DOMException.NOT_FOUND_ERR));
             }
             
@@ -1192,14 +1202,14 @@ __extend__(DOMNode.prototype, {
         var ret = null;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -1213,7 +1223,7 @@ __extend__(DOMNode.prototype, {
         var index = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (index < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (index < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -1272,7 +1282,7 @@ __extend__(DOMNode.prototype, {
     },
     removeChild : function(oldChild) {
         // throw Exception if DOMNamedNodeMap is readonly
-        if (this.ownerDocument.implementation.errorChecking && (this._readonly || oldChild._readonly)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
@@ -1280,7 +1290,7 @@ __extend__(DOMNode.prototype, {
         var itemIndex = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -1304,21 +1314,18 @@ __extend__(DOMNode.prototype, {
         oldChild.previousSibling = null;
         oldChild.nextSibling = null;
         
-        /*if(oldChild.ownerDocument == document){
-            $log("removeChild :  all -> " + document.all.length);
-        }*/
         return oldChild;
     },
     appendChild : function(newChild) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
         // throw Exception if Node is readonly
         if (this._readonly) {
           throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
     
         // throw Exception if arg was not created by this Document
-        if (this.ownerDocument != newChild.ownerDocument) {
+        if (__ownerDocument__(this) != __ownerDocument__(this)) {
           throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
         }
     
@@ -1390,7 +1397,7 @@ __extend__(DOMNode.prototype, {
         //do not throw any exceptions
         //$log("cloning node");
         try {
-            return this.ownerDocument.importNode(this, deep);
+            return __ownerDocument__(this).importNode(this, deep);
         } catch (e) {
             //there shouldn't be any exceptions, but if there are, return null
             return null;
@@ -1433,16 +1440,16 @@ __extend__(DOMNode.prototype, {
     },
     isSupported : function(feature, version) {
         // use Implementation.hasFeature to determin if this feature is supported
-        return this.ownerDocument.implementation.hasFeature(feature, version);
+        return __ownerDocument__(this).implementation.hasFeature(feature, version);
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
         //$log("getElementsByTagName("+tagname+")");
-        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(__ownerDocument__(this)));
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
-        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         var importNode;
@@ -1450,13 +1457,12 @@ __extend__(DOMNode.prototype, {
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
-        this.ownerDocument._performingImportNodeOperation = true;
+        __ownerDocument__(this)._performingImportNodeOperation = true;
         
-        //try {
             if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Element (with the name of the importedNode)
-                    importNode = this.ownerDocument.createElement(importedNode.tagName);
+                    importNode = __ownerDocument__(this).createElement(importedNode.tagName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -1464,7 +1470,7 @@ __extend__(DOMNode.prototype, {
                     }
                 }else {
                     // create a local Element (with the name & namespaceURI of the importedNode)
-                    importNode = this.ownerDocument.createElementNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -1474,21 +1480,21 @@ __extend__(DOMNode.prototype, {
                 
                     // create namespace definitions matching those of the importedNode
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
             } else if (importedNode.nodeType == DOMNode.ATTRIBUTE_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Attribute (with the name of the importedAttribute)
-                    importNode = this.ownerDocument.createAttribute(importedNode.name);
+                    importNode = __ownerDocument__(this).createAttribute(importedNode.name);
                 } else {
                     // create a local Attribute (with the name & namespaceURI of the importedAttribute)
-                    importNode = this.ownerDocument.createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create namespace definitions matching those of the importedAttribute
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
@@ -1498,43 +1504,37 @@ __extend__(DOMNode.prototype, {
                 
             } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT) {
                 // create a local DocumentFragment
-                importNode = this.ownerDocument.createDocumentFragment();
+                importNode = __ownerDocument__(this).createDocumentFragment();
             } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
                 // create a local NamespaceNode (with the same name & value as the importedNode)
-                importNode = this.ownerDocument.createNamespace(importedNode.nodeName);
+                importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
                 importNode.value = importedNode.value;
             } else if (importedNode.nodeType == DOMNode.TEXT_NODE) {
                 // create a local TextNode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createTextNode(importedNode.data);
+                importNode = __ownerDocument__(this).createTextNode(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.CDATA_SECTION_NODE) {
                 // create a local CDATANode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createCDATASection(importedNode.data);
+                importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.PROCESSING_INSTRUCTION_NODE) {
                 // create a local ProcessingInstruction (with the same target & data as the importedNode)
-                importNode = this.ownerDocument.createProcessingInstruction(importedNode.target, importedNode.data);
+                importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
             } else if (importedNode.nodeType == DOMNode.COMMENT_NODE) {
                 // create a local Comment (with the same data as the importedNode)
-                importNode = this.ownerDocument.createComment(importedNode.data);
+                importNode = __ownerDocument__(this).createComment(importedNode.data);
             } else {  // throw Exception if nodeType is not supported
                 throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
             }
             
             if (deep) {                                    // recurse childNodes
                 for(var i = 0; i < importedNode.childNodes.length; i++) {
-                    importNode.appendChild(this.ownerDocument.importNode(importedNode.childNodes.item(i), true));
+                    importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
                 }
             }
             
             //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
+            __ownerDocument__(this)._performingImportNodeOperation = false;
             return importNode;
-        /*} catch (eAny) {
-            //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
-            
-            //re-throw the exception
-            throw eAny;
-        }//djotemp*/
+        
     },
     contains : function(node){
             while(node && node != this ){
@@ -1572,7 +1572,9 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     //$log("__getElementsByTagNameRecursive__("+elem._id+")");
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
-        if((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || (tagname == "*")) {
+        if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
+            ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
+                (tagname == "*")) ){
             //$log("found node by name " + tagname);
             __appendChild__(nodeList, elem);               // add matching node to nodeList
         }
@@ -1622,9 +1624,11 @@ var __isAncestor__ = function(target, node) {
   // if this node matches, return true,
   // otherwise recurse up (if there is a parentNode)
   return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
-}
+};
 
-
+var __ownerDocument__ = function(node){
+    return (node.nodeType == DOMNode.DOCUMENT_NODE)?node:node.ownerDocument;
+};
 /**
  * @class  DOMNamespace - The Namespace interface represents an namespace in an Element object
  *
@@ -1705,7 +1709,7 @@ __extend__(DOMCharacterData.prototype,{
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // append data
@@ -1713,12 +1717,12 @@ __extend__(DOMCharacterData.prototype,{
     },
     deleteData: function(offset, count){ 
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
               throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1732,13 +1736,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     insertData: function(offset, arg){
         // throw Exception if DOMCharacterData is readonly
-        if(this.ownerDocument.implementation.errorChecking && this._readonly){
+        if(__ownerDocument__(this).implementation.errorChecking && this._readonly){
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if(this.data){
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1746,7 +1750,7 @@ __extend__(DOMCharacterData.prototype,{
             this.data =  this.data.substring(0, offset).concat(arg, this.data.substring(offset));
         }else {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && (offset != 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (offset != 0)) {
                throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1756,13 +1760,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     replaceData: function(offset, count, arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1778,7 +1782,7 @@ __extend__(DOMCharacterData.prototype,{
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
             // or the count is negative
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             // if count is not specified
@@ -1825,7 +1829,7 @@ __extend__(DOMText.prototype,{
         var data, inode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Node is readonly
             if (this._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -1842,7 +1846,7 @@ __extend__(DOMText.prototype,{
             data  = this.substringData(offset);
             
             // create new TextNode with remaining string
-            inode = this.ownerDocument.createTextNode(data);
+            inode = __ownerDocument__(this).createTextNode(data);
             
             // attach new TextNode
             if (this.nextSibling) {
@@ -1989,7 +1993,7 @@ __extend__(DOMAttr.prototype, {
     },
     set value(value){
         // throw Exception if Attribute is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // delegate to node
@@ -2060,14 +2064,14 @@ __extend__(DOMElement.prototype, {
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
-        if(this.ownerDocument){
+        if(__ownerDocument__(this)){
             if (!attr) {
-                attr = this.ownerDocument.createAttribute(name);  // otherwise create it
+                attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
             }
             
             
             // test for exceptions
-            if (this.ownerDocument.implementation.errorChecking) {
+            if (__ownerDocument__(this).implementation.errorChecking) {
                 // throw Exception if Attribute is readonly
                 if (attr._readonly) {
                     throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -2115,7 +2119,7 @@ __extend__(DOMElement.prototype, {
     },
     removeAttributeNode: function(oldAttr) {
       // throw Exception if Attribute is readonly
-      if (this.ownerDocument.implementation.errorChecking && oldAttr._readonly) {
+      if (__ownerDocument__(this).implementation.errorChecking && oldAttr._readonly) {
         throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
       }
     
@@ -2123,7 +2127,7 @@ __extend__(DOMElement.prototype, {
       var itemIndex = this.attributes._findItemIndex(oldAttr._id);
     
       // throw Exception if node does not exist in this map
-      if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+      if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
         throw(new DOMException(DOMException.NOT_FOUND_ERR));
       }
     
@@ -2144,13 +2148,13 @@ __extend__(DOMElement.prototype, {
         
         if (!attr) {  // if Attribute exists, use it
             // otherwise create it
-            attr = this.ownerDocument.createAttributeNS(namespaceURI, qualifiedName);
+            attr = __ownerDocument__(this).createAttributeNS(namespaceURI, qualifiedName);
         }
         
         var value = String(value);
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Attribute is readonly
             if (attr._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -2335,7 +2339,7 @@ __extend__(DOMProcessingInstruction.prototype, {
     },
     set data(data){
         // throw Exception if DOMNode is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;
@@ -4116,7 +4120,7 @@ var DOMDocument = function(implementation) {
     this._parseComplete = false;                   // initially false, set to true by parser
     this._url = "";
     
-    this.ownerDocument = this;
+    this.ownerDocument = null;
     
     this._performingImportNodeOperation = false;
     //$log("\tfinished creating dom document " + this);
@@ -4205,7 +4209,7 @@ __extend__(DOMDocument.prototype, {
     createElement : function(tagName) {
         //$log("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -4252,7 +4256,8 @@ __extend__(DOMDocument.prototype, {
     },
     createProcessingInstruction : function(target, data) {
           // throw Exception if the target string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(target))) {
+        //$log("DOMDocument.createProcessingInstruction( "+target+" )");
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -4267,7 +4272,8 @@ __extend__(DOMDocument.prototype, {
     },
     createAttribute : function(name) {
         // throw Exception if the name string contains an illegal character
-        if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
+        //$log("DOMDocument.createAttribute( "+target+" )");
+        if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         
@@ -4282,7 +4288,7 @@ __extend__(DOMDocument.prototype, {
     createElementNS : function(namespaceURI, qualifiedName) {
         //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -4308,7 +4314,7 @@ __extend__(DOMDocument.prototype, {
     },
     createAttributeNS : function(namespaceURI, qualifiedName) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -4355,7 +4361,7 @@ __extend__(DOMDocument.prototype, {
             node = all[i];
             // if id matches & node is alive (ie, connected (in)directly to the documentElement)
             if (node.id == elementId) {
-                if((node.ownerDocument.documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -4363,7 +4369,7 @@ __extend__(DOMDocument.prototype, {
             }
           }
           
-          if(retNode == null){$log("Couldn't find id " + elementId);}
+          //if(retNode == null){$log("Couldn't find id " + elementId);}
           return retNode;
     },
     normalizeDocument: function(){
@@ -4808,7 +4814,7 @@ __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
         //$log("HTMLDocument.createElement( "+tagName+" )");
         // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
@@ -5030,7 +5036,7 @@ __extend__(HTMLElement.prototype, {
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = this.ownerDocument.importNode(doc.documentElement, true);
+            var parent = __ownerDocument__(this).importNode(doc.documentElement, true);
             
 			//$log("\n\nIMPORTED HTML:\n\n"+nodes.xml);
 			while(this.firstChild != null){
@@ -6684,7 +6690,19 @@ var HTMLScriptElement = function(ownerDocument) {
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
     get text(){
+        // text of script is in a child node of the element
+        // scripts with < operator must be in a CDATA node
+        for (var i=0; i<this.childNodes.length; i++) {
+            if (this.childNodes[i].nodeType == DOMNode.CDATA_SECTION_NODE) {
+                return this.childNodes[i].nodeValue;
+            }
+        } 
+        // otherwise there will be a text node containing the script
+        if (this.childNodes[0] && this.childNodes[0].nodeType == DOMNode.TEXT_NODE) {
+            return this.childNodes[0].nodeValue;
+ 		}
         return this.nodeValue;
+
     },
     get htmlFor(){
         return this.getAttribute('for');
@@ -6724,7 +6742,7 @@ __extend__(HTMLScriptElement.prototype, {
     }
 });
 
-			$log("Defining HTMLSelectElement");
+            $log("Defining HTMLSelectElement");
 /* 
 * HTMLSelectElement - DOM Level 2
 */
@@ -6861,14 +6879,17 @@ __extend__(HTMLStyleElement.prototype, {
 * event.js
 */
 $w.__defineGetter__("Event", function(){
-  __extend__(this,{
-    CAPTURING_PHASE : 1,
-    AT_TARGET       : 2,
-    BUBBLING_PHASE  : 3
-  });
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    __extend__(this,{
+        CAPTURING_PHASE : 1,
+        AT_TARGET       : 2,
+        BUBBLING_PHASE  : 3
+    });
+    if(this.__output__ == undefined) {
+        this.__output__ = function(){
+            throw new Error("Object cannot be created in this context");
+        };
+    }
+    return this.__output__;
 });
 
 var Event = function(options){
@@ -6878,7 +6899,7 @@ var Event = function(options){
     AT_TARGET       : 2,
     BUBBLING_PHASE  : 3
   });
-  $log("Creating new Event");
+  //$log("Creating new Event");
   var $bubbles = options.bubbles?options.bubbles:true,
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,
@@ -7461,7 +7482,7 @@ var $events = [],
     $onunload;
 
 $w.addEventListener = function(type, fn){
-  $log("adding event listener " + type);
+  //$log("adding event listener " + type);
 	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
@@ -7489,7 +7510,7 @@ $w.removeEventListener = function(type, fn){
 };
 
 $w.dispatchEvent = function(event){
-    $log("dispatching event " + event.type);
+    //$log("dispatching event " + event.type);
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
     if(!event.target)
@@ -7549,6 +7570,7 @@ $log("Initializing Window XMLHttpRequest.");
 $w.XMLHttpRequest = function(){
 	this.headers = {};
 	this.responseHeaders = {};
+	$log("creating xhr");
 };
 
 XMLHttpRequest.prototype = {
@@ -7566,25 +7588,27 @@ XMLHttpRequest.prototype = {
 	},
 	getResponseHeader: function(header){ },
 	send: function(data){
-		var self = this;
+		var _this = this;
 		
 		function makeRequest(){
-			$env.connection(self, function(){
+			$env.connection(_this, function(){
 			  var responseXML = null;
-				self.__defineGetter__("responseXML", function(){
-      				if ( self.responseText.match(/^\s*</) ) {
-      				  if(responseXML){return responseXML;}
-      				  else{
+				_this.__defineGetter__("responseXML", function(){
+      				if ( _this.responseText.match(/^\s*</) ) {
+      				  if(responseXML){
+      				      return responseXML;
+      				      
+  				      }else{
         					try {
         					    $log("parsing response text into xml document");
-        						responseXML = $domparser.parseFromString(self.responseText)+"";
+        						responseXML = $domparser.parseFromString(_this.responseText+"");
                                 return responseXML;
         					} catch(e) { return null;/*TODO: need to flag an error here*/}
       					}
       				}else{return null;}
       			});
 			});
-			self.onreadystatechange();
+			_this.onreadystatechange();
 		}
 		if (this.async){
 		  $log("XHR sending asynch;");
