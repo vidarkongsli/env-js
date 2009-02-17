@@ -4,14 +4,28 @@ load("dist/env.rhino.js");
 
 window.onload = function(){
   print("Handling onload for test.js");
-  var __endTime__ = new Date().getTime();
+  // Load the test runner
+  load("test/testrunner.js", "test/jquery.js");
+  print("Loaded test runner.");
+  
+  var start = new Date().getTime();
+  print("Loading tests.");
+  // Load the tests
+  load(
+    "test/unit/dom.js",
+
+    //NOTE: keep this test last because Prototype pollutes
+    //the namespace and several DOM objects
+    "test/unit/prototypecompat.js"
+  );
+  var end = new Date().getTime();
   
   
   // Display the results
-  //results();
+  results();
   
   var tab = "                ";//16
-  print("\n\nTOTAL TIME : " + (__endTime__ - __startTime__)/1000 + " SECONDS");
+  print("\n\nTOTAL TIME : " + (end - start)/1000 + " SECONDS");
   print("\nPROFILE");
   print("ASPECT \n" +  
         " | # OF CALLS "+tab.substring(0,tab.length-String(calls).length)+ 
@@ -32,5 +46,4 @@ window.onload = function(){
   
 };
 
-var __startTime__ = new Date().getTime();
 window.location = "test/index.html";

@@ -15,16 +15,14 @@ function test(name, fn){
 	if ( expected != -1 && expected != numTests )
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
-//var orig = document.getElementById('main').innerHTML;
 var orig = document.getElementById('main').cloneNode(true);
-//print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
+	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
     
-    //document.getElementById('main').innerHTML = orig;
 	var main = document.getElementById('main');
 	
 	while(main.firstChild != null){
@@ -135,13 +133,13 @@ function q() {
  * @example t("Check for something", "//[a]", ["foo", "baar"]);
  * @result returns true if "//[a]" return two elements with the IDs 'foo' and 'baar'
  */
-function t(a,b,c) {
-	var f = jQuery(b);
-	var s = "";
-	for ( var i = 0; i < f.length; i++ )
-		s += (s && ",") + '"' + f[i].id + '"';
-	isSet(f, q.apply(q,c), a + " (" + b + ")");
-}
+// function t(a,b,c) {
+//  var f = jQuery(b);
+//  var s = "";
+//  for ( var i = 0; i < f.length; i++ )
+//    s += (s && ",") + '"' + f[i].id + '"';
+//  isSet(f, q.apply(q,c), a + " (" + b + ")");
+// }
 
 /**
  * Checks that the first two arguments are equal, with an optional message.

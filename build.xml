@@ -125,30 +125,10 @@
         <echo message="${ENV_RHINO} built." />
     </target>
     
-    <target name="test-jquery-1.2.6">
-        <echo message="Running jQuery-1.2.6 Tests"/>
-        <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-            <!--arg line='-e load("/dist/env.rhino.js"); window.location="test/jquery/1.2.6/index.html";' /-->
-            <arg value='-e'/>
-            <arg value='load(\"dist\/env.rhino.js\"); window.location=\"test\/jquery\/1.2.6\/index.html\";' />
-            <classpath>
-                <pathelement location="${RHINO_JAR}"/>
-            </classpath>
-        </java>
-        <echo message="Finished jQuery-1.2.6 Tests" />
-    </target>
-    
-    <target name="test-prototype">
-        <echo message="Running Prototype-1.6.0.3 Tests"/>
-        <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-            <!--arg line='-e load("/dist/env.rhino.js"); window.location="test/jquery/1.2.6/index.html";' /-->
-            <arg value='-e'/>
-            <arg value='load(\"dist\/env.rhino.js\"); window.location=\"test\/prototype\/1.6.0.3\/index.html\"; load(\"test\/prototype\/1.6.0.3\/unit\/dom_test.js\"); __env__.writeToFile(document.documentElement.xml, __env__.location(\"test\/prototype\/1.6.0.3\/results\/dom.html\"));' />
-            <classpath>
-                <pathelement location="${RHINO_JAR}"/>
-            </classpath>
-        </java>
-        <echo message="Finished Prototype-1.6.0.3 Tests" />
+    <target name="test" description="Run the tests">
+      <java fork="true" jar="rhino/js.jar">
+        <arg value="test/test.js"/>
+      </java>
     </target>
     
 </project>
