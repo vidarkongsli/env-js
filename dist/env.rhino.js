@@ -100,7 +100,7 @@ var __env__ = {};
         var out = new java.io.FileWriter(temp);
         out.write(text, 0, text.length);
         out.close();
-        return temp.getAbsolutePath();
+        return $env.location(temp.getAbsolutePath());
     };
     
     //Used to delete a local file
@@ -277,6 +277,7 @@ var __this__ = this;
 this.__defineGetter__('window', function(){
   return __this__;
 });
+
 try{
 (function($w, $env, $policy){
         /*
@@ -1417,7 +1418,7 @@ __extend__(DOMNode.prototype, {
          newChild.ownerDocument == window.document &&
          newChild.nodeName.toUpperCase() == "SCRIPT"){
              
-        $log("loading script via policy");
+        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
         $policy.loadScript(newChild);
           
       }

@@ -100,7 +100,7 @@ var __env__ = {};
         var out = new java.io.FileWriter(temp);
         out.write(text, 0, text.length);
         out.close();
-        return temp.getAbsolutePath();
+        return $env.location(temp.getAbsolutePath());
     };
     
     //Used to delete a local file

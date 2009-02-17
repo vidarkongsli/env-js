@@ -356,7 +356,7 @@ __extend__(DOMNode.prototype, {
          newChild.ownerDocument == window.document &&
          newChild.nodeName.toUpperCase() == "SCRIPT"){
              
-        $log("loading script via policy");
+        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
         $policy.loadScript(newChild);
           
       }
