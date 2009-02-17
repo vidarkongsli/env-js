@@ -6717,7 +6717,6 @@ var CSS2Properties = function(options){
     __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
 };
-//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);
@@ -7226,6 +7225,7 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
+	    //$log("Creating timer number "+num);
     	$timers[num] = $env.timer(fn, time);
     	$timers[num].start();
 	}
@@ -7234,6 +7234,8 @@ window.setInterval = function(fn, time){
 
 window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
+	    
+	    //$log("Deleting timer number "+num);
 		$timers[num].stop();
 		delete $timers[num];
 	}

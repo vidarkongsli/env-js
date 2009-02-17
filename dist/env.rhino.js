@@ -34,7 +34,7 @@ var __env__ = {};
     
     //For Java the window.location object is a java.net.URL
     $env.location = function(path, base){
-      var protocol = new RegExp('(^\\w*\:)');
+      var protocol = new RegExp('(^file\:|^http\:|^https\:)');
         var m = protocol.exec(path);
         if(m&&m.length>1){
             return new java.net.URL(path).toString();
@@ -42,7 +42,7 @@ var __env__ = {};
           return new java.net.URL(base + '/' + path).toString();
         }else{
             //return an absolute url from a relative to the file system
-            return new java.io.File(path).toURL().toString();
+            return new java.io.File( path).toURL().toString();
         }
     };
     
@@ -85,6 +85,22 @@ var __env__ = {};
         out.write( text, 0, text.length );
         out.flush();
         out.close();
+    };
+    
+    //Used to write to a local file
+    $env.writeToTempFile = function(text, suffix){
+        print("writing text to temp url : " + suffix);
+        // Create temp file.
+        var temp = java.io.File.createTempFile("envjs-tmp", suffix);
+    
+        // Delete temp file when program exits.
+        temp.deleteOnExit();
+    
+        // Write to temp file
+        var out = new java.io.FileWriter(temp);
+        out.write(text, 0, text.length);
+        out.close();
+        return temp.getAbsolutePath();
     };
     
     //Used to delete a local file
@@ -145,7 +161,7 @@ var __env__ = {};
                 baos.close();
                 stream.close();
 
-                xhr.responseText = java.nio.charset.Charset.forName(contentEncoding).
+                xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
                     decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
                 
         }
@@ -181,6 +197,7 @@ var __env__ = {};
         evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
     };
     
+    $env.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
     $env.os_name        = java.lang.System.getProperty("os.name"); 
     $env.os_arch        = java.lang.System.getProperty("os.arch"); 
     $env.os_version     = java.lang.System.getProperty("os.version"); 
@@ -197,26 +214,44 @@ var __env__ = {};
     };
     
     $env.loadLocalScript = function(script){
-        print("loading script " + script.src + " type : "+ script.type);
+        print("loading script ");
         var types, type, src, i, base;
         try{
-            types = script.type?script.type.split(";"):[];
-            for(i=0;i<types.length;i++){
-                if($env.scriptTypes[types[i]]){
-                    if(script.src){
-                        print("loading both script :" + script.src);
-                        base = "" + window.location;
-                        load($env.location(script.src, base.substring(0, base.lastIndexOf("/"))));
+            if(script.type){
+                types = script.type?script.type.split(";"):[];
+                for(i=0;i<types.length;i++){
+                    if($env.scriptTypes[types[i]]){
+                        if(script.src){
+                            print("loading allowed external script :" + script.src);
+                            base = "" + window.location;
+                            load($env.location(script.src, base.substring(0, base.lastIndexOf("/"))));
+                        }else{
+                            $env.loadInlineScript(script);
+                        }
                     }else{
-                        print("loading inline script :" + script.text);
-                        eval(script.text);
+                        if(!script.src && script.type == "text/javascript"){
+                            $env.loadInlineScript(script);
+                        }
                     }
+                }
+            }else{
+                //anonymous type and anonymous src means inline
+                if(!script.src){
+                    $env.loadInlineScript(script);
                 }
             }
         }catch(e){
             print("Error loading script.");
             print(e);
         }
+    };
+    
+    $env.loadInlineScript = function(script){
+        print("loading inline script :" + script.text);
+        var tmpFile = $env.writeToTempFile(script.text, 'js') ;
+        $env.writeToFile(script.text, tmpFile);
+        print("loading ",tmpFile);
+        load(tmpFile);
     };
     
 })(__env__);/*
@@ -6949,7 +6984,6 @@ var CSS2Properties = function(options){
     __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
 };
-//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);
@@ -7458,6 +7492,7 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
+	    //$log("Creating timer number "+num);
     	$timers[num] = $env.timer(fn, time);
     	$timers[num].start();
 	}
@@ -7466,6 +7501,8 @@ window.setInterval = function(fn, time){
 
 window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
+	    
+	    //$log("Deleting timer number "+num);
 		$timers[num].stop();
 		delete $timers[num];
 	}
