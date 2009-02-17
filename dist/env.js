@@ -249,7 +249,6 @@ $w.__defineGetter__('NodeList', function(){
  */
 var DOMNodeList = function(ownerDocument, parentNode) {
     //$log("\t\tcreating dom nodelist");
-    var nodes = [];
     
     this.length = 0;
     this.parentNode = parentNode;
@@ -257,7 +256,7 @@ var DOMNodeList = function(ownerDocument, parentNode) {
     
     this._readonly = false;
     
-    __setArray__(this, nodes);
+    __setArray__(this, []);
     //$log("\t\tfinished creating dom nodelist");
 };
 __extend__(DOMNodeList.prototype, {
@@ -402,7 +401,11 @@ var __removeChild__ = function(nodelist, refChildIndex) {
 var __appendChild__ = function(nodelist, newChild) {
     if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
         // append the children of DocumentFragment
-        Array.prototype.push.apply(nodelist, newChild.childNodes);
+        //TODO : see #14 - http://envjs.lighthouseapp.com/projects/21590/tickets/14-nodelist-functionprototypeapply-must-take-an-array
+        //not sure why this could happen, .childNodes should always be an array
+        Array.prototype.push.apply(nodelist, 
+            (newChild.childNodes instanceof Array) ?
+                newChild.childNodes : [newChild.childNodes]);
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
