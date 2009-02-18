@@ -3,7 +3,7 @@
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008 John Resig, under the MIT License
  */
- 
+
 
 // The Window Object
 var __this__ = this;
@@ -1145,17 +1145,7 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
-      //check to see if this is a script element and apply a script loading strategy
-      //the check against the ownerDocument isnt really enough to support frames in
-      // the long run, but for now it's ok
-      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
-         newChild.ownerDocument == window.document &&
-         newChild.nodeName.toUpperCase() == "SCRIPT"){
-             
-        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
-        $policy.loadScript(newChild);
-          
-      }
+      
       return newChild;
     },
     hasChildNodes : function() {
@@ -1221,8 +1211,9 @@ __extend__(DOMNode.prototype, {
         return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
+        
         var importNode;
-        //$log("importing node " + importedNode + "(?deep = "+deep+")");
+        //$log("importing node " + importedNode.nodeName + "(?deep = "+deep+")");
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
@@ -3976,7 +3967,7 @@ __extend__(DOMDocument.prototype, {
         return null;/*TODO*/
     },
     createElement : function(tagName) {
-        //$log("DOMDocument.createElement( "+tagName+" )");
+        $log("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
           if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
@@ -4801,20 +4792,23 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		set innerHTML(html){
-		    //$debug("htmlElement.innerHTML("+html+")");
+		    $debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = __ownerDocument__(this).importNode(doc.documentElement, true);
+            var parent = doc.documentElement;//__ownerDocument__(this).importNode(doc.documentElement, true);
             
-			//$log("\n\nIMPORTED HTML:\n\n"+nodes.xml);
+			//$log("\n\nIMPORTED HTML:\n\n"+parent.xml);
 			while(this.firstChild != null){
 			    //$log('innerHTML - removing child '+ this.firstChild.xml);
 			    this.removeChild( this.firstChild );
 			}
+			var importedNode;
 			while(parent.firstChild != null){
 			    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-			    this.appendChild( parent.removeChild( parent.firstChild ) );
+		        //$log('innerHTML - importing node');
+	            importedNode = this.importNode( parent.removeChild( parent.firstChild ), true);
+			    this.appendChild( importedNode );   
 		    }
 		    //Mark for garbage collection
 		    doc = null;
@@ -5757,9 +5751,34 @@ __extend__(HTMLHeadElement.prototype, {
     set profile(value){
         this.setAttribute('profile', value);
     },
+    //we override this so we can apply browser behavior specific to head children
+    //like loading scripts
+    appendChild : function(newChild) {
+        //$log("HTMLHeadElement.appendChild");
+        var newChild = HTMLElement.prototype.appendChild.apply(this,[newChild]);
+        __evalScript__(newChild);
+        return newChild;
+    },
+    insertBefore : function(newChild, refChild) {
+        //$log("HTMLHeadElement.insertBefore");
+        var newChild = HTMLElement.prototype.insertBefore.apply(this,[newChild]);
+        //__evalScript__(newChild);
+        return newChild;
+    }
 });
 
-			$log("Defining HTMLIFrameElement");
+var __evalScript__ = function(newChild){
+    //check to see if this is a script element and apply a script loading strategy
+    //the check against the ownerDocument isnt really enough to support frames in
+    // the long run, but for now it's ok
+    if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
+        newChild.ownerDocument == window.document ){
+        if(newChild.nodeName.toUpperCase() == "SCRIPT"){
+            $log("loading script via policy. parent : " + this.tagName);
+            $policy.loadScript(newChild);
+        }
+    }
+};$log("Defining HTMLIFrameElement");
 /* 
 * HTMLIFrameElement - DOM Level 2
 */

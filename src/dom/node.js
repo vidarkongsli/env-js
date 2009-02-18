@@ -350,17 +350,7 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
-      //check to see if this is a script element and apply a script loading strategy
-      //the check against the ownerDocument isnt really enough to support frames in
-      // the long run, but for now it's ok
-      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
-         newChild.ownerDocument == window.document &&
-         newChild.nodeName.toUpperCase() == "SCRIPT"){
-             
-        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
-        $policy.loadScript(newChild);
-          
-      }
+      
       return newChild;
     },
     hasChildNodes : function() {
@@ -426,8 +416,9 @@ __extend__(DOMNode.prototype, {
         return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
+        
         var importNode;
-        //$log("importing node " + importedNode + "(?deep = "+deep+")");
+        //$log("importing node " + importedNode.nodeName + "(?deep = "+deep+")");
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace

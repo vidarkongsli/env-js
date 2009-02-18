@@ -39,20 +39,23 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		set innerHTML(html){
-		    //$debug("htmlElement.innerHTML("+html+")");
+		    $debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = __ownerDocument__(this).importNode(doc.documentElement, true);
+            var parent = doc.documentElement;//__ownerDocument__(this).importNode(doc.documentElement, true);
             
-			//$log("\n\nIMPORTED HTML:\n\n"+nodes.xml);
+			//$log("\n\nIMPORTED HTML:\n\n"+parent.xml);
 			while(this.firstChild != null){
 			    //$log('innerHTML - removing child '+ this.firstChild.xml);
 			    this.removeChild( this.firstChild );
 			}
+			var importedNode;
 			while(parent.firstChild != null){
 			    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-			    this.appendChild( parent.removeChild( parent.firstChild ) );
+		        //$log('innerHTML - importing node');
+	            importedNode = this.importNode( parent.removeChild( parent.firstChild ), true);
+			    this.appendChild( importedNode );   
 		    }
 		    //Mark for garbage collection
 		    doc = null;
