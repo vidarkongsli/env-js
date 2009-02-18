@@ -6648,21 +6648,6 @@ __extend__(HTMLStyleElement.prototype, {
 * event.js
 */
 $w.__defineGetter__("Event", function(){
-<<<<<<< HEAD:dist/env.js
-  __extend__(this,{
-    CAPTURING_PHASE : 1,
-    AT_TARGET       : 2,
-    BUBBLING_PHASE  : 3
-  });
-  
-  if(this.__output__ == undefined) {
-    this.__output__ = function(){ 
-      throw new Error("Object cannot be created in this context"); 
-    };
-  }
-  
-  return this.__output__;
-=======
     __extend__(this,{
         CAPTURING_PHASE : 1,
         AT_TARGET       : 2,
@@ -6674,7 +6659,6 @@ $w.__defineGetter__("Event", function(){
         };
     }
     return this.__output__;
->>>>>>> thatcher/master:dist/env.js
 });
 
 var Event = function(options){
