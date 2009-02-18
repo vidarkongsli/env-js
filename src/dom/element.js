@@ -51,14 +51,14 @@ __extend__(DOMElement.prototype, {
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
-        if(this.ownerDocument){
+        if(__ownerDocument__(this)){
             if (!attr) {
-                attr = this.ownerDocument.createAttribute(name);  // otherwise create it
+                attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
             }
             
             
             // test for exceptions
-            if (this.ownerDocument.implementation.errorChecking) {
+            if (__ownerDocument__(this).implementation.errorChecking) {
                 // throw Exception if Attribute is readonly
                 if (attr._readonly) {
                     throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -106,7 +106,7 @@ __extend__(DOMElement.prototype, {
     },
     removeAttributeNode: function(oldAttr) {
       // throw Exception if Attribute is readonly
-      if (this.ownerDocument.implementation.errorChecking && oldAttr._readonly) {
+      if (__ownerDocument__(this).implementation.errorChecking && oldAttr._readonly) {
         throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
       }
     
@@ -114,7 +114,7 @@ __extend__(DOMElement.prototype, {
       var itemIndex = this.attributes._findItemIndex(oldAttr._id);
     
       // throw Exception if node does not exist in this map
-      if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+      if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
         throw(new DOMException(DOMException.NOT_FOUND_ERR));
       }
     
@@ -135,13 +135,13 @@ __extend__(DOMElement.prototype, {
         
         if (!attr) {  // if Attribute exists, use it
             // otherwise create it
-            attr = this.ownerDocument.createAttributeNS(namespaceURI, qualifiedName);
+            attr = __ownerDocument__(this).createAttributeNS(namespaceURI, qualifiedName);
         }
         
         var value = String(value);
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Attribute is readonly
             if (attr._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -206,6 +206,7 @@ __extend__(DOMElement.prototype, {
         return DOMNode.ELEMENT_NODE;
     },
     get xml() {
+        //$log("Serializing " + this);
         var ret = "";
         
         // serialize namespace declarations

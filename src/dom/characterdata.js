@@ -29,7 +29,7 @@ __extend__(DOMCharacterData.prototype,{
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // append data
@@ -37,12 +37,12 @@ __extend__(DOMCharacterData.prototype,{
     },
     deleteData: function(offset, count){ 
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
               throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -56,13 +56,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     insertData: function(offset, arg){
         // throw Exception if DOMCharacterData is readonly
-        if(this.ownerDocument.implementation.errorChecking && this._readonly){
+        if(__ownerDocument__(this).implementation.errorChecking && this._readonly){
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if(this.data){
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -70,7 +70,7 @@ __extend__(DOMCharacterData.prototype,{
             this.data =  this.data.substring(0, offset).concat(arg, this.data.substring(offset));
         }else {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && (offset != 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (offset != 0)) {
                throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -80,13 +80,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     replaceData: function(offset, count, arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -102,7 +102,7 @@ __extend__(DOMCharacterData.prototype,{
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
             // or the count is negative
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             // if count is not specified

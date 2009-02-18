@@ -13,6 +13,7 @@ window.onload = function(){
   // Load the tests
   load(
     "test/unit/dom.js",
+    "test/unit/window.js",
 
     //NOTE: keep this test last because Prototype pollutes
     //the namespace and several DOM objects

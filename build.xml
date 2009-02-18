@@ -5,11 +5,9 @@
 <project name="Env" default="default" basedir=".">
     <description>Builds, tests, and runs the project Env.</description>
     
-    <property description="Source Folder" name="SRC_DIR" location="src" />
-    <property description="Files for parsing etc." name="TOOLS_DIR" location="tools" />
-    <property description="Java Jars" name="JAVA_LIB_DIR" location="rhino" />
-    <property description="Rhino JS Engine" name="RHINO_JAR" location="${JAVA_LIB_DIR}/js.jar" />
-    <property description="JSLint Syntax Checking Engine" name="JSLINT_JAR" location="${JAVA_LIB_DIR}/jslint4java-1.2.1.jar" />
+    <property name="SRC_DIR"        location="src"           description="Source Folder"/>
+    <property name="TOOLS_DIR"      location="tools"         description="Files for parsing etc." />
+    <property name="RHINO_JAR"      location="rhino/js.jar"  description="Rhino JS Engine"/>
 
     <property name="PREFIX"         location="${basedir}/dist/"       description="Target parent folder for built files"   />
     <property name="DOCS_DIR"       location="${PREFIX}/docs"         description="Folder for docs target"  />
@@ -26,12 +24,12 @@
     <target name="all" depends="default"/>
     
     <target name="lint" depends="concat">
-        <java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
+        <!--java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
             <arg value="${ENV_DIST}" />
         </java>
         <java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
             <arg value="${ENV_RHINO}" />
-        </java>
+        </java-->
     </target>
     
     <target name="concat" description="Main ENV build">
@@ -61,7 +59,7 @@
             <fileset dir="${SRC_DIR}" includes="dom/implementation.js" />
             <fileset dir="${SRC_DIR}" includes="dom/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/html.js" />
-            <!--fileset dir="${SRC_DIR}" includes="html/htmlparser.js" /-->
+            <fileset dir="${SRC_DIR}" includes="html/htmlparser.js" />
             <fileset dir="${SRC_DIR}" includes="html/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/element.js" />
             <fileset dir="${SRC_DIR}" includes="html/collection.js" />
@@ -126,11 +124,12 @@
         </concat>
         <echo message="${ENV_RHINO} built." />
     </target>
-
+    
     <target name="test" description="Run the tests">
       <java fork="true" jar="rhino/js.jar">
-        <arg value="test/test.js"/>
+        <arg value="test/test.js"/>    
+        <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
     </target>
-
+    
 </project>

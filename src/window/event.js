@@ -9,7 +9,7 @@ var $events = [],
     $onunload;
 
 $w.addEventListener = function(type, fn){
-  $log("adding event listener " + type);
+  //$log("adding event listener " + type);
 	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
@@ -37,7 +37,7 @@ $w.removeEventListener = function(type, fn){
 };
 
 $w.dispatchEvent = function(event){
-    $log("dispatching event " + event.type);
+    //$log("dispatching event " + event.type);
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
     if(!event.target)

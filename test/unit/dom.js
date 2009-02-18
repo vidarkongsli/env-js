@@ -10,7 +10,7 @@ test("Basic requirements", function() {
 });
 
 test("document.getElementById", function() {
-	expect(14);
+	expect(15);
   try{ok (document.getElementById('body').id == "body", "Can get Element by id, expected id='body'");}catch(e){print(e);}
   try{ok (document.getElementById('header').id == "header", "Can get Element by id, expected id='header'");}catch(e){print(e);}
   try{ok (document.getElementById('banner').id == "banner", "Can get Element by id, expected id='banner'");}catch(e){print(e);}
@@ -25,6 +25,7 @@ test("document.getElementById", function() {
   try{ok (document.getElementById('ap').id == "ap", "Can get Element by id, expected id='ap'");}catch(e){print(e);}
   try{ok (document.getElementById('google').id == "google", "Can get Element by id, expected id='google'");}catch(e){print(e);}
   try{ok (document.getElementById('groups').id == "groups", "Can get Element by id, expected id='groups'");}catch(e){print(e);}
+  try{ok (document.getElementById('台北Táiběi').id == "台北Táiběi", "Can get Element by UTF-8 id, expected id='台北Táiběi'");}catch(e){print(e);}
 });
 
 test("element.getElementsByTagName", function() {

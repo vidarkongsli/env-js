@@ -12,16 +12,23 @@ var HTMLScriptElement = function(ownerDocument) {
     //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
-    $log("loading script via policy");
-    var _this = this;
-    $w.setTimeout(function(){
-        $policy.loadScripts(_this);
-    }, 1);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
     get text(){
+        // text of script is in a child node of the element
+        // scripts with < operator must be in a CDATA node
+        for (var i=0; i<this.childNodes.length; i++) {
+            if (this.childNodes[i].nodeType == DOMNode.CDATA_SECTION_NODE) {
+                return this.childNodes[i].nodeValue;
+            }
+        } 
+        // otherwise there will be a text node containing the script
+        if (this.childNodes[0] && this.childNodes[0].nodeType == DOMNode.TEXT_NODE) {
+            return this.childNodes[0].nodeValue;
+ 		}
         return this.nodeValue;
+
     },
     get htmlFor(){
         return this.getAttribute('for');
@@ -61,4 +68,4 @@ __extend__(HTMLScriptElement.prototype, {
     }
 });
 
-			
+            

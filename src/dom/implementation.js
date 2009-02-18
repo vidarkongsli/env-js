@@ -455,6 +455,7 @@ function __parseLoop__(impl, doc, p) {
   }
 };
 
+
 /**
  * @method DOMImplementation._isNamespaceDeclaration - Return true, if attributeName is a namespace declaration
  * @author Jon van Noort (jon@webarcana.com.au)

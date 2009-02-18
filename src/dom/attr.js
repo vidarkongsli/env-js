@@ -40,7 +40,7 @@ __extend__(DOMAttr.prototype, {
     },
     set value(value){
         // throw Exception if Attribute is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // delegate to node

@@ -32,7 +32,7 @@ __extend__(DOMText.prototype,{
         var data, inode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Node is readonly
             if (this._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -49,7 +49,7 @@ __extend__(DOMText.prototype,{
             data  = this.substringData(offset);
             
             // create new TextNode with remaining string
-            inode = this.ownerDocument.createTextNode(data);
+            inode = __ownerDocument__(this).createTextNode(data);
             
             // attach new TextNode
             if (this.nextSibling) {

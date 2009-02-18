@@ -6,6 +6,7 @@ var __policy__ = {};
     
     //you can change these to $env.safeScript to avoid loading scripts
     //or change to $env.loadLocalScripts to load local scripts
-    $policy.loadScripts    = $env.safeScript;
+    //$policy.loadScript    = $env.safeScript;
+    $policy.loadScript    = $env.loadLocalScript;
     
 })(__policy__, __env__);

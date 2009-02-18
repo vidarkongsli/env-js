@@ -29,7 +29,7 @@ var DOMNode = function(ownerDocument) {
   if (ownerDocument) {
     this._id = ownerDocument._genId();           // generate unique internal id
   }
-
+  
   this.namespaceURI = "";                        // The namespace URI of this node (Level 2)
   this.prefix       = "";                        // The namespace prefix of this node (Level 2)
   this.localName    = "";                        // The localName of this node (Level 2)
@@ -87,14 +87,14 @@ __extend__(DOMNode.prototype, {
         var prevNode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
             
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
             
@@ -109,7 +109,7 @@ __extend__(DOMNode.prototype, {
             var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
             
             // throw Exception if there is no child node with this id
-            if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
               throw(new DOMException(DOMException.NOT_FOUND_ERR));
             }
             
@@ -176,14 +176,14 @@ __extend__(DOMNode.prototype, {
         var ret = null;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -197,7 +197,7 @@ __extend__(DOMNode.prototype, {
         var index = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (index < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (index < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -256,7 +256,7 @@ __extend__(DOMNode.prototype, {
     },
     removeChild : function(oldChild) {
         // throw Exception if DOMNamedNodeMap is readonly
-        if (this.ownerDocument.implementation.errorChecking && (this._readonly || oldChild._readonly)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
@@ -264,7 +264,7 @@ __extend__(DOMNode.prototype, {
         var itemIndex = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -288,21 +288,18 @@ __extend__(DOMNode.prototype, {
         oldChild.previousSibling = null;
         oldChild.nextSibling = null;
         
-        /*if(oldChild.ownerDocument == document){
-            $log("removeChild :  all -> " + document.all.length);
-        }*/
         return oldChild;
     },
     appendChild : function(newChild) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
         // throw Exception if Node is readonly
         if (this._readonly) {
           throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
     
         // throw Exception if arg was not created by this Document
-        if (this.ownerDocument != newChild.ownerDocument) {
+        if (__ownerDocument__(this) != __ownerDocument__(this)) {
           throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
         }
     
@@ -353,6 +350,17 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
+      //check to see if this is a script element and apply a script loading strategy
+      //the check against the ownerDocument isnt really enough to support frames in
+      // the long run, but for now it's ok
+      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
+         newChild.ownerDocument == window.document &&
+         newChild.nodeName.toUpperCase() == "SCRIPT"){
+             
+        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
+        $policy.loadScript(newChild);
+          
+      }
       return newChild;
     },
     hasChildNodes : function() {
@@ -363,7 +371,7 @@ __extend__(DOMNode.prototype, {
         //do not throw any exceptions
         //$log("cloning node");
         try {
-            return this.ownerDocument.importNode(this, deep);
+            return __ownerDocument__(this).importNode(this, deep);
         } catch (e) {
             //there shouldn't be any exceptions, but if there are, return null
             return null;
@@ -406,16 +414,16 @@ __extend__(DOMNode.prototype, {
     },
     isSupported : function(feature, version) {
         // use Implementation.hasFeature to determin if this feature is supported
-        return this.ownerDocument.implementation.hasFeature(feature, version);
+        return __ownerDocument__(this).implementation.hasFeature(feature, version);
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
         //$log("getElementsByTagName("+tagname+")");
-        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(__ownerDocument__(this)));
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
-        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         var importNode;
@@ -423,13 +431,12 @@ __extend__(DOMNode.prototype, {
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
-        this.ownerDocument._performingImportNodeOperation = true;
+        __ownerDocument__(this)._performingImportNodeOperation = true;
         
-        //try {
             if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Element (with the name of the importedNode)
-                    importNode = this.ownerDocument.createElement(importedNode.tagName);
+                    importNode = __ownerDocument__(this).createElement(importedNode.tagName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -437,7 +444,7 @@ __extend__(DOMNode.prototype, {
                     }
                 }else {
                     // create a local Element (with the name & namespaceURI of the importedNode)
-                    importNode = this.ownerDocument.createElementNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -447,21 +454,21 @@ __extend__(DOMNode.prototype, {
                 
                     // create namespace definitions matching those of the importedNode
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
             } else if (importedNode.nodeType == DOMNode.ATTRIBUTE_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Attribute (with the name of the importedAttribute)
-                    importNode = this.ownerDocument.createAttribute(importedNode.name);
+                    importNode = __ownerDocument__(this).createAttribute(importedNode.name);
                 } else {
                     // create a local Attribute (with the name & namespaceURI of the importedAttribute)
-                    importNode = this.ownerDocument.createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create namespace definitions matching those of the importedAttribute
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
@@ -471,43 +478,37 @@ __extend__(DOMNode.prototype, {
                 
             } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT) {
                 // create a local DocumentFragment
-                importNode = this.ownerDocument.createDocumentFragment();
+                importNode = __ownerDocument__(this).createDocumentFragment();
             } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
                 // create a local NamespaceNode (with the same name & value as the importedNode)
-                importNode = this.ownerDocument.createNamespace(importedNode.nodeName);
+                importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
                 importNode.value = importedNode.value;
             } else if (importedNode.nodeType == DOMNode.TEXT_NODE) {
                 // create a local TextNode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createTextNode(importedNode.data);
+                importNode = __ownerDocument__(this).createTextNode(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.CDATA_SECTION_NODE) {
                 // create a local CDATANode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createCDATASection(importedNode.data);
+                importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.PROCESSING_INSTRUCTION_NODE) {
                 // create a local ProcessingInstruction (with the same target & data as the importedNode)
-                importNode = this.ownerDocument.createProcessingInstruction(importedNode.target, importedNode.data);
+                importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
             } else if (importedNode.nodeType == DOMNode.COMMENT_NODE) {
                 // create a local Comment (with the same data as the importedNode)
-                importNode = this.ownerDocument.createComment(importedNode.data);
+                importNode = __ownerDocument__(this).createComment(importedNode.data);
             } else {  // throw Exception if nodeType is not supported
                 throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
             }
             
             if (deep) {                                    // recurse childNodes
                 for(var i = 0; i < importedNode.childNodes.length; i++) {
-                    importNode.appendChild(this.ownerDocument.importNode(importedNode.childNodes.item(i), true));
+                    importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
                 }
             }
             
             //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
+            __ownerDocument__(this)._performingImportNodeOperation = false;
             return importNode;
-        /*} catch (eAny) {
-            //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
-            
-            //re-throw the exception
-            throw eAny;
-        }//djotemp*/
+        
     },
     contains : function(node){
             while(node && node != this ){
@@ -545,7 +546,9 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     //$log("__getElementsByTagNameRecursive__("+elem._id+")");
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
-        if((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || (tagname == "*")) {
+        if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
+            ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
+                (tagname == "*")) ){
             //$log("found node by name " + tagname);
             __appendChild__(nodeList, elem);               // add matching node to nodeList
         }
@@ -595,5 +598,8 @@ var __isAncestor__ = function(target, node) {
   // if this node matches, return true,
   // otherwise recurse up (if there is a parentNode)
   return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
-}
+};
 
+var __ownerDocument__ = function(node){
+    return (node.nodeType == DOMNode.DOCUMENT_NODE)?node:node.ownerDocument;
+};

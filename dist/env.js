@@ -10,6 +10,7 @@ var __this__ = this;
 this.__defineGetter__('window', function(){
   return __this__;
 });
+
 try{
 (function($w, $env, $policy){
         /*
@@ -208,14 +209,18 @@ function __extend__(a,b) {
 // this might be a good utility function to provide in the env.core
 // as in might be useful to the parser and other areas as well
 function trim( str ){
+    return (str || "").replace( /^\s+|\s+$/g, "" );
+    
+};
+/*function trim( str ){
     var start = -1,
     end = str.length;
-    /*jsl:ignore*/
+    /*jsl:ignore*
     while( str.charCodeAt(--end) < 33 );
     while( str.charCodeAt(++start) < 33 );
-    /*jsl:end*/
+    /*jsl:end*
     return str.slice( start, end + 1 );
-};
+};*/
 
 //from jQuery
 function __setArray__( target, array ) {
@@ -245,7 +250,6 @@ $w.__defineGetter__('NodeList', function(){
  */
 var DOMNodeList = function(ownerDocument, parentNode) {
     //$log("\t\tcreating dom nodelist");
-    var nodes = [];
     
     this.length = 0;
     this.parentNode = parentNode;
@@ -253,7 +257,7 @@ var DOMNodeList = function(ownerDocument, parentNode) {
     
     this._readonly = false;
     
-    __setArray__(this, nodes);
+    __setArray__(this, []);
     //$log("\t\tfinished creating dom nodelist");
 };
 __extend__(DOMNodeList.prototype, {
@@ -271,11 +275,13 @@ __extend__(DOMNodeList.prototype, {
         
         // create string containing the concatenation of the string values of each child
         for (var i=0; i < this.length; i++) {
-            if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
-                //add a single space between adjacent text nodes
-                ret += " "+this[i].xml;
-            }else{
-                ret += this[i].xml;
+            if(this[i]){
+                if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                    //add a single space between adjacent text nodes
+                    ret += " "+this[i].xml;
+                }else{
+                    ret += this[i].xml;
+                }
             }
         }
         
@@ -396,7 +402,11 @@ var __removeChild__ = function(nodelist, refChildIndex) {
 var __appendChild__ = function(nodelist, newChild) {
     if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
         // append the children of DocumentFragment
-        Array.prototype.push.apply(nodelist, newChild.childNodes);
+        //TODO : see #14 - http://envjs.lighthouseapp.com/projects/21590/tickets/14-nodelist-functionprototypeapply-must-take-an-array
+        //not sure why this could happen, .childNodes should always be an array
+        Array.prototype.push.apply(nodelist, 
+            (newChild.childNodes instanceof Array) ?
+                newChild.childNodes : [newChild.childNodes]);
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
@@ -458,7 +468,7 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItem : function(arg) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
             if (this.ownerDocument != arg.ownerDocument) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
@@ -483,7 +493,7 @@ __extend__(DOMNamedNodeMap.prototype, {
             ret = this[itemIndex];                // use existing Attribute
         
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -501,7 +511,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var ret = null;
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -509,7 +519,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemIndex__(this, name);
         
           // throw Exception if there is no node named name in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -517,7 +527,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -538,14 +548,14 @@ __extend__(DOMNamedNodeMap.prototype, {
     },
     setNamedItemNS : function(arg) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNamedNodeMap is readonly
             if (this._readonly || (this.parentNode && this.parentNode._readonly)) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if arg was not created by this Document
-            if (this.ownerDocument != arg.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(arg)) {
               throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -562,7 +572,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
             // throw Exception if DOMAttr is readonly
-            if (this.ownerDocument.implementation.errorChecking && ret._readonly) {
+            if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
@@ -581,7 +591,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (this.ownerDocument.implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -589,7 +599,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
           // throw Exception if there is no matching node in this map
-          if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+          if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
           }
         
@@ -597,7 +607,7 @@ __extend__(DOMNamedNodeMap.prototype, {
           var oldNode = this[itemIndex];
         
           // throw Exception if Node is readonly
-          if (this.ownerDocument.implementation.errorChecking && oldNode._readonly) {
+          if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
@@ -814,7 +824,7 @@ var DOMNode = function(ownerDocument) {
   if (ownerDocument) {
     this._id = ownerDocument._genId();           // generate unique internal id
   }
-
+  
   this.namespaceURI = "";                        // The namespace URI of this node (Level 2)
   this.prefix       = "";                        // The namespace prefix of this node (Level 2)
   this.localName    = "";                        // The localName of this node (Level 2)
@@ -872,14 +882,14 @@ __extend__(DOMNode.prototype, {
         var prevNode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
             
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
             
@@ -894,7 +904,7 @@ __extend__(DOMNode.prototype, {
             var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
             
             // throw Exception if there is no child node with this id
-            if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
               throw(new DOMException(DOMException.NOT_FOUND_ERR));
             }
             
@@ -961,14 +971,14 @@ __extend__(DOMNode.prototype, {
         var ret = null;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
         
             // throw Exception if newChild was not created by this Document
-            if (this.ownerDocument != newChild.ownerDocument) {
+            if (__ownerDocument__(this) != __ownerDocument__(newChild)) {
                 throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
         
@@ -982,7 +992,7 @@ __extend__(DOMNode.prototype, {
         var index = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (index < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (index < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -1041,7 +1051,7 @@ __extend__(DOMNode.prototype, {
     },
     removeChild : function(oldChild) {
         // throw Exception if DOMNamedNodeMap is readonly
-        if (this.ownerDocument.implementation.errorChecking && (this._readonly || oldChild._readonly)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
@@ -1049,7 +1059,7 @@ __extend__(DOMNode.prototype, {
         var itemIndex = __findItemIndex__(this.childNodes, oldChild._id);
         
         // throw Exception if there is no child node with this id
-        if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+        if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
             throw(new DOMException(DOMException.NOT_FOUND_ERR));
         }
         
@@ -1073,21 +1083,18 @@ __extend__(DOMNode.prototype, {
         oldChild.previousSibling = null;
         oldChild.nextSibling = null;
         
-        /*if(oldChild.ownerDocument == document){
-            $log("removeChild :  all -> " + document.all.length);
-        }*/
         return oldChild;
     },
     appendChild : function(newChild) {
       // test for exceptions
-      if (this.ownerDocument.implementation.errorChecking) {
+      if (__ownerDocument__(this).implementation.errorChecking) {
         // throw Exception if Node is readonly
         if (this._readonly) {
           throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
     
         // throw Exception if arg was not created by this Document
-        if (this.ownerDocument != newChild.ownerDocument) {
+        if (__ownerDocument__(this) != __ownerDocument__(this)) {
           throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
         }
     
@@ -1138,6 +1145,17 @@ __extend__(DOMNode.prototype, {
           this.firstChild = newChild;
         }
       }
+      //check to see if this is a script element and apply a script loading strategy
+      //the check against the ownerDocument isnt really enough to support frames in
+      // the long run, but for now it's ok
+      if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
+         newChild.ownerDocument == window.document &&
+         newChild.nodeName.toUpperCase() == "SCRIPT"){
+             
+        $log("loading script via policy. parent : " + this.tagName?this.tagName:this._id);
+        $policy.loadScript(newChild);
+          
+      }
       return newChild;
     },
     hasChildNodes : function() {
@@ -1148,7 +1166,7 @@ __extend__(DOMNode.prototype, {
         //do not throw any exceptions
         //$log("cloning node");
         try {
-            return this.ownerDocument.importNode(this, deep);
+            return __ownerDocument__(this).importNode(this, deep);
         } catch (e) {
             //there shouldn't be any exceptions, but if there are, return null
             return null;
@@ -1191,16 +1209,16 @@ __extend__(DOMNode.prototype, {
     },
     isSupported : function(feature, version) {
         // use Implementation.hasFeature to determin if this feature is supported
-        return this.ownerDocument.implementation.hasFeature(feature, version);
+        return __ownerDocument__(this).implementation.hasFeature(feature, version);
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
         //$log("getElementsByTagName("+tagname+")");
-        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(__ownerDocument__(this)));
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
-        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(this.ownerDocument));
+        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         var importNode;
@@ -1208,13 +1226,12 @@ __extend__(DOMNode.prototype, {
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
-        this.ownerDocument._performingImportNodeOperation = true;
+        __ownerDocument__(this)._performingImportNodeOperation = true;
         
-        //try {
             if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Element (with the name of the importedNode)
-                    importNode = this.ownerDocument.createElement(importedNode.tagName);
+                    importNode = __ownerDocument__(this).createElement(importedNode.tagName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -1222,7 +1239,7 @@ __extend__(DOMNode.prototype, {
                     }
                 }else {
                     // create a local Element (with the name & namespaceURI of the importedNode)
-                    importNode = this.ownerDocument.createElementNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create attributes matching those of the importedNode
                     for(var i = 0; i < importedNode.attributes.length; i++) {
@@ -1232,21 +1249,21 @@ __extend__(DOMNode.prototype, {
                 
                     // create namespace definitions matching those of the importedNode
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
             } else if (importedNode.nodeType == DOMNode.ATTRIBUTE_NODE) {
-                if (!this.ownerDocument.implementation.namespaceAware) {
+                if (!__ownerDocument__(this).implementation.namespaceAware) {
                     // create a local Attribute (with the name of the importedAttribute)
-                    importNode = this.ownerDocument.createAttribute(importedNode.name);
+                    importNode = __ownerDocument__(this).createAttribute(importedNode.name);
                 } else {
                     // create a local Attribute (with the name & namespaceURI of the importedAttribute)
-                    importNode = this.ownerDocument.createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
+                    importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
                 
                     // create namespace definitions matching those of the importedAttribute
                     for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = this.ownerDocument.createNamespace(importedNode._namespaces.item(i).localName);
+                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
                         importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                     }
                 }
@@ -1256,43 +1273,37 @@ __extend__(DOMNode.prototype, {
                 
             } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT) {
                 // create a local DocumentFragment
-                importNode = this.ownerDocument.createDocumentFragment();
+                importNode = __ownerDocument__(this).createDocumentFragment();
             } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
                 // create a local NamespaceNode (with the same name & value as the importedNode)
-                importNode = this.ownerDocument.createNamespace(importedNode.nodeName);
+                importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
                 importNode.value = importedNode.value;
             } else if (importedNode.nodeType == DOMNode.TEXT_NODE) {
                 // create a local TextNode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createTextNode(importedNode.data);
+                importNode = __ownerDocument__(this).createTextNode(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.CDATA_SECTION_NODE) {
                 // create a local CDATANode (with the same data as the importedNode)
-                importNode = this.ownerDocument.createCDATASection(importedNode.data);
+                importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
             } else if (importedNode.nodeType == DOMNode.PROCESSING_INSTRUCTION_NODE) {
                 // create a local ProcessingInstruction (with the same target & data as the importedNode)
-                importNode = this.ownerDocument.createProcessingInstruction(importedNode.target, importedNode.data);
+                importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
             } else if (importedNode.nodeType == DOMNode.COMMENT_NODE) {
                 // create a local Comment (with the same data as the importedNode)
-                importNode = this.ownerDocument.createComment(importedNode.data);
+                importNode = __ownerDocument__(this).createComment(importedNode.data);
             } else {  // throw Exception if nodeType is not supported
                 throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
             }
             
             if (deep) {                                    // recurse childNodes
                 for(var i = 0; i < importedNode.childNodes.length; i++) {
-                    importNode.appendChild(this.ownerDocument.importNode(importedNode.childNodes.item(i), true));
+                    importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
                 }
             }
             
             //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
+            __ownerDocument__(this)._performingImportNodeOperation = false;
             return importNode;
-        /*} catch (eAny) {
-            //reset _performingImportNodeOperation
-            this.ownerDocument._performingImportNodeOperation = false;
-            
-            //re-throw the exception
-            throw eAny;
-        }//djotemp*/
+        
     },
     contains : function(node){
             while(node && node != this ){
@@ -1330,7 +1341,9 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     //$log("__getElementsByTagNameRecursive__("+elem._id+")");
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
-        if((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || (tagname == "*")) {
+        if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
+            ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
+                (tagname == "*")) ){
             //$log("found node by name " + tagname);
             __appendChild__(nodeList, elem);               // add matching node to nodeList
         }
@@ -1380,9 +1393,11 @@ var __isAncestor__ = function(target, node) {
   // if this node matches, return true,
   // otherwise recurse up (if there is a parentNode)
   return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
-}
+};
 
-
+var __ownerDocument__ = function(node){
+    return (node.nodeType == DOMNode.DOCUMENT_NODE)?node:node.ownerDocument;
+};
 /**
  * @class  DOMNamespace - The Namespace interface represents an namespace in an Element object
  *
@@ -1463,7 +1478,7 @@ __extend__(DOMCharacterData.prototype,{
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // append data
@@ -1471,12 +1486,12 @@ __extend__(DOMCharacterData.prototype,{
     },
     deleteData: function(offset, count){ 
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
               throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1490,13 +1505,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     insertData: function(offset, arg){
         // throw Exception if DOMCharacterData is readonly
-        if(this.ownerDocument.implementation.errorChecking && this._readonly){
+        if(__ownerDocument__(this).implementation.errorChecking && this._readonly){
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if(this.data){
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1504,7 +1519,7 @@ __extend__(DOMCharacterData.prototype,{
             this.data =  this.data.substring(0, offset).concat(arg, this.data.substring(offset));
         }else {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && (offset != 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (offset != 0)) {
                throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1514,13 +1529,13 @@ __extend__(DOMCharacterData.prototype,{
     },
     replaceData: function(offset, count, arg){
         // throw Exception if DOMCharacterData is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -1536,7 +1551,7 @@ __extend__(DOMCharacterData.prototype,{
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
             // or the count is negative
-            if (this.ownerDocument.implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             // if count is not specified
@@ -1583,7 +1598,7 @@ __extend__(DOMText.prototype,{
         var data, inode;
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Node is readonly
             if (this._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -1600,7 +1615,7 @@ __extend__(DOMText.prototype,{
             data  = this.substringData(offset);
             
             // create new TextNode with remaining string
-            inode = this.ownerDocument.createTextNode(data);
+            inode = __ownerDocument__(this).createTextNode(data);
             
             // attach new TextNode
             if (this.nextSibling) {
@@ -1689,7 +1704,7 @@ __extend__(DOMComment.prototype, {
         return DOMNode.COMMENT_NODE;
     },
     get xml(){
-        return "<!-- " + this.nodeValue + " -->";
+        return "<!--" + this.nodeValue + "-->";
     },
     toString : function(){
         return "Comment #"+this._id;
@@ -1747,7 +1762,7 @@ __extend__(DOMAttr.prototype, {
     },
     set value(value){
         // throw Exception if Attribute is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // delegate to node
@@ -1818,14 +1833,14 @@ __extend__(DOMElement.prototype, {
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
-        if(this.ownerDocument){
+        if(__ownerDocument__(this)){
             if (!attr) {
-                attr = this.ownerDocument.createAttribute(name);  // otherwise create it
+                attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
             }
             
             
             // test for exceptions
-            if (this.ownerDocument.implementation.errorChecking) {
+            if (__ownerDocument__(this).implementation.errorChecking) {
                 // throw Exception if Attribute is readonly
                 if (attr._readonly) {
                     throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -1873,7 +1888,7 @@ __extend__(DOMElement.prototype, {
     },
     removeAttributeNode: function(oldAttr) {
       // throw Exception if Attribute is readonly
-      if (this.ownerDocument.implementation.errorChecking && oldAttr._readonly) {
+      if (__ownerDocument__(this).implementation.errorChecking && oldAttr._readonly) {
         throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
       }
     
@@ -1881,7 +1896,7 @@ __extend__(DOMElement.prototype, {
       var itemIndex = this.attributes._findItemIndex(oldAttr._id);
     
       // throw Exception if node does not exist in this map
-      if (this.ownerDocument.implementation.errorChecking && (itemIndex < 0)) {
+      if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
         throw(new DOMException(DOMException.NOT_FOUND_ERR));
       }
     
@@ -1902,13 +1917,13 @@ __extend__(DOMElement.prototype, {
         
         if (!attr) {  // if Attribute exists, use it
             // otherwise create it
-            attr = this.ownerDocument.createAttributeNS(namespaceURI, qualifiedName);
+            attr = __ownerDocument__(this).createAttributeNS(namespaceURI, qualifiedName);
         }
         
         var value = String(value);
         
         // test for exceptions
-        if (this.ownerDocument.implementation.errorChecking) {
+        if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Attribute is readonly
             if (attr._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -1973,6 +1988,7 @@ __extend__(DOMElement.prototype, {
         return DOMNode.ELEMENT_NODE;
     },
     get xml() {
+        //$log("Serializing " + this);
         var ret = "";
         
         // serialize namespace declarations
@@ -2092,7 +2108,7 @@ __extend__(DOMProcessingInstruction.prototype, {
     },
     set data(data){
         // throw Exception if DOMNode is readonly
-        if (this.ownerDocument.implementation.errorChecking && this._readonly) {
+        if (__ownerDocument__(this).errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;
@@ -3731,6 +3747,7 @@ function __parseLoop__(impl, doc, p) {
   }
 };
 
+
 /**
  * @method DOMImplementation._isNamespaceDeclaration - Return true, if attributeName is a namespace declaration
  * @author Jon van Noort (jon@webarcana.com.au)
@@ -3865,7 +3882,6 @@ var DOMDocument = function(implementation) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
-    //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -3873,7 +3889,7 @@ var DOMDocument = function(implementation) {
     this._parseComplete = false;                   // initially false, set to true by parser
     this._url = "";
     
-    this.ownerDocument = this;
+    this.ownerDocument = null;
     
     this._performingImportNodeOperation = false;
     //$log("\tfinished creating dom document " + this);
@@ -3901,9 +3917,11 @@ __extend__(DOMDocument.prototype, {
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
-            //HTMLtoDOM(xmlStr, doc);
+            //doc = html2dom(xmlStr+"", doc);
+        	//$log("\nhtml2xml\n" + doc.xml);
         } catch (e) {
-            $error(this.implementation.translateErrCode(e.code))
+            //$error(this.implementation.translateErrCode(e.code))
+            $error(e);
         }
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
@@ -3916,7 +3934,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var _this = this;
+        var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
         xhr.onreadystatechange = function(){
@@ -3931,6 +3949,15 @@ __extend__(DOMDocument.prototype, {
                 "</body></html>");
             }
             _this._url = url;
+            
+        	$log("Loading scripts.");
+            scripts = document.getElementsByTagName('script');
+            /*for(var prop in $policy){
+                $log("$policy."+prop+" ="+$policy[prop]);
+            }*/
+            for(var i=0;i<scripts.length;i++){
+                $policy.loadScript(scripts[i]);
+            }
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
         	event.initEvent("load");
@@ -3951,7 +3978,7 @@ __extend__(DOMDocument.prototype, {
     createElement : function(tagName) {
         //$log("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -3998,7 +4025,8 @@ __extend__(DOMDocument.prototype, {
     },
     createProcessingInstruction : function(target, data) {
           // throw Exception if the target string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(target))) {
+        //$log("DOMDocument.createProcessingInstruction( "+target+" )");
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -4013,7 +4041,8 @@ __extend__(DOMDocument.prototype, {
     },
     createAttribute : function(name) {
         // throw Exception if the name string contains an illegal character
-        if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
+        //$log("DOMDocument.createAttribute( "+target+" )");
+        if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         
@@ -4028,7 +4057,7 @@ __extend__(DOMDocument.prototype, {
     createElementNS : function(namespaceURI, qualifiedName) {
         //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -4054,7 +4083,7 @@ __extend__(DOMDocument.prototype, {
     },
     createAttributeNS : function(namespaceURI, qualifiedName) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -4101,7 +4130,7 @@ __extend__(DOMDocument.prototype, {
             node = all[i];
             // if id matches & node is alive (ie, connected (in)directly to the documentElement)
             if (node.id == elementId) {
-                if((node.ownerDocument.documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -4109,7 +4138,7 @@ __extend__(DOMDocument.prototype, {
             }
           }
           
-          if(retNode == null){$log("Couldn't find id " + elementId);}
+          //if(retNode == null){$log("Couldn't find id " + elementId);}
           return retNode;
     },
     normalizeDocument: function(){
@@ -4119,6 +4148,7 @@ __extend__(DOMDocument.prototype, {
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
+        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 
@@ -4184,6 +4214,345 @@ var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribut
     
       return valid;
 };
+/*
+*	parser.js
+*/
+/*
+ * HTML Parser By John Resig (ejohn.org)
+ * Original code by Erik Arvidsson, Mozilla Public License
+ * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
+ *
+ * // Use like so:
+ * HTMLParser(htmlString, {
+ *     start: function(tag, attrs, unary) {},
+ *     end: function(tag) {},
+ *     chars: function(text) {},
+ *     comment: function(text) {}
+ * });
+ *
+ * // or to get an XML string:
+ * HTMLtoXML(htmlString);
+ *
+ * // or to get an XML DOM Document
+ * HTMLtoDOM(htmlString);
+ *
+ * // or to inject into an existing document/DOM node
+ * HTMLtoDOM(htmlString, document);
+ * HTMLtoDOM(htmlString, document.body);
+ *
+ */
+ var html2dom, html2xml;
+
+(function(){
+
+	// Regular Expressions for parsing tags and attributes
+	var startTag = /^<([\w\:\-]+)((?:\s+[\w\:\-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+        endTag = /^<\/([\w\:\-]+)[^>]*>/,
+        attr = /([\w\:\-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g; 	
+	// Empty Elements - HTML 4.01
+	var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
+
+	// Block Elements - HTML 4.01
+	var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
+
+	// Inline Elements - HTML 4.01
+	var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
+
+	// Elements that you can, intentionally, leave open
+	// (and which close themselves)
+	var closeSelf = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
+
+	// Attributes that have their values filled in disabled="disabled"
+	var fillAttrs = makeMap("checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected");
+
+	// Special Elements (can contain anything)
+	var special = makeMap("script,style");
+
+	var HTMLParser  = function( html, handler ) {
+		var index, chars, match, stack = [], last = html;
+		stack.last = function(){
+			return this[ this.length - 1 ];
+		};
+
+		while ( html ) {
+		    //$log("HTMLParser: chunking... ");
+			chars = true;
+
+			// Make sure we're not in a script or style element
+			if ( !stack.last() || !special[ stack.last() ] ) {
+            
+		        //$log("HTMLParser: ... ");
+				// Comment
+				if ( html.indexOf("<!--") === 0 ) {
+		            //$log("HTMLParser: comment ");
+					index = html.indexOf("-->");
+	
+					if ( index >= 0 ) {
+						if ( handler.comment )
+							handler.comment( html.substring( 4, index ) );
+						html = html.substring( index + 3 );
+						chars = false;
+					}
+	
+				// end tag
+				} else if ( html.indexOf("</") === 0 ) {
+		            //$log("HTMLParser: endtag ");
+					match = html.match( endTag );
+	
+					if ( match ) {
+		                //$log("HTMLParser: endtag match : "+match[0]);
+						html = html.substring( match[0].length );
+						match[0].replace( endTag, parseEndTag );
+						chars = false;
+					}
+	
+				// start tag
+				} else if ( html.indexOf("<") === 0 ) {
+		            //$log("HTMLParser: starttag ");
+					match = html.match( startTag );
+	
+					if ( match ) {
+		                //$log("HTMLParser: starttag match : "+match[0]);
+						html = html.substring( match[0].length );
+						match[0].replace( startTag, parseStartTag );
+						chars = false;
+					}
+				}
+
+				if ( chars ) {
+		            //$log("HTMLParser: other ");
+					index = html.indexOf("<");
+					var text = index < 0 ? html : html.substring( 0, index );
+					html = index < 0 ? "" : html.substring( index );
+					if ( handler.chars ){
+		                //$log("HTMLParser: chars " + text);
+					    handler.chars( text );
+				    }
+				}
+			} else {
+		        //$log("HTMLParser: special ");
+				html = html.replace(new RegExp("(.*)<\/" + stack.last() + "[^>]*>"), function(all, text){
+					text = text.replace(/<!--(.*?)-->/g, "$1").
+						replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
+					if ( handler.chars ){
+		                //$log("HTMLParser: special chars " + text);
+					    handler.chars( text );
+				    }
+					return "";
+				});
+				parseEndTag( "", stack.last() );
+			}
+			if ( html == last ){throw "Parse Error: " + html;}
+			last = html;
+		}
+		
+		// Clean up any remaining tags
+		parseEndTag();
+
+		function parseStartTag( tag, tagName, rest, unary ) {
+			if ( block[ tagName ] ) {
+				while ( stack.last() && inline[ stack.last() ] ) {
+					parseEndTag( "", stack.last() );
+				}
+			}
+
+			if ( closeSelf[ tagName ] && stack.last() == tagName ) {
+				parseEndTag( "", tagName );
+			}
+
+			unary = empty[ tagName ] || !!unary;
+
+			if ( !unary )
+				stack.push( tagName );
+			
+			if ( handler.start ) {
+				var attrs = [];
+	
+				rest.replace(attr, function(match, name) {
+					var value = arguments[2] ? arguments[2] :
+						arguments[3] ? arguments[3] :
+						arguments[4] ? arguments[4] :
+						fillAttrs[name] ? name : "";
+					
+					attrs.push({
+						name: name,
+						value: value,
+						escaped: value.replace(/(^|[^\\])"/g, '$1\\\"') //"
+					});
+				});
+	
+				if ( handler.start ){
+				    //$log("unary ? : "+unary);
+					handler.start( tagName, attrs, unary );
+				}
+			}
+		}
+
+		function parseEndTag( tag, tagName ) {
+		  var pos;
+			// If no tag name is provided, clean shop
+			if ( !tagName ){
+				pos = 0;
+			}else{
+			// Find the closest opened tag of the same type
+				for ( pos = stack.length - 1; pos >= 0; pos-- ){
+					//$log("parseEndTag : "+stack[ pos ] );
+					if ( stack[ pos ] == tagName ){ 
+					    break; 
+				    }
+				}
+            }
+			if ( pos >= 0 ) {
+				// Close all the open elements, up the stack
+				for ( var i = stack.length - 1; i >= pos; i-- ){
+                    if ( handler.end ){
+					    //$log("end : "+stack[ i ] );
+                        handler.end( stack[ i ] );
+                    }
+				}
+				// Remove the open elements from the stack
+				//$log("setting stack length : " + stack.length + " -> " +pos );
+				stack.length = pos;
+			}
+		}
+	};
+	
+	html2xml = function( html ) {
+		var results = "";
+		
+		HTMLParser(html, {
+			start: function( tag, attrs, unary ) {
+				results += "<" + tag;
+		
+				for ( var i = 0; i < attrs.length; i++ )
+					results += " " + attrs[i].name + '="' + attrs[i].escaped + '"';
+		
+				results += (unary ? "/" : "") + ">";
+			},
+			end: function( tag ) {
+				results += "</" + tag + ">";
+			},
+			chars: function( text ) {
+				results += text;
+			},
+			comment: function( text ) {
+				results += "<!--" + text + "-->";
+			}
+		});
+		
+		return results;
+	};
+	
+	html2dom = function( html, doc ) {
+		// There can be only one of these elements
+		var one = makeMap("html,head,body,title");
+		
+		// Enforce a structure for the document
+		/*var structure = {
+			link: "head",
+			base: "head"
+		};*/
+	
+		if ( !doc ) {
+			if ( typeof DOMDocument != "undefined" ){
+				doc = new DOMDocument();
+			}else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument ){
+				doc = document.implementation.createDocument("", "", null);
+			}else if ( typeof ActiveX != "undefined" ){
+				doc = new ActiveXObject("Msxml.DOMDocument");
+			}
+		} else {
+			doc = doc.ownerDocument ||
+				doc.getOwnerDocument && doc.getOwnerDocument() ||
+				doc;
+		}
+		
+		var elems = [],
+			documentElement = doc.documentElement || doc.getDocumentElement && doc.getDocumentElement();
+				
+		// If we're dealing with an empty document then we
+		// need to pre-populate it with the HTML document structure
+		/*if ( !documentElement && doc.createElement ) (function(){
+		    //$log("HTMLtoDOM: adding structure... ");
+			var html = doc.createElement("html");
+			var head = doc.createElement("head");
+			head.appendChild( doc.createElement("title") );
+			html.appendChild( head );
+			html.appendChild( doc.createElement("body") );
+			doc.appendChild( html );
+			doc.documentElement = html;
+		})();*/
+		
+		// Find all the unique elements
+		/*if ( doc.getElementsByTagName ){
+			for ( var i in one ){
+			   one[ i ] = doc.getElementsByTagName( i )[0];
+            }
+		}*/
+		
+		// If we're working with a document, inject contents into
+		// the body element
+		var curParentNode;// = one.body;
+		
+		//$log("HTMLtoDOM: Parsing... ");
+		HTMLParser( html, {
+			start: function( tagName, attrs, unary ) {
+			    
+				var elem;
+		        //$log("HTMLtoDOM: createElement... " + tagName);
+				elem = doc.createElement( tagName );
+			
+				
+				for ( var attr in attrs ){
+		            //$log("HTMLtoDOM: setAttribute... " +  attrs[ attr ].name);
+					elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
+				}
+				
+				if ( !doc.documentElement ){		            
+				    //$log("HTMLtoDOM: documentElement... " +  elem.nodeName);
+		            doc.documentElement = elem;
+			        doc.appendChild( elem );
+				}
+				
+				else if ( curParentNode && curParentNode.appendChild ){
+		            //$log("HTMLtoDOM: curParentNode.appendChild... " +  curParentNode.nodeName + " -> " +elem.nodeName);
+					curParentNode.appendChild( elem );
+				}
+					
+				if ( !unary ) {
+				    //$log("start : push into elems[] " + tagName);
+					elems.push( elem );
+					curParentNode = elem;
+				}
+			},
+			end: function( tag ) {
+			    //$log(tag + " : elems.lengths : "+elems.length);
+			    elems.length -= 1;
+				
+				// Init the new parentNode
+				curParentNode = elems[ elems.length - 1 ];
+
+			},
+			chars: function( text ) {
+				curParentNode.appendChild( doc.createTextNode( text ) );
+			},
+			comment: function( text ) {
+				curParentNode.appendChild( doc.createComment( text ) );
+			}
+		});
+				
+        //$log("HTMLtoDOM: doc... " + doc);
+		return doc;
+	};
+
+	function makeMap(str){
+		var obj = {}, items = str.split(",");
+		for ( var i = 0; i < items.length; i++ )
+			obj[ items[i] ] = true;
+		return obj;
+	};
+	
+})( );
 $log("Defining HTMLDocument");
 /*
 * HTMLDocument - DOM Level 2
@@ -4214,7 +4583,7 @@ __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
         //$log("HTMLDocument.createElement( "+tagName+" )");
         // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
@@ -4436,7 +4805,7 @@ __extend__(HTMLElement.prototype, {
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = this.ownerDocument.importNode(doc.documentElement, true);
+            var parent = __ownerDocument__(this).importNode(doc.documentElement, true);
             
 			//$log("\n\nIMPORTED HTML:\n\n"+nodes.xml);
 			while(this.firstChild != null){
@@ -4480,7 +4849,7 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        //$log("Initializing new css2props for html element : " + this.getAttribute("style"));
 		        this.$css2props = new CSS2Properties({
     		        cssText:this.getAttribute("style")
     	        });
@@ -6086,16 +6455,23 @@ var HTMLScriptElement = function(ownerDocument) {
     //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
-    $log("loading script via policy");
-    var _this = this;
-    $w.setTimeout(function(){
-        $policy.loadScripts(_this);
-    }, 1);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
     get text(){
+        // text of script is in a child node of the element
+        // scripts with < operator must be in a CDATA node
+        for (var i=0; i<this.childNodes.length; i++) {
+            if (this.childNodes[i].nodeType == DOMNode.CDATA_SECTION_NODE) {
+                return this.childNodes[i].nodeValue;
+            }
+        } 
+        // otherwise there will be a text node containing the script
+        if (this.childNodes[0] && this.childNodes[0].nodeType == DOMNode.TEXT_NODE) {
+            return this.childNodes[0].nodeValue;
+ 		}
         return this.nodeValue;
+
     },
     get htmlFor(){
         return this.getAttribute('for');
@@ -6135,7 +6511,7 @@ __extend__(HTMLScriptElement.prototype, {
     }
 });
 
-			$log("Defining HTMLSelectElement");
+            $log("Defining HTMLSelectElement");
 /* 
 * HTMLSelectElement - DOM Level 2
 */
@@ -6272,6 +6648,7 @@ __extend__(HTMLStyleElement.prototype, {
 * event.js
 */
 $w.__defineGetter__("Event", function(){
+<<<<<<< HEAD:dist/env.js
   __extend__(this,{
     CAPTURING_PHASE : 1,
     AT_TARGET       : 2,
@@ -6285,6 +6662,19 @@ $w.__defineGetter__("Event", function(){
   }
   
   return this.__output__;
+=======
+    __extend__(this,{
+        CAPTURING_PHASE : 1,
+        AT_TARGET       : 2,
+        BUBBLING_PHASE  : 3
+    });
+    if(this.__output__ == undefined) {
+        this.__output__ = function(){
+            throw new Error("Object cannot be created in this context");
+        };
+    }
+    return this.__output__;
+>>>>>>> thatcher/master:dist/env.js
 });
 
 var Event = function(options){
@@ -6294,7 +6684,7 @@ var Event = function(options){
     AT_TARGET       : 2,
     BUBBLING_PHASE  : 3
   });
-  $log("Creating new Event");
+  //$log("Creating new Event");
   var $bubbles = options.bubbles?options.bubbles:true,
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,
@@ -6345,7 +6735,6 @@ var CSS2Properties = function(options){
     __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
 };
-//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);
@@ -6854,6 +7243,7 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
+	    //$log("Creating timer number "+num);
     	$timers[num] = $env.timer(fn, time);
     	$timers[num].start();
 	}
@@ -6862,6 +7252,8 @@ window.setInterval = function(fn, time){
 
 window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
+	    
+	    //$log("Deleting timer number "+num);
 		$timers[num].stop();
 		delete $timers[num];
 	}
@@ -6877,7 +7269,7 @@ var $events = [],
     $onunload;
 
 $w.addEventListener = function(type, fn){
-  $log("adding event listener " + type);
+  //$log("adding event listener " + type);
 	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
@@ -6905,7 +7297,7 @@ $w.removeEventListener = function(type, fn){
 };
 
 $w.dispatchEvent = function(event){
-    $log("dispatching event " + event.type);
+    //$log("dispatching event " + event.type);
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
     if(!event.target)
@@ -6965,6 +7357,7 @@ $log("Initializing Window XMLHttpRequest.");
 $w.XMLHttpRequest = function(){
 	this.headers = {};
 	this.responseHeaders = {};
+	$log("creating xhr");
 };
 
 XMLHttpRequest.prototype = {
@@ -6982,25 +7375,27 @@ XMLHttpRequest.prototype = {
 	},
 	getResponseHeader: function(header){ },
 	send: function(data){
-		var self = this;
+		var _this = this;
 		
 		function makeRequest(){
-			$env.connection(self, function(){
+			$env.connection(_this, function(){
 			  var responseXML = null;
-				self.__defineGetter__("responseXML", function(){
-  				if ( self.responseText.match(/^\s*</) ) {
-  				  if(responseXML){return responseXML;}
-  				  else{
-    					try {
-    					  $log("parsing response text into xml document");
-    						responseXML = $domparser.parseFromString(self.responseText);
-  					    return responseXML;
-    					} catch(e) { return null;/*TODO: need to flag an error here*/}
-  					}
-  				}else{return null;}
-  			});
+				_this.__defineGetter__("responseXML", function(){
+      				if ( _this.responseText.match(/^\s*</) ) {
+      				  if(responseXML){
+      				      return responseXML;
+      				      
+  				      }else{
+        					try {
+        					    $log("parsing response text into xml document");
+        						responseXML = $domparser.parseFromString(_this.responseText+"");
+                                return responseXML;
+        					} catch(e) { return null;/*TODO: need to flag an error here*/}
+      					}
+      				}else{return null;}
+      			});
 			});
-			self.onreadystatechange();
+			_this.onreadystatechange();
 		}
 		if (this.async){
 		  $log("XHR sending asynch;");

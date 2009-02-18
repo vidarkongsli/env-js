@@ -43,7 +43,7 @@ __extend__(HTMLElement.prototype, {
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = this.ownerDocument.importNode(doc.documentElement, true);
+            var parent = __ownerDocument__(this).importNode(doc.documentElement, true);
             
 			//$log("\n\nIMPORTED HTML:\n\n"+nodes.xml);
 			while(this.firstChild != null){
@@ -87,7 +87,7 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        $log("Initializing new css2props for html element : " + this.getAttribute("style"));
+		        //$log("Initializing new css2props for html element : " + this.getAttribute("style"));
 		        this.$css2props = new CSS2Properties({
     		        cssText:this.getAttribute("style")
     	        });

@@ -12,7 +12,6 @@ var CSS2Properties = function(options){
     __extend__(this, __supportedStyles__);
     __cssTextToStyles__(this, options.cssText?options.cssText:"");
 };
-//__extend__(CSS2Properties.prototype, __supportedStyles__);
 __extend__(CSS2Properties.prototype, {
     get cssText(){
         return Array.prototype.apply.join(this,[';\n']);

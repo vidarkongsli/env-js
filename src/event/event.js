@@ -3,19 +3,17 @@ $log("Defining Event");
 * event.js
 */
 $w.__defineGetter__("Event", function(){
-  __extend__(this,{
-    CAPTURING_PHASE : 1,
-    AT_TARGET       : 2,
-    BUBBLING_PHASE  : 3
-  });
-  
-  if(this.__output__ == undefined) {
-    this.__output__ = function(){ 
-      throw new Error("Object cannot be created in this context"); 
-    };
-  }
-  
-  return this.__output__;
+    __extend__(this,{
+        CAPTURING_PHASE : 1,
+        AT_TARGET       : 2,
+        BUBBLING_PHASE  : 3
+    });
+    if(this.__output__ == undefined) {
+        this.__output__ = function(){
+            throw new Error("Object cannot be created in this context");
+        };
+    }
+    return this.__output__;
 });
 
 var Event = function(options){
@@ -25,7 +23,7 @@ var Event = function(options){
     AT_TARGET       : 2,
     BUBBLING_PHASE  : 3
   });
-  $log("Creating new Event");
+  //$log("Creating new Event");
   var $bubbles = options.bubbles?options.bubbles:true,
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,

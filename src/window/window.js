@@ -194,14 +194,18 @@ function __extend__(a,b) {
 // this might be a good utility function to provide in the env.core
 // as in might be useful to the parser and other areas as well
 function trim( str ){
+    return (str || "").replace( /^\s+|\s+$/g, "" );
+    
+};
+/*function trim( str ){
     var start = -1,
     end = str.length;
-    /*jsl:ignore*/
+    /*jsl:ignore*
     while( str.charCodeAt(--end) < 33 );
     while( str.charCodeAt(++start) < 33 );
-    /*jsl:end*/
+    /*jsl:end*
     return str.slice( start, end + 1 );
-};
+};*/
 
 //from jQuery
 function __setArray__( target, array ) {

@@ -26,7 +26,6 @@ var DOMDocument = function(implementation) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
-    //this.all  = new Array();                       // The list of all Elements
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -34,7 +33,7 @@ var DOMDocument = function(implementation) {
     this._parseComplete = false;                   // initially false, set to true by parser
     this._url = "";
     
-    this.ownerDocument = this;
+    this.ownerDocument = null;
     
     this._performingImportNodeOperation = false;
     //$log("\tfinished creating dom document " + this);
@@ -62,9 +61,11 @@ __extend__(DOMDocument.prototype, {
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
-            //HTMLtoDOM(xmlStr, doc);
+            //doc = html2dom(xmlStr+"", doc);
+        	//$log("\nhtml2xml\n" + doc.xml);
         } catch (e) {
-            $error(this.implementation.translateErrCode(e.code))
+            //$error(this.implementation.translateErrCode(e.code))
+            $error(e);
         }
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
@@ -77,7 +78,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var _this = this;
+        var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
         xhr.onreadystatechange = function(){
@@ -92,6 +93,15 @@ __extend__(DOMDocument.prototype, {
                 "</body></html>");
             }
             _this._url = url;
+            
+        	$log("Loading scripts.");
+            scripts = document.getElementsByTagName('script');
+            /*for(var prop in $policy){
+                $log("$policy."+prop+" ="+$policy[prop]);
+            }*/
+            for(var i=0;i<scripts.length;i++){
+                $policy.loadScript(scripts[i]);
+            }
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
         	event.initEvent("load");
@@ -112,7 +122,7 @@ __extend__(DOMDocument.prototype, {
     createElement : function(tagName) {
         //$log("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -159,7 +169,8 @@ __extend__(DOMDocument.prototype, {
     },
     createProcessingInstruction : function(target, data) {
           // throw Exception if the target string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(target))) {
+        //$log("DOMDocument.createProcessingInstruction( "+target+" )");
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -174,7 +185,8 @@ __extend__(DOMDocument.prototype, {
     },
     createAttribute : function(name) {
         // throw Exception if the name string contains an illegal character
-        if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(name))) {
+        //$log("DOMDocument.createAttribute( "+target+" )");
+        if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         
@@ -189,7 +201,7 @@ __extend__(DOMDocument.prototype, {
     createElementNS : function(namespaceURI, qualifiedName) {
         //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -215,7 +227,7 @@ __extend__(DOMDocument.prototype, {
     },
     createAttributeNS : function(namespaceURI, qualifiedName) {
           // test for exceptions
-          if (this.ownerDocument.implementation.errorChecking) {
+          if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if the Namespace is invalid
             if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
               throw(new DOMException(DOMException.NAMESPACE_ERR));
@@ -262,7 +274,7 @@ __extend__(DOMDocument.prototype, {
             node = all[i];
             // if id matches & node is alive (ie, connected (in)directly to the documentElement)
             if (node.id == elementId) {
-                if((node.ownerDocument.documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -270,7 +282,7 @@ __extend__(DOMDocument.prototype, {
             }
           }
           
-          if(retNode == null){$log("Couldn't find id " + elementId);}
+          //if(retNode == null){$log("Couldn't find id " + elementId);}
           return retNode;
     },
     normalizeDocument: function(){
@@ -280,6 +292,7 @@ __extend__(DOMDocument.prototype, {
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
+        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 

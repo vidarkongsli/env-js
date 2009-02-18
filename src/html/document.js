@@ -28,7 +28,7 @@ __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
         //$log("HTMLDocument.createElement( "+tagName+" )");
         // throw Exception if the tagName string contains an illegal character
-          if (this.ownerDocument.implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
