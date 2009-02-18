@@ -3,7 +3,7 @@
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008 John Resig, under the MIT License
  */
- 
+
 
 // The Window Object
 var __this__ = this;

@@ -120,7 +120,7 @@ __extend__(DOMDocument.prototype, {
         return null;/*TODO*/
     },
     createElement : function(tagName) {
-        //$log("DOMDocument.createElement( "+tagName+" )");
+        $log("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
           if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
