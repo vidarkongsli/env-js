@@ -213,18 +213,26 @@ var __env__ = {};
         "text/envjs"        :true
     };
     
-    $env.loadLocalScript = function(script){
+    $env.loadLocalScript = function(script, parser){
         print("loading script ");
-        var types, type, src, i, base;
+        var types, type, src, i, base, 
+            docWrites = [],
+            write = document.write,
+            writeln = document.writeln;
+        //temporarily replace document write becuase the function
+        //has a different meaning during parsing
+        document.write = function(text){
+			docWrites.push(text);
+		};
         try{
-            if(script.type){
+			if(script.type){
                 types = script.type?script.type.split(";"):[];
                 for(i=0;i<types.length;i++){
                     if($env.scriptTypes[types[i]]){
-                        if(script.src){
+						if(script.src){
                             print("loading allowed external script :" + script.src);
                             base = "" + window.location;
-                            load($env.location(script.src, base.substring(0, base.lastIndexOf("/"))));
+							load($env.location(script.src.match(/([^\?#]*)/)[1], base ));
                         }else{
                             $env.loadInlineScript(script);
                         }
@@ -243,6 +251,13 @@ var __env__ = {};
         }catch(e){
             print("Error loading script.");
             print(e);
+        }finally{
+            if(parser){
+                parser.appendFragment(docWrites.join(''));
+			}
+			//return document.write to it's non-script loading form
+            document.write = write;
+            document.writeln = writeln;
         }
     };
     

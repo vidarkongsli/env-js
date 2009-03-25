@@ -4,6 +4,9 @@
 <!-- (If you delete it and reopen the project it will be recreated.) -->
 <project name="Env" default="default" basedir=".">
     <description>Builds, tests, and runs the project Env.</description>
+    <property name="BUILD_MAJOR"              value="0" />
+    <property name="BUILD_MINOR"              value="9" />
+    <property name="BUILD_ID"                 value="0" />
     
     <property name="SRC_DIR"        location="src"           description="Source Folder"/>
     <property name="TOOLS_DIR"      location="tools"         description="Files for parsing etc." />
@@ -15,8 +18,10 @@
     <property name="DIST_DIR"       location="${PREFIX}/"             description="Folder for concatenated, min, lite and packed target" />
 
     <!-- Files names for distribution -->
-    <property name="ENV_DIST"   		location="${DIST_DIR}/env.js" />
-    <property name="ENV_RHINO"   		location="${DIST_DIR}/env.rhino.js" />
+    <property name="ENV_DIST"  
+            location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js" />
+    <property name="ENV_RHINO"   	
+            location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.rhino.js"/>
     
     <!-- BUILD TARGETS -->
     <target name="default" depends="lint"/>
@@ -34,7 +39,7 @@
     
     <target name="concat" description="Main ENV build">
         <mkdir dir="${DIST_DIR}" />
-    	  <!-- CORE -->
+          <!-- CORE -->
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
             <fileset dir="${SRC_DIR}" includes="intro.js" />
@@ -115,7 +120,7 @@
         </concat>
         <echo message="${ENV_DIST} built." />
         
-    	<!-- RHINO -->
+        <!-- RHINO -->
         <echo message="Building ${ENV_RHINO}" />
         <concat destfile="${ENV_RHINO}">
             <fileset dir="${SRC_DIR}"  includes="platform/rhino.js" />
