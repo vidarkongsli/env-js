@@ -40,11 +40,11 @@ var DOMDocument = function(implementation) {
 };
 DOMDocument.prototype = new DOMNode;
 __extend__(DOMDocument.prototype, {	
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
-	attachEvent             : function(){ window.addEventListener.apply(this, arguments) },
-	detachEvent             : function(){ window.removeEventListener.apply(this, arguments) },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
+    addEventListener        : function(){ window.addEventListener.apply(this, arguments); },
+	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments); },
+	attachEvent             : function(){ window.addEventListener.apply(this, arguments); },
+	detachEvent             : function(){ window.removeEventListener.apply(this, arguments); },
+	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments); },
 
     get styleSheets(){ 
         return [];/*TODO*/ 
@@ -58,6 +58,10 @@ __extend__(DOMDocument.prototype, {
         
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);
+        if(this === $document){
+            $log("Setting internal window.document");
+            $document = doc;
+        }
         // populate Document with Parsed Nodes
         try {
             __parseLoop__(this.implementation, doc, parser);
@@ -70,10 +74,6 @@ __extend__(DOMDocument.prototype, {
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
         doc._parseComplete = true;
-        if(this === $document){
-            $log("Setting internal window.document");
-            $document = doc;
-        }
         return doc;
     },
     load: function(url){
@@ -94,14 +94,6 @@ __extend__(DOMDocument.prototype, {
             }
             _this._url = url;
             
-        	$log("Loading scripts.");
-            scripts = document.getElementsByTagName('script');
-            /*for(var prop in $policy){
-                $log("$policy."+prop+" ="+$policy[prop]);
-            }*/
-            for(var i=0;i<scripts.length;i++){
-                $policy.loadScript(scripts[i]);
-            }
         	$log("Sucessfully loaded document.");
         	var event = document.createEvent();
         	event.initEvent("load");

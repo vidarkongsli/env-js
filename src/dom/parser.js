@@ -269,6 +269,14 @@ XMLP.prototype.next = function() {
 
 } 
 
+XMLP.prototype.appendFragment = function(xmlfragment) {
+
+	var start = this.m_xml.slice(0,this.m_iP);
+	var end = this.m_xml.slice(this.m_iP);
+	this.m_xml = start+xmlfragment+end;
+
+} 
+
 
 XMLP.prototype._parse = function() {
 

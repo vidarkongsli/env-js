@@ -33,14 +33,14 @@ __extend__(DOMImplementation.prototype,{
         }
         return ret;
     },
-	createDocumentType : function(qname, publicid, systemid){
-		return new DOMDocumentType();
-	},
-	createDocument : function(nsuri, qname, doctype){
-	  //TODO - this currently returns an empty doc
-	  //but needs to handle the args
-		return new HTMLDocument($implementation);
-	},
+    createDocumentType : function(qname, publicid, systemid){
+        return new DOMDocumentType();
+    },
+    createDocument : function(nsuri, qname, doctype){
+      //TODO - this currently returns an empty doc
+      //but needs to handle the args
+        return new HTMLDocument($implementation);
+    },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
       var msg = "";
@@ -143,7 +143,7 @@ function __parseLoop__(impl, doc, p) {
     
     // if namespaceAware, add default namespace
     if (impl.namespaceAware) {
-    var iNS = doc.createNamespace(""); // add the default-default namespace
+        var iNS = doc.createNamespace(""); // add the default-default namespace
         iNS.value = "http://www.w3.org/2000/xmlns/";
         doc._namespaces.setNamedItem(iNS);
     }
@@ -241,7 +241,12 @@ function __parseLoop__(impl, doc, p) {
     }
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
+      //handle script tag
+      if(iNodeParent.nodeName.toLowerCase() == 'script'){
+         $policy.loadScript(iNodeParent, p);
+      }
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
+      
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -333,12 +338,12 @@ function __parseLoop__(impl, doc, p) {
       // get Text content
       var pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
       
-	  if (!impl.preserveWhiteSpace ) {
-		if (trim(pContent, true, true) == "") {
-			pContent = ""; //this will cause us not to create the text node below
-		}
-	  }
-	  
+      if (!impl.preserveWhiteSpace ) {
+        if (trim(pContent, true, true) == "") {
+            pContent = ""; //this will cause us not to create the text node below
+        }
+      }
+      
       if (pContent.length > 0) {                    // ignore empty TextNodes
         var textNode = doc.createTextNode(pContent);
         iNodeParent.appendChild(textNode); // attach TextNode to parentNode
@@ -353,15 +358,15 @@ function __parseLoop__(impl, doc, p) {
         if (iEvt == XMLP._ENTITY) {
             entitiesList[entitiesList.length] = textNode;
         }
-		else {
-			//I can't properly decide how to handle preserve whitespace
-			//until the siblings of the text node are built due to 
-			//the entitiy handling described above. I don't know that this
-			//will be all of the text node or not, so trimming is not appropriate
-			//at this time. Keep a list of all the text nodes for now
-			//and we'll process the preserve whitespace stuff at a later time.
-			textNodesList[textNodesList.length] = textNode;
-		}
+        else {
+            //I can't properly decide how to handle preserve whitespace
+            //until the siblings of the text node are built due to 
+            //the entitiy handling described above. I don't know that this
+            //will be all of the text node or not, so trimming is not appropriate
+            //at this time. Keep a list of all the text nodes for now
+            //and we'll process the preserve whitespace stuff at a later time.
+            textNodesList[textNodesList.length] = textNode;
+        }
       }
     }
     else if(iEvt == XMLP._PI) {                     // ProcessingInstruction Event
@@ -420,20 +425,20 @@ function __parseLoop__(impl, doc, p) {
       var parentNode = entity.parentNode;
       if (parentNode) {
           parentNode.normalize();
-		  
-		  //now do whitespace (if necessary)
-		  //it was not done for text nodes that have entities
-		  if(!impl.preserveWhiteSpace) {
-		  		var children = parentNode.childNodes;
-				for ( var j = 0; j < children.length; j++) {
-					var child = children.item(j);
-					if (child.nodeType == DOMNode.TEXT_NODE) {
-						var childData = child.data;
-						childData.replace(/\s/g, ' ');
-						child.data = childData;
-					}
-				}
-		  }
+          
+          //now do whitespace (if necessary)
+          //it was not done for text nodes that have entities
+          if(!impl.preserveWhiteSpace) {
+                var children = parentNode.childNodes;
+                for ( var j = 0; j < children.length; j++) {
+                    var child = children.item(j);
+                    if (child.nodeType == DOMNode.TEXT_NODE) {
+                        var childData = child.data;
+                        childData.replace(/\s/g, ' ');
+                        child.data = childData;
+                    }
+                }
+          }
       }
   }
   
@@ -443,14 +448,14 @@ function __parseLoop__(impl, doc, p) {
   //This may duplicate the whitespace processing for some nodes that had entities in them
   //but there's no way around that
   if (!impl.preserveWhiteSpace) {
-	for (var i = 0; i < textNodesList.length; i++) {
-		var node = textNodesList[i];
-		if (node.parentNode != null) {
-			var nodeData = node.data;
-			nodeData.replace(/\s/g, ' ');
-			node.data = nodeData;
-		}
-	}
+    for (var i = 0; i < textNodesList.length; i++) {
+        var node = textNodesList[i];
+        if (node.parentNode != null) {
+            var nodeData = node.data;
+            nodeData.replace(/\s/g, ' ');
+            node.data = nodeData;
+        }
+    }
   
   }
 };
