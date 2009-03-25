@@ -4,24 +4,42 @@
 <!-- (If you delete it and reopen the project it will be recreated.) -->
 <project name="Env" default="default" basedir=".">
     <description>Builds, tests, and runs the project Env.</description>
-    <property name="BUILD_MAJOR"              value="0" />
-    <property name="BUILD_MINOR"              value="9" />
-    <property name="BUILD_ID"                 value="0" />
+    <property name="BUILD_MAJOR"    value="0" />
+    <property name="BUILD_MINOR"    value="9" />
+    <property name="BUILD_ID"       value="0" />
     
-    <property name="SRC_DIR"        location="src"           description="Source Folder"/>
-    <property name="TOOLS_DIR"      location="tools"         description="Files for parsing etc." />
-    <property name="RHINO_JAR"      location="rhino/js.jar"  description="Rhino JS Engine"/>
+    <property name="SRC_DIR"        
+            location="src"           
+            description="Source Folder"/>
+    <property name="TOOLS_DIR"      
+            location="tools"         
+            description="Files for parsing etc." />
+    <property name="RHINO_JAR"      
+            location="rhino/js.jar"  
+            description="Rhino JS Engine"/>
 
-    <property name="PREFIX"         location="${basedir}/dist/"       description="Target parent folder for built files"   />
-    <property name="DOCS_DIR"       location="${PREFIX}/docs"         description="Folder for docs target"  />
-    <property name="TEST_DIR"       location="${PREFIX}/test"         description="Folder for test target"  />
-    <property name="DIST_DIR"       location="${PREFIX}/"             description="Folder for concatenated, min, lite and packed target" />
+    <property name="PREFIX"         
+            location="${basedir}/dist/"       
+            description="Target parent folder for built files"   />
+    <property name="DOCS_DIR"       
+            location="${PREFIX}/docs"         
+            description="Folder for docs target"  />
+    <property name="TEST_DIR"       
+            location="${PREFIX}/test"         
+            description="Folder for test target"  />
+    <property name="DIST_DIR"       
+            location="${PREFIX}/"             
+            description="Folder for concatenated, min, lite and packed target" />
 
     <!-- Files names for distribution -->
     <property name="ENV_DIST"  
             location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js" />
     <property name="ENV_RHINO"   	
-            location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.rhino.js"/>
+            location="${DIST_DIR}/env.rhino.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js"/>
+    <property name="ENV_LATEST_DIST"  
+            location="${DIST_DIR}/env.js" />
+    <property name="ENV_LATEST_RHINO"   	
+            location="${DIST_DIR}/env.rhino.js"/>
     
     <!-- BUILD TARGETS -->
     <target name="default" depends="lint"/>
@@ -119,6 +137,7 @@
             <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <echo message="${ENV_DIST} built." />
+        <copy tofile="${ENV_LATEST_DIST}" file="${ENV_DIST}"/>
         
         <!-- RHINO -->
         <echo message="Building ${ENV_RHINO}" />
@@ -128,6 +147,7 @@
             <fileset dir="${DIST_DIR}" includes="env.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />
+        <copy tofile="${ENV_LATEST_RHINO}" file="${ENV_RHINO}"/>
     </target>
     
     <target name="test" description="Run the tests">
@@ -137,4 +157,4 @@
       </java>
     </target>
     
-</project>
+    </project>
