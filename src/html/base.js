@@ -1,4 +1,4 @@
-$log("Defining HTMLBaseElement");
+$debug("Defining HTMLBaseElement");
 /* 
 * HTMLBaseElement - DOM Level 2
 */

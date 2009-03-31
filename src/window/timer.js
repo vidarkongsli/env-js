@@ -3,7 +3,7 @@
 */
 	
 
-$log("Initializing Window Timer.");
+$debug("Initializing Window Timer.");
 
 //private
 var $timers = [];
@@ -28,7 +28,7 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
-	    //$log("Creating timer number "+num);
+	    $log("Creating timer number "+num);
     	$timers[num] = $env.timer(fn, time);
     	$timers[num].start();
 	}
@@ -38,7 +38,7 @@ window.setInterval = function(fn, time){
 window.clearInterval = window.clearTimeout = function(num){
 	if ( $timers[num] ) {
 	    
-	    //$log("Deleting timer number "+num);
+	    $debug("Deleting timer number "+num);
 		$timers[num].stop();
 		delete $timers[num];
 	}

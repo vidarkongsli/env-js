@@ -2,7 +2,7 @@
 *	history.js
 */
 
-  $log("Initializing Window History.");
+    $info("Initializing Window History.");
 	$currentHistoryIndex = 0;
 	$history = [];
 	
@@ -46,7 +46,7 @@
 	// to modify the correct portion of the location object
 	// when we navigate the history
 	var setHistory = function( value, locationPart){
-	  $log("adding value to history: " +value);
+	    $info("adding value to history: " +value);
 		$currentHistoryIndex++;
 		$history.push({
 			location: locationPart||"href",

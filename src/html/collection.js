@@ -1,4 +1,4 @@
-$log("Defining HTMLCollection");
+$debug("Defining HTMLCollection");
 /*
 * HTMLCollection - DOM Level 2
 */

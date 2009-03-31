@@ -1,4 +1,4 @@
-$log("Defining HTMLScriptElement");
+$debug("Defining HTMLScriptElement");
 /* 
 * HTMLScriptElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLScriptElement", function(){
 });
 
 var HTMLScriptElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

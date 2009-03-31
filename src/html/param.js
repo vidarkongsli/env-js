@@ -1,4 +1,4 @@
-$log("Defining HTMLParamElement");
+$debug("Defining HTMLParamElement");
 /* 
 * HTMLParamElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLParamElement", function(){
 });
 
 var HTMLParamElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

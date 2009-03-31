@@ -1,13 +1,13 @@
 /*
 *	xhr.js
 */
-$log("Initializing Window XMLHttpRequest.");
+$debug("Initializing Window XMLHttpRequest.");
 // XMLHttpRequest
 // Originally implemented by Yehuda Katz
 $w.XMLHttpRequest = function(){
 	this.headers = {};
 	this.responseHeaders = {};
-	$log("creating xhr");
+	$debug("creating xhr");
 };
 
 XMLHttpRequest.prototype = {
@@ -37,7 +37,7 @@ XMLHttpRequest.prototype = {
       				      
   				      }else{
         					try {
-        					    $log("parsing response text into xml document");
+        					    $debug("parsing response text into xml document");
         						responseXML = $domparser.parseFromString(_this.responseText+"");
                                 return responseXML;
         					} catch(e) { return null;/*TODO: need to flag an error here*/}
@@ -48,10 +48,10 @@ XMLHttpRequest.prototype = {
 			_this.onreadystatechange();
 		}
 		if (this.async){
-		  $log("XHR sending asynch;");
+		    $debug("XHR sending asynch;");
 			$env.runAsync(makeRequest);
 		}else{
-		  $log("XHR sending synch;");
+		    $debug("XHR sending synch;");
 			makeRequest();
 		}
 	},

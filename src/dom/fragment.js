@@ -1,4 +1,4 @@
-$log("Defining DocumentFragment");
+$debug("Defining DocumentFragment");
 /* 
 * DocumentFragment - DOM Level 2
 */

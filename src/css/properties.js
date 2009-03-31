@@ -72,10 +72,10 @@ var __cssTextToStyles__ = function(css2props, cssText){
             camelCaseName = trim(style[0].replace(/\-(\w)/g, function(all, letter){
 				return letter.toUpperCase();
 			}));
-            //$log('CSS Style Name:  ' + camelCaseName);
+            $debug('CSS Style Name:  ' + camelCaseName);
             if(css2props[camelCaseName]!==undefined){
                 //set the value internally with camelcase name 
-                //$log('Setting css ' + camelCaseName + ' to ' + value);
+                $debug('Setting css ' + camelCaseName + ' to ' + value);
                 css2props[camelCaseName] = value;
             };
     	}

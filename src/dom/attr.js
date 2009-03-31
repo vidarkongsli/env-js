@@ -1,4 +1,4 @@
-$log("Defining Attr");
+$debug("Defining Attr");
 /*
 * Attr - DOM Level 2
 */
@@ -16,14 +16,11 @@ $w.__defineGetter__("Attr", function(){
  * @param  ownerDocument : DOMDocument - The Document object associated with this node.
  */
 var DOMAttr = function(ownerDocument) {
-    //$log("\tcreating dom attribute");
     this.DOMNode = DOMNode;
     this.DOMNode(ownerDocument);
                    
     this.specified = false;
     this.ownerElement = null;               // set when Attr is added to NamedNodeMap
-    
-    //$log("\tfincished creating dom attribute " + this);
 };
 DOMAttr.prototype = new DOMNode; 
 __extend__(DOMAttr.prototype, {
@@ -51,7 +48,7 @@ __extend__(DOMAttr.prototype, {
         return DOMNode.ATTRIBUTE_NODE;
     },
     get xml(){
-        return this.nodeName + "='" + this.nodeValue + "' ";
+        return this.nodeName + '="' + __escapeXML__(this.nodeValue) + '" ';
     },
     toString : function(){
         return "Attr #" + this._id + " " + this.name;

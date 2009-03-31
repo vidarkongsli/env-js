@@ -1,4 +1,4 @@
-$log("Defining Anchor");
+$debug("Defining Anchor");
 /* 
 * Anchor - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("Anchor", function(){
 });
 
 var Anchor = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLAnchorElement = HTMLAnchorElement;
     this.HTMLAnchorElement(ownerDocument);
 };

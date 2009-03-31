@@ -1,4 +1,4 @@
-$log("Defining HTMLImageElement");
+$debug("Defining HTMLImageElement");
 /* 
 * HTMLImageElement - DOM Level 2
 */

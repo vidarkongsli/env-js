@@ -1,4 +1,4 @@
-$log("Defining HTMLMetaElement");
+$debug("Defining HTMLMetaElement");
 /* 
 * HTMLMetaElement - DOM Level 2
 */

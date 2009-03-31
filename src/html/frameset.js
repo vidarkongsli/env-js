@@ -1,4 +1,4 @@
-$log("Defining HTMLFrameSetElement");
+$debug("Defining HTMLFrameSetElement");
 /* 
 * HTMLFrameSetElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLFrameSetElement", function(){
 });
 
 var HTMLFrameSetElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

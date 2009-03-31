@@ -1,4 +1,4 @@
-$log("Defining DOMParser");
+$debug("Defining DOMParser");
 /*
 * DOMParser
 */
@@ -11,7 +11,7 @@ __extend__(DOMParser.prototype,{
     }
 });
 
-$log("Initializing Internal DOMParser.");
+$debug("Initializing Internal DOMParser.");
 //keep one around for internal use
 $domparser = new DOMParser();
 

@@ -2,12 +2,12 @@
 *	location.js
 *   - requires env
 */
-$log("Initializing Window Location.");
+$debug("Initializing Window Location.");
 //the current location
 var $location = $env.location('./');
 
 $w.__defineSetter__("location", function(url){
-  //$w.onunload();
+    //$w.onunload();
 	$location = $env.location(url);
 	setHistory($location);
 	$w.document.load($location);

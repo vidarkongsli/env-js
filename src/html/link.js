@@ -8,7 +8,7 @@ $w.__defineGetter__("Link", function(){
 });
 
 
-$log("Defining HTMLLinkElement");
+$debug("Defining HTMLLinkElement");
 /* 
 * HTMLLinkElement - DOM Level 2
 */
@@ -19,7 +19,6 @@ $w.__defineGetter__("HTMLLinkElement", function(){
 });
 
 var HTMLLinkElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

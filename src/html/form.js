@@ -1,4 +1,4 @@
-$log("Defining HTMLFormElement");
+$debug("Defining HTMLFormElement");
 /* 
 * HTMLAnchorElement - DOM Level 2
 */

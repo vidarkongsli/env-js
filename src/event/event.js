@@ -1,4 +1,4 @@
-$log("Defining Event");
+$debug("Defining Event");
 /*
 * event.js
 */
@@ -17,13 +17,15 @@ $w.__defineGetter__("Event", function(){
 });
 
 var Event = function(options){
-  if(options === undefined){options={target:window,currentTarget:window};}
+  if(options === undefined){
+      options={target:window,currentTarget:window};
+  }
   __extend__(this,{
     CAPTURING_PHASE : 1,
     AT_TARGET       : 2,
     BUBBLING_PHASE  : 3
   });
-  //$log("Creating new Event");
+  $debug("Creating new Event");
   var $bubbles = options.bubbles?options.bubbles:true,
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,

@@ -10,7 +10,7 @@
 
 // read only reference to the Document object
 
-$log("Initializing window.document.");
+$debug("Initializing window.document.");
 var $async = false;
 __extend__(HTMLDocument.prototype, {
 	get async(){ return $async;},

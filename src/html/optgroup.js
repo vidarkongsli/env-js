@@ -1,4 +1,4 @@
-$log("Defining HTMLOptGroupElement");
+$debug("Defining HTMLOptGroupElement");
 /* 
 * HTMLOptGroupElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLOptGroupElement", function(){
 });
 
 var HTMLOptGroupElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

@@ -1,4 +1,4 @@
-$log("Defining HTMLQuoteElement");
+$debug("Defining HTMLQuoteElement");
 /* 
 * HTMLQuoteElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLQuoteElement", function(){
 });
 
 var HTMLQuoteElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

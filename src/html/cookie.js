@@ -1,4 +1,4 @@
-$log("Defining document.cookie");
+$debug("Defining document.cookie");
 /*
 *	cookie.js
 *   - requires env
@@ -124,7 +124,7 @@ var loadCookies = function(){
 //We simply use the default ajax get to load the .cookies.js file
 //if it doesn't exist we create it with a post.  Cookies are maintained
 //in memory, but serialized with each set.
-$log("Loading Cookies");
+$info("Loading Cookies");
 try{
 	//TODO - load cookies
 	loadCookies();

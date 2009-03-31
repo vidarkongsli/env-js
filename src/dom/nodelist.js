@@ -1,4 +1,4 @@
-$log("Defining NodeList");
+$debug("Defining NodeList");
 /*
 * NodeList - DOM Level 2
 */
@@ -18,8 +18,6 @@ $w.__defineGetter__('NodeList', function(){
  * @param  parentNode    : DOMNode - the node that the DOMNodeList is attached to (or null)
  */
 var DOMNodeList = function(ownerDocument, parentNode) {
-    //$log("\t\tcreating dom nodelist");
-    
     this.length = 0;
     this.parentNode = parentNode;
     this.ownerDocument = ownerDocument;
@@ -27,7 +25,6 @@ var DOMNodeList = function(ownerDocument, parentNode) {
     this._readonly = false;
     
     __setArray__(this, []);
-    //$log("\t\tfinished creating dom nodelist");
 };
 __extend__(DOMNodeList.prototype, {
     item : function(index) {
@@ -106,7 +103,6 @@ var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
             Array.prototype.splice.apply(nodelist,[refChildIndex, 0, newChild]);
         }
     }
-    //$log("__insertBefore__ : length " + nodelist.length + " all -> " + document.all.length);
 };
 
 /**
@@ -134,7 +130,6 @@ var __replaceChild__ = function(nodelist, newChild, refChildIndex) {
         }
     }
     
-    //$log("__replaceChild__ : length " + nodelist.length + " all -> " + document.all.length);
     return ret;                                   // return replaced node
 };
 
@@ -156,7 +151,6 @@ var __removeChild__ = function(nodelist, refChildIndex) {
         Array.prototype.splice.apply(nodelist,[refChildIndex, 1]);
     }
     
-    //$log("__removeChild__ : length " + nodelist.length + " all -> " + document.all.length);
     return ret;                                   // return removed node
 };
 
@@ -181,7 +175,6 @@ var __appendChild__ = function(nodelist, newChild) {
         Array.prototype.push.apply(nodelist, [newChild]);
     }
     
-    //$log("__appendChild__ : length " + nodelist.length + " all -> " + document.all.length);
 };
 
 /**

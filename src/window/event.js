@@ -2,7 +2,7 @@
 * event.js
 */
 // Window Events
-$log("Initializing Window Event.");
+$debug("Initializing Window Event.");
 var $events = [],
     $onerror,
     $onload,

@@ -1,4 +1,4 @@
-$log("Defining CDATASection");
+$debug("Defining CDATASection");
 /*
 * CDATASection - DOM Level 2
 */

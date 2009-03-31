@@ -42,15 +42,17 @@ __extend__(DOMCharacterData.prototype,{
         }
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
-              throw(new DOMException(DOMException.INDEX_SIZE_ERR));
+            if (__ownerDocument__(this).implementation.errorChecking && 
+                ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+                throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
             // delete data
             if(!count || (offset + count) > this.data.length) {
               this.data = this.data.substring(0, offset);
             }else {
-              this.data = this.data.substring(0, offset).concat(this.data.substring(offset + count));
+              this.data = this.data.substring(0, offset).
+                concat(this.data.substring(offset + count));
             }
         }
     },
@@ -62,7 +64,8 @@ __extend__(DOMCharacterData.prototype,{
         
         if(this.data){
             // throw Exception if offset is negative or greater than the data length,
-            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length))) {
+            if (__ownerDocument__(this).implementation.errorChecking && 
+                ((offset < 0) || (offset >  this.data.length))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
@@ -86,12 +89,14 @@ __extend__(DOMCharacterData.prototype,{
         
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
-            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && 
+                ((offset < 0) || (offset >  this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             
             // replace data
-            this.data = this.data.substring(0, offset).concat(arg, this.data.substring(offset + count));
+            this.data = this.data.substring(0, offset).
+                concat(arg, this.data.substring(offset + count));
         }else {
             // set data
             this.data = arg;
@@ -102,7 +107,8 @@ __extend__(DOMCharacterData.prototype,{
         if (this.data) {
             // throw Exception if offset is negative or greater than the data length,
             // or the count is negative
-            if (__ownerDocument__(this).implementation.errorChecking && ((offset < 0) || (offset > this.data.length) || (count < 0))) {
+            if (__ownerDocument__(this).implementation.errorChecking && 
+                ((offset < 0) || (offset > this.data.length) || (count < 0))) {
                 throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
             // if count is not specified

@@ -1,4 +1,4 @@
-$log("Defining Document");
+$debug("Defining Document");
 /*
 * Document - DOM Level 2
 *  The Document object is not directly 
@@ -59,7 +59,7 @@ __extend__(DOMDocument.prototype, {
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);
         if(this === $document){
-            $log("Setting internal window.document");
+            $debug("Setting internal window.document");
             $document = doc;
         }
         // populate Document with Parsed Nodes
@@ -77,7 +77,7 @@ __extend__(DOMDocument.prototype, {
         return doc;
     },
     load: function(url){
-		$log("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
+		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
         var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
@@ -94,7 +94,7 @@ __extend__(DOMDocument.prototype, {
             }
             _this._url = url;
             
-        	$log("Sucessfully loaded document.");
+        	$info("Sucessfully loaded document at "+url);
         	var event = document.createEvent();
         	event.initEvent("load");
         	$w.dispatchEvent( event );
@@ -112,9 +112,10 @@ __extend__(DOMDocument.prototype, {
         return null;/*TODO*/
     },
     createElement : function(tagName) {
-        $log("DOMDocument.createElement( "+tagName+" )");
+          //$debug("DOMDocument.createElement( "+tagName+" )");
           // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
+          if (__ownerDocument__(this).implementation.errorChecking 
+            && (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -129,7 +130,6 @@ __extend__(DOMDocument.prototype, {
     createDocumentFragment : function() {
           // create DOMDocumentFragment specifying 'this' as ownerDocument
           var node = new DOMDocumentFragment(this);
-        
           return node;
     },
     createTextNode: function(data) {
@@ -161,8 +161,9 @@ __extend__(DOMDocument.prototype, {
     },
     createProcessingInstruction : function(target, data) {
           // throw Exception if the target string contains an illegal character
-        //$log("DOMDocument.createProcessingInstruction( "+target+" )");
-          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(target))) {
+          //$log("DOMDocument.createProcessingInstruction( "+target+" )");
+          if (__ownerDocument__(this).implementation.errorChecking 
+            && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
         
@@ -178,7 +179,8 @@ __extend__(DOMDocument.prototype, {
     createAttribute : function(name) {
         // throw Exception if the name string contains an illegal character
         //$log("DOMDocument.createAttribute( "+target+" )");
-        if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(name))) {
+        if (__ownerDocument__(this).implementation.errorChecking 
+            && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         
