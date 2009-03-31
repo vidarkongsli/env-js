@@ -1,4 +1,4 @@
-$log("Defining HTMLMapElement");
+$debug("Defining HTMLMapElement");
 /* 
 * HTMLMapElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLMapElement", function(){
 });
 
 var HTMLMapElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

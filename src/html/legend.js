@@ -1,4 +1,4 @@
-$log("Defining HTMLLegendElement");
+$debug("Defining HTMLLegendElement");
 /* 
 * HTMLLegendElement - DOM Level 2
 */

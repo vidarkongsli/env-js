@@ -2,7 +2,7 @@
 *	navigator.js
 *   - requires env
 */
-$log("Initializing Window Navigator.");
+$debug("Initializing Window Navigator.");
 
 var $appCodeName  = $env.appCodeName;//eg "Mozilla"
 var $appName      = $env.appName;//eg "Gecko/20070309 Firefox/2.0.0.3"

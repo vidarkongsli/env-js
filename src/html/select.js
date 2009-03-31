@@ -1,4 +1,4 @@
-$log("Defining HTMLSelectElement");
+$debug("Defining HTMLSelectElement");
 /* 
 * HTMLSelectElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLSelectElement", function(){
 });
 
 var HTMLSelectElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

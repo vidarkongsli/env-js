@@ -1,4 +1,4 @@
-$log("Defining HTMLInputElement");
+$debug("Defining HTMLInputElement");
 /* 
 * HTMLInputElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLInputElement", function(){
 });
 
 var HTMLInputElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

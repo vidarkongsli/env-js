@@ -1,4 +1,4 @@
-$log("Defining HTMLIFrameElement");
+$debug("Defining HTMLIFrameElement");
 /* 
 * HTMLIFrameElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLIFrameElement", function(){
 });
 
 var HTMLIFrameElement = function(ownerDocument) {
-    //$log("creating iframe element");
     this.HTMLFrameElement = HTMLFrameElement;
     this.HTMLFrameElement(ownerDocument);
 };

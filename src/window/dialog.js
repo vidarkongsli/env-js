@@ -1,7 +1,7 @@
 /*
 *	dialog.js
 */
-$log("Initializing Window Dialogs.");
+$debug("Initializing Window Dialogs.");
 $w.alert = function(message){
  //TODO 
 };

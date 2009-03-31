@@ -16,8 +16,9 @@ var CSSStyleSheet = function(options){
         $type = "text/css";
         
     function parseStyleSheet(text){
-      //this is pretty ugly, but text is the entire text of a stylesheet
-      var cssRules = [];
+        $debug("parsing css");
+        //this is pretty ugly, but text is the entire text of a stylesheet
+        var cssRules = [];
     	if (!text) text = "";
     	text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
     	// TODO: @import ?

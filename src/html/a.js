@@ -1,4 +1,4 @@
-$log("Defining HTMLAnchorElement");
+$debug("Defining HTMLAnchorElement");
 /* 
 * HTMLAnchorElement - DOM Level 2
 */

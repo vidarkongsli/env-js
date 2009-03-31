@@ -1,15 +1,14 @@
-$log("Defining HTMLxElement");
+$debug("Defining HTMLCanvasElement");
 /* 
-* HTMLxElement - DOM Level 2
+* HTMLCanvasElement - DOM Level 2
 */
-$w.__defineGetter__("HTMLxElement", function(){
+$w.__defineGetter__("HTMLCanvasElement", function(){
     return function(){
         throw new Error("Object cannot be created in this context");
     };
 });
 
 var HTMLxElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

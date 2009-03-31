@@ -1,4 +1,4 @@
-$log("Defining Node");
+$debug("Defining Node");
 /*
 * Node - DOM Level 2
 */	
@@ -25,7 +25,6 @@ $w.__defineGetter__('Node', function(){
  * @param  ownerDocument : DOMDocument - The Document object associated with this node.
  */
 var DOMNode = function(ownerDocument) {
-  //$log("\tcreating dom node");
   if (ownerDocument) {
     this._id = ownerDocument._genId();           // generate unique internal id
   }
@@ -120,7 +119,8 @@ __extend__(DOMNode.prototype, {
             }
             
             // insert newChild into childNodes
-            __insertBefore__(this.childNodes, newChild, __findItemIndex__(this.childNodes, refChild._id));
+            __insertBefore__(this.childNodes, newChild, 
+                __findItemIndex__(this.childNodes, refChild._id));
             
             // do node pointer surgery
             prevNode = refChild.previousSibling;
@@ -250,7 +250,6 @@ __extend__(DOMNode.prototype, {
             newChild.previousSibling = oldChild.previousSibling;
             newChild.nextSibling = oldChild.nextSibling;
         }
-        //this.removeChild(oldChild);
         return ret;
     },
     removeChild : function(oldChild) {
@@ -358,7 +357,6 @@ __extend__(DOMNode.prototype, {
     cloneNode: function(deep) {
         // use importNode to clone this Node
         //do not throw any exceptions
-        //$log("cloning node");
         try {
             return __ownerDocument__(this).importNode(this, deep);
         } catch (e) {
@@ -407,17 +405,18 @@ __extend__(DOMNode.prototype, {
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
-        //$log("getElementsByTagName("+tagname+")");
-        return __getElementsByTagNameRecursive__(this, tagname, new DOMNodeList(__ownerDocument__(this)));
+        return __getElementsByTagNameRecursive__(this, tagname, 
+            new DOMNodeList(__ownerDocument__(this)));
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
-        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, new DOMNodeList(__ownerDocument__(this)));
+        return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, 
+            new DOMNodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         
         var importNode;
-        //$log("importing node " + importedNode.nodeName + "(?deep = "+deep+")");
+        //$debug("importing node " + importedNode.nodeName + "(?deep = "+deep+")");
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
@@ -533,13 +532,11 @@ __extend__(DOMNode.prototype, {
  * @return : DOMNodeList
  */
 var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
-    //$log("__getElementsByTagNameRecursive__("+elem._id+")");
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
         if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
             ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
                 (tagname == "*")) ){
-            //$log("found node by name " + tagname);
             __appendChild__(nodeList, elem);               // add matching node to nodeList
         }
     

@@ -1,5 +1,5 @@
 //DOMImplementation
-$log("Defining DOMImplementation");
+$debug("Defining DOMImplementation");
 $w.__defineGetter__("DOMImplementation", function(){
   return function(){
     throw new Error("Object cannot be created in this context");
@@ -402,7 +402,9 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._DTD) {                    // ignore DTD events
     }
     else if(iEvt == XMLP._ERROR) {
-        $error("Fatal Error: " + p.getContent() + "\nLine: " + p.getLineNumber() + "\nColumn: " + p.getColumnNumber() + "\n");
+        $error("Fatal Error: " + p.getContent() + 
+                "\nLine: " + p.getLineNumber() + 
+                "\nColumn: " + p.getColumnNumber() + "\n");
         throw(new DOMException(DOMException.SYNTAX_ERR));
     }
     else if(iEvt == XMLP._NONE) {                   // no more events
@@ -564,7 +566,7 @@ function __parseQName__(qualifiedName) {
   return resultQName;
 };
 
-$log("Initializing document.implementation");
+$debug("Initializing document.implementation");
 var $implementation =  new DOMImplementation();
 $implementation.namespaceAware = false;
 $implementation.errorChecking = false;

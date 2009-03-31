@@ -1,4 +1,4 @@
-$log("Defining Text");
+$debug("Defining Text");
 /*
 * Text - DOM Level 2
 */

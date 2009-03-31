@@ -1,4 +1,4 @@
-$log("Defining ProcessingInstruction");
+$debug("Defining ProcessingInstruction");
 /*
 * ProcessingInstruction - DOM Level 2
 */

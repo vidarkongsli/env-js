@@ -1,4 +1,4 @@
-$log("Defining HTMLLabelElement");
+$debug("Defining HTMLLabelElement");
 /* 
 * HTMLLabelElement - DOM Level 2
 */
@@ -32,7 +32,7 @@ __extend__(HTMLLabelElement.prototype, {
     },
     set htmlFor(value){
         this.setAttribute('for',value);
-    },
+    }
 });
 
 			

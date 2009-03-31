@@ -12,20 +12,33 @@ var __env__ = {};
     //to profile
     $env.profile = false;
     
-    $env.debug = function(){};
+    $env.log = function(msg){
+         print("[ENV] ("+new Date().getTime()+") -> "+msg);
+    };
+    $env.debug  = function(){};
+    $env.info   = function(){};
+    $env.warn   = function(){};
+    $env.error  = function(){};
     
-    $env.log = function(){};
-    //uncomment this if you want to get some internal log statementes
-    $env.log = print;
-    $env.log("Initializing Rhino Platform Env");
-    
+    //uncomment these if you want to get some internal log statementes
+    /*$env.debug  = function(msg){
+        $env.log("DEBUG: "+msg); 
+    };*/
+    $env.info   = function(msg){
+        $env.log("INFO: "+msg); 
+    };
+    $env.warn   = function(msg){
+        $env.log("WARNIING!: "+msg);    
+    };
     $env.error = function(msg, e){
-        print("ERROR! : " + msg);
-        print(e||"");
+        $env.log("\n\n*** ERROR! ***: "+ msg+ " Line: "+ $env.lineSource(e));
+        $env.log(e||"");
     };
     
+    $env.info("Initializing Rhino Platform Env");
+    
     $env.lineSource = function(e){
-        return e.rhinoException?e.rhinoException.lineSource():"(line ?)";
+        return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
     };
     
     $env.hashCode = function(obj){
@@ -49,12 +62,12 @@ var __env__ = {};
     //For Java the window.timer is created using the java.lang.Thread in combination
     //with the java.lang.Runnable
     $env.timer = function(fn, time){
-        //print("wating for timer "+time);
+        //$env.debug("wating for timer "+time);
         return new java.lang.Thread(new java.lang.Runnable({
             run: function(){
                 while (true){
                     java.lang.Thread.currentThread().sleep(time);
-                    //print("calling in timer "+time);
+                    //$env.debug("calling in timer "+time);
                     fn();
                 }
             }
@@ -70,7 +83,7 @@ var __env__ = {};
     //Used in the XMLHttpRquest implementation to run a
     // request in a seperate thread
     $env.runAsync = function(fn){
-        print("running async");
+        $env.debug("running async");
         (new java.lang.Thread(new java.lang.Runnable({
             run: fn
         }))).start();
@@ -78,7 +91,7 @@ var __env__ = {};
     
     //Used to write to a local file
     $env.writeToFile = function(text, url){
-        print("writing text to url : " + url);
+        $env.debug("writing text to url : " + url);
         var out = new java.io.FileWriter( 
             new java.io.File( 
                 new java.net.URI(url.toString())));	
@@ -214,7 +227,7 @@ var __env__ = {};
     };
     
     $env.loadLocalScript = function(script, parser){
-        print("loading script ");
+        $env.debug("loading script ");
         var types, type, src, i, base, 
             docWrites = [],
             write = document.write,
@@ -230,7 +243,7 @@ var __env__ = {};
                 for(i=0;i<types.length;i++){
                     if($env.scriptTypes[types[i]]){
 						if(script.src){
-                            print("loading allowed external script :" + script.src);
+                            $env.info("loading allowed external script :" + script.src);
                             base = "" + window.location;
 							load($env.location(script.src.match(/([^\?#]*)/)[1], base ));
                         }else{
@@ -249,8 +262,7 @@ var __env__ = {};
                 }
             }
         }catch(e){
-            print("Error loading script.");
-            print(e);
+            $env.error("Error loading script.", e);
         }finally{
             if(parser){
                 parser.appendFragment(docWrites.join(''));
@@ -262,10 +274,9 @@ var __env__ = {};
     };
     
     $env.loadInlineScript = function(script){
-        print("loading inline script :" + script.text);
+        $env.debug("loading inline script :" + script.text);
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
-        $env.writeToFile(script.text, tmpFile);
-        print("loading ",tmpFile);
+        $env.debug("loading " + tmpFile);
         load(tmpFile);
     };
     

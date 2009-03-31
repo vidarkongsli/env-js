@@ -4,8 +4,11 @@
 */
 // a logger or empty function available to all modules.
 var $log = $env.log,
-    $error = $env.error,
-    $debug = $env.debug;
+    $debug = $env.debug,
+    $info = $env.info,
+    $warn = $env.warn,
+    $error = $env.error;
+    
 //The version of this application
 var $version = "0.1";
 //This should be hooked to git or svn or whatever
@@ -87,7 +90,7 @@ var $top;
 // the window property is identical to the self property.
 var $window = $w;
 
-$log("Initializing Window.");
+$debug("Initializing Window.");
 __extend__($w,{
   get closed(){return $closed;},
   get defaultStatus(){return $defaultStatus;},

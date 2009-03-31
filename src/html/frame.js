@@ -1,4 +1,4 @@
-$log("Defining HTMLFrameElement");
+$debug("Defining HTMLFrameElement");
 /* 
 * HTMLFrameElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLFrameElement", function(){
 });
 
 var HTMLFrameElement = function(ownerDocument) {
-    //$log("creating frame element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -64,15 +63,15 @@ __extend__(HTMLFrameElement.prototype, {
         this.setAttribute('src', value);
     },
     get contentDocument(){
-        $log("getting content document for (i)frame");
+        $debug("getting content document for (i)frame");
         if(!this._content){
             this._content = new HTMLDocument($implementation);
             if(this.src.length > 0){
-                $log("Loading frame content from " + this.src);
+                $info("Loading frame content from " + this.src);
                 try{
                     this._content.load(this.src);
                 }catch(e){
-                    $error("failed to load " + this.src);
+                    $error("failed to load frame content: from " + this.src, e);
                 }
             }
         }

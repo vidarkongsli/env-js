@@ -1,4 +1,4 @@
-$log("Defining HTMLxElement");
+$debug("Defining HTMLxElement");
 /* 
 * HTMLxElement - DOM Level 2
 */

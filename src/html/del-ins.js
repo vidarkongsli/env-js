@@ -1,4 +1,4 @@
-$log("Defining HTMLModElement");
+$debug("Defining HTMLModElement");
 /* 
 * HTMLModElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLModElement", function(){
 });
 
 var HTMLModElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

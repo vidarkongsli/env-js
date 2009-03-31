@@ -1,4 +1,4 @@
-$log("Defining HTMLElement");
+$debug("Defining HTMLElement");
 /*
 * HTMLElement - DOM Level 2
 */
@@ -9,10 +9,8 @@ $w.__defineGetter__("HTMLElement", function(){
 });
 
 var HTMLElement = function(ownerDocument) {
-    //$log("\tcreating html element");
     this.DOMElement = DOMElement;
     this.DOMElement(ownerDocument);
-    //$log("\nfinished creating html element");
     
     this.$css2props = null;
 };
@@ -43,18 +41,14 @@ __extend__(HTMLElement.prototype, {
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
-            var parent = doc.documentElement;//__ownerDocument__(this).importNode(doc.documentElement, true);
-            
-			//$log("\n\nIMPORTED HTML:\n\n"+parent.xml);
+            var parent = doc.documentElement;
 			while(this.firstChild != null){
-			    //$log('innerHTML - removing child '+ this.firstChild.xml);
 			    this.removeChild( this.firstChild );
 			}
 			var importedNode;
 			while(parent.firstChild != null){
-			    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-		        //$log('innerHTML - importing node');
-	            importedNode = this.importNode( parent.removeChild( parent.firstChild ), true);
+	            importedNode = this.importNode( 
+	                parent.removeChild( parent.firstChild ), true);
 			    this.appendChild( importedNode );   
 		    }
 		    //Mark for garbage collection
@@ -90,7 +84,6 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        //$log("Initializing new css2props for html element : " + this.getAttribute("style"));
 		        this.$css2props = new CSS2Properties({
     		        cssText:this.getAttribute("style")
     	        });

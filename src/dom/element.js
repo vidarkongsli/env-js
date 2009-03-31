@@ -1,4 +1,4 @@
-$log("Defining Element");
+$debug("Defining Element");
 /*
 * Element - DOM Level 2
 */
@@ -17,11 +17,9 @@ $w.__defineGetter__("Element", function(){
  * @param  ownerDocument : DOMDocument - The Document object associated with this node.
  */
 var DOMElement = function(ownerDocument) {
-    //$log("\tcreating dom element");
     this.DOMNode  = DOMNode;
     this.DOMNode(ownerDocument);                   
     this.id = "";                                  // the ID of the element
-    //$log("\nfinished creating dom element " + this);
 };
 DOMElement.prototype = new DOMNode;
 __extend__(DOMElement.prototype, {	
@@ -206,7 +204,6 @@ __extend__(DOMElement.prototype, {
         return DOMNode.ELEMENT_NODE;
     },
     get xml() {
-        //$log("Serializing " + this);
         var ret = "";
         
         // serialize namespace declarations

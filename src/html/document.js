@@ -1,4 +1,4 @@
-$log("Defining HTMLDocument");
+$debug("Defining HTMLDocument");
 /*
 * HTMLDocument - DOM Level 2
 *  The Document object is not directly 
@@ -26,13 +26,12 @@ var HTMLDocument = function(implementation) {
 HTMLDocument.prototype = new DOMDocument;
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
-        //$log("HTMLDocument.createElement( "+tagName+" )");
-        // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking && (!__isValidName__(tagName))) {
-            throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+          // throw Exception if the tagName string contains an illegal character
+          if (__ownerDocument__(this).implementation.errorChecking && 
+                (!__isValidName__(tagName))) {
+              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
-          //$log("HTMLDocument.createElement( "+tagName+" )");
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
           if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
@@ -117,7 +116,6 @@ __extend__(HTMLDocument.prototype, {
         
     },
     get forms(){
-      $log("document.forms");
       return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
     },
     get images(){
@@ -151,7 +149,6 @@ __extend__(HTMLDocument.prototype, {
 	    this._open = false;
     },
 	getElementsByName : function(name){
-        //$debug("document.getElementsByName ( "+name+" )");
         //returns a real Array + the DOMNodeList
         var retNodes = __extend__([],new DOMNodeList(this, this.documentElement)),
           node;
@@ -160,7 +157,6 @@ __extend__(HTMLDocument.prototype, {
         for (var i=0; i < all.length; i++) {
             node = all[i];
             if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
-                //$log("Found node by name " + name);
                 retNodes.push(node);
             }
         }

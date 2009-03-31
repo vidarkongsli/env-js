@@ -1,4 +1,4 @@
-$log("Defining HTMLFieldSetElement");
+$debug("Defining HTMLFieldSetElement");
 /* 
 * HTMLFieldSetElement - DOM Level 2
 */
@@ -9,7 +9,6 @@ $w.__defineGetter__("HTMLFieldSetElement", function(){
 });
 
 var HTMLFieldSetElement = function(ownerDocument) {
-    //$log("creating anchor element");
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };

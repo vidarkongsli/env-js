@@ -1,11 +1,11 @@
-$log("Defining Comment");
+$debug("Defining Comment");
 /* 
 * Comment - DOM Level 2
 */
 $w.__defineGetter__("Comment", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
 });
 
 /**

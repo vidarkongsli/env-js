@@ -1,7 +1,7 @@
 /*
 *	screen.js
 */
-$log("Initializing Window Screen.");
+$debug("Initializing Window Screen.");
 
 var $availHeight  = 600,
     $availWidth   = 800,

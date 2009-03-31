@@ -74,8 +74,9 @@ __extend__(DOMNamedNodeMap.prototype, {
           var ret = null;
           // test for exceptions
           // throw Exception if DOMNamedNodeMap is readonly
-          if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
-            throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+          if (__ownerDocument__(this).implementation.errorChecking && 
+                (this._readonly || (this.parentNode && this.parentNode._readonly))) {
+              throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
         
           // get item index
@@ -306,7 +307,7 @@ var __cloneNamedNodes__ = function(namednodemap, parentNode, isnsmap) {
 
   // create list containing clones of all children
   for (var i=0; i < namednodemap.length; i++) {
-      $log("cloning node in named node map :" + namednodemap[i]);
+      $debug("cloning node in named node map :" + namednodemap[i]);
     __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
   }
 
@@ -341,7 +342,8 @@ __extend__(DOMNamespaceNodeMap.prototype, {
             // if namespace declaration does not exist in the containing node's, parentNode's namespaces
             var ns = null;
             try {
-                var ns = this.parentNode.parentNode._namespaces.getNamedItem(this[ind].localName);
+                var ns = this.parentNode.parentNode._namespaces.
+                    getNamedItem(this[ind].localName);
             }
             catch (e) {
                 //breaking to prevent default namespace being inserted into return value
