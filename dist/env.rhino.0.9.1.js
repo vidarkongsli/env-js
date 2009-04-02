@@ -50,12 +50,12 @@ var __env__ = {};
       var protocol = new RegExp('(^file\:|^http\:|^https\:)');
         var m = protocol.exec(path);
         if(m&&m.length>1){
-            return new java.net.URL(path).toString();
+            return new java.net.URL(path).toString()+'';
         }else if(base){
-          return new java.net.URL(new java.net.URL(base), path).toString();
+          return new java.net.URL(new java.net.URL(base), path).toString()+'';
         }else{
             //return an absolute url from a relative to the file system
-            return new java.io.File( path ).toURL().toString();
+            return new java.io.File( path ).toURL().toString()+'';
         }
     };
     
@@ -141,7 +141,7 @@ var __env__ = {};
             
             // Add headers to Java connection
             for (var header in xhr.headers){
-                connection.addRequestProperty(header, xhr.headers[header]);
+                connection.addRequestProperty(header+'', xhr.headers[header]+'');
           }connection.connect();
             
             // Stick the response headers into responseHeaders
@@ -150,7 +150,7 @@ var __env__ = {};
                 var headerValue = connection.getHeaderField(i); 
                 if (!headerName && !headerValue) break; 
                 if (headerName)
-                    xhr.responseHeaders[headerName] = headerValue;
+                    xhr.responseHeaders[headerName+''] = headerValue+'';
             }
         }
         if(connection){
