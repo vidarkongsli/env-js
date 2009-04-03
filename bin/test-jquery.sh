@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Usage: test-jquery.sh [version]
-# Currently supported versions: 1.2.6 & 1.3.1
+# Currently supported versions: 1.3.2, 1.3.1, and 1.2.6
 #
 # This script will check out the jQuery development tree from Subversion if necessary,
 # massage the testing scripts as necessary, copy our latest version of env.js into place,
 # and then run the test scripts.
 
-if [ -n "$1" ]; then VERSION="$1"; else VERSION="1.2.6"; fi
+if [ -n "$1" ]; then VERSION="$1"; else VERSION="1.3.2"; fi
 JQUERY_DIR="test/vendor/jQuery/$VERSION"
 
 ant concat
