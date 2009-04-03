@@ -10,6 +10,8 @@
 if [ -n "$1" ]; then VERSION="$1"; else VERSION="1.2.6"; fi
 JQUERY_DIR="test/vendor/jQuery/$VERSION"
 
+ant concat
+
 if [ ! -d "$JQUERY_DIR" ]; then
   svn export http://jqueryjs.googlecode.com/svn/tags/$VERSION/ $JQUERY_DIR
 fi
