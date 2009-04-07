@@ -36,3 +36,19 @@ test("Entity replaced", function() {
     equals(XMLP._ELM_E, p.next(), "Closing body tag"); // _ELM_E </body>
     equals(XMLP._ELM_E, p.next(), "Closing html tag"); // _ELM_E </html>
 });
+
+test("Toggle entity replacement", function() {
+    expect(6);
+    var htmlstr = "<html><body>Hello, &quot;World&quot;!</body></html>";
+    var p = new XMLP(htmlstr);
+    p.replaceEntities = false;
+    equals(XMLP._ELM_B, p.next(), "Opening html tag"); // _ELM_B <html>
+    equals(XMLP._ELM_B, p.next(), "Opening body tag"); // _ELM_B <body>
+
+    equals(XMLP._TEXT, p.next(), "Parser emits text event");
+    var actual = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
+    equals("Hello, &quot;World&quot;!", actual, "Parser content set");
+
+    equals(XMLP._ELM_E, p.next(), "Closing body tag"); // _ELM_E </body>
+    equals(XMLP._ELM_E, p.next(), "Closing html tag"); // _ELM_E </html>
+});
