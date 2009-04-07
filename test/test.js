@@ -14,7 +14,7 @@ window.onload = function(){
   load(
     "test/unit/dom.js",
     "test/unit/window.js",
-
+    "test/unit/parser.js",
     //NOTE: keep this test last because Prototype pollutes
     //the namespace and several DOM objects
     "test/unit/prototypecompat.js"
