@@ -2481,7 +2481,7 @@ var XMLP = function(strXML) {
     this.m_iState = XMLP._STATE_PROLOG;
     this.m_stack = new Stack();
     this._clearAttributes();
-
+    this.replaceEntities = true;
 };
 
 
@@ -2535,15 +2535,15 @@ XMLP._errs[XMLP.ERR_ELM_NESTING    = 17] = "Element: must be nested correctly";
 
 XMLP.prototype._addAttribute = function(name, value) {
     this.m_atts[this.m_atts.length] = new Array(name, value);
-}  
+}
 
 
 XMLP.prototype._checkStructure = function(iEvent) {
-  
-	if(XMLP._STATE_PROLOG == this.m_iState) {
-		if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
+
+        if(XMLP._STATE_PROLOG == this.m_iState) {
+                if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
             if(SAXStrings.indexOfNonWhitespace(this.getContent(), this.getContentBegin(), this.getContentEnd()) != -1) {
-				return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+                                return this._setErr(XMLP.ERR_DOC_STRUCTURE);
             }
         }
 
@@ -2570,25 +2570,25 @@ XMLP.prototype._checkStructure = function(iEvent) {
         }
     }
     if(XMLP._STATE_MISC == this.m_iState) {
-		if((XMLP._ELM_B == iEvent) || (XMLP._ELM_E == iEvent) || (XMLP._ELM_EMP == iEvent) || (XMLP.EVT_DTD == iEvent)) {
-			return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+                if((XMLP._ELM_B == iEvent) || (XMLP._ELM_E == iEvent) || (XMLP._ELM_EMP == iEvent) || (XMLP.EVT_DTD == iEvent)) {
+                        return this._setErr(XMLP.ERR_DOC_STRUCTURE);
         }
 
         if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
-			if(SAXStrings.indexOfNonWhitespace(this.getContent(), this.getContentBegin(), this.getContentEnd()) != -1) {
-				return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+                        if(SAXStrings.indexOfNonWhitespace(this.getContent(), this.getContentBegin(), this.getContentEnd()) != -1) {
+                                return this._setErr(XMLP.ERR_DOC_STRUCTURE);
             }
         }
     }
 
     return iEvent;
 
-}  
+}
 
 
 XMLP.prototype._clearAttributes = function() {
     this.m_atts = new Array();
-}  
+}
 
 
 XMLP.prototype._findAttributeIndex = function(name) {
@@ -2599,100 +2599,100 @@ XMLP.prototype._findAttributeIndex = function(name) {
     }
     return -1;
 
-}  
+}
 
 
 XMLP.prototype.getAttributeCount = function() {
 
     return this.m_atts ? this.m_atts.length : 0;
 
-}  
+}
 
 
 XMLP.prototype.getAttributeName = function(index) {
 
     return ((index < 0) || (index >= this.m_atts.length)) ? null : this.m_atts[index][XMLP._ATT_NAME];
 
-}  
+}
 
 
 XMLP.prototype.getAttributeValue = function(index) {
 
     return ((index < 0) || (index >= this.m_atts.length)) ? null : __unescapeXML__(this.m_atts[index][XMLP._ATT_VAL]);
 
-} 
+}
 
 
 XMLP.prototype.getAttributeValueByName = function(name) {
 
     return this.getAttributeValue(this._findAttributeIndex(name));
 
-}  
+}
 
 
 XMLP.prototype.getColumnNumber = function() {
 
     return SAXStrings.getColumnNumber(this.m_xml, this.m_iP);
 
-}  
+}
 
 
 XMLP.prototype.getContent = function() {
 
     return (this.m_cSrc == XMLP._CONT_XML) ? this.m_xml : this.m_cAlt;
 
-}  
+}
 
 
 XMLP.prototype.getContentBegin = function() {
 
     return this.m_cB;
 
-}  
+}
 
 
 XMLP.prototype.getContentEnd = function() {
 
     return this.m_cE;
 
-}  
+}
 
 
 XMLP.prototype.getLineNumber = function() {
 
     return SAXStrings.getLineNumber(this.m_xml, this.m_iP);
 
-}  
+}
 
 
 XMLP.prototype.getName = function() {
 
     return this.m_name;
 
-}  
+}
 
 
 XMLP.prototype.next = function() {
 
     return this._checkStructure(this._parse());
 
-} 
+}
 
 XMLP.prototype.appendFragment = function(xmlfragment) {
 
-	var start = this.m_xml.slice(0,this.m_iP);
-	var end = this.m_xml.slice(this.m_iP);
-	this.m_xml = start+xmlfragment+end;
+        var start = this.m_xml.slice(0,this.m_iP);
+        var end = this.m_xml.slice(this.m_iP);
+        this.m_xml = start+xmlfragment+end;
 
-} 
+}
 
 
 XMLP.prototype._parse = function() {
 
-	if(this.m_iP == this.m_xml.length) {
+        if(this.m_iP == this.m_xml.length) {
         return XMLP._NONE;
     }
-    
+
     if(this.m_iP == this.m_xml.indexOf("<", this.m_iP)){
         if(this.m_xml.charAt(this.m_iP+1) == "?") {
             return this._parsePI(this.m_iP + 2);
@@ -2718,18 +2718,18 @@ XMLP.prototype._parse = function() {
     else{
         return this._parseText(this.m_iP);
     }
-	
 
-} 
+
+}
 
 
 XMLP.prototype._parseAttribute = function(iB, iE) {
     var iNB, iNE, iEq, iVB, iVE;
     var cQuote, strN, strV;
 
-	this.m_cAlt = ""; //resets the value so we don't use an old one by accident (see testAttribute7 in the test suite)
-    
-	iNB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
+        this.m_cAlt = ""; //resets the value so we don't use an old one by accident (see testAttribute7 in the test suite)
+
+        iNB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
     if((iNB == -1) ||(iNB >= iE)) {
         return iNB;
     }
@@ -2758,7 +2758,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     strN = this.m_xml.substring(iNB, iNE + 1);
     strV = this.m_xml.substring(iVB + 1, iVE);
-    
+
     if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ATT_LT_NAME);
     }
@@ -2769,7 +2769,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     strV = SAXStrings.replace(strV, null, null, "\n", " ");
     strV = SAXStrings.replace(strV, null, null, "\t", " ");
-	iRet = this._replaceEntities(strV);
+        iRet = this._replaceEntities(strV);
     if(iRet == XMLP._ERROR) {
         return iRet;
     }
@@ -2786,7 +2786,7 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
 
     return XMLP._ATT;
 
-}  
+}
 
 
 XMLP.prototype._parseCDATA = function(iB) {
@@ -2801,7 +2801,7 @@ XMLP.prototype._parseCDATA = function(iB) {
 
     return XMLP._CDATA;
 
-}  
+}
 
 
 XMLP.prototype._parseComment = function(iB) {
@@ -2816,7 +2816,7 @@ XMLP.prototype._parseComment = function(iB) {
 
     return XMLP._COMMENT;
 
-}  
+}
 
 
 XMLP.prototype._parseDTD = function(iB) {
@@ -2857,7 +2857,7 @@ XMLP.prototype._parseDTD = function(iB) {
 
     return XMLP._DTD;
 
-}  
+}
 
 
 XMLP.prototype._parseElement = function(iB) {
@@ -2894,9 +2894,9 @@ XMLP.prototype._parseElement = function(iB) {
             return this._setErr(XMLP.ERR_ELM_NAME);
         }
     }*/
-    // end hack -- original code below 
+    // end hack -- original code below
 
-    /* 
+    /*
     if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB)
         return this._setErr(XMLP.ERR_ELM_NAME);
     */
@@ -2921,7 +2921,7 @@ XMLP.prototype._parseElement = function(iB) {
     }
 
     strN = this.m_xml.substring(iB, iNE);
-    
+
     /*if(strN.indexOf("<") != -1) {
         return this._setErr(XMLP.ERR_ELM_LT_NAME);
     }*/
@@ -2931,7 +2931,7 @@ XMLP.prototype._parseElement = function(iB) {
 
     return iType;
 
-}  
+}
 
 
 XMLP.prototype._parseEntity = function(iB) {
@@ -2944,7 +2944,7 @@ XMLP.prototype._parseEntity = function(iB) {
 
     return this._replaceEntity(this.m_xml, iB, iE);
 
-} 
+}
 
 
 XMLP.prototype._parsePI = function(iB) {
@@ -2982,7 +2982,7 @@ XMLP.prototype._parsePI = function(iB) {
 
     return XMLP._PI;
 
-}  
+}
 
 
 XMLP.prototype._parseText = function(iB) {
@@ -2993,9 +2993,11 @@ XMLP.prototype._parseText = function(iB) {
         iE = this.m_xml.length;
     }
 
-    iEE = this.m_xml.indexOf("&", iB);
-    if((iEE != -1) && (iEE <= iE)) {
-        iE = iEE;
+    if(this.replaceEntities) {
+        iEE = this.m_xml.indexOf("&", iB);
+        if((iEE != -1) && (iEE <= iE)) {
+            iE = iEE;
+        }
     }
 
     this._setContent(XMLP._CONT_XML, iB, iE);
@@ -3004,7 +3006,7 @@ XMLP.prototype._parseText = function(iB) {
 
     return XMLP._TEXT;
 
-} 
+}
 
 
 XMLP.prototype._replaceEntities = function(strD, iB, iE) {
@@ -3045,7 +3047,7 @@ XMLP.prototype._replaceEntities = function(strD, iB, iE) {
 
     return XMLP._ENTITY;
 
-}  
+}
 
 
 XMLP.prototype._replaceEntity = function(strD, iB, iE) {
@@ -3070,7 +3072,7 @@ XMLP.prototype._replaceEntity = function(strD, iB, iE) {
     this._setContent(XMLP._CONT_ALT, strEnt);
 
     return XMLP._ENTITY;
-}  
+}
 
 
 XMLP.prototype._setContent = function(iSrc) {
@@ -3087,7 +3089,7 @@ XMLP.prototype._setContent = function(iSrc) {
     }
     this.m_cSrc = iSrc;
 
-}  
+}
 
 
 XMLP.prototype._setErr = function(iErr) {
@@ -3100,7 +3102,7 @@ XMLP.prototype._setErr = function(iErr) {
 
     return XMLP._ERROR;
 
-}  
+}
 
 
 /**
@@ -3155,28 +3157,28 @@ SAXDriver.prototype.parse = function(strD) {
     this.m_xml = null;
     this.m_iP = 0;
 
-}  
+}
 
 
 SAXDriver.prototype.setDocumentHandler = function(hnd) {
 
     this.m_hndDoc = hnd;
 
-}   
+}
 
 
 SAXDriver.prototype.setErrorHandler = function(hnd) {
 
     this.m_hndErr = hnd;
 
-}  
+}
 
 
 SAXDriver.prototype.setLexicalHandler = function(hnd) {
 
     this.m_hndLex = hnd;
 
-}  
+}
 
 
     /**
@@ -3208,14 +3210,14 @@ SAXDriver.prototype.getPublicId = function() {
 
     return null;
 
-}  
+}
 
 
 SAXDriver.prototype.getSystemId = function() {
 
     return null;
 
-}  
+}
 
 
     /***
@@ -3226,28 +3228,28 @@ SAXDriver.prototype.getLength = function() {
 
     return this.m_parser.getAttributeCount();
 
-}  
+}
 
 
 SAXDriver.prototype.getName = function(index) {
 
     return this.m_parser.getAttributeName(index);
 
-} 
+}
 
 
 SAXDriver.prototype.getValue = function(index) {
 
     return this.m_parser.getAttributeValue(index);
 
-}  
+}
 
 
 SAXDriver.prototype.getValueByName = function(name) {
 
     return this.m_parser.getAttributeValueByName(name);
 
-} 
+}
 
 
     /***
@@ -3411,7 +3413,7 @@ _SAXStrings.prototype.indexOfNonWhitespace = function(strD, iB, iE) {
 
     //var i = strD.substring(iB, iE).search(_SAXStrings.NONWHITESPACE);
     //return i < 0 ? i : iB + i;
-    
+
     while( strD.charCodeAt(iB++) < 33 );
     return (iB > iE)?-1:iB-1;
     /*for(var i = iB; i < iE; i++){
@@ -3434,7 +3436,7 @@ _SAXStrings.prototype.indexOfWhitespace = function(strD, iB, iE) {
 
     while( strD.charCodeAt(iB++) >= 33 );
     return (iB > iE)?-1:iB-1;
-    
+
     /*for(var i = iB; i < iE; i++) {
         if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) != -1) {
             return i;
@@ -3460,7 +3462,7 @@ _SAXStrings.prototype.lastIndexOfNonWhitespace = function(strD, iB, iE) {
 
     while( (iE >= iB) && strD.charCodeAt(--iE) < 33 );
     return (iE < iB)?-1:iE;
-    
+
     /*for(var i = iE - 1; i >= iB; i--){
         if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1){
             return i;
@@ -3493,7 +3495,7 @@ Stack: A simple stack class, used for verifying document structure.
 
 var Stack = function() {
     this.m_arr = new Array();
-}; 
+};
 __extend__(Stack.prototype, {
     clear : function() {
         this.m_arr = new Array();
@@ -3521,7 +3523,7 @@ __extend__(Stack.prototype, {
     push : function(o) {
         this.m_arr[this.m_arr.length] = o;
     }
-});    
+});
 
 
 /**
@@ -3556,7 +3558,7 @@ function __escapeXML__(str) {
 };
 
 /**
- * function __unescapeXML__ 
+ * function __unescapeXML__
  * author: David Joham djoham@yahoo.com
  * @param  str : string - The string to be unescaped
  * @return : string - The unescaped string
@@ -3596,7 +3598,7 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 __extend__(DOMImplementation.prototype,{
-    // @param  feature : string - The package name of the feature to test. 
+    // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
     // @param  version : string - This is the version number of the package
     //       name to test. In Level 1, this is the string "1.0".*
@@ -3622,83 +3624,83 @@ __extend__(DOMImplementation.prototype,{
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
       var msg = "";
-    
+
       switch (code) {
         case DOMException.INDEX_SIZE_ERR :                // 1
            msg = "INDEX_SIZE_ERR: Index out of bounds";
            break;
-    
+
         case DOMException.DOMSTRING_SIZE_ERR :            // 2
            msg = "DOMSTRING_SIZE_ERR: The resulting string is too long to fit in a DOMString";
            break;
-    
+
         case DOMException.HIERARCHY_REQUEST_ERR :         // 3
            msg = "HIERARCHY_REQUEST_ERR: The Node can not be inserted at this location";
            break;
-    
+
         case DOMException.WRONG_DOCUMENT_ERR :            // 4
            msg = "WRONG_DOCUMENT_ERR: The source and the destination Documents are not the same";
            break;
-    
+
         case DOMException.INVALID_CHARACTER_ERR :         // 5
            msg = "INVALID_CHARACTER_ERR: The string contains an invalid character";
            break;
-    
+
         case DOMException.NO_DATA_ALLOWED_ERR :           // 6
            msg = "NO_DATA_ALLOWED_ERR: This Node / NodeList does not support data";
            break;
-    
+
         case DOMException.NO_MODIFICATION_ALLOWED_ERR :   // 7
            msg = "NO_MODIFICATION_ALLOWED_ERR: This object cannot be modified";
            break;
-    
+
         case DOMException.NOT_FOUND_ERR :                 // 8
            msg = "NOT_FOUND_ERR: The item cannot be found";
            break;
-    
+
         case DOMException.NOT_SUPPORTED_ERR :             // 9
            msg = "NOT_SUPPORTED_ERR: This implementation does not support function";
            break;
-    
+
         case DOMException.INUSE_ATTRIBUTE_ERR :           // 10
            msg = "INUSE_ATTRIBUTE_ERR: The Attribute has already been assigned to another Element";
            break;
-    
+
         // Introduced in DOM Level 2:
         case DOMException.INVALID_STATE_ERR :             // 11
            msg = "INVALID_STATE_ERR: The object is no longer usable";
            break;
-    
+
         case DOMException.SYNTAX_ERR :                    // 12
            msg = "SYNTAX_ERR: Syntax error";
            break;
-    
+
         case DOMException.INVALID_MODIFICATION_ERR :      // 13
            msg = "INVALID_MODIFICATION_ERR: Cannot change the type of the object";
            break;
-    
+
         case DOMException.NAMESPACE_ERR :                 // 14
            msg = "NAMESPACE_ERR: The namespace declaration is incorrect";
            break;
-    
+
         case DOMException.INVALID_ACCESS_ERR :            // 15
            msg = "INVALID_ACCESS_ERR: The object does not support this function";
            break;
-    
+
         default :
            msg = "UNKNOWN: Unknown Exception Code ("+ code +")";
       }
-    
+
       return msg;
     }
 });
-  
+
 
 /**
-* Defined 'globally' to this scope.  Remember everything is wrapped in a closure so this doesnt show up 
+* Defined 'globally' to this scope.  Remember everything is wrapped in a closure so this doesnt show up
 * in the outer most global scope.
 */
-  
+
 /**
  *  process SAX events
  *
@@ -3713,12 +3715,12 @@ __extend__(DOMImplementation.prototype,{
 function __parseLoop__(impl, doc, p) {
     var iEvt, iNode, iAttr, strName;
     iNodeParent = doc;
-    
+
     var el_close_count = 0;
-    
+
     var entitiesList = new Array();
     var textNodesList = new Array();
-    
+
     // if namespaceAware, add default namespace
     if (impl.namespaceAware) {
         var iNS = doc.createNamespace(""); // add the default-default namespace
@@ -3734,6 +3736,8 @@ function __parseLoop__(impl, doc, p) {
     if (iEvt == XMLP._ELM_B) {                      // Begin-Element Event
       var pName = p.getName();                      // get the Element name
       pName = trim(pName, true, true);              // strip spaces from Element name
+      if(pName.toLowerCase() == 'script')
+        p.replaceEntities = false;
 
       if (!impl.namespaceAware) {
         iNode = doc.createElement(p.getName());     // create the Element
@@ -3821,10 +3825,11 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
       //handle script tag
       if(iNodeParent.nodeName.toLowerCase() == 'script'){
+         p.replaceEntities = true;
          $policy.loadScript(iNodeParent, p);
       }
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-      
+
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -3915,13 +3920,13 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
       // get Text content
       var pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
-      
+
       if (!impl.preserveWhiteSpace ) {
         if (trim(pContent, true, true) == "") {
             pContent = ""; //this will cause us not to create the text node below
         }
       }
-      
+
       if (pContent.length > 0) {                    // ignore empty TextNodes
         var textNode = doc.createTextNode(pContent);
         iNodeParent.appendChild(textNode); // attach TextNode to parentNode
@@ -3938,7 +3943,7 @@ function __parseLoop__(impl, doc, p) {
         }
         else {
             //I can't properly decide how to handle preserve whitespace
-            //until the siblings of the text node are built due to 
+            //until the siblings of the text node are built due to
             //the entitiy handling described above. I don't know that this
             //will be all of the text node or not, so trimming is not appropriate
             //at this time. Keep a list of all the text nodes for now
@@ -3980,8 +3985,8 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._DTD) {                    // ignore DTD events
     }
     else if(iEvt == XMLP._ERROR) {
-        $error("Fatal Error: " + p.getContent() + 
-                "\nLine: " + p.getLineNumber() + 
+        $error("Fatal Error: " + p.getContent() +
+                "\nLine: " + p.getLineNumber() +
                 "\nColumn: " + p.getColumnNumber() + "\n");
         throw(new DOMException(DOMException.SYNTAX_ERR));
     }
@@ -4005,7 +4010,7 @@ function __parseLoop__(impl, doc, p) {
       var parentNode = entity.parentNode;
       if (parentNode) {
           parentNode.normalize();
-          
+
           //now do whitespace (if necessary)
           //it was not done for text nodes that have entities
           if(!impl.preserveWhiteSpace) {
@@ -4021,7 +4026,7 @@ function __parseLoop__(impl, doc, p) {
           }
       }
   }
-  
+
   //do the preserve whitespace processing on the rest of the text nodes
   //It's possible (due to the processing above) that the node will have been
   //removed from the tree. Only do whitespace checking if parentNode is not null.
@@ -4036,7 +4041,7 @@ function __parseLoop__(impl, doc, p) {
             node.data = nodeData;
         }
     }
-  
+
   }
 };
 

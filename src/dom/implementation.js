@@ -18,7 +18,7 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 __extend__(DOMImplementation.prototype,{
-    // @param  feature : string - The package name of the feature to test. 
+    // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
     // @param  version : string - This is the version number of the package
     //       name to test. In Level 1, this is the string "1.0".*
@@ -44,83 +44,83 @@ __extend__(DOMImplementation.prototype,{
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
       var msg = "";
-    
+
       switch (code) {
         case DOMException.INDEX_SIZE_ERR :                // 1
            msg = "INDEX_SIZE_ERR: Index out of bounds";
            break;
-    
+
         case DOMException.DOMSTRING_SIZE_ERR :            // 2
            msg = "DOMSTRING_SIZE_ERR: The resulting string is too long to fit in a DOMString";
            break;
-    
+
         case DOMException.HIERARCHY_REQUEST_ERR :         // 3
            msg = "HIERARCHY_REQUEST_ERR: The Node can not be inserted at this location";
            break;
-    
+
         case DOMException.WRONG_DOCUMENT_ERR :            // 4
            msg = "WRONG_DOCUMENT_ERR: The source and the destination Documents are not the same";
            break;
-    
+
         case DOMException.INVALID_CHARACTER_ERR :         // 5
            msg = "INVALID_CHARACTER_ERR: The string contains an invalid character";
            break;
-    
+
         case DOMException.NO_DATA_ALLOWED_ERR :           // 6
            msg = "NO_DATA_ALLOWED_ERR: This Node / NodeList does not support data";
            break;
-    
+
         case DOMException.NO_MODIFICATION_ALLOWED_ERR :   // 7
            msg = "NO_MODIFICATION_ALLOWED_ERR: This object cannot be modified";
            break;
-    
+
         case DOMException.NOT_FOUND_ERR :                 // 8
            msg = "NOT_FOUND_ERR: The item cannot be found";
            break;
-    
+
         case DOMException.NOT_SUPPORTED_ERR :             // 9
            msg = "NOT_SUPPORTED_ERR: This implementation does not support function";
            break;
-    
+
         case DOMException.INUSE_ATTRIBUTE_ERR :           // 10
            msg = "INUSE_ATTRIBUTE_ERR: The Attribute has already been assigned to another Element";
            break;
-    
+
         // Introduced in DOM Level 2:
         case DOMException.INVALID_STATE_ERR :             // 11
            msg = "INVALID_STATE_ERR: The object is no longer usable";
            break;
-    
+
         case DOMException.SYNTAX_ERR :                    // 12
            msg = "SYNTAX_ERR: Syntax error";
            break;
-    
+
         case DOMException.INVALID_MODIFICATION_ERR :      // 13
            msg = "INVALID_MODIFICATION_ERR: Cannot change the type of the object";
            break;
-    
+
         case DOMException.NAMESPACE_ERR :                 // 14
            msg = "NAMESPACE_ERR: The namespace declaration is incorrect";
            break;
-    
+
         case DOMException.INVALID_ACCESS_ERR :            // 15
            msg = "INVALID_ACCESS_ERR: The object does not support this function";
            break;
-    
+
         default :
            msg = "UNKNOWN: Unknown Exception Code ("+ code +")";
       }
-    
+
       return msg;
     }
 });
-  
+
 
 /**
-* Defined 'globally' to this scope.  Remember everything is wrapped in a closure so this doesnt show up 
+* Defined 'globally' to this scope.  Remember everything is wrapped in a closure so this doesnt show up
 * in the outer most global scope.
 */
-  
+
 /**
  *  process SAX events
  *
@@ -135,12 +135,12 @@ __extend__(DOMImplementation.prototype,{
 function __parseLoop__(impl, doc, p) {
     var iEvt, iNode, iAttr, strName;
     iNodeParent = doc;
-    
+
     var el_close_count = 0;
-    
+
     var entitiesList = new Array();
     var textNodesList = new Array();
-    
+
     // if namespaceAware, add default namespace
     if (impl.namespaceAware) {
         var iNS = doc.createNamespace(""); // add the default-default namespace
@@ -156,6 +156,8 @@ function __parseLoop__(impl, doc, p) {
     if (iEvt == XMLP._ELM_B) {                      // Begin-Element Event
       var pName = p.getName();                      // get the Element name
       pName = trim(pName, true, true);              // strip spaces from Element name
+      if(pName.toLowerCase() == 'script')
+        p.replaceEntities = false;
 
       if (!impl.namespaceAware) {
         iNode = doc.createElement(p.getName());     // create the Element
@@ -243,10 +245,11 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
       //handle script tag
       if(iNodeParent.nodeName.toLowerCase() == 'script'){
+         p.replaceEntities = true;
          $policy.loadScript(iNodeParent, p);
       }
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-      
+
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -337,13 +340,13 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
       // get Text content
       var pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
-      
+
       if (!impl.preserveWhiteSpace ) {
         if (trim(pContent, true, true) == "") {
             pContent = ""; //this will cause us not to create the text node below
         }
       }
-      
+
       if (pContent.length > 0) {                    // ignore empty TextNodes
         var textNode = doc.createTextNode(pContent);
         iNodeParent.appendChild(textNode); // attach TextNode to parentNode
@@ -360,7 +363,7 @@ function __parseLoop__(impl, doc, p) {
         }
         else {
             //I can't properly decide how to handle preserve whitespace
-            //until the siblings of the text node are built due to 
+            //until the siblings of the text node are built due to
             //the entitiy handling described above. I don't know that this
             //will be all of the text node or not, so trimming is not appropriate
             //at this time. Keep a list of all the text nodes for now
@@ -402,8 +405,8 @@ function __parseLoop__(impl, doc, p) {
     else if(iEvt == XMLP._DTD) {                    // ignore DTD events
     }
     else if(iEvt == XMLP._ERROR) {
-        $error("Fatal Error: " + p.getContent() + 
-                "\nLine: " + p.getLineNumber() + 
+        $error("Fatal Error: " + p.getContent() +
+                "\nLine: " + p.getLineNumber() +
                 "\nColumn: " + p.getColumnNumber() + "\n");
         throw(new DOMException(DOMException.SYNTAX_ERR));
     }
@@ -427,7 +430,7 @@ function __parseLoop__(impl, doc, p) {
       var parentNode = entity.parentNode;
       if (parentNode) {
           parentNode.normalize();
-          
+
           //now do whitespace (if necessary)
           //it was not done for text nodes that have entities
           if(!impl.preserveWhiteSpace) {
@@ -443,7 +446,7 @@ function __parseLoop__(impl, doc, p) {
           }
       }
   }
-  
+
   //do the preserve whitespace processing on the rest of the text nodes
   //It's possible (due to the processing above) that the node will have been
   //removed from the tree. Only do whitespace checking if parentNode is not null.
@@ -458,7 +461,7 @@ function __parseLoop__(impl, doc, p) {
             node.data = nodeData;
         }
     }
-  
+
   }
 };
 
