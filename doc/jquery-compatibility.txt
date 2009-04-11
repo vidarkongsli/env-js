@@ -22,20 +22,22 @@
 (after changing testrunner not to blow up on JavaScript exceptions)
 
 jQuery 1.3.2:
-* 843 Passed, 223 Failed, 51 Errors, 1117 total assertions from command line
+* 843 Passed, 223 Failed, 51 Errors
+* 1117 total assertions when ran from command line
 * 1358 total assertions when ran in Firefox
 * so 241 assertions didn't run due to exceptions [an improvement of 708!]
 
 jQuery 1.3.1:
-* 754 Passed, 221 Failed, 51 Errors, 1026 total tests from command line
-* 1302 total tests when ran in Firefox
+* 754 Passed, 221 Failed, 51 Errors
+* 1026 total assertions when ran from command line
+* 1302 total assertions when ran in Firefox
 * so 276 assertions didn't run due to exceptions [an improvement of 620!s]
 
 jQuery 1.2.6:
 * 763 Passed, 142 Failed, 0 Errors
 * 911 total tests from command line
 * 1124 total tests when ran in Firefox
-* so 213 tests didn't run due to exceptions
+* so 213 tests didn't run due to exceptions [same as before]
 
 
 == 2009-04-02: larry.karnowski@gmail.com ==
