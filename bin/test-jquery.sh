@@ -20,5 +20,8 @@ cp dist/env.rhino.js $JQUERY_DIR/build/runtest/env.js
 cp rhino/js.jar $JQUERY_DIR/build/js.jar
 cp bin/jquery-$VERSION-test.js $JQUERY_DIR/build/runtest/test.js
 
+cp test/testrunner.js $JQUERY_DIR/build/runtest/testrunner.js
+perl -pi~ -e "s/^JAR(.*)\.jar$/JAR\1.jar -w -debug/" $JQUERY_DIR/Makefile
+
 cd $JQUERY_DIR
 make runtest
