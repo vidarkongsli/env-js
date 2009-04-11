@@ -3,10 +3,15 @@ function test(name, fn){
 	numTests = 0;
 	reset();
 	
-	fn();
-	
-	if ( expected != -1 && expected != numTests )
-		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
+	try {
+		fn();
+
+		if ( expected != -1 && expected != numTests )
+			log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
+	}
+	catch(e) {
+		logError(e);
+	}
 }
 
 var orig = document.getElementById('main').innerHTML;
@@ -141,13 +146,14 @@ function equals(expected, actual, message) {
 	log( result, result ? message + ": " + expected : message + " expected: " + expected + " actual: " + actual );
 }
 
-var numTests = 0, total = 0, pass = 0, fail = 0;
+var numTests = 0, total = 0, pass = 0, fail = 0, errors = 0;
 
 function log(state, msg){
-	print( (state ? "PASS" : "FAIL") + " (" + (++total) + ") " +
-		(currentModule ? "[" + currentModule + "] " : "") + msg );
-		
 	numTests++;
+	total++;
+	
+	print( (state ? "PASS" : "FAIL") + " (" + total + ") " +
+		(currentModule ? "[" + currentModule + "] " : "") + msg );
 
 	if ( state )
 		pass++;
@@ -155,8 +161,33 @@ function log(state, msg){
 		fail++;
 }
 
+function logError(e) {
+	numTests++;
+	total++;
+	
+	print("ERROR (" + total + ") " + (currentModule ? "[" + currentModule + "] " : "") + e);
+	
+	if(e.rhinoException != null) {
+		print(e.rhinoException.getScriptStackTrace());
+	}
+	else if(e.javaException != null) {
+		e.javaException.printStackTrace();
+	}
+	
+	errors++;
+}
+
 function results(){
-	print( pass + " Passed, " + fail + " Failed" );
+	print( pass + " Passed, " + fail + " Failed, " + errors + " Errors, " + total + " Total Tests" );
+	
+	if(fail + errors > 0) {
+		//Error exit code
+		java.lang.System.exit(1);
+	}
+	else {
+		//Successful exit code
+		java.lang.System.exit(0);
+	}
 }
 
 function start(){}
