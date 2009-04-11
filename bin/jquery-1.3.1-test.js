@@ -1,9 +1,6 @@
-//TODO: 
-// 1) clobber the makefile to give better java exceptions ("-w -debug" I think)
-// 2) clobber the fake qunit runner to handle exceptions
-
 // Init
 load("build/runtest/env.js");
+
 var isLocal;
 window.onload = function(){
     isLocal  = !!(window.location.protocol == 'file:');

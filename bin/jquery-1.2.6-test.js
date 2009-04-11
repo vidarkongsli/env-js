@@ -4,8 +4,10 @@ load("build/runtest/env.js");
 var isLocal;
 window.onload = function(){
     isLocal  = !!(window.location.protocol == 'file:');
+    
     // Load the test runner
-    load("dist/jquery.js","build/runtest/testrunner.js");
+    load("dist/jquery.js",
+        "build/runtest/testrunner.js");
     
     // Load the tests
     load(

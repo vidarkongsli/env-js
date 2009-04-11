@@ -1,5 +1,6 @@
 // Init
 load("build/runtest/env.js");
+
 var isLocal;
 window.onload = function(){
     isLocal  = !!(window.location.protocol == 'file:');
