@@ -1,10 +1,3 @@
-var jQuery = this.jQuery || "jQuery", // For testing .noConflict()
-	$ = this.$ || "$",
-	originaljQuery = jQuery,
-	original$ = $;
-
-var isLocal = true;
-
 function test(name, fn){
 	expected = -1;
 	numTests = 0;
@@ -15,28 +8,14 @@ function test(name, fn){
 	if ( expected != -1 && expected != numTests )
 		log( false, "Wrong number of tests run. " + numTests + " ran, expected " + expected );
 }
-var orig = document.getElementById('main').cloneNode(true);
-	print( "\n\n\n \t\tORINGINAL DOCUMENT MAIN \n\n\n" + orig.xml);
+
+var orig = document.getElementById('main').innerHTML;
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
-    
-	var main = document.getElementById('main');
-	
-	while(main.firstChild != null){
-	    //$log('innerHTML - removing child '+ this.firstChild.xml);
-	    main.removeChild( main.firstChild );
-    }
-    
-    var parent = main.ownerDocument.importNode(orig, true);
-            
-	while(parent.firstChild != null){
-	    //$log('innerHTML - appending child '+ parent.firstChild.xml);
-	    main.appendChild( parent.removeChild( parent.firstChild ) );
-    }
-    parent = null;
+	document.getElementById('main').innerHTML = orig;
 }
 
 var currentModule = "";
@@ -103,17 +82,20 @@ function isObj(a, b, msg) {
 
 function serialArray( a ) {
 	var r = [];
-	if ( a && a.length ){
-    for ( var i = 0; i < a.length; i++ ) {
-      var str = a[i] ? a[i].nodeName : "";
-      if(str){
-        str = str.toLowerCase();
-        if ( a[i].id ){str += "#" + a[i].id;}
-      }else{ str = a[i]; }
-      r.push( str );
-    }
-  }
-	return "[ " + r.join(", ") + " ]";
+	
+	if ( a && a.length )
+        for ( var i = 0; i < a.length; i++ ) {
+            var str = a[i] ? a[i].nodeName : "";
+            if ( str ) {
+                str = str.toLowerCase();
+                if ( a[i].id )
+                    str += "#" + a[i].id;
+            } else
+                str = a[i];
+            r.push( str );
+        }
+
+	return "[ " + r.join(", ") + " ]"
 }
 
 /**
@@ -133,13 +115,13 @@ function q() {
  * @example t("Check for something", "//[a]", ["foo", "baar"]);
  * @result returns true if "//[a]" return two elements with the IDs 'foo' and 'baar'
  */
-// function t(a,b,c) {
-//  var f = jQuery(b);
-//  var s = "";
-//  for ( var i = 0; i < f.length; i++ )
-//    s += (s && ",") + '"' + f[i].id + '"';
-//  isSet(f, q.apply(q,c), a + " (" + b + ")");
-// }
+function t(a,b,c) {
+	var f = jQuery(b);
+	var s = "";
+	for ( var i = 0; i < f.length; i++ )
+		s += (s && ",") + '"' + f[i].id + '"';
+	isSet(f, q.apply(q,c), a + " (" + b + ")");
+}
 
 /**
  * Checks that the first two arguments are equal, with an optional message.
@@ -156,7 +138,7 @@ function q() {
 function equals(expected, actual, message) {
 	var result = expected == actual;
 	message = message || (result ? "okay" : "failed");
-	log( result, result ? message + ": " + expected : message + " actual: " + expected + " expected: " + actual );
+	log( result, result ? message + ": " + expected : message + " expected: " + expected + " actual: " + actual );
 }
 
 var numTests = 0, total = 0, pass = 0, fail = 0;
