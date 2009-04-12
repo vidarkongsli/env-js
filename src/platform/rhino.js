@@ -54,7 +54,7 @@ var __env__ = {};
         }else if(base){
           return new java.net.URL(new java.net.URL(base), path).toString()+'';
         }else{
-            //return an absolute url from a relative to the file system
+            //return an absolute url from a url relative to the window location
             return new java.io.File( path ).toURL().toString()+'';
         }
     };
