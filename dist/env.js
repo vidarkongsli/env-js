@@ -7006,7 +7006,7 @@ var CSSStyleSheet = function(options){
 */
 $debug("Initializing Window Location.");
 //the current location
-var $location = $env.location('./');
+var $location = '';
 
 $w.__defineSetter__("location", function(url){
     //$w.onunload();
