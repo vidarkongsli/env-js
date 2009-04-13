@@ -3422,7 +3422,7 @@ __extend__(DOMImplementation.prototype,{
  */
 function __parseLoop__(impl, doc, p) {
     var iEvt, iNode, iAttr, strName;
-    iNodeParent = doc;
+    var iNodeParent = doc;
 
     var el_close_count = 0;
 

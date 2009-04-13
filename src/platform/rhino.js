@@ -12,8 +12,8 @@ var __env__ = {};
     //to profile
     $env.profile = false;
     
-    $env.log = function(msg){
-         print("[ENV] ("+new Date().getTime()+") -> "+msg);
+    $env.log = function(msg, level){
+         print(level||'LOG' + ':\t['+ new Date()+"] {ENVJS} "+msg);
     };
     $env.debug  = function(){};
     $env.info   = function(){};
@@ -22,17 +22,17 @@ var __env__ = {};
     
     //uncomment these if you want to get some internal log statementes
     /*$env.debug  = function(msg){
-        $env.log("DEBUG: "+msg); 
+        $env.log(msg,"DEBUG"); 
     };*/
     $env.info   = function(msg){
-        $env.log("INFO: "+msg); 
+        $env.log(msg,"INFO"); 
     };
     $env.warn   = function(msg){
-        $env.log("WARNIING!: "+msg);    
+        $env.log(msg,"WARNIING");    
     };
     $env.error = function(msg, e){
-        $env.log("\n\n*** ERROR! ***: "+ msg+ " Line: "+ $env.lineSource(e));
-        $env.log(e||"");
+        $env.log(msg+ " Line: "+ $env.lineSource(e),'ERROR');
+        $env.log(e||"",'ERROR');
     };
     
     $env.info("Initializing Rhino Platform Env");
@@ -102,7 +102,7 @@ var __env__ = {};
     
     //Used to write to a local file
     $env.writeToTempFile = function(text, suffix){
-        print("writing text to temp url : " + suffix);
+        $env.debug("writing text to temp url : " + suffix);
         // Create temp file.
         var temp = java.io.File.createTempFile("envjs-tmp", suffix);
     
