@@ -13,7 +13,7 @@ var __env__ = {};
     $env.profile = false;
     
     $env.log = function(msg, level){
-         print(level||'LOG' + ':\t'+ new Date()+" {ENVJS} "+msg);
+         print(' '+ (level?level:'LOG') + ':\t['+ new Date()+"] {ENVJS} "+msg);
     };
     $env.debug  = function(){};
     $env.info   = function(){};
