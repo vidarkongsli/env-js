@@ -55,7 +55,12 @@ var __env__ = {};
           return new java.net.URL(new java.net.URL(base), path).toString()+'';
         }else{
             //return an absolute url from a url relative to the window location
-            return new java.io.File( path ).toURL().toString()+'';
+            if(window.location.href.length > 0){
+                base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                return base + '/' + path;
+            }else{
+                return new java.io.File(  path ).toURL().toString()+'';
+            }
         }
     };
     
