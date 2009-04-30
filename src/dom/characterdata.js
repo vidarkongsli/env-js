@@ -21,10 +21,10 @@ var DOMCharacterData = function(ownerDocument) {
 DOMCharacterData.prototype = new DOMNode;
 __extend__(DOMCharacterData.prototype,{
     get data(){
-        return String(this.nodeValue);
+        return this.nodeValue;
     },
     set data(data){
-        this.nodeValue = String(data);
+        this.nodeValue = data;
     },
     get length(){return this.nodeValue.length;},
     appendData: function(arg){

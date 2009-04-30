@@ -52,10 +52,9 @@ var DOMNode = function(ownerDocument) {
   this.previousSibling = null;                   // The node immediately preceding this node. If there is no such node, this is null.
   this.nextSibling     = null;                   // The node immediately following this node. If there is no such node, this is null.
 
-  this.attributes = new DOMNamedNodeMap(ownerDocument, this);   // A NamedNodeMap containing the attributes of this node (if it is an Element) or null otherwise.
   this.ownerDocument   = ownerDocument;          // The Document object associated with this node
+  this.attributes = new DOMNamedNodeMap(this.ownerDocument, this);
   this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
-
   this._readonly = false;
 };
 
@@ -406,8 +405,12 @@ __extend__(DOMNode.prototype, {
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
-        return __getElementsByTagNameRecursive__(this, tagname, 
-            new DOMNodeList(__ownerDocument__(this)));
+        // recurse childNodes
+        var nodelist = new DOMNodeList(__ownerDocument__(this));
+        for(var i = 0; i < this.childNodes.length; i++) {
+            nodeList = __getElementsByTagNameRecursive__(this.childNodes.item(i), tagname, nodelist);
+        }
+        return nodelist;
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
@@ -533,6 +536,7 @@ __extend__(DOMNode.prototype, {
  * @return : DOMNodeList
  */
 var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
+    
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
         if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 

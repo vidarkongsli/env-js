@@ -45,7 +45,7 @@ __extend__(DOMElement.prototype, {
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        var value = new String(value);
+        var value = value+'';
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
@@ -69,18 +69,11 @@ __extend__(DOMElement.prototype, {
             }
             
             if (__isIdDeclaration__(name)) {
-                this.id = value;  // cache ID for getElementById()
+            //    this.id = value;  // cache ID for getElementById()
             }
             
             // assign values to properties (and aliases)
             attr.value     = value;
-            
-            // update .specified
-            if (value.length > 0) {
-                attr.specified = true;
-            }else {
-                attr.specified = false;
-            }
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
@@ -136,7 +129,7 @@ __extend__(DOMElement.prototype, {
             attr = __ownerDocument__(this).createAttributeNS(namespaceURI, qualifiedName);
         }
         
-        var value = String(value);
+        var value = value+'';
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
@@ -165,13 +158,6 @@ __extend__(DOMElement.prototype, {
         attr.value     = value;
         attr.nodeValue = value;
         
-        // update .specified
-        if (value.length > 0) {
-            attr.specified = true;
-        }else {
-            attr.specified = false;
-        }
-        
         // delegate to DOMNamedNodeMap.setNamedItem
         this.attributes.setNamedItemNS(attr);
     },
@@ -186,7 +172,7 @@ __extend__(DOMElement.prototype, {
     setAttributeNodeNS : function(newAttr) {
         // if this Attribute is an ID
         if ((newAttr.prefix == "") &&  __isIdDeclaration__(newAttr.name)) {
-            this.id = String(newAttr.value);  // cache ID for getElementById()
+            this.id = newAttr.value+'';  // cache ID for getElementById()
         }
         
         // delegate to DOMNamedNodeMap.setNamedItemNS

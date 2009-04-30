@@ -45,7 +45,7 @@ Anchor.prototype = new Anchor;
 			return m&&m.length>1?m[1]:"";
 		},
 		set hostname(_hostname){
-			this.href = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
+			this.href = this.protocol + _hostname + ((this.port=="")?"":(":"+this.port)) +
 			 	 this.pathname + this.search + this.hash;
 		},
 		get pathname(){

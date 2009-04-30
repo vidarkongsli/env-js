@@ -53,6 +53,13 @@ __extend__(DOMNodeList.prototype, {
         
         return ret;
     },
+    toArray: function () {
+        var children = [];
+        for ( var i=0; i < this.length; i++) {
+                children.push (this[i]);
+        }
+        return children;
+    },
     toString: function(){
       return "[ "+(this.length > 0?Array.prototype.join.apply(this, [", "]):"Empty NodeList")+" ]";
     }
@@ -96,7 +103,7 @@ var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
         
         if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
             // append the children of DocumentFragment
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes));
+            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes.toArray()));
         }
         else {
             // append the newChild
@@ -122,7 +129,7 @@ var __replaceChild__ = function(nodelist, newChild, refChildIndex) {
     
         if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
             // get array containing children prior to refChild
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes));
+            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes.toArray()));
         }
         else {
             // simply replace node in array (links between Nodes are made at higher level)
@@ -165,11 +172,7 @@ var __removeChild__ = function(nodelist, refChildIndex) {
 var __appendChild__ = function(nodelist, newChild) {
     if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
         // append the children of DocumentFragment
-        //TODO : see #14 - http://envjs.lighthouseapp.com/projects/21590/tickets/14-nodelist-functionprototypeapply-must-take-an-array
-        //not sure why this could happen, .childNodes should always be an array
-        Array.prototype.push.apply(nodelist, 
-            (newChild.childNodes instanceof Array) ?
-                newChild.childNodes : [newChild.childNodes]);
+         Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);

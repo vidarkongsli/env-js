@@ -49,16 +49,16 @@ __extend__(HTMLInputElement.prototype, {
         this.setAttribute('alt', value);
     },
     get checked(){
-        return (this.getAttribute('checked')==='checked');
+        return (this.getAttribute('checked')=='checked');
     },
-    set checked(){
-        this.setAttribute('checked', 'checked');
+    set checked(value){
+        this.setAttribute('checked', (value ? 'checked' :''));
     },
     get disabled(){
-        return (this.getAttribute('disabled')==='disabled');
+        return (this.getAttribute('disabled')=='disabled');
     },
     set disabled(value){
-        this.setAttribute('disabled', 'disabled');
+        this.setAttribute('disabled', (value ? 'disabled' :''));
     },
     get maxLength(){
         return Number(this.getAttribute('maxlength')||'0');
@@ -73,10 +73,10 @@ __extend__(HTMLInputElement.prototype, {
         this.setAttribute('name', value);
     },
     get readOnly(){
-        return (this.getAttribute('readonly')==='readonly');
+        return (this.getAttribute('readonly')=='readonly');
     },
     set readOnly(value){
-        this.setAttribute('readonly', 'readonly');
+        this.setAttribute('readonly', (value ? 'readonly' :''));
     },
     get size(){
         return this.getAttribute('size');

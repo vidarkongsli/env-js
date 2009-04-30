@@ -12,8 +12,8 @@ var __env__ = {};
     //to profile
     $env.profile = false;
     
-    $env.log = function(msg){
-         print("[ENV] ("+new Date().getTime()+") -> "+msg);
+    $env.log = function(msg, level){
+         print(' '+ (level?level:'LOG') + ':\t['+ new Date()+"] {ENVJS} "+msg);
     };
     $env.debug  = function(){};
     $env.info   = function(){};
@@ -22,17 +22,17 @@ var __env__ = {};
     
     //uncomment these if you want to get some internal log statementes
     /*$env.debug  = function(msg){
-        $env.log("DEBUG: "+msg); 
+        $env.log(msg,"DEBUG"); 
     };*/
     $env.info   = function(msg){
-        $env.log("INFO: "+msg); 
+        $env.log(msg,"INFO"); 
     };
     $env.warn   = function(msg){
-        $env.log("WARNIING!: "+msg);    
+        $env.log(msg,"WARNIING");    
     };
     $env.error = function(msg, e){
-        $env.log("\n\n*** ERROR! ***: "+ msg+ " Line: "+ $env.lineSource(e));
-        $env.log(e||"");
+        $env.log(msg+ " Line: "+ $env.lineSource(e),'ERROR');
+        $env.log(e||"",'ERROR');
     };
     
     $env.info("Initializing Rhino Platform Env");
@@ -42,7 +42,7 @@ var __env__ = {};
     };
     
     $env.hashCode = function(obj){
-        return obj?obj.hashCode().toString():null;
+        return obj?obj.hashCode().toString()+'':null;
     };
     
     //For Java the window.location object is a java.net.URL
@@ -54,8 +54,13 @@ var __env__ = {};
         }else if(base){
           return new java.net.URL(new java.net.URL(base), path).toString()+'';
         }else{
-            //return an absolute url from a relative to the file system
-            return new java.io.File( path ).toURL().toString()+'';
+            //return an absolute url from a url relative to the window location
+            if(window.location.href.length > 0){
+                base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                return base + '/' + path;
+            }else{
+                return new java.io.File(  path ).toURL().toString()+'';
+            }
         }
     };
     
@@ -102,7 +107,7 @@ var __env__ = {};
     
     //Used to write to a local file
     $env.writeToTempFile = function(text, suffix){
-        print("writing text to temp url : " + suffix);
+        $env.debug("writing text to temp url : " + suffix);
         // Create temp file.
         var temp = java.io.File.createTempFile("envjs-tmp", suffix);
     
@@ -113,7 +118,7 @@ var __env__ = {};
         var out = new java.io.FileWriter(temp);
         out.write(text, 0, text.length);
         out.close();
-        return $env.location(temp.getAbsolutePath());
+        return temp.getAbsolutePath().toString()+'';
     };
     
     //Used to delete a local file
@@ -276,7 +281,7 @@ var __env__ = {};
     $env.loadInlineScript = function(script){
         $env.debug("loading inline script :" + script.text);
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
-        $env.debug("loading " + tmpFile);
+        $env.info("loading " + tmpFile);
         load(tmpFile);
     };
     
@@ -580,6 +585,13 @@ __extend__(DOMNodeList.prototype, {
         
         return ret;
     },
+    toArray: function () {
+        var children = [];
+        for ( var i=0; i < this.length; i++) {
+                children.push (this[i]);
+        }
+        return children;
+    },
     toString: function(){
       return "[ "+(this.length > 0?Array.prototype.join.apply(this, [", "]):"Empty NodeList")+" ]";
     }
@@ -623,7 +635,7 @@ var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
         
         if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
             // append the children of DocumentFragment
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes));
+            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes.toArray()));
         }
         else {
             // append the newChild
@@ -649,7 +661,7 @@ var __replaceChild__ = function(nodelist, newChild, refChildIndex) {
     
         if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
             // get array containing children prior to refChild
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes));
+            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes.toArray()));
         }
         else {
             // simply replace node in array (links between Nodes are made at higher level)
@@ -692,11 +704,7 @@ var __removeChild__ = function(nodelist, refChildIndex) {
 var __appendChild__ = function(nodelist, newChild) {
     if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
         // append the children of DocumentFragment
-        //TODO : see #14 - http://envjs.lighthouseapp.com/projects/21590/tickets/14-nodelist-functionprototypeapply-must-take-an-array
-        //not sure why this could happen, .childNodes should always be an array
-        Array.prototype.push.apply(nodelist, 
-            (newChild.childNodes instanceof Array) ?
-                newChild.childNodes : [newChild.childNodes]);
+         Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
@@ -786,10 +794,12 @@ __extend__(DOMNamedNodeMap.prototype, {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
+              this[arg.name] = arg;
             }
       } else {
             // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
+            this[arg.name] = arg;
       }
     
       arg.ownerElement = this.parentNode;            // update ownerElement
@@ -815,6 +825,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // get Node
           var oldNode = this[itemIndex];
+          //this[oldNode.name] = undefined;
         
           // throw Exception if Node is readonly
           if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {
@@ -1138,10 +1149,9 @@ var DOMNode = function(ownerDocument) {
   this.previousSibling = null;                   // The node immediately preceding this node. If there is no such node, this is null.
   this.nextSibling     = null;                   // The node immediately following this node. If there is no such node, this is null.
 
-  this.attributes = new DOMNamedNodeMap(ownerDocument, this);   // A NamedNodeMap containing the attributes of this node (if it is an Element) or null otherwise.
   this.ownerDocument   = ownerDocument;          // The Document object associated with this node
+  this.attributes = new DOMNamedNodeMap(this.ownerDocument, this);
   this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
-
   this._readonly = false;
 };
 
@@ -1492,8 +1502,12 @@ __extend__(DOMNode.prototype, {
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
-        return __getElementsByTagNameRecursive__(this, tagname, 
-            new DOMNodeList(__ownerDocument__(this)));
+        // recurse childNodes
+        var nodelist = new DOMNodeList(__ownerDocument__(this));
+        for(var i = 0; i < this.childNodes.length; i++) {
+            nodeList = __getElementsByTagNameRecursive__(this.childNodes.item(i), tagname, nodelist);
+        }
+        return nodelist;
     },
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
@@ -1619,6 +1633,7 @@ __extend__(DOMNode.prototype, {
  * @return : DOMNodeList
  */
 var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
+    
     if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
     
         if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
@@ -1703,7 +1718,7 @@ __extend__(DOMNamespace.prototype, {
         return this.nodeValue;
     },
     set value(value){
-        this.nodeValue = String(value);
+        this.nodeValue = value+'';
     },
     get nodeType(){
         return DOMNode.NAMESPACE_NODE;
@@ -1749,10 +1764,10 @@ var DOMCharacterData = function(ownerDocument) {
 DOMCharacterData.prototype = new DOMNode;
 __extend__(DOMCharacterData.prototype,{
     get data(){
-        return String(this.nodeValue);
+        return this.nodeValue;
     },
     set data(data){
-        this.nodeValue = String(data);
+        this.nodeValue = data;
     },
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
@@ -2048,8 +2063,10 @@ __extend__(DOMAttr.prototype, {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // delegate to node
-        this.specified = (this.value.length > 0);
         this.nodeValue = value;
+    },
+    get specified(){
+        return (this.value.length > 0);
     },
     get nodeType(){
         return DOMNode.ATTRIBUTE_NODE;
@@ -2109,7 +2126,7 @@ __extend__(DOMElement.prototype, {
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        var value = new String(value);
+        var value = value+'';
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
@@ -2133,18 +2150,11 @@ __extend__(DOMElement.prototype, {
             }
             
             if (__isIdDeclaration__(name)) {
-                this.id = value;  // cache ID for getElementById()
+            //    this.id = value;  // cache ID for getElementById()
             }
             
             // assign values to properties (and aliases)
             attr.value     = value;
-            
-            // update .specified
-            if (value.length > 0) {
-                attr.specified = true;
-            }else {
-                attr.specified = false;
-            }
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
@@ -2200,7 +2210,7 @@ __extend__(DOMElement.prototype, {
             attr = __ownerDocument__(this).createAttributeNS(namespaceURI, qualifiedName);
         }
         
-        var value = String(value);
+        var value = value+'';
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
@@ -2229,13 +2239,6 @@ __extend__(DOMElement.prototype, {
         attr.value     = value;
         attr.nodeValue = value;
         
-        // update .specified
-        if (value.length > 0) {
-            attr.specified = true;
-        }else {
-            attr.specified = false;
-        }
-        
         // delegate to DOMNamedNodeMap.setNamedItem
         this.attributes.setNamedItemNS(attr);
     },
@@ -2250,7 +2253,7 @@ __extend__(DOMElement.prototype, {
     setAttributeNodeNS : function(newAttr) {
         // if this Attribute is an ID
         if ((newAttr.prefix == "") &&  __isIdDeclaration__(newAttr.name)) {
-            this.id = String(newAttr.value);  // cache ID for getElementById()
+            this.id = newAttr.value+'';  // cache ID for getElementById()
         }
         
         // delegate to DOMNamedNodeMap.setNamedItemNS
@@ -3064,7 +3067,7 @@ XMLP.prototype._replaceEntity = function(strD, iB, iE) {
         case "quot": strEnt = "\""; break;
         default:
             if(strD.charAt(iB) == "#") {
-                strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)));
+                strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)))+'';
             } else {
                 return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
             }
@@ -3715,7 +3718,7 @@ __extend__(DOMImplementation.prototype,{
  */
 function __parseLoop__(impl, doc, p) {
     var iEvt, iNode, iAttr, strName;
-    iNodeParent = doc;
+    var iNodeParent = doc;
 
     var el_close_count = 0;
 
@@ -4209,7 +4212,7 @@ __extend__(DOMDocument.prototype, {
     },
     loadXML : function(xmlStr) {
         // create SAX Parser
-        var parser = new XMLP(String(xmlStr));
+        var parser = new XMLP(xmlStr+'');
         
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);
@@ -5084,6 +5087,14 @@ __extend__(HTMLElement.prototype, {
 		    return this.setAttribute("dir",val); 
 		    
 	    },
+		get id(){  
+		    return this.getAttribute('id')||''; 
+		    
+	    },
+		set id(id){  
+		    this.setAttribute('id', id); 
+            
+	    },
 		get innerHTML(){  
 		    return this.childNodes.xml; 
 		    
@@ -5161,62 +5172,44 @@ __extend__(HTMLElement.prototype, {
 	    
         },
 		onclick: function(event){
-		    try{
-		        eval(this.getAttribute('onclick'));
-		    }catch(e){
-		        $error(e);
-	        }
+		    __eval__(this.getAttribute('onclick')||'')
 	    },
 		ondblclick: function(event){
-		    try{
-		        eval(this.getAttribute('ondblclick'));
-		    }catch(e){
-		        $error(e)
-		    }
+            __eval__(this.getAttribute('ondblclick')||'');
 	    },
 		onkeydown: function(event){
-		    try{
-		        eval(this.getAttribute('onkeydown'));
-		    }catch(e){
-		        $error(e);
-		    }
+            __eval__(this.getAttribute('onkeydown')||'');
 	    },
 		onkeypress: function(event){
-		    try{
-		        eval(this.getAttribute('onkeypress'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onkeypress')||'');
+	    },
 		onkeyup: function(event){
-		    try{
-		        eval(this.getAttribute('onkeyup'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onkeyup')||'');
+	    },
 		onmousedown: function(event){
-		    try{
-		        eval(this.getAttribute('onmousedown'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmousedown')||'');
+	    },
 		onmousemove: function(event){
-		    try{
-		        eval(this.getAttribute('onmousemove'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmousemove')||'');
+	    },
 		onmouseout: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseout'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmouseout')||'');
+	    },
 		onmouseover: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseover'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmouseover')||'');
+	    },
 		onmouseup: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseup'));
-		    }catch(e){
-		        $error(e);}}
+            __eval__(this.getAttribute('onmouseup')||'');
+	    }
 });
+
+var __eval__ = function(script){
+    try{
+        eval(script);
+    }catch(e){
+        $error(e);
+    }
+};
 
 var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 
@@ -5502,7 +5495,7 @@ Anchor.prototype = new Anchor;
 			return m&&m.length>1?m[1]:"";
 		},
 		set hostname(_hostname){
-			this.href = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
+			this.href = this.protocol + _hostname + ((this.port=="")?"":(":"+this.port)) +
 			 	 this.pathname + this.search + this.hash;
 		},
 		get pathname(){
@@ -6201,16 +6194,16 @@ __extend__(HTMLInputElement.prototype, {
         this.setAttribute('alt', value);
     },
     get checked(){
-        return (this.getAttribute('checked')==='checked');
+        return (this.getAttribute('checked')=='checked');
     },
-    set checked(){
-        this.setAttribute('checked', 'checked');
+    set checked(value){
+        this.setAttribute('checked', (value ? 'checked' :''));
     },
     get disabled(){
-        return (this.getAttribute('disabled')==='disabled');
+        return (this.getAttribute('disabled')=='disabled');
     },
     set disabled(value){
-        this.setAttribute('disabled', 'disabled');
+        this.setAttribute('disabled', (value ? 'disabled' :''));
     },
     get maxLength(){
         return Number(this.getAttribute('maxlength')||'0');
@@ -6225,10 +6218,10 @@ __extend__(HTMLInputElement.prototype, {
         this.setAttribute('name', value);
     },
     get readOnly(){
-        return (this.getAttribute('readonly')==='readonly');
+        return (this.getAttribute('readonly')=='readonly');
     },
     set readOnly(value){
-        this.setAttribute('readonly', 'readonly');
+        this.setAttribute('readonly', (value ? 'readonly' :''));
     },
     get size(){
         return this.getAttribute('size');
@@ -6678,10 +6671,10 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('label',value);
     },
     get selected(){
-        return (this.getAttribute('selected')==='selected');
+        return (this.getAttribute('selected')=='selected');
     },
-    set selected(){
-        this.setAttribute('selected','selected');
+    set selected(value){
+        this.setAttribute('selected', (value ? 'selected' :''));
     },
     get value(){
         return this.getAttribute('value');
@@ -6836,8 +6829,19 @@ __extend__(HTMLSelectElement.prototype, {
     get value(){
         return this.getAttribute('value')||'';
     },
-    set value(value){
-        this.setAttribute('value',value);
+    set value(value) {
+        var options = this.options,
+            i, index;
+        for (i=0; i<options.length; i++) {
+            if (options[i].value == value) {
+                index = i;
+                break;
+            }
+        }
+        if (index !== undefined) {
+            this.setAttribute('value', value);
+            this.selectedIndex = index;
+        }
     },
     get length(){
         return this.options.length;
@@ -6853,10 +6857,10 @@ __extend__(HTMLSelectElement.prototype, {
         return this.getElementsByTagName('option');
     },
     get disabled(){
-        return (this.getAttribute('disabled')==='disabled');
+        return (this.getAttribute('disabled')=='disabled');
     },
-    set disabled(){
-        this.setAttribute('disabled','disabled');
+    set disabled(value){
+        this.setAttribute('disabled', (value ? 'disabled' :''));
     },
     get multiple(){
         return this.getAttribute('multiple');
@@ -6929,7 +6933,7 @@ __extend__(HTMLStyleElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
-    },
+    }
 });
 
 			$debug("Defining Event");
@@ -7299,7 +7303,7 @@ var CSSStyleSheet = function(options){
 */
 $debug("Initializing Window Location.");
 //the current location
-var $location = $env.location('./');
+var $location = '';
 
 $w.__defineSetter__("location", function(url){
     //$w.onunload();

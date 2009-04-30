@@ -51,10 +51,10 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('label',value);
     },
     get selected(){
-        return (this.getAttribute('selected')==='selected');
+        return (this.getAttribute('selected')=='selected');
     },
-    set selected(){
-        this.setAttribute('selected','selected');
+    set selected(value){
+        this.setAttribute('selected', (value ? 'selected' :''));
     },
     get value(){
         return this.getAttribute('value');

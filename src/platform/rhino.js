@@ -42,7 +42,7 @@ var __env__ = {};
     };
     
     $env.hashCode = function(obj){
-        return obj?obj.hashCode().toString():null;
+        return obj?obj.hashCode().toString()+'':null;
     };
     
     //For Java the window.location object is a java.net.URL
@@ -118,7 +118,7 @@ var __env__ = {};
         var out = new java.io.FileWriter(temp);
         out.write(text, 0, text.length);
         out.close();
-        return $env.location(temp.getAbsolutePath());
+        return temp.getAbsolutePath().toString()+'';
     };
     
     //Used to delete a local file
@@ -281,7 +281,7 @@ var __env__ = {};
     $env.loadInlineScript = function(script){
         $env.debug("loading inline script :" + script.text);
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
-        $env.debug("loading " + tmpFile);
+        $env.info("loading " + tmpFile);
         load(tmpFile);
     };
     

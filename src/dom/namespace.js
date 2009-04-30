@@ -25,7 +25,7 @@ __extend__(DOMNamespace.prototype, {
         return this.nodeValue;
     },
     set value(value){
-        this.nodeValue = String(value);
+        this.nodeValue = value+'';
     },
     get nodeType(){
         return DOMNode.NAMESPACE_NODE;

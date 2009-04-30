@@ -32,6 +32,14 @@ __extend__(HTMLElement.prototype, {
 		    return this.setAttribute("dir",val); 
 		    
 	    },
+		get id(){  
+		    return this.getAttribute('id')||''; 
+		    
+	    },
+		set id(id){  
+		    this.setAttribute('id', id); 
+            
+	    },
 		get innerHTML(){  
 		    return this.childNodes.xml; 
 		    
@@ -109,62 +117,44 @@ __extend__(HTMLElement.prototype, {
 	    
         },
 		onclick: function(event){
-		    try{
-		        eval(this.getAttribute('onclick'));
-		    }catch(e){
-		        $error(e);
-	        }
+		    __eval__(this.getAttribute('onclick')||'')
 	    },
 		ondblclick: function(event){
-		    try{
-		        eval(this.getAttribute('ondblclick'));
-		    }catch(e){
-		        $error(e)
-		    }
+            __eval__(this.getAttribute('ondblclick')||'');
 	    },
 		onkeydown: function(event){
-		    try{
-		        eval(this.getAttribute('onkeydown'));
-		    }catch(e){
-		        $error(e);
-		    }
+            __eval__(this.getAttribute('onkeydown')||'');
 	    },
 		onkeypress: function(event){
-		    try{
-		        eval(this.getAttribute('onkeypress'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onkeypress')||'');
+	    },
 		onkeyup: function(event){
-		    try{
-		        eval(this.getAttribute('onkeyup'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onkeyup')||'');
+	    },
 		onmousedown: function(event){
-		    try{
-		        eval(this.getAttribute('onmousedown'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmousedown')||'');
+	    },
 		onmousemove: function(event){
-		    try{
-		        eval(this.getAttribute('onmousemove'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmousemove')||'');
+	    },
 		onmouseout: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseout'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmouseout')||'');
+	    },
 		onmouseover: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseover'));
-		    }catch(e){
-		        $error(e);}},
+            __eval__(this.getAttribute('onmouseover')||'');
+	    },
 		onmouseup: function(event){
-		    try{
-		        eval(this.getAttribute('onmouseup'));
-		    }catch(e){
-		        $error(e);}}
+            __eval__(this.getAttribute('onmouseup')||'');
+	    }
 });
+
+var __eval__ = function(script){
+    try{
+        eval(script);
+    }catch(e){
+        $error(e);
+    }
+};
 
 var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 

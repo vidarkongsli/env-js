@@ -54,7 +54,7 @@ __extend__(DOMDocument.prototype, {
     },
     loadXML : function(xmlStr) {
         // create SAX Parser
-        var parser = new XMLP(String(xmlStr));
+        var parser = new XMLP(xmlStr+'');
         
         // create DOM Document
         var doc = new HTMLDocument(this.implementation);

@@ -60,10 +60,12 @@ __extend__(DOMNamedNodeMap.prototype, {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
+              this[arg.name] = arg;
             }
       } else {
             // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
+            this[arg.name] = arg;
       }
     
       arg.ownerElement = this.parentNode;            // update ownerElement
@@ -89,6 +91,7 @@ __extend__(DOMNamedNodeMap.prototype, {
         
           // get Node
           var oldNode = this[itemIndex];
+          //this[oldNode.name] = undefined;
         
           // throw Exception if Node is readonly
           if (__ownerDocument__(this).implementation.errorChecking && oldNode._readonly) {

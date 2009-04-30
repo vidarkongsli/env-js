@@ -32,8 +32,19 @@ __extend__(HTMLSelectElement.prototype, {
     get value(){
         return this.getAttribute('value')||'';
     },
-    set value(value){
-        this.setAttribute('value',value);
+    set value(value) {
+        var options = this.options,
+            i, index;
+        for (i=0; i<options.length; i++) {
+            if (options[i].value == value) {
+                index = i;
+                break;
+            }
+        }
+        if (index !== undefined) {
+            this.setAttribute('value', value);
+            this.selectedIndex = index;
+        }
     },
     get length(){
         return this.options.length;
@@ -49,10 +60,10 @@ __extend__(HTMLSelectElement.prototype, {
         return this.getElementsByTagName('option');
     },
     get disabled(){
-        return (this.getAttribute('disabled')==='disabled');
+        return (this.getAttribute('disabled')=='disabled');
     },
-    set disabled(){
-        this.setAttribute('disabled','disabled');
+    set disabled(value){
+        this.setAttribute('disabled', (value ? 'disabled' :''));
     },
     get multiple(){
         return this.getAttribute('multiple');

@@ -41,8 +41,10 @@ __extend__(DOMAttr.prototype, {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         // delegate to node
-        this.specified = (this.value.length > 0);
         this.nodeValue = value;
+    },
+    get specified(){
+        return (this.value.length > 0);
     },
     get nodeType(){
         return DOMNode.ATTRIBUTE_NODE;

@@ -31,7 +31,7 @@ __extend__(HTMLStyleElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
-    },
+    }
 });
 
 			

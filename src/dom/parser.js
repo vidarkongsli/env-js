@@ -654,7 +654,7 @@ XMLP.prototype._replaceEntity = function(strD, iB, iE) {
         case "quot": strEnt = "\""; break;
         default:
             if(strD.charAt(iB) == "#") {
-                strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)));
+                strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)))+'';
             } else {
                 return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
             }
