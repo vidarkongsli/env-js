@@ -19,7 +19,6 @@ var DOMAttr = function(ownerDocument) {
     this.DOMNode = DOMNode;
     this.DOMNode(ownerDocument);
                    
-    this.specified = false;
     this.ownerElement = null;               // set when Attr is added to NamedNodeMap
 };
 DOMAttr.prototype = new DOMNode; 

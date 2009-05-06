@@ -23,10 +23,10 @@ var __env__ = {};
     //uncomment these if you want to get some internal log statementes
     /*$env.debug  = function(msg){
         $env.log(msg,"DEBUG"); 
-    };*/
+    };
     $env.info   = function(msg){
         $env.log(msg,"INFO"); 
-    };
+    };*/
     $env.warn   = function(msg){
         $env.log(msg,"WARNIING");    
     };
