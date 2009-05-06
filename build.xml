@@ -6,7 +6,7 @@
     <description>Builds, tests, and runs the project Env.</description>
     <property name="BUILD_MAJOR"    value="0" />
     <property name="BUILD_MINOR"    value="9" />
-    <property name="BUILD_ID"       value="3" />
+    <property name="BUILD_ID"       value="4" />
     
     <property name="SRC_DIR"        
             location="src"           
@@ -115,6 +115,9 @@
             <fileset dir="${SRC_DIR}" includes="html/script.js" />
             <fileset dir="${SRC_DIR}" includes="html/select.js" />
             <fileset dir="${SRC_DIR}" includes="html/style.js" />
+            <fileset dir="${SRC_DIR}" includes="html/table.js" />
+            <fileset dir="${SRC_DIR}" includes="html/td-th.js" />
+            <fileset dir="${SRC_DIR}" includes="html/tr.js" />
             <fileset dir="${SRC_DIR}" includes="event/event.js" />
             <fileset dir="${SRC_DIR}" includes="event/mouseevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/uievent.js" />

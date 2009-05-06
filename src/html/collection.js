@@ -1,12 +1,39 @@
 $debug("Defining HTMLCollection");
 /*
 * HTMLCollection - DOM Level 2
+* Implementation Provided by Steven Wood
 */
 $w.__defineGetter__("HTMLCollection", function(){
   return function(){
     throw new Error("Object cannot be created in this context");
   };
 });
+
+var HTMLCollection = function(nodelist, type){
+
+  __setArray__(this, []);
+  for (var i=0; i<nodelist.length; i++) {
+      this[i] = nodelist[i];
+  }
+  
+  this.length = nodelist.length;
+
+}
+
+HTMLCollection.prototype = {
+        
+    item : function (idx) {
+        var ret = null;
+        if ((idx >= 0) && (idx < this.length)) { 
+            ret = this[idx];                    
+        }
+    
+        return ret;   
+    },
+    
+    namedItem : function (name) {
+    }
+};
 
 /*var HTMLCollection = function(nodelist, type){
   var $items = [], 

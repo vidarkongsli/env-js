@@ -1743,7 +1743,6 @@ var DOMAttr = function(ownerDocument) {
     this.DOMNode = DOMNode;
     this.DOMNode(ownerDocument);
                    
-    this.specified = false;
     this.ownerElement = null;               // set when Attr is added to NamedNodeMap
 };
 DOMAttr.prototype = new DOMNode; 
@@ -4627,12 +4626,12 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
           else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
           else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
-          else if(tagName.match(/TABLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
           else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLElement(this);}
-          else if(tagName.match(/TD|TH/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
-          else if(tagName.match(/TR/))                  {node = new HTMLElement(this);}
+          else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
           else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
           else{
             node = new HTMLElement(this);
@@ -4982,12 +4981,39 @@ var __blur__ = function(element){
 $debug("Defining HTMLCollection");
 /*
 * HTMLCollection - DOM Level 2
+* Implementation Provided by Steven Wood
 */
 $w.__defineGetter__("HTMLCollection", function(){
   return function(){
     throw new Error("Object cannot be created in this context");
   };
 });
+
+var HTMLCollection = function(nodelist, type){
+
+  __setArray__(this, []);
+  for (var i=0; i<nodelist.length; i++) {
+      this[i] = nodelist[i];
+  }
+  
+  this.length = nodelist.length;
+
+}
+
+HTMLCollection.prototype = {
+        
+    item : function (idx) {
+        var ret = null;
+        if ((idx >= 0) && (idx < this.length)) { 
+            ret = this[idx];                    
+        }
+    
+        return ret;   
+    },
+    
+    namedItem : function (name) {
+    }
+};
 
 /*var HTMLCollection = function(nodelist, type){
   var $items = [], 
@@ -6636,6 +6662,205 @@ __extend__(HTMLStyleElement.prototype, {
     set type(value){
         this.setAttribute('type',value);
     }
+});
+
+			$debug("Defining HTMLTableElement");
+/* 
+* HTMLTableElement - DOM Level 2
+* Implementation Provided by Steven Wood
+*/
+$w.__defineGetter__("HTMLTableElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLTableElement = function(ownerDocument) {
+
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+
+};
+
+HTMLTableElement.prototype = new HTMLElement;
+__extend__(HTMLTableElement.prototype, {
+    
+    get rows() {
+        return new HTMLCollection(this.getElementsByTagName("tr"));
+    },
+    
+    insertRow : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableElement.insertRow ");
+        }
+        
+        var numRows = this.rows.length,
+            node = null;
+        
+        if (idx > numRows) {
+            throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
+        }
+        
+        var row = document.createElement("tr");
+        // If index is -1 or equal to the number of rows, 
+        // the row is appended as the last row. If index is omitted 
+        // or greater than the number of rows, an error will result
+        if (idx === -1 || idx === numRows) {
+            this.appendChild(row);
+        } else {
+            
+
+            node = this.firstChild;
+
+            for (var i=0; i<idx; i++) {
+                node = node.nextSibling;
+            }
+        }
+            
+        this.insertBefore(row, node);
+        
+        return row;
+    },
+    
+    deleteRow : function (idx) {
+        var elem = this.rows[idx];
+        this.removeChild(elem);
+    }
+    
+});
+
+			$debug("Defining HTMLTableCellElement");
+/* 
+* HTMLTableCellElement - DOM Level 2
+* Implementation Provided by Steven Wood
+*/
+$w.__defineGetter__("HTMLTableCellElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLTableCellElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLTableCellElement.prototype = new HTMLElement;
+__extend__(HTMLTableCellElement.prototype, {
+    
+    
+    // TODO :
+    
+});
+
+			$debug("Defining HTMLRowElement");
+/* 
+* HTMLRowElement - DOM Level 2
+* Implementation Provided by Steven Wood
+*/
+$w.__defineGetter__("HTMLTableRowElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLTableRowElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+
+};
+HTMLTableRowElement.prototype = new HTMLElement;
+__extend__(HTMLTableRowElement.prototype, {
+    
+    // align gets or sets the horizontal alignment of data within cells of the row.
+    get align() {
+        return this.getAttribute("align");
+    },
+     
+    get bgColor() {
+        return this.getAttribute("bgcolor");
+    },
+         
+    get cells() {
+        var nl = this.getElementsByTagName("td");
+        return new HTMLCollection(nl);
+    },
+       
+    get ch() {
+        return this.getAttribute("ch");
+    },
+     
+    set ch(ch) {
+        this.setAttribute("ch", ch);
+    },
+    
+    // ch gets or sets the alignment character for cells in a column. 
+    set chOff(chOff) {
+        this.setAttribute("chOff", chOff);
+    },
+     
+    get chOff(chOff) {
+        return this.getAttribute("chOff");
+    },
+   
+    get rowIndex() {
+        var nl = this.parentNode.childNodes;
+        for (var i=0; i<nl.length; i++) {
+            if (nl[i] === this) {
+                return i;
+            }
+        }
+    },
+
+    get sectionRowIndex() {
+        var nl = this.parentNode.getElementsByTagName(this.tagName);
+        for (var i=0; i<nl.length; i++) {
+            if (nl[i] === this) {
+                return i;
+            }
+        }
+    },
+     
+    get vAlign () {
+         return this.getAttribute("vAlign");
+    },
+
+    insertCell : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableRow.insertCell");
+        }
+        
+        var numCells = this.cells.length,
+            node = null;
+        
+        if (idx > numCells) {
+            throw new Error("Index > rows.length in call to HTMLTableRow.insertCell");
+        }
+        
+        var cell = document.createElement("td");
+
+        if (idx === -1 || idx === numCells) {
+            this.appendChild(cell);
+        } else {
+            
+
+            node = this.firstChild;
+
+            for (var i=0; i<idx; i++) {
+                node = node.nextSibling;
+            }
+        }
+            
+        this.insertBefore(cell, node);
+        
+        return cell;
+    },
+    
+    deleteCell : function (idx) {
+        var elem = this.cells[idx];
+        this.removeChild(elem);
+    }
+    
+    
 });
 
 			$debug("Defining Event");

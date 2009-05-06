@@ -1,19 +1,24 @@
-$debug("Defining HTMLxElement");
+$debug("Defining HTMLTableCellElement");
 /* 
-* HTMLxElement - DOM Level 2
+* HTMLTableCellElement - DOM Level 2
+* Implementation Provided by Steven Wood
 */
-$w.__defineGetter__("HTMLxElement", function(){
+$w.__defineGetter__("HTMLTableCellElement", function(){
     return function(){
         throw new Error("Object cannot be created in this context");
     };
 });
 
-var HTMLxElement = function(ownerDocument) {
+var HTMLTableCellElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
-HTMLxElement.prototype = new HTMLElement;
-__extend__(HTMLxElement.prototype, {
+HTMLTableCellElement.prototype = new HTMLElement;
+__extend__(HTMLTableCellElement.prototype, {
+    
+    
+    // TODO :
+    
 });
 
 			
