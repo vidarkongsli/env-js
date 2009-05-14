@@ -127,7 +127,7 @@ var __env__ = {};
         file["delete"]();
     };
     
-    $env.connection = function(xhr, responseHandler){
+    $env.connection = function(xhr, responseHandler, data){
         var url = java.net.URL(xhr.url);//, $w.location);
       var connection;
         if ( /^file\:/.test(url) ) {
@@ -143,11 +143,26 @@ var __env__ = {};
         } else { 
             connection = url.openConnection();
             connection.setRequestMethod( xhr.method );
-            
+			
             // Add headers to Java connection
             for (var header in xhr.headers){
                 connection.addRequestProperty(header+'', xhr.headers[header]+'');
-          }connection.connect();
+            }
+			
+			//write data to output stream if required
+            if(data&&data.length&&data.length>0){
+				 if ( xhr.method == "PUT" ) {
+                	connection.setDoOutput(true);
+					var outstream = connection.getOutputStream(),
+						outbuffer = new java.lang.String(data).getBytes('UTF-8');
+					
+                    outstream.write(outbuffer, 0, outbuffer.length);
+					outstream.close();
+            	}
+			}else{
+		  		connection.connect();
+			}
+			
             
             // Stick the response headers into responseHeaders
             for (var i = 0; ; i++) { 

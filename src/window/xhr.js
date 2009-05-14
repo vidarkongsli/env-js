@@ -44,7 +44,7 @@ XMLHttpRequest.prototype = {
       					}
       				}else{return null;}
       			});
-			});
+			}, data);
 			_this.onreadystatechange();
 		}
 		if (this.async){
