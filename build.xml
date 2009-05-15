@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="Env" default="default" basedir=".">
+<project name="Env" default="all" basedir=".">
     <description>Builds, tests, and runs the project Env.</description>
     <property name="BUILD_MAJOR"    value="0" />
     <property name="BUILD_MINOR"    value="9" />
@@ -42,18 +39,7 @@
             location="${DIST_DIR}/env.rhino.js"/>
     
     <!-- BUILD TARGETS -->
-    <target name="default" depends="lint"/>
-    
-    <target name="all" depends="default"/>
-    
-    <target name="lint" depends="concat">
-        <!--java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
-            <arg value="${ENV_DIST}" />
-        </java>
-        <java jar="${JSLINT_JAR}" classpath="${RHINO_JAR}" fork="true">
-            <arg value="${ENV_RHINO}" />
-        </java-->
-    </target>
+    <target name="all" depends="concat,test"/>
     
     <target name="concat" description="Main ENV build">
         <mkdir dir="${DIST_DIR}" />
