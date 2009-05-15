@@ -5,7 +5,7 @@ load("dist/env.rhino.js");
 window.onload = function(){
   print("Handling onload for test.js");
   // Load the test runner
-  load("test/testrunner.js", "test/jquery.js");
+  load("test/testrunner.js");
   print("Loaded test runner.");
   
   var start = new Date().getTime();
