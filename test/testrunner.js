@@ -15,6 +15,7 @@ function test(name, fn){
 }
 
 var orig = document.getElementById('main').innerHTML;
+//var orig = document.getElementById('main').cloneNode(true);
 
 /**
  * Resets the test setup. Useful for tests that modify the DOM.
@@ -142,6 +143,12 @@ function t(a,b,c) {
  */
 function equals(expected, actual, message) {
 	var result = expected == actual;
+	message = message || (result ? "okay" : "failed");
+	log( result, result ? message + ": " + expected : message + " expected: " + expected + " actual: " + actual );
+}
+
+function same(expected, actual, message) {
+	var result = expected === actual;
 	message = message || (result ? "okay" : "failed");
 	log( result, result ? message + ": " + expected : message + " expected: " + expected + " actual: " + actual );
 }

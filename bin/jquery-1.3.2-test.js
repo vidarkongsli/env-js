@@ -1,33 +1,33 @@
-// Init
+//debugger;
 load("build/runtest/env.js");
 
-var isLocal;
-window.onload = function(){
-    isLocal  = !!(window.location.protocol == 'file:');
+(function($env){
     
-    // Load the test runner
-    load("dist/jquery.js",
-        "build/runtest/testrunner.js");
+    //let it load the script from the html
+    $env.scriptTypes = {
+        "text/javascript"   :true
+    };
     
-    // Load the tests
-    load(
-        "test/unit/core.js",
-        "test/unit/selector.js",
-        "test/unit/event.js",
-        "test/unit/fx.js",
-        "test/unit/dimensions.js",
-        "test/unit/data.js",
+    var count = 0;
+    window.log = function(result, message){
+        $env.log('(' + (count++) + ')[' + ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
+    };
+    
+    window.onload = function(){
+        $env.warn('Defining QUnit.done');
+        QUnit.done = function(pass, fail){
+            $env.warn('Writing Results to File');
+            jQuery('script').each(function(){
+                this.type = 'text/envjs';
+            });
+            $env.writeToFile(
+                document.documentElement.xml, 
+                $env.location('jqenv.html')
+            );
+        };
         
-        // offset relies on window.open, which is currently unimplemented in env.js
-        //"test/unit/offset.js",
-        
-        // these tests require hitting a server, so we will need some clever env.js
-        // way of testing them
-        "test/unit/ajax.js"
-    );
+    }
     
-    // Display the results
-    results();
-};
-
-window.location = "test/index.html";
+    window.location = "test/index.html";
+    
+})(__env__);
