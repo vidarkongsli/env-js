@@ -12,8 +12,8 @@ var Envjs = function(){
     		} else
     			Envjs[i] = arguments[1][i];
     	}
-        window.location = arguments[0];
     }
+    window.location = arguments[0];
 };
 
 /*

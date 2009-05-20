@@ -105,6 +105,10 @@
             <fileset dir="${SRC_DIR}" includes="html/tbody-thead-tfoot.js" />
             <fileset dir="${SRC_DIR}" includes="html/td-th.js" />
             <fileset dir="${SRC_DIR}" includes="html/tr.js" />
+            <fileset dir="${SRC_DIR}" includes="serializer/xml.js" />
+            <fileset dir="${SRC_DIR}" includes="xpath/expression.js" />
+            <fileset dir="${SRC_DIR}" includes="xpath/result.js" />
+            <fileset dir="${SRC_DIR}" includes="xslt/processor.js" />
             <fileset dir="${SRC_DIR}" includes="event/event.js" />
             <fileset dir="${SRC_DIR}" includes="event/mouseevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/uievent.js" />

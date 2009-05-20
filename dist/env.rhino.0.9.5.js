@@ -7336,7 +7336,130 @@ __extend__(HTMLTableRowElement.prototype, {
     
 });
 
-			$debug("Defining Event");
+			/**
+ * @author thatcher
+ */
+$debug("Defining XMLSerializer");
+/*
+* XMLSerializer 
+*/
+$w.__defineGetter__("XMLSerializer", function(){
+    return new XMLSerializer(arguments);
+});
+
+var XMLSerializer = function() {
+
+};
+__extend__(XMLSerializer.prototype, {
+    serializeToString: function(node){
+        return node.xml;
+    }
+});/**
+ * @author thatcher
+ */
+$debug("Defining XPathExpression");
+/*
+* XPathExpression 
+*/
+$w.__defineGetter__("XPathExpression", function(){
+    throw new Error("Object cannot be created in this context");
+});
+
+var XPathExpression = function() {};
+__extend__(XPathExpression.prototype, {
+    evaluate: function(){
+        //TODO
+    }
+});/**
+ * @author thatcher
+ */
+$debug("Defining XPathResult");
+/*
+* XPathResult 
+*/
+$w.__defineGetter__("XPathResult", function(){
+    return XPathResult;
+});
+
+var XPathResult = function() {
+    this.snapshotLentgh = 0;
+    this.stringValue = '';
+};
+
+__extend__( XPathResult, {
+    ANY_TYPE:                     0,
+    NUMBER_TYPE:                  1,
+    STRING_TYPE:                  2,
+    BOOLEAN_TYPE:                 3,
+    UNORDERED_NODE_ITERATOR_TYPE: 4,
+    ORDERED_NODEITERATOR_TYPE:    5,
+    UNORDERED_NODE_SNAPSHOT_TYPE: 6,
+    ORDERED_NODE_SNAPSHOT_TYPE:   7,
+    ANY_ORDERED_NODE_TYPE:        8,
+    FIRST_ORDERED_NODE_TYPE:      9
+});
+
+__extend__(XPathResult.prototype, {
+    get booleanValue(){
+      //TODO  
+    },
+    get invalidIteration(){
+        //TODO
+    },
+    get numberValue(){
+        //TODO
+    },
+    get resultType(){
+        //TODO
+    },
+    get singleNodeValue(){
+        //TODO
+    },
+    iterateNext: function(){
+        //TODO
+    },
+    snapshotItem: function(index){
+        //TODO
+    }
+});
+
+/**
+ * @author thatcher
+ */
+
+$w.__defineGetter__("XSLTProcessor", function(){
+    return new XSLTProcessor(arguments);
+});
+
+var XSLTProcessor = function() {
+    this.__stylesheet__ = null;
+};
+__extend__(XSLTProcessor.prototype, {
+    clearParameters: function(){
+        //TODO
+    },
+    getParameter: function(nsuri, name){
+        //TODO
+    },
+    importStyleSheet: function(stylesheet){
+        this.__stylesheet__ = stylesheet;
+    },
+    removeParameter: function(nsuri, name){
+        //TODO
+    },
+    reset: function(){
+        //TODO
+    },
+    setParameter: function(nsuri, name, value){
+        //TODO
+    },
+    transformToDocument: function(sourceNode){
+        return xsltProcess(sourceNode, this.__stylesheet__);
+    },
+    transformToFragment: function(sourceNode, ownerDocument){
+        return xsltProcess(sourceNode, this.__stylesheet__).childNodes;
+    }
+});$debug("Defining Event");
 /*
 * event.js
 */
