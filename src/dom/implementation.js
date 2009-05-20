@@ -411,12 +411,16 @@ function __parseLoop__(impl, doc, p) {
         throw(new DOMException(DOMException.SYNTAX_ERR));
     }
     else if(iEvt == XMLP._NONE) {                   // no more events
-      if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
+      //steven woods notes that unclosed tags are rejected elsewhere and this check
+	  //breaks a table patching routine
+	  /*if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
         break;
       }
       else {
         throw(new DOMException(DOMException.SYNTAX_ERR));  // one or more Tags were not closed properly
-      }
+      }*/
+        break;
+
     }
   }
 

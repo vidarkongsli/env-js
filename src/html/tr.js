@@ -105,8 +105,7 @@ __extend__(HTMLTableRowElement.prototype, {
         var elem = this.cells[idx];
         this.removeChild(elem);
     }
-    
-    
+
 });
 
 			

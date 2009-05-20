@@ -12,8 +12,8 @@ var Envjs = function(){
     		} else
     			Envjs[i] = arguments[1][i];
     	}
-        window.location = arguments[0];
     }
+    window.location = arguments[0];
 };
 
 /*
@@ -4105,12 +4105,16 @@ function __parseLoop__(impl, doc, p) {
         throw(new DOMException(DOMException.SYNTAX_ERR));
     }
     else if(iEvt == XMLP._NONE) {                   // no more events
-      if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
+      //steven woods notes that unclosed tags are rejected elsewhere and this check
+	  //breaks a table patching routine
+	  /*if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
         break;
       }
       else {
         throw(new DOMException(DOMException.SYNTAX_ERR));  // one or more Tags were not closed properly
-      }
+      }*/
+        break;
+
     }
   }
 
@@ -5069,7 +5073,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
           else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
           else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
-          //else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
+          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
@@ -7140,6 +7144,79 @@ var HTMLTableElement = function(ownerDocument) {
 HTMLTableElement.prototype = new HTMLElement;
 __extend__(HTMLTableElement.prototype, {
     
+        get tFoot() { 
+        //tFoot returns the table footer.
+        return this.getElementsByTagName("tfoot")[0];
+    },
+    
+    createTFoot : function () {
+        var tFoot = this.tFoot;
+       
+        if (!tFoot) {
+            tFoot = document.createElement("tfoot");
+            this.appendChild(tFoot);
+        }
+        
+        return tFoot;
+    },
+    
+    deleteTFoot : function () {
+        var foot = this.tFoot;
+        if (foot) {
+            foot.parentNode.removeChild(foot);
+        }
+    },
+    
+    get tHead() { 
+        //tHead returns the table head.
+        return this.getElementsByTagName("thead")[0];
+    },
+    
+    createTHead : function () {
+        var tHead = this.tHead;
+       
+        if (!tHead) {
+            tHead = document.createElement("thead");
+            this.insertBefore(tHead, this.firstChild);
+        }
+        
+        return tHead;
+    },
+    
+    deleteTHead : function () {
+        var head = this.tHead;
+        if (head) {
+            head.parentNode.removeChild(head);
+        }
+    },
+ 
+    appendChild : function (child) {
+
+        var tagName = child.tagName.toLowerCase();
+        if (tagName === "tr") {
+            // need an implcit <tbody> to contain this...
+            if (!this.currentBody) {
+                this.currentBody = document.createElement("tbody");
+            
+                DOMNode.prototype.appendChild.apply(this, [this.currentBody]);
+            }
+          
+            return this.currentBody.appendChild(child); 
+   
+        } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
+            this.currentBody = child;
+            return DOMNode.prototype.appendChild.apply(this, arguments);  
+            
+        } else {
+            return DOMNode.prototype.appendChild.apply(this, arguments);
+        }
+    },
+     
+    get tBodies() {
+        return new HTMLCollection(this.getElementsByTagName("tbody"));
+        
+    },
+    
     get rows() {
         return new HTMLCollection(this.getElementsByTagName("tr"));
     },
@@ -7149,11 +7226,172 @@ __extend__(HTMLTableElement.prototype, {
             throw new Error("Index omitted in call to HTMLTableElement.insertRow ");
         }
         
+        var rows = this.rows, 
+            numRows = rows.length,
+            node,
+            inserted, 
+            lastRow;
+        
+        if (idx > numRows) {
+            throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
+        }
+        
+        var inserted = document.createElement("tr");
+        // If index is -1 or equal to the number of rows, 
+        // the row is appended as the last row. If index is omitted 
+        // or greater than the number of rows, an error will result
+        if (idx === -1 || idx === numRows) {
+            lastRow = rows[rows.length-1];
+            lastRow.parentNode.appendChild(inserted);
+        } else {
+            rows[idx].parentNode.insertBefore(inserted, rows[idx]);
+        }
+
+        return inserted;
+    },
+    
+    deleteRow : function (idx) {
+        var elem = this.rows[idx];
+        elem.parentNode.removeChild(elem);
+    },
+    
+    get summary() {
+        return this.getAttribute("summary");
+    },
+    
+    set summary(summary) {
+        this.setAttribute("summary", summary);
+    },
+    
+    get align() {
+        return this.getAttribute("align");
+    },
+    
+    set align(align) {
+        this.setAttribute("align", align);
+    },
+    
+     
+    get bgColor() {
+        return this.getAttribute("bgColor");
+    },
+    
+    set bgColor(bgColor) {
+        return this.setAttribute("bgColor", bgColor);
+    },
+   
+    get cellPadding() {
+        return this.getAttribute("cellPadding");
+    },
+    
+    set cellPadding(cellPadding) {
+        return this.setAttribute("cellPadding", cellPadding);
+    },
+    
+    
+    get cellSpacing() {
+        return this.getAttribute("cellSpacing");
+    },
+    
+    set cellSpacing(cellSpacing) {
+        this.setAttribute("cellSpacing", cellSpacing);
+    },
+
+    get frame() {
+        return this.getAttribute("frame");
+    },
+    
+    set frame(frame) { 
+        this.setAttribute("frame", frame);
+    },
+    
+    get rules() {
+        return this.getAttribute("rules");
+    }, 
+    
+    set rules(rules) {
+        this.setAttribute("rules", rules);
+    }, 
+    
+    get width() {
+        return this.getAttribute("width");
+    },
+    
+    set width(width) {
+        this.setAttribute("width", width);
+    }
+    
+    
+});
+
+			$debug("Defining HTMLxElement");
+/* 
+* HTMLxElement - DOM Level 2
+* - Contributed by Steven Wood
+*/
+$w.__defineGetter__("HTMLTableSectionElement", function(){
+    return function(){
+        throw new Error("Object cannot be created in this context");
+    };
+});
+
+var HTMLTableSectionElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLTableSectionElement.prototype = new HTMLElement;
+__extend__(HTMLTableSectionElement.prototype, {    
+    
+    appendChild : function (child) {
+    
+        // disallow nesting of these elements.
+        if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
+            return this.parentNode.appendChild(child);
+        } else {
+            return DOMNode.prototype.appendChild.apply(this, arguments);
+        }
+
+    },
+    
+    get align() {
+        return this.getAttribute("align");
+    },
+
+    get ch() {
+        return this.getAttribute("ch");
+    },
+     
+    set ch(ch) {
+        this.setAttribute("ch", ch);
+    },
+    
+    // ch gets or sets the alignment character for cells in a column. 
+    set chOff(chOff) {
+        this.setAttribute("chOff", chOff);
+    },
+     
+    get chOff(chOff) {
+        return this.getAttribute("chOff");
+    },
+     
+    get vAlign () {
+         return this.getAttribute("vAlign");
+    },
+    
+    get rows() {
+        return new HTMLCollection(this.getElementsByTagName("tr"));
+    },
+    
+    insertRow : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableSectionElement.insertRow ");
+        }
+        
         var numRows = this.rows.length,
             node = null;
         
         if (idx > numRows) {
-            throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
+            throw new Error("Index > rows.length in call to HTMLTableSectionElement.insertRow");
         }
         
         var row = document.createElement("tr");
@@ -7163,8 +7401,6 @@ __extend__(HTMLTableElement.prototype, {
         if (idx === -1 || idx === numRows) {
             this.appendChild(row);
         } else {
-            
-
             node = this.firstChild;
 
             for (var i=0; i<idx; i++) {
@@ -7181,25 +7417,7 @@ __extend__(HTMLTableElement.prototype, {
         var elem = this.rows[idx];
         this.removeChild(elem);
     }
-    
-});
 
-			$debug("Defining HTMLxElement");
-/* 
-* HTMLxElement - DOM Level 2
-*/
-$w.__defineGetter__("HTMLxElement", function(){
-    return function(){
-        throw new Error("Object cannot be created in this context");
-    };
-});
-
-var HTMLxElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLxElement.prototype = new HTMLElement;
-__extend__(HTMLxElement.prototype, {
 });
 
 			$debug("Defining HTMLTableCellElement");
@@ -7332,8 +7550,7 @@ __extend__(HTMLTableRowElement.prototype, {
         var elem = this.cells[idx];
         this.removeChild(elem);
     }
-    
-    
+
 });
 
 			/**
