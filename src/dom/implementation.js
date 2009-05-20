@@ -246,7 +246,7 @@ function __parseLoop__(impl, doc, p) {
       //handle script tag
       if(iNodeParent.nodeName.toLowerCase() == 'script'){
          p.replaceEntities = true;
-         $policy.loadScript(iNodeParent, p);
+         $env.loadLocalScript(iNodeParent, p);
       }
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
 

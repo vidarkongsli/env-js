@@ -34,7 +34,7 @@ var DOMNode = function(ownerDocument) {
   this.localName    = "";                        // The localName of this node (Level 2)
 
   this.nodeName = "";                            // The name of this node
-  this.nodeValue = "";                           // The value of this node
+  this.nodeValue = null;                           // The value of this node
   this.className = "";                           // The CSS class name of this node.
   
   // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
@@ -83,6 +83,10 @@ __extend__(DOMNode.prototype, {
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
+        
+        if(newChild==null || refChild==null){
+            return newChild;
+        }
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
@@ -174,6 +178,10 @@ __extend__(DOMNode.prototype, {
     replaceChild : function(newChild, oldChild) {
         var ret = null;
         
+        if(newChild==null || oldChild==null){
+            return oldChild;
+        }
+        
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if DOMNode is readonly
@@ -253,6 +261,9 @@ __extend__(DOMNode.prototype, {
         return ret;
     },
     removeChild : function(oldChild) {
+        if(!oldChild){
+            return null;
+        }
         // throw Exception if DOMNamedNodeMap is readonly
         if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -289,6 +300,9 @@ __extend__(DOMNode.prototype, {
         return oldChild;
     },
     appendChild : function(newChild) {
+        if(!newChild){
+            return null;
+        }
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
         // throw Exception if Node is readonly

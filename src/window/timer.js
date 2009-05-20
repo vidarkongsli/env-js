@@ -17,7 +17,7 @@ $w.setTimeout = function(fn, time){
 };
 
 window.setInterval = function(fn, time){
-	var num = $timers.length;
+	var num = $timers.length+1;
 	
     if (typeof fn == 'string') {
         var fnstr = fn; 
@@ -28,8 +28,8 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
-	    $log("Creating timer number "+num);
-    	$timers[num] = $env.timer(fn, time);
+	    $debug("Creating timer number "+num);
+    	$timers[num] = new $env.timer(fn, time);
     	$timers[num].start();
 	}
 	return num;

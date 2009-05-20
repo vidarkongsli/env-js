@@ -109,7 +109,7 @@ __extend__(DOMDocument.prototype, {
         return event;
     },
     createExpression        : function(xpath, nsuriMap){ 
-        return null;/*TODO*/
+        return new XPathExpression(xpath, nsuriMap);
     },
     createElement : function(tagName) {
           //$debug("DOMDocument.createElement( "+tagName+" )");
@@ -258,6 +258,39 @@ __extend__(DOMDocument.prototype, {
           node.nodeValue    = "";
         
           return node;
+    },
+    /** from David Flanagan's JavaScript - The Definitive Guide
+     * 
+     * @param {String} xpathText
+     *     The string representing the XPath expression to evaluate.
+     * @param {Node} contextNode 
+     *     The node in this document against which the expression is to
+     *     be evaluated.
+     * @param {Function} nsuriMapper 
+     *     A function that will map from namespace prefix to to a full 
+     *     namespace URL or null if no such mapping is required.
+     * @param {Number} resultType 
+     *     Specifies the type of object expected as a result, using
+     *     XPath conversions to coerce the result. Possible values for
+     *     type are the constrainsts defined by the XPathResult object.
+     *     (null if not required)
+     * @param {XPathResult} result 
+     *     An XPathResult object to be reused or null
+     *     if you want a new XPathResult object to be created.
+     * @returns {XPathResult} result
+     *     A XPathResult object representing the evaluation of the 
+     *     expression against the given context node.
+     * @throws {Exception} e
+     *     This method may throw an exception if the xpathText contains 
+     *     a syntax error, if the expression cannot be converted to the
+     *     desired resultType, if the expression contains namespaces 
+     *     that nsuriMapper cannot resolve, or if contextNode is of the 
+     *     wrong type or is not assosciated with this document.
+     * @seealso
+     *     Document.evaluate
+     */
+    evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
+        XPathExpression.apply(this, arguments);
     },
     getElementById : function(elementId) {
           var retNode = null,

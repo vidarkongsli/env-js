@@ -7,6 +7,9 @@ $w.__defineGetter__("HTMLElement", function(){
         throw new Error("Object cannot be created in this context");
     };
 });
+$w.HTMLElement.__defineGetter__("prototype", function(){
+    return HTMLElement.prototype;
+});
 
 var HTMLElement = function(ownerDocument) {
     this.DOMElement = DOMElement;
@@ -45,7 +48,7 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		set innerHTML(html){
-		    $debug("htmlElement.innerHTML("+html+")");
+		    //$debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');

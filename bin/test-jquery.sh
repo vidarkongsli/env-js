@@ -30,8 +30,6 @@ cp dist/env.rhino.js $JQUERY_DIR/build/runtest/env.js
 cp rhino/js.jar $JQUERY_DIR/build/js.jar
 cp bin/jquery-$VERSION-test.js $JQUERY_DIR/build/runtest/test.js
 
-cp test/qunit.js $JQUERY_DIR/test/qunit/testrunner.js
-#perl -pi~ -e "s/^JAR(.*)\.jar$/JAR\1.jar -w -debug/" $JQUERY_DIR/Makefile
 if [ $DEBUG -eq 1 ]; then
     echo 'enabling rhino debugger'
     perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.debugger.Main/" $JQUERY_DIR/Makefile;

@@ -28,7 +28,9 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('defaultSelected',value);
     },
     get text(){
-        return this.nodeValue;
+         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ? 
+             this.innerHTML : 
+             this.nodeValue;
     },
     get index(){
         var options = this.parent.childNodes;
@@ -57,7 +59,9 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('selected', (value ? 'selected' :''));
     },
     get value(){
-        return this.getAttribute('value');
+        return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
+            this.text : 
+            this.getAttribute('value');
     },
     set value(value){
         this.setAttribute('value',value);

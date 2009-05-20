@@ -37,21 +37,26 @@ $w.removeEventListener = function(type, fn){
 };
 
 $w.dispatchEvent = function(event){
-    //$log("dispatching event " + event.type);
+    $debug("dispatching event " + event.type);
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
-    if(!event.target)
+    if (!event.target) {
         event.target = this;
+    }
+    $debug("event target: " + event.target);
     if ( event.type ) {
         if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;
             $events[this.uuid][event.type].forEach(function(fn){
+                $debug('calling event handler '+fn+' on target '+_this);
                 fn.call( _this, event );
             });
         }
     
-        if ( this["on" + event.type] )
-            this["on" + event.type].call( _this, event );
+        if (this["on" + event.type]) {
+            $debug('calling event handler '+event.type+' on target '+this);
+            this["on" + event.type].call(_this, event);
+        }
     }
     if(this.parentNode){
         this.parentNode.dispatchEvent.call(this.parentNode,event);

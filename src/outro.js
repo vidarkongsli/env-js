@@ -2,8 +2,8 @@
 *	outro.js
 */
 
-})(window, __env__, __policy__); 
+})(window, Envjs); 
 
 }catch(e){
-    __env__.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +__env__.lineSource(e));
+    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" + Envjs.lineSource(e));
 }

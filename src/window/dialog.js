@@ -3,7 +3,7 @@
 */
 $debug("Initializing Window Dialogs.");
 $w.alert = function(message){
- //TODO 
+     $env.warn(message);
 };
 
 $w.confirm = function(question){

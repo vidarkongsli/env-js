@@ -74,7 +74,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
           else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
           else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLElement(this);}
+          //else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}

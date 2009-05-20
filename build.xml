@@ -116,6 +116,7 @@
             <fileset dir="${SRC_DIR}" includes="html/select.js" />
             <fileset dir="${SRC_DIR}" includes="html/style.js" />
             <fileset dir="${SRC_DIR}" includes="html/table.js" />
+            <fileset dir="${SRC_DIR}" includes="html/tbody-thead-tfoot.js" />
             <fileset dir="${SRC_DIR}" includes="html/td-th.js" />
             <fileset dir="${SRC_DIR}" includes="html/tr.js" />
             <fileset dir="${SRC_DIR}" includes="event/event.js" />
@@ -145,8 +146,8 @@
         <!-- RHINO -->
         <echo message="Building ${ENV_RHINO}" />
         <concat destfile="${ENV_RHINO}">
+            <fileset dir="${SRC_DIR}"  includes="platform/core.js" />
             <fileset dir="${SRC_DIR}"  includes="platform/rhino.js" />
-            <fileset dir="${SRC_DIR}"  includes="policy/policy.js" />
             <fileset dir="${DIST_DIR}" includes="env.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />

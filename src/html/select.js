@@ -27,7 +27,13 @@ __extend__(HTMLSelectElement.prototype, {
         return -1;
     },
     set selectedIndex(value){
-        this.options[Number(value)].selected = 'selected';
+        if (this.selectedIndex != -1) {
+            this.options[this.selectedIndex].selected = '';
+        }
+        var option = this.options[Number(value)];
+        if (option) {
+            option.selected = 'selected';
+        }
     },
     get value(){
         return this.getAttribute('value')||'';

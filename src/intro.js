@@ -12,5 +12,5 @@ this.__defineGetter__('window', function(){
 });
 
 try{
-(function($w, $env, $policy){
+(function($w, $env){
         
