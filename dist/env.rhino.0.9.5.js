@@ -4561,9 +4561,9 @@ __extend__(DOMDocument.prototype, {
      * @seealso
      *     Document.evaluate
      */
-    evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
-        XPathExpression.apply(this, arguments);
-    },
+    /*evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
+        return new XPathExpression().evaluate();
+    },*/
     getElementById : function(elementId) {
           var retNode = null,
               node;
@@ -7579,13 +7579,14 @@ $debug("Defining XPathExpression");
 * XPathExpression 
 */
 $w.__defineGetter__("XPathExpression", function(){
-    throw new Error("Object cannot be created in this context");
+    return XPathExpression;
 });
 
 var XPathExpression = function() {};
 __extend__(XPathExpression.prototype, {
     evaluate: function(){
-        //TODO
+        //TODO for now just return an empty XPathResult
+        return new XPathResult();        
     }
 });/**
  * @author thatcher
@@ -7599,7 +7600,7 @@ $w.__defineGetter__("XPathResult", function(){
 });
 
 var XPathResult = function() {
-    this.snapshotLentgh = 0;
+    this.snapshotLength = 0;
     this.stringValue = '';
 };
 

@@ -10,7 +10,7 @@ $w.__defineGetter__("XPathResult", function(){
 });
 
 var XPathResult = function() {
-    this.snapshotLentgh = 0;
+    this.snapshotLength = 0;
     this.stringValue = '';
 };
 

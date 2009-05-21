@@ -289,9 +289,9 @@ __extend__(DOMDocument.prototype, {
      * @seealso
      *     Document.evaluate
      */
-    evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
-        XPathExpression.apply(this, arguments);
-    },
+    /*evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
+        return new XPathExpression().evaluate();
+    },*/
     getElementById : function(elementId) {
           var retNode = null,
               node;
