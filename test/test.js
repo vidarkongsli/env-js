@@ -1,6 +1,17 @@
 // Init
 load("dist/env.rhino.js");
 
+// Must upgrade Rhino to 1.7R2 for this function to work.
+// function crankyLoad() {
+//   var context = Packages.org.mozilla.javascript.Context.currentContext;
+//   var SourceReader = Packages.org.mozilla.javascript.tools.SourceReader;
+//       
+//   for(var i=0; i < arguments.length; i++) {
+//     var filename = arguments[i];
+//     var source = SourceReader.readFileOrUrl(filename, true, "UTF-8");
+//     context.evaluateString(this, source, filename, 0, null);
+//   }
+// }
 
 window.onload = function(){
   print("Handling onload for test.js");
