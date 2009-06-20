@@ -65,6 +65,7 @@
             <fileset dir="${SRC_DIR}" includes="dom/fragment.js" />
             <fileset dir="${SRC_DIR}" includes="dom/instruction.js" />
             <fileset dir="${SRC_DIR}" includes="dom/parser.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/entities.js" />
             <fileset dir="${SRC_DIR}" includes="dom/implementation.js" />
             <fileset dir="${SRC_DIR}" includes="dom/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/html.js" />
