@@ -1,3 +1,9 @@
+// dependencies for the tests
+$w = { }
+$env = { debug: function() {} }
+load("src/window/window.js", "src/dom/node.js");
+
+
 module("dom");
 
 test("Basic requirements", function() {
@@ -10,14 +16,13 @@ test("Basic requirements", function() {
 });
 
 test("document.getElementById", function() {
-	expect(15);
+	expect(14);
   try{ok (document.getElementById('body').id == "body", "Can get Element by id, expected id='body'");}catch(e){print(e);}
   try{ok (document.getElementById('header').id == "header", "Can get Element by id, expected id='header'");}catch(e){print(e);}
   try{ok (document.getElementById('banner').id == "banner", "Can get Element by id, expected id='banner'");}catch(e){print(e);}
   try{ok (document.getElementById('userAgent').id == "userAgent", "Can get Element by id, expected id='userAgent'");}catch(e){print(e);}
   try{ok (document.getElementById('nothiddendiv').id == "nothiddendiv", "Can get Element by id, expected id='nothiddendiv'");}catch(e){print(e);}
   try{ok (document.getElementById('nothiddendivchild').id == "nothiddendivchild", "Can get Element by id, expected id='nothiddendivchild'");}catch(e){print(e);}
-  try{ok (document.getElementById('loadediframe').id == "loadediframe", "Can get Element by id, expected id='loadediframe'");}catch(e){print(e);}
   try{ok (document.getElementById('dl').id == "dl", "Can get Element by id, expected id='dl'");}catch(e){print(e);}
   try{ok (document.getElementById('main').id == "main", "Can get Element by id, expected id='main'");}catch(e){print(e);}
   try{ok (document.getElementById('firstp').id == "firstp", "Can get Element by id, expected id='firstp");}catch(e){print(e);}
@@ -32,4 +37,23 @@ test("element.getElementsByTagName", function() {
 	expect(1);
   var body = document.getElementById('body');
   try{ok (body.getElementsByTagName('h1').length == 1, "Can get NodeList length : Expected 1 , Got " + body.getElementsByTagName('h1').length);}catch(e){print(e);}
+});
+
+test("handling of iframes", function() {
+        expect(3);
+
+  iElement = document.getElementById('loadediframe');
+  try{ok (iElement.id == "loadediframe",
+	  "Can get an IFRAME Element by id, expected id='loadediframe'");
+     }catch(e){print(e);}
+
+  iDocument = iElement.contentDocument;
+  try{ok (iDocument.nodeType == DOMNode.DOCUMENT_NODE,
+          "Can get 'document' object from IFRAME");
+     }catch(e){print(e);}
+
+  iContent = iDocument.getElementById('anElementWithText');
+  try{ok (iContent.innerHTML.match(/text content/).length > 0,
+          "Can get element from DOM inside of IFRAME");
+     }catch(e){print(e);}
 });

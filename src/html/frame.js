@@ -69,7 +69,7 @@ __extend__(HTMLFrameElement.prototype, {
                 }
             }
         }
-        return true;
+        return this._content;
     }
 });
 
