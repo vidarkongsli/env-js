@@ -62,6 +62,7 @@ var Envjs = function(){
     //For Java the window.timer is created using the java.lang.Thread in combination
     //with the java.lang.Runnable
     $env.timer = function(fn, time){};	
+    $env.wait = function(wait){};
     
     $env.javaEnabled = false;	
     
@@ -195,27 +196,63 @@ var Envjs = function(){
         }
     };
     
-    //For Java the window.timer is created using the java.lang.Thread in combination
-    //with the java.lang.Runnable
-    $env.timer = function(fn, time){
-        var running = true;
-        var thread = new java.lang.Thread(new java.lang.Runnable({
-            run: function(){
-                while (running){
-                    java.lang.Thread.currentThread().sleep(time);
-                    //$env.debug("calling in timer "+time);
-                    fn();
-                }
-            }
-        }));
-        this.start = function(){ 
-            thread.start(); 
-        };
-        this.stop = function(){
-            running = false;
-        }
+    var timers = [];
+
+    $env.timer = function(fn, interval){
+	this.fn = fn;
+	this.interval = interval;
+	this.at = Date.now() + interval;
+	this.index = timers.length;
+	timers[this.index] = this;
     };	
-    
+
+    $env.timer.prototype.start = function(){};
+    $env.timer.prototype.stop = function(){
+	delete timers[this.index];
+    };
+
+    // wait === null: execute any immediately runnable timers and return
+    // wait(n) (n > 0): execute any timers as they fire but no longer than n ms
+    // wait(0): execute any timers as they fire, waiting until there are none left
+    $env.wait = function(wait) {
+	var i;
+	var empty;
+	var after;
+	var now;
+	var timer;
+	var sleep;
+	if (wait !== 0 && wait !== null && wait !== undefined){
+	    wait += Date.now();
+	}
+	for (;;) {
+	    for (i in timers){
+		timer = timers[i];
+		now = Date.now();
+		if (timer.at <= now){
+		    f = timer.fn;
+		    f();
+		    timer.at = Date.now() + timer.interval;
+		}
+	    }
+	    empty = true;
+	    sleep = null;
+	    now = Date.now();
+	    for (i in timers){
+		empty  = false;
+		timer = timers[i];
+		after = timer.at - now
+		sleep = (sleep === null || after < sleep) ? after : sleep;
+	    }
+	    sleep = sleep < 0 ? 0 : sleep;
+	    if (empty || ( wait !== 0 ) && ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
+		break;
+	    }
+	    if (sleep) {
+		java.lang.Thread.currentThread().sleep(sleep);
+	    }
+	}
+    };
+
     //Since we're running in rhino I guess we can safely assume
     //java is 'enabled'.  I'm sure this requires more thought
     //than I've given it here
@@ -7931,12 +7968,25 @@ $debug("Initializing Window Timer.");
 //private
 var $timers = [];
 
-$w.setTimeout = function(fn, time){
-	var num;
-	return num = window.setInterval(function(){
-		fn();
-		window.clearInterval(num);
-	}, time);
+window.setTimeout = function(fn, time){
+	var num = $timers.length+1;
+	var tfn;
+	
+    if (typeof fn == 'string') {
+        tfn = function() { 
+            eval(fn); 
+			window.clearInterval(num);
+        }; 
+    } else {
+		tfn = function() {
+			fn();
+			window.clearInterval(num);
+		}
+	}
+	$debug("Creating timer number "+num);
+    $timers[num] = new $env.timer(tfn, time);
+    $timers[num].start();
+	return num;
 };
 
 window.setInterval = function(fn, time){
@@ -7966,7 +8016,8 @@ window.clearInterval = window.clearTimeout = function(num){
 		delete $timers[num];
 	}
 };	
-	/*
+	
+window.$wait = function(wait){ $env.wait(wait); }/*
 * event.js
 */
 // Window Events
