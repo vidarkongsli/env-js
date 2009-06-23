@@ -325,7 +325,7 @@ var Envjs = function(){
 			
 			//write data to output stream if required
             if(data&&data.length&&data.length>0){
-				 if ( xhr.method == "PUT" ) {
+				 if ( xhr.method == "PUT" || xhr.method == "POST" ) {
                 	connection.setDoOutput(true);
 					var outstream = connection.getOutputStream(),
 						outbuffer = new java.lang.String(data).getBytes('UTF-8');
