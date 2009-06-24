@@ -4,9 +4,34 @@
   <head>
     <title>Content document for IFRAME element in env.js unit test suite</title>
   </head>
-  <body>
+  <body onload="checkEventsWithinIframe(this);">
     <p id="anElementWithText">
       This is the text content of a paragraph element.
     </p>
+
+    <!-- elements and scripting here match test cases in ../unit/window.js -->
+    <script>//ensure that we can execute JS inline while loading
+      document.write(
+        '\x3cp id="js_generated_p"\x3eDynamically-generated\x3c/p\x3e');
+    </script>
+
+    <script>//verify that our "document" object actually points to this page
+      document.write('\x3cp id="internalDocRefResult"\x3e');
+      if (document.getElementById('anElementWithText'))
+        document.write("First paragraph element exists-found.");
+      else
+        document.write("Eeek!  Didn't find paragraph id=anElementWithText.");
+      document.write('\x3c/p\x3e');
+    </script>
+
+    <script>// append 'p id=appended "An appended paragraph"' to doc....
+      function checkEventsWithinIframe(body_elem){
+        var t = document.createTextNode("An appended paragraph");
+        var p = document.createElement("p");
+        p.setAttribute("id", "appended");
+        p.appendChild(t);
+        body_elem.appendChild(p);
+      }
+    </script>
   </body>
 </html>

@@ -4810,7 +4810,6 @@ var HTMLDocument = function(implementation) {
   this.DOMDocument = DOMDocument;
   this.DOMDocument(implementation);
 
-  this.title = "";
   this._refferer = "";
   this._domain;
   this._open = false;
@@ -4869,7 +4868,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
-          else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
           else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
           else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
           else{
@@ -4897,6 +4896,29 @@ __extend__(HTMLDocument.prototype, {
         return this.replaceNode(this.body,html);
         
     },
+
+    get title(){
+        var titleArray = this.getElementsByTagName('title');
+        if (titleArray.length < 1)
+            return "";
+        return titleArray[0].text;
+    },
+    set title(titleStr){
+        titleArray = this.getElementsByTagName('title');
+        if (titleArray.length < 1){
+            // need to make a new element and add it to "head"
+            var titleElem = new HTMLTitleElement(this);
+            titleElem.text = titleStr;
+            var headArray = this.getElementsByTagName('head');
+	    if (headArray.length < 1)
+                return;  // ill-formed, just give up.....
+            headArray[0].appendChild(titleElem);
+        }
+        else {
+            titleArray[0].text = titleStr;
+        }
+    },
+
     //set/get cookie see cookie.js
     get domain(){
         return this._domain||window.location.domain;
@@ -7030,7 +7052,40 @@ __extend__(HTMLTableCellElement.prototype, {
     
 });
 
-$w.HTMLTableCellElement	= HTMLTableCellElement;$debug("Defining HTMLTableRowElement");
+$w.HTMLTableCellElement	= HTMLTableCellElement;$debug("Defining HTMLTitleElement");
+/* 
+* HTMLTitleElement - DOM Level 2
+*/
+var HTMLTitleElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLTitleElement.prototype = new HTMLElement;
+__extend__(HTMLTitleElement.prototype, {
+    $recursivelyGatherTextFromNodeTree: function(aNode) {
+        var accumulateText = "";
+        var idx; var n;
+        for (idx=0;idx < aNode.childNodes.length;idx++){
+            n = aNode.childNodes.item(idx);
+	    if      (n.nodeType == DOMNode.TEXT_NODE)
+                accumulateText += n.data;
+            else
+                accumulateText += this.$recursivelyGatherTextFromNodeTree(n);
+        }
+
+        return accumulateText;
+    },
+    get text() {
+        return this.$recursivelyGatherTextFromNodeTree(this);
+    },
+
+    set text(titleStr) {
+        this.innerHTML = titleStr; // if paranoid, would error on embedded HTML
+    }
+});
+
+$w.HTMLTitleElement = HTMLTitleElement;
+$debug("Defining HTMLTableRowElement");
 /* 
 * HTMLRowElement - DOM Level 2
 * Implementation Provided by Steven Wood

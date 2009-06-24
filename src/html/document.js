@@ -12,7 +12,6 @@ var HTMLDocument = function(implementation) {
   this.DOMDocument = DOMDocument;
   this.DOMDocument(implementation);
 
-  this.title = "";
   this._refferer = "";
   this._domain;
   this._open = false;
@@ -71,7 +70,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
-          else if(tagName.match(/TITLE/))               {node = new HTMLElement(this);}
+          else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
           else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
           else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
           else{
@@ -99,6 +98,29 @@ __extend__(HTMLDocument.prototype, {
         return this.replaceNode(this.body,html);
         
     },
+
+    get title(){
+        var titleArray = this.getElementsByTagName('title');
+        if (titleArray.length < 1)
+            return "";
+        return titleArray[0].text;
+    },
+    set title(titleStr){
+        titleArray = this.getElementsByTagName('title');
+        if (titleArray.length < 1){
+            // need to make a new element and add it to "head"
+            var titleElem = new HTMLTitleElement(this);
+            titleElem.text = titleStr;
+            var headArray = this.getElementsByTagName('head');
+	    if (headArray.length < 1)
+                return;  // ill-formed, just give up.....
+            headArray[0].appendChild(titleElem);
+        }
+        else {
+            titleArray[0].text = titleStr;
+        }
+    },
+
     //set/get cookie see cookie.js
     get domain(){
         return this._domain||window.location.domain;

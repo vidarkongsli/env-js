@@ -105,6 +105,7 @@
             <fileset dir="${SRC_DIR}" includes="html/table.js" />
             <fileset dir="${SRC_DIR}" includes="html/tbody-thead-tfoot.js" />
             <fileset dir="${SRC_DIR}" includes="html/td-th.js" />
+            <fileset dir="${SRC_DIR}" includes="html/title.js" />
             <fileset dir="${SRC_DIR}" includes="html/tr.js" />
             <fileset dir="${SRC_DIR}" includes="serializer/xml.js" />
             <fileset dir="${SRC_DIR}" includes="xpath/expression.js" />
