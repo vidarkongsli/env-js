@@ -7,7 +7,7 @@ var CSS2Properties = function(options){
 };
 __extend__(CSS2Properties.prototype, {
     get cssText(){
-        return Array.prototype.apply.join(this,[';\n']);
+        return Array.prototype.join.apply(this,[';\n']);
     },
     set cssText(cssText){ 
         __cssTextToStyles__(this, cssText); 
