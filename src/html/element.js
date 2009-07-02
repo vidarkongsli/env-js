@@ -86,11 +86,24 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        this.$css2props = new CSS2Properties({
-    		        cssText:this.getAttribute("style")
-    	        });
+		        this.updateCss2Props();
 	        }
 	        return this.$css2props
+		},
+		updateCss2Props: function() {
+			this.$css2props = new CSS2Properties({
+				onSet: (function(that) {
+					return function() { that.__setAttribute("style", this.cssText); }
+				})(this),
+				cssText:this.getAttribute("style")
+			});
+		},
+		__setAttribute: HTMLElement.prototype.setAttribute,
+		setAttribute: function (name, value) {
+		    this.__setAttribute(name, value);
+		    if (name === "style") {
+		        this.updateCss2Props();
+		    }
 		},
 		get title() { 
 		    return this.getAttribute("title")||""; 
