@@ -155,14 +155,21 @@
                 xhr.statusText = connection.responseMessage || "";
                 
                 var contentEncoding = connection.getContentEncoding() || "utf-8",
-                    stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
-                            new java.util.zip.GZIPInputStream(connection.getInputStream()) :
-                            connection.getInputStream(),
                     baos = new java.io.ByteArrayOutputStream(),
-                buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+                    buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
                     length,
+                    stream = null,
                     responseXML = null;
 
+                try{
+                    stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
+                            new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+                            connection.getInputStream();
+                }catch(e){
+                    $env.error('failed to open connection stream \n'+e.toString(), e);
+                    stream = connection.getErrorStream();
+                }
+                
                 while ((length = stream.read(buffer)) != -1) {
                     baos.write(buffer, 0, length);
                 }
