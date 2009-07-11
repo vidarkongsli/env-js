@@ -18,3 +18,16 @@ test("Window Global Scope Equivalence", function() {
 	ok( window.$$$$$ === "12345", "Property is in window scope." );
     
 });
+
+
+test("Window scope in iframe isolated", function() {
+    expect(1);
+
+    // test cases here rely on JS in ../html/iframe.html
+    var idoc = document.getElementById('loadediframe').contentDocument;
+    var mtch = idoc.title.match(/IFRAME/);
+	try{ok (mtch && mtch.length > 0,
+            "Can get 'document' object from test iframe");
+        }catch(e){print(e);}
+});
+

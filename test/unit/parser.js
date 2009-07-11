@@ -1,8 +1,8 @@
 // environment mocking for parser
-$w = ""
+$w = { }
 $env = { debug: function() {} }
 
-load("src/window/window.js", "src/dom/parser.js");
+load("src/window/window.js", "src/dom/parser.js", "src/dom/entities.js");
 
 module("parser");
 
@@ -35,6 +35,43 @@ test("Entity replaced", function() {
 
     equals(XMLP._ELM_E, p.next(), "Closing body tag"); // _ELM_E </body>
     equals(XMLP._ELM_E, p.next(), "Closing html tag"); // _ELM_E </html>
+});
+
+test("HTML standard entities spot-check", function() {
+    // test definition
+    var numentities = 23;
+    var numexpect = 2 + (4*numentities);
+    expect(numexpect)
+    var htmlstr  = "<html><body>&quot; &amp; &lt; &gt; "+
+                   "&nbsp; &copy; &reg; &yen; &para; " +
+                   "&Ecirc; &Otilde; &aelig; &divide; &Kappa; &theta; "+
+                   "&bull; &hellip; &trade; &rArr; &sum; &clubs; " +
+                   "&ensp; &mdash; </body></html>";
+    var expected = [            '"',   '&',  '<', '>',
+                   '\xA0', '\xA9','\xAE','\xA5','\xB6',
+                   '\xCA',  '\xD5',  '\xE6', '\xF7', '\u039A','\u03B8',
+                   '\u2022','\u2026','\u2122','\u21D2','\u2211','\u2663',
+                   '\u2002','\u2014'  ];
+
+    // get started
+    var p = new XMLP(htmlstr);
+    equals(XMLP._ELM_B, p.next(), "Opening html tag"); // _ELM_B <html>
+    equals(XMLP._ELM_B, p.next(), "Opening body tag"); // _ELM_B <body>
+
+    // check entities
+    for (idx=0; idx < numentities; idx++) {
+	equals(XMLP._ENTITY, p.next(), "Parser emits entity event -- '" +
+                                       expected[idx] + "'");
+	actual = p.getContent().substring(
+                     p.getContentBegin(), p.getContentEnd());
+	equals(expected[idx], actual, "Parser replaces entity -- '" +
+                                       expected[idx] + "'");
+
+	equals(XMLP._TEXT, p.next(), "Parser emits text event");
+	actual = p.getContent().substring(
+                     p.getContentBegin(), p.getContentEnd());
+	equals(" ", actual, "Parser content set");
+    }
 });
 
 test("Toggle entity replacement", function() {

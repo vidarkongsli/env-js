@@ -46,14 +46,13 @@ __extend__(DOMDocument.prototype, {
         var parser = new XMLP(xmlStr+'');
         
         // create DOM Document
-        var doc = new HTMLDocument(this.implementation);
         if(this === $document){
             $debug("Setting internal window.document");
-            $document = doc;
+            $document = this;
         }
         // populate Document with Parsed Nodes
         try {
-            __parseLoop__(this.implementation, doc, parser);
+            __parseLoop__(this.implementation, this, parser);
             //doc = html2dom(xmlStr+"", doc);
         	//$log("\nhtml2xml\n" + doc.xml);
         } catch (e) {
@@ -62,8 +61,8 @@ __extend__(DOMDocument.prototype, {
         }
 
         // set parseComplete flag, (Some validation Rules are relaxed if this is false)
-        doc._parseComplete = true;
-        return doc;
+        this._parseComplete = true;
+        return this;
     },
     load: function(url){
 		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");

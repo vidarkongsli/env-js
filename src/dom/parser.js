@@ -646,23 +646,20 @@ XMLP.prototype._replaceEntity = function(strD, iB, iE) {
     iB = iB || 0;
     iE = iE || strD.length;
 
-    switch(strD.substring(iB, iE)) {
-        case "amp":  strEnt = "&";  break;
-        case "lt":   strEnt = "<";  break;
-        case "gt":   strEnt = ">";  break;
-        case "apos": strEnt = "'";  break;
-        case "quot": strEnt = "\""; break;
-        case "nbsp": strEnt = " "; break;
-        default:
-            if(strD.charAt(iB) == "#") {
-                strEnt = String.fromCharCode(parseInt(strD.substring(iB + 1, iE)))+'';
-            } else {
-                return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
-            }
-        break;
-    }
-    this._setContent(XMLP._CONT_ALT, strEnt);
 
+    ent = strD.substring(iB, iE);
+    strEnt = $w.$entityDefinitions[ent];
+    if (!strEnt)  // special case for entity name==JS reserved keyword
+        strEnt = $w.$entityDefinitions[ent+"XX"];
+    if (!strEnt) {
+        if(strD.charAt(iB) == "#")
+            strEnt = String.fromCharCode(
+                         parseInt(strD.substring(iB + 1, iE)))+'';
+        else
+            return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
+    }
+
+    this._setContent(XMLP._CONT_ALT, strEnt);
     return XMLP._ENTITY;
 }
 
