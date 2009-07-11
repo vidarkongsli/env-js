@@ -8,12 +8,25 @@ $debug("Initializing Window Timer.");
 //private
 var $timers = [];
 
-$w.setTimeout = function(fn, time){
-	var num;
-	return num = window.setInterval(function(){
-		fn();
-		window.clearInterval(num);
-	}, time);
+window.setTimeout = function(fn, time){
+	var num = $timers.length+1;
+	var tfn;
+	
+    if (typeof fn == 'string') {
+        tfn = function() { 
+            eval(fn); 
+			window.clearInterval(num);
+        }; 
+    } else {
+		tfn = function() {
+			fn();
+			window.clearInterval(num);
+		}
+	}
+	$debug("Creating timer number "+num);
+    $timers[num] = new $env.timer(tfn, time);
+    $timers[num].start();
+	return num;
 };
 
 window.setInterval = function(fn, time){
@@ -44,3 +57,4 @@ window.clearInterval = window.clearTimeout = function(num){
 	}
 };	
 	
+window.$wait = function(wait){ $env.wait(wait); }
