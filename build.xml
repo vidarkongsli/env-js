@@ -39,8 +39,11 @@
             location="${DIST_DIR}/env.rhino.js"/>
     
     <!-- BUILD TARGETS -->
-    <target name="all" depends="concat,test"/>
-    
+    <target name="all" depends="rhino,concat,test"/>
+    <target name="rhino">
+        <ant antfile="rhino/build.xml" target="all" inheritAll="false"/>
+    </target>
+
     <target name="concat" description="Main ENV build">
         <mkdir dir="${DIST_DIR}" />
           <!-- CORE -->
@@ -147,7 +150,10 @@
     </target>
     
     <target name="test" description="Run the tests">
-      <java fork="true" jar="rhino/js.jar" failonerror="true">
+      <java fork="true"
+            failonerror="true"
+            classname="EnvjsRhinoMain"
+            classpath="rhino/js.jar:rhino/mainForEnvjs.jar">
         <arg value="test/test.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
