@@ -36,9 +36,9 @@ var Envjs = function(){
     $env.error  = function(){};
     
     //uncomment these if you want to get some internal log statementes
-    /*$env.debug  = function(msg){
+    /**/$env.debug  = function(msg){
         $env.log(msg,"DEBUG"); 
-    };*/
+    };
     $env.info   = function(msg){
         $env.log(msg,"INFO"); 
     };
@@ -442,15 +442,18 @@ var Envjs = function(){
  */
 
 
-// The Window Object
-var __this__ = this;
-this.__defineGetter__('window', function(){
-  return __this__;
-});
+try {
+        // this goes into the global namespace, but less likely to collide with
+        //   client JS code than methods in Rhino shell (load, print, etc.)
+    _$envjs$makeObjectIntoWindow$_ = function($w, $env){
 
-try{
-(function($w, $env){
-        /*
+        // The Window Object
+        var __this__ = $w;
+        $w.__defineGetter__('window', function(){
+            return __this__;
+        });
+
+/*
 *	window.js
 *   - this file will be wrapped in a closure providing the window object as $w
 */
@@ -4185,10 +4188,26 @@ function __parseLoop__(impl, doc, p) {
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
       //handle script tag
-      if(iNodeParent.nodeName.toLowerCase() == 'script'){
+      if      (iNodeParent.nodeName.toLowerCase() == 'script'){
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
+      else if (iNodeParent.nodeName.toLowerCase() == 'frame' ||
+               iNodeParent.nodeName.toLowerCase() == 'iframe'   ){
+        if (iNodeParent.src.length > 0){
+          $debug("getting content document for (i)frame from " +
+                 iNodeParent.src);
+          var frameWindow = {};   // temporary, will replace with a new global
+          try {
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+            frameWindow.location = iNodeParent.src;
+            iNodeParent._content = frameWindow;
+          } catch(e){
+            $error("failed to load frame content: from " + iNodeParent.src, e);
+          }
+        }
+      }
+
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
 
     }
@@ -6310,19 +6329,7 @@ __extend__(HTMLFrameElement.prototype, {
         this.setAttribute('src', value);
     },
     get contentDocument(){
-        $debug("getting content document for (i)frame");
-        if(!this._content){
-            this._content = new HTMLDocument($implementation);
-            if(this.src.length > 0){
-                $info("Loading frame content from " + this.src);
-                try{
-                    this._content.load(this.src);
-                }catch(e){
-                    $error("failed to load frame content: from " + this.src, e);
-                }
-            }
-        }
-        return this._content;
+        return this._content.document;
     }
 });
 
@@ -10325,8 +10332,15 @@ try{
 *	outro.js
 */
 
-})(window, Envjs); 
 
-}catch(e){
-    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" + Envjs.lineSource(e));
+    };        // close function definition begun in 'intro.js'
+
+
+        // turn "original" JS interpreter global object into the
+        //   "root" window object
+    _$envjs$makeObjectIntoWindow$_(this, Envjs);
+
+} catch(e){
+    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +
+        Envjs.lineSource(e));
 }

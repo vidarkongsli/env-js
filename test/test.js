@@ -16,10 +16,6 @@ load("dist/env.rhino.js");
 window.onload = function(){
   print("Handling onload for test.js");
 
-  // env.js doesn't load IFRAMEs until their content is referenced, so...
-  document.getElementById('loadediframe').contentDocument;
-  print("Forced loading of iframe in test page.");
-
   // Load the test runner
   load("test/testrunner.js");
   print("Loaded test runner.");

@@ -57,19 +57,7 @@ __extend__(HTMLFrameElement.prototype, {
         this.setAttribute('src', value);
     },
     get contentDocument(){
-        $debug("getting content document for (i)frame");
-        if(!this._content){
-            this._content = new HTMLDocument($implementation);
-            if(this.src.length > 0){
-                $info("Loading frame content from " + this.src);
-                try{
-                    this._content.load(this.src);
-                }catch(e){
-                    $error("failed to load frame content: from " + this.src, e);
-                }
-            }
-        }
-        return this._content;
+        return this._content.document;
     }
 });
 

@@ -5,12 +5,14 @@
  */
 
 
-// The Window Object
-var __this__ = this;
-this.__defineGetter__('window', function(){
-  return __this__;
-});
+try {
+        // this goes into the global namespace, but less likely to collide with
+        //   client JS code than methods in Rhino shell (load, print, etc.)
+    _$envjs$makeObjectIntoWindow$_ = function($w, $env){
 
-try{
-(function($w, $env){
-        
+        // The Window Object
+        var __this__ = $w;
+        $w.__defineGetter__('window', function(){
+            return __this__;
+        });
+

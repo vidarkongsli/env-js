@@ -238,10 +238,26 @@ function __parseLoop__(impl, doc, p) {
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
       //handle script tag
-      if(iNodeParent.nodeName.toLowerCase() == 'script'){
+      if      (iNodeParent.nodeName.toLowerCase() == 'script'){
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
+      else if (iNodeParent.nodeName.toLowerCase() == 'frame' ||
+               iNodeParent.nodeName.toLowerCase() == 'iframe'   ){
+        if (iNodeParent.src.length > 0){
+          $debug("getting content document for (i)frame from " +
+                 iNodeParent.src);
+          var frameWindow = {};   // temporary, will replace with a new global
+          try {
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+            frameWindow.location = iNodeParent.src;
+            iNodeParent._content = frameWindow;
+          } catch(e){
+            $error("failed to load frame content: from " + iNodeParent.src, e);
+          }
+        }
+      }
+
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
 
     }
