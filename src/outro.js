@@ -7,8 +7,8 @@
 
 
         // turn "original" JS interpreter global object into the
-        //   "root" window object
-    _$envjs$makeObjectIntoWindow$_(this, Envjs);
+        //   "root" window object; third param value for new window's "parent"
+    _$envjs$makeObjectIntoWindow$_(this, Envjs, null);
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +

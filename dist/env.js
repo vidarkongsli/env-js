@@ -8,7 +8,7 @@
 try {
         // this goes into the global namespace, but less likely to collide with
         //   client JS code than methods in Rhino shell (load, print, etc.)
-    _$envjs$makeObjectIntoWindow$_ = function($w, $env){
+    _$envjs$makeObjectIntoWindow$_ = function($w, $env, $parentWindow){
 
         // The Window Object
         var __this__ = $w;
@@ -49,7 +49,8 @@ var $defaultStatus = "Done";
 var $event = null;
 
 //A read-only array of window objects
-var $frames = [];
+//var $frames = [];    // TODO: since window.frames can be accessed like a
+                       //   hash, will need an object to really implement
 
 // a read-only reference to the History object
 /**>  $history - see location.js <**/
@@ -60,9 +61,9 @@ var $innerHeight = 600, $innerWidth = 800;
 // a read-only reference to the Location object.  the location object does expose read/write properties
 /**> $location - see location.js <**/
 
-// a read only property specifying the name of the window.  Can be set when using open()
-// and may be used when specifying the target attribute of links
-var $name = 'Resig Env Browser';
+// The name of window/frame.  Set directly, when using open(), or in frameset.
+// May be used when specifying the target attribute of links
+var $name;
 
 // a read-only reference to the Navigator object
 /**> $navigator - see navigator.js <**/
@@ -84,18 +85,14 @@ var $pageXOffset = 0, $pageYOffset = 0;
 //A read-only reference to the Window object that contains this window or frame.  If the window is
 // a top-level window, parent refers to the window itself.  If this window is a frame, this property
 // refers to the window or frame that conatins it.
-var $parent;
+var $parent = $parentWindow;
 
 // a read-only refernce to the Screen object that specifies information about the screen: 
 // the number of available pixels and the number of available colors.
 /**> $screen - see screen.js <**/
-
 // read only properties that specify the coordinates of the upper-left corner of the screen.
 var $screenX = 0, $screenY = 0;
 var $screenLeft = $screenX, $screenTop = $screenY;
-
-// a read-only refernce to this window itself.
-var $self;
 
 // a read/write string that specifies the current contents of the status line.
 var $status = '';
@@ -105,7 +102,7 @@ var $status = '';
 // is a frame, the top property refers to the top-level window that contains the frame.
 var $top;
 
-// the window property is identical to the self property.
+// the window property is identical to the self property and to this obj
 var $window = $w;
 
 $debug("Initializing Window.");
@@ -115,7 +112,10 @@ __extend__($w,{
   set defaultStatus(_defaultStatus){$defaultStatus = _defaultStatus;},
   //get document(){return $document;}, - see document.js
   get event(){return $event;},
-  get frames(){return $frames;},
+
+  get frames(){return undefined;}, // TODO: not yet any code to maintain list
+  get length(){return undefined;}, //   should be frames.length, but.... TODO
+
   //get history(){return $history;}, - see location.js
   get innerHeight(){return $innerHeight;},
   get innerWidth(){return $innerWidth;},
@@ -123,6 +123,7 @@ __extend__($w,{
   get clientWidth(){return $innerWidth;},
   //get location(){return $location;}, see location.js
   get name(){return $name;},
+  set name(newName){ $name = newName; },
   //get navigator(){return $navigator;}, see navigator.js
   get opener(){return $opener;},
   get outerHeight(){return $outerHeight;},
@@ -135,7 +136,7 @@ __extend__($w,{
   get screenTop(){return $screenTop;},
   get screenX(){return $screenX;},
   get screenY(){return $screenY;},
-  get self(){return $self;},
+  get self(){return $window;},
   get status(){return $status;},
   set status(_status){$status = _status;},
   get top(){return $top || $window;},
@@ -143,11 +144,11 @@ __extend__($w,{
 });
 
 $w.open = function(url, name, features, replace){
-  //TODO
+  //TODO.  Remember to set $opener, $name
 };
 
 $w.close = function(){
-  //TODO
+  //TODO.  Remember to set $closed
 };     
   
 /* Time related functions - see timer.js
@@ -3742,7 +3743,7 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
@@ -3755,6 +3756,7 @@ function __parseLoop__(impl, doc, p) {
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
+      //handle frame and iframe tags
       else if (iNodeParent.nodeName.toLowerCase() == 'frame' ||
                iNodeParent.nodeName.toLowerCase() == 'iframe'   ){
         if (iNodeParent.src.length > 0){
@@ -3762,7 +3764,7 @@ function __parseLoop__(impl, doc, p) {
                  iNodeParent.src);
           var frameWindow = {};   // temporary, will replace with a new global
           try {
-            _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
             frameWindow.location = iNodeParent.src;
             iNodeParent._content = frameWindow;
           } catch(e){
@@ -3855,7 +3857,7 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
@@ -4115,7 +4117,8 @@ var DOMDocument = function(implementation) {
     
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
-    this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
+    this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
+    this._parentWindow = null;            // "private" variable providing the read-only document.parentWindow property
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -4142,6 +4145,12 @@ __extend__(DOMDocument.prototype, {
     get all(){
         return this.getElementsByTagName("*");
     },
+    get documentElement(){
+        return this._documentElement;
+    },
+    get parentWindow(){
+        return this._parentWindow;
+    },
     loadXML : function(xmlStr) {
         // create SAX Parser
         var parser = new XMLP(xmlStr+'');
@@ -4167,6 +4176,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
+        this._parentWindow = $w;
         var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
@@ -4388,9 +4398,9 @@ __extend__(DOMDocument.prototype, {
           var all = this.all;
           for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches & node is alive (ie, connected (in)directly to the _documentElement)
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node)._documentElement._id == this._documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -4402,14 +4412,14 @@ __extend__(DOMDocument.prototype, {
           return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this._documentElement.normalize();
     },
     get nodeType(){
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         //$log("Serializing " + this);
-        return this.documentElement.xml;
+        return this._documentElement.xml;
     },
 	toString: function(){ 
 	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
@@ -5895,7 +5905,7 @@ __extend__(HTMLFrameElement.prototype, {
             if (!this._content){
                 var frameWindow = {};
                 try {
-                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
                     frameWindow.location = value;
                     this._content = frameWindow;
                 } catch(e){
@@ -9920,8 +9930,8 @@ try{
 
 
         // turn "original" JS interpreter global object into the
-        //   "root" window object
-    _$envjs$makeObjectIntoWindow$_(this, Envjs);
+        //   "root" window object; third param value for new window's "parent"
+    _$envjs$makeObjectIntoWindow$_(this, Envjs, null);
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +

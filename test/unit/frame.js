@@ -12,7 +12,7 @@ module("frame");
 
 // all tests to next comment rely on content of ../html/iframe.html
 test("IFRAMEs load with accessible content", function() {
-    expect(3);
+    expect(4);
 
     var iframe = document.getElementById('loadediframe');
     try{ok (iframe.src == "html/iframe.html",
@@ -29,6 +29,10 @@ test("IFRAMEs load with accessible content", function() {
     mtch = para.innerHTML.match(/content of a paragraph/);
     try{ok (mtch && mtch.length > 0,
         "Can get text from element in an iframe");
+    }catch(e){print(e);}
+
+    try{ok (idoc.parentWindow.parent == window,
+        "can follow chain from iframe's doc to containing window");
     }catch(e){print(e);}
 });
 

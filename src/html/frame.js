@@ -60,7 +60,7 @@ __extend__(HTMLFrameElement.prototype, {
             if (!this._content){
                 var frameWindow = {};
                 try {
-                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
                     frameWindow.location = value;
                     this._content = frameWindow;
                 } catch(e){

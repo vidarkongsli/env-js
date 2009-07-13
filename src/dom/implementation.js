@@ -229,7 +229,7 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
@@ -242,6 +242,7 @@ function __parseLoop__(impl, doc, p) {
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
+      //handle frame and iframe tags
       else if (iNodeParent.nodeName.toLowerCase() == 'frame' ||
                iNodeParent.nodeName.toLowerCase() == 'iframe'   ){
         if (iNodeParent.src.length > 0){
@@ -249,7 +250,7 @@ function __parseLoop__(impl, doc, p) {
                  iNodeParent.src);
           var frameWindow = {};   // temporary, will replace with a new global
           try {
-            _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
             frameWindow.location = iNodeParent.src;
             iNodeParent._content = frameWindow;
           } catch(e){
@@ -342,7 +343,7 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
       iNodeParent.appendChild(iNode);               // attach Element to parentNode

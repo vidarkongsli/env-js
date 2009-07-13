@@ -14,7 +14,8 @@ var DOMDocument = function(implementation) {
     
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
-    this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
+    this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
+    this._parentWindow = null;            // "private" variable providing the read-only document.parentWindow property
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -41,6 +42,12 @@ __extend__(DOMDocument.prototype, {
     get all(){
         return this.getElementsByTagName("*");
     },
+    get documentElement(){
+        return this._documentElement;
+    },
+    get parentWindow(){
+        return this._parentWindow;
+    },
     loadXML : function(xmlStr) {
         // create SAX Parser
         var parser = new XMLP(xmlStr+'');
@@ -66,6 +73,7 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
+        this._parentWindow = $w;
         var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
@@ -287,9 +295,9 @@ __extend__(DOMDocument.prototype, {
           var all = this.all;
           for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches & node is alive (ie, connected (in)directly to the _documentElement)
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node)._documentElement._id == this._documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -301,14 +309,14 @@ __extend__(DOMDocument.prototype, {
           return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this._documentElement.normalize();
     },
     get nodeType(){
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         //$log("Serializing " + this);
-        return this.documentElement.xml;
+        return this._documentElement.xml;
     },
 	toString: function(){ 
 	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 

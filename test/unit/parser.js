@@ -1,6 +1,7 @@
 // environment mocking for parser
 $w = { }
 $env = { debug: function() {} }
+$parentWindow = null;
 
 load("src/window/window.js", "src/dom/parser.js", "src/dom/entities.js");
 
