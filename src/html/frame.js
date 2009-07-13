@@ -55,9 +55,29 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+
+        if (value.length > 0){
+            if (!this._content){
+                var frameWindow = {};
+                try {
+                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env);
+                    frameWindow.location = value;
+                    this._content = frameWindow;
+                } catch(e){
+                    $error("failed to load frame content: from " + value, e);
+                }
+            }
+
+	    this._content.location = value;
+        }
     },
     get contentDocument(){
+        if (!this._content)
+            return null;
         return this._content.document;
+    },
+    get contentWindow(){
+        return this._content;
     }
 });
 
