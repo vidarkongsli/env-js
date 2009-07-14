@@ -82,7 +82,7 @@ var $status = '';
 // a read-only reference to the top-level window that contains this window.  If this
 // window is a top-level window it is simply a refernce to itself.  If this window 
 // is a frame, the top property refers to the top-level window that contains the frame.
-var $top;
+var $top = $initTop;
 
 // the window property is identical to the self property and to this obj
 var $window = $w;

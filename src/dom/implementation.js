@@ -250,7 +250,8 @@ function __parseLoop__(impl, doc, p) {
                  iNodeParent.src);
           var frameWindow = {};   // temporary, will replace with a new global
           try {
-            _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env,
+                                           window, window.top);
             frameWindow.location = iNodeParent.src;
             iNodeParent._content = frameWindow;
           } catch(e){

@@ -445,7 +445,8 @@ var Envjs = function(){
 try {
         // this goes into the global namespace, but less likely to collide with
         //   client JS code than methods in Rhino shell (load, print, etc.)
-    _$envjs$makeObjectIntoWindow$_ = function($w, $env, $parentWindow){
+    _$envjs$makeObjectIntoWindow$_ = function($w, $env,
+                                              $parentWindow, $initTop){
 
         // The Window Object
         var __this__ = $w;
@@ -537,7 +538,7 @@ var $status = '';
 // a read-only reference to the top-level window that contains this window.  If this
 // window is a top-level window it is simply a refernce to itself.  If this window 
 // is a frame, the top property refers to the top-level window that contains the frame.
-var $top;
+var $top = $initTop;
 
 // the window property is identical to the self property and to this obj
 var $window = $w;
@@ -4201,7 +4202,8 @@ function __parseLoop__(impl, doc, p) {
                  iNodeParent.src);
           var frameWindow = {};   // temporary, will replace with a new global
           try {
-            _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
+            _$envjs$makeObjectIntoWindow$_(frameWindow, $env,
+                                           window, window.top);
             frameWindow.location = iNodeParent.src;
             iNodeParent._content = frameWindow;
           } catch(e){
@@ -10368,7 +10370,7 @@ try{
 
         // turn "original" JS interpreter global object into the
         //   "root" window object; third param value for new window's "parent"
-    _$envjs$makeObjectIntoWindow$_(this, Envjs, null);
+    _$envjs$makeObjectIntoWindow$_(this, Envjs, null, this);
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +

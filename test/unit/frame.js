@@ -12,7 +12,7 @@ module("frame");
 
 // all tests to next comment rely on content of ../html/iframe.html
 test("IFRAMEs load with accessible content", function() {
-    expect(4);
+    expect(5);
 
     var iframe = document.getElementById('loadediframe');
     try{ok (iframe.src == "html/iframe.html",
@@ -32,7 +32,11 @@ test("IFRAMEs load with accessible content", function() {
     }catch(e){print(e);}
 
     try{ok (idoc.parentWindow.parent == window,
-        "can follow chain from iframe's doc to containing window");
+        "Can follow chain from iframe's doc to containing window");
+    }catch(e){print(e);}
+
+    try{ok (iframe.contentWindow.top == window,
+        "'.top' from iframe does point to top window");
     }catch(e){print(e);}
 });
 

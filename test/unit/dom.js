@@ -1,7 +1,7 @@
 // dependencies for the tests
 $w = { }
 $env = { debug: function() {} }
-$parentWindow = null;
+$parentWindow = $initTop = null;
 load("src/window/window.js", "src/dom/node.js");
 
 

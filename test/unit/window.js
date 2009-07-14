@@ -24,3 +24,18 @@ test("Window Global Scope Equivalence", function() {
         "'window' provides Math.* when referenced implicitly/global");
     }catch(e){print(e);}
 });
+
+
+test("References to the window object", function() {
+    expect(3);
+
+    try{ ok(window == window.window,
+        "'window' is property of the window object");
+    }catch(e){print(e);}
+    try{ ok(window == self,
+        "'self' refers to the current window");
+    }catch(e){print(e);}
+    try{ ok(window == window.top,
+        "for top-level document 'window.top' refers to itself");
+    }catch(e){print(e);}
+});
