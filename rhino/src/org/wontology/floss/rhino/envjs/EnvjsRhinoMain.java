@@ -7,13 +7,16 @@
  */
 
 
+package org.wontology.floss.rhino.envjs;
+
 import org.mozilla.javascript.tools.shell.*;
+
 
 public class EnvjsRhinoMain extends Main
 {
     static
     {           // replace the generic Global object with our extended
-        System.out.println("Hello from EnvjsRhinoMain-static-initializer");
+//        EnvjsRhinoGlobal g =
         global = new EnvjsRhinoGlobal();
         // not calling global.initQuitAction()  Doesn't matter because env.js
         // doesn't call the "quit" JS method provided by the Rhino shell app

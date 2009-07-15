@@ -1,6 +1,6 @@
 
 <project name="rhino" default="all" basedir=".">
   <target name="all">
-    <ant antfile="mainForEnvjs/build.xml" target="jar"/>
+    <ant antfile="src/build.xml" target="jar"/>
   </target>
 </project>

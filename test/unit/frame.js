@@ -40,6 +40,18 @@ test("IFRAMEs load with accessible content", function() {
     }catch(e){print(e);}
 });
 
+
+test("Global scope for JS code in an iframe refers to that iframe's window/document", function() {
+    expect(1);
+
+    var idoc = document.getElementById('loadediframe').contentDocument;
+    mtch = idoc.getElementById('js_generated_p').innerHTML.match(/Dynamic/);
+    try{ ok(mtch && mtch.length > 0,
+        "Can get content from dynamically-generate p element");
+    }catch(e){print(e);}
+});
+
+
 // all tests to next comment rely on content of ../html/iframe2.html
 test("IFRAMEs reload on assignment to 'src'", function() {
     expect(2);

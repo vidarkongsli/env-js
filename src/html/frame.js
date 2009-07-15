@@ -61,8 +61,8 @@ __extend__(HTMLFrameElement.prototype, {
                 var frameWindow = {};
                 try {
                     _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
-                    frameWindow.location = value;
                     this._content = frameWindow;
+                    frameWindow.location = value;
                 } catch(e){
                     $error("failed to load frame content: from " + value, e);
                 }

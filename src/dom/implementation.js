@@ -248,12 +248,18 @@ function __parseLoop__(impl, doc, p) {
         if (iNodeParent.src.length > 0){
           $debug("getting content document for (i)frame from " +
                  iNodeParent.src);
-          var frameWindow = {};   // temporary, will replace with a new global
+          var frameWindow = createAGlobalObject();       //EnvjsRhinoGlobal.java
           try {
             _$envjs$makeObjectIntoWindow$_(frameWindow, $env,
                                            window, window.top);
-            frameWindow.location = iNodeParent.src;
             iNodeParent._content = frameWindow;
+            _$envjs$globalObjectStack$_.push(
+              getThisScopesGlobalObject());              //EnvjsRhinoGlobal.java
+            setThisScopesGlobalObject(frameWindow);      //EnvjsRhinoGlobal.java
+                // **** CAREFUL: use no global references here ****
+                frameWindow.location = iNodeParent.src;
+            setThisScopesGlobalObject(                   //EnvjsRhinoGlobal.java
+              _$envjs$globalObjectStack$_.pop());
           } catch(e){
             $error("failed to load frame content: from " + iNodeParent.src, e);
           }
