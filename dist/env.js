@@ -3765,14 +3765,15 @@ function __parseLoop__(impl, doc, p) {
                  iNodeParent.src);
           var frameWindow = createAGlobalObject();       //EnvjsRhinoGlobal.java
           try {
-            _$envjs$makeObjectIntoWindow$_(frameWindow, $env,
-                                           window, window.top);
-            iNodeParent._content = frameWindow;
             _$envjs$globalObjectStack$_.push(
               getThisScopesGlobalObject());              //EnvjsRhinoGlobal.java
             setThisScopesGlobalObject(frameWindow);      //EnvjsRhinoGlobal.java
-                // **** CAREFUL: use no global references here ****
+            {   // **** CAREFUL: use no global references in this block ****
+		_$envjs$makeObjectIntoWindow$_(frameWindow, $env,
+					       window, window.top);
+		iNodeParent._content = frameWindow;
                 frameWindow.location = iNodeParent.src;
+	    }
             setThisScopesGlobalObject(                   //EnvjsRhinoGlobal.java
               _$envjs$globalObjectStack$_.pop());
           } catch(e){

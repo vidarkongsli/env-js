@@ -10,68 +10,30 @@
 package org.wontology.floss.rhino.envjs;
 
 import org.mozilla.javascript.*;
+import org.mozilla.javascript.tools.shell.Global;
 
-
-public class EnvjsRhinoGlobal extends
-        org.mozilla.javascript.tools.shell.Global
+public class EnvjsRhinoGlobal extends Global
 {
 
-    Scriptable initialGlobalScope;
-
+    public EnvjsRhinoGlobal(Global parentSharedScope)
+    {
+        this.setPrototype(parentSharedScope);
+        this.setParentScope(null);
+    }
 
     public void init(Context cx)
     {
-        // first, let the Rhino shell base class do its init
-        super.init(cx);
-
-        // now, we add the JavaScript methods we want to provide for env.js
-        String[] names = {
-            "createAGlobalObject",
-            "getThisScopesGlobalObject",
-            "setThisScopesGlobalObject"
-        };
-        defineFunctionProperties(names, EnvjsRhinoGlobal.class,
-                                 ScriptableObject.DONTENUM);
-
-        // env.js needs access to this array on both sides of a change
-        // in global object, and won't be able to create new properties
-        // on "this" object by the time we start executing JS code
-        NativeArray envjsGlobalStack = (NativeArray) cx.newArray(this, 0);
-        defineProperty("_$envjs$globalObjectStack$_", envjsGlobalStack,
-                       ScriptableObject.DONTENUM);
-
-
-
-        // now, create a new empty object to serve as the execution
-        // context's "global", and change this object into a cross-
-        // environment, uber-global object see "Sharing Scopes" in
-        // https://developer.mozilla.org/En/
-        //             Rhino_documentation/Scopes_and_Contexts
-
-//        initialGlobalScope = cx.newObject(this);
-//        initialGlobalScope.setPrototype(this);
-//        initialGlobalScope.setParentScope(null);
+        // we don't init, but make sure our parent is
+        Global uberGlobal = (Global) this.getPrototype();
+        if (!uberGlobal.isInitialized())
+            uberGlobal.init(cx);
     }
 
-
-    /* class methods intended to be called as JavaScript global functions */
-
-    public static Scriptable createAGlobalObject(Context cx, Scriptable thisObj,
-                                                 Object[] args, Function funObj)
+    public boolean isInitialized()
     {
-        return cx.newObject(thisObj);
-    }
-
-    public static Scriptable getThisScopesGlobalObject(Context cx,
-                                                       Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
-    {
-        return cx.newObject(thisObj);
-    }
-
-    public static void setThisScopesGlobalObject(Context cx, Scriptable thisObj,
-                                                 Object[] args, Function funObj)
-    {
+        return ((Global) this.getPrototype()).isInitialized();
+        // some users of Global access .initialized directly (bad class, bad!),
+        //   and will be confused by the fact that we don't set it.  However,
+        //   unnecessary calls to .init() will simply do nothing, so....
     }
 }

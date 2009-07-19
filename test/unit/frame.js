@@ -49,6 +49,19 @@ test("Global scope for JS code in an iframe refers to that iframe's window/docum
     try{ ok(mtch && mtch.length > 0,
         "Can get content from dynamically-generate p element");
     }catch(e){print(e);}
+
+/*
+    mtch = idoc.getElementById('internalDocRefResult').innerHTML.
+                  match(/exists-found/);
+    try{ ok(mtch && mtch.length > 0,
+        "Got confirmation of access to 'document' object in iframe");
+    }catch(e){print(e);}
+
+    mtch = idoc.getElementById('appended').innerHTML.match(/appended para/);
+    try{ ok(mtch && mtch.length > 0,
+        "Got confirmation of body-onload execution in iframe");
+    }catch(e){print(e);}
+*/
 });
 
 
