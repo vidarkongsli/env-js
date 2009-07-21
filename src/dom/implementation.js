@@ -248,19 +248,53 @@ function __parseLoop__(impl, doc, p) {
         if (iNodeParent.src.length > 0){
           $debug("getting content document for (i)frame from " +
                  iNodeParent.src);
-          var frameWindow = createAGlobalObject();       //EnvjsRhinoGlobal.java
+
+
+          // create a new global/window object, such that its methods and
+          //   objects are defined within the scope of the new global
           try {
-            _$envjs$globalObjectStack$_.push(
-              getThisScopesGlobalObject());              //EnvjsRhinoGlobal.java
-            setThisScopesGlobalObject(frameWindow);      //EnvjsRhinoGlobal.java
-            {   // **** CAREFUL: use no global references in this block ****
-		_$envjs$makeObjectIntoWindow$_(frameWindow, $env,
-					       window, window.top);
-		iNodeParent._content = frameWindow;
-                frameWindow.location = iNodeParent.src;
-	    }
-            setThisScopesGlobalObject(                   //EnvjsRhinoGlobal.java
-              _$envjs$globalObjectStack$_.pop());
+
+        /* this code semi-duplicated in html/frame.js -- sorry */
+            // a blank object, pre-configured to inherit from original global
+            var frameWindow = createAGlobalObject();  // EnvjsRhinoSupraGlobal
+
+            // define local variables with content of things that are
+            //   in current global/window, because when the following
+            //   function executes we'll have a new/blank
+            //   global/window and won't be able to get at them....
+            var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+            var localCopy_$env       = $env;
+            var localCopy_window     = window;
+
+            // a local function gives us something whose scope is easy to change
+            var mkAndLoadNewWindow   = function(){
+              localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                localCopy_window, localCopy_window.top);
+              iNodeParent._content = frameWindow;
+              frameWindow.location = iNodeParent.src;
+            }
+
+
+
+            // change scope of window object creation functions, so that
+            //   functions/code they create will be scoped to new window object
+                // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+            var oldMkWinScope      = getFunctionObjectsScope(localCopy_mkWinFn);
+            var oldLoadScope       = getFunctionObjectsScope(load);
+            var oldLoadScriptScope = getFunctionObjectsScope(
+              $env.loadLocalScript);
+
+            setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+            setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+            setFunctionObjectsScope(load,                  frameWindow);
+            setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+            mkAndLoadNewWindow();
+
+            // now restore the scope
+            setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
+            setFunctionObjectsScope(load, oldLoadScope);
+            setFunctionObjectsScope($env.loadLocalScript, oldLoadScriptScope);
           } catch(e){
             $error("failed to load frame content: from " + iNodeParent.src, e);
           }
@@ -268,7 +302,6 @@ function __parseLoop__(impl, doc, p) {
       }
 
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event

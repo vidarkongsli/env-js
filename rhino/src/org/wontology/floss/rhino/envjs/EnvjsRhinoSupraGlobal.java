@@ -24,9 +24,12 @@ public class EnvjsRhinoSupraGlobal extends Global
         // now, we add the JavaScript methods we want to provide for env.js
         String[] names = {
             "createAGlobalObject",
-            "getThisScopesGlobalObject",
-            "whereAmI",
-            "setThisScopesGlobalObject"
+            "getFunctionObjectsScope",
+            "setFunctionObjectsScope",
+            "load",                       // overrides ...shell.Global.load()
+            // debug helper functions
+//            "whereAmI",
+//            "javaHashCode"
         };
         defineFunctionProperties(names, EnvjsRhinoSupraGlobal.class,
                                  ScriptableObject.DONTENUM);
@@ -57,7 +60,17 @@ public class EnvjsRhinoSupraGlobal extends Global
     }
 
 
+
+
     /* class methods intended to be called as JavaScript global functions */
+
+
+    public static void load(Context cx, Scriptable thisObj,
+                            Object[] args, Function funObj)
+    {
+        Global.load(cx, funObj.getParentScope(), args, funObj);
+    }
+
 
     public static Scriptable createAGlobalObject(Context cx, Scriptable thisObj,
                                                  Object[] args, Function funObj)
@@ -67,134 +80,90 @@ public class EnvjsRhinoSupraGlobal extends Global
         while (gObj != null && gObj.getClass() != c)
             gObj = (Global) gObj.getPrototype();
         if (gObj == null)
-            throw new IllegalStateException("EnvjsRhinoSupraGlobal.createAGlobalObject: couldn't find our Global scope obj.");
+            throw new IllegalStateException(
+                "EnvjsRhinoSupraGlobal.createAGlobalObject: couldn't find " +
+                "our Global scope obj.");
         return new EnvjsRhinoGlobal(gObj);
     }
 
-    public static Scriptable getThisScopesGlobalObject(Context cx,
-                                                       Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
+
+    public static Scriptable getFunctionObjectsScope(Context cx,
+                                                     Scriptable thisObj,
+                                                     Object[] args,
+                                                     Function funObj)
     {
-        return ScriptableObject.getTopLevelScope(funObj);
+        if (args.length != 1)
+            throw new IllegalArgumentException(
+                "EnvjsRhinoSupraGlobal.getFunctionObjectsScope: wrong " +
+                "argument count.");
+        return ScriptableObject.getTopLevelScope((Function) args[0]);
     }
 
-    public static void setThisScopesGlobalObject(Context cx, Scriptable thisObj,
-                                                 Object[] args, Function funObj)
+    public static void setFunctionObjectsScope(Context cx, Scriptable thisObj,
+                                               Object[] args, Function funObj)
     {
-        Scriptable previousObj = funObj;
-        Scriptable currentObj = funObj.getParentScope();
+        if (args.length != 2)
+            throw new IllegalArgumentException(
+                "EnvjsRhinoSupraGlobal.setFunctionObjectsScope: wrong " +
+                "argument count.");
+        // rely on Java to throw an exception if we can't do the casts we want
+        //   instead of explicitly checking our argument types
+
+        Function targetFn = (Function) args[0];
+        Scriptable previousObj = targetFn;
+        Scriptable currentObj = targetFn.getParentScope();
         Scriptable nextObj;
         while ((nextObj = currentObj.getParentScope()) != null) {
             previousObj = currentObj;
             currentObj = nextObj;
         }
 
-        if (args.length != 1)
-            throw new IllegalArgumentException("EnvjsRhinoSupraGlobal.setThisScropesGlobalObject: wrong argument count.");
-        else if (args[0].getClass() != EnvjsRhinoGlobal.class)
-            throw new IllegalArgumentException("EnvjsRhinoSupraGlobal.setThisScropesGlobalObject: new scope object isn't an EnvjsRhinoGlobal.");
-        else if (currentObj.getClass() != EnvjsRhinoGlobal.class)
-            throw new IllegalStateException("EnvjsRhinoSupraGlobal.setThisScropesGlobalObject: existing scope object isn't an EnvjsRhinoGlobal.");
-        else
-            previousObj.setParentScope((Scriptable) args[0]);
+        previousObj.setParentScope((Scriptable) args[1]);
     }
 
 
-    public static void whereAmI(Context cx,
-                                                       Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
+/*
+    public static void whereAmI(Context cx, Scriptable thisObj, Object[] args,
+                                Function funObj)
     {
         System.out.println("whereAmI : " + Context.toString(args[0]));
-	System.out.println("    **** function is " + ((FunctionObject) funObj).getFunctionName());
+//        System.out.println(thisObj.getClass().getName() +
+//                             " (" + thisObj.hashCode() + ")");
         System.out.println("  scope:");
         Scriptable temp = thisObj;
         while (temp != null){
-         System.out.println("    this " + temp.getClass().getName() +
-                            " (" + temp.hashCode() + ")");
-         temp = temp.getParentScope();
+            System.out.println("    this " + temp.getClass().getName() +
+                               " (" + temp.hashCode() + ")");
+            temp = temp.getParentScope();
         }
-        temp = funObj;
-        while (temp != null){
-         System.out.println("    fun  " + temp.getClass().getName() +
-                            " (" + temp.hashCode() + ")");
-         temp = temp.getParentScope();
+        if (args[1] != null){
+            temp = (Function) args[1];
+            while (temp != null){
+                System.out.println("    fun  " + temp.getClass().getName() +
+                                   " (" + temp.hashCode() + ")");
+                temp = temp.getParentScope();
+            }
         }
         System.out.println("  prototypes:");
         temp = thisObj;
         while (temp != null){
-         System.out.println("    this " + temp.getClass().getName() +
-                            " (" + temp.hashCode() + ")");
-         temp = temp.getPrototype();
+            System.out.println("    this " + temp.getClass().getName() +
+                               " (" + temp.hashCode() + ")");
+            temp = temp.getPrototype();
         }
-        temp = funObj;
-        while (temp != null){
-         System.out.println("    fun  " + temp.getClass().getName() +
-                            " (" + temp.hashCode() + ")");
-         temp = temp.getPrototype();
+        if (args[1] != null){
+            temp = (Function) args[1];
+            while (temp != null){
+                System.out.println("    fun  " + temp.getClass().getName() +
+                                   " (" + temp.hashCode() + ")");
+                temp = temp.getPrototype();
+            }
         }
-
-
-        System.out.println("  function parameters:");
-        Object[] allIds = ((ScriptableObject) funObj).getAllIds();
-	for (Object anObj: allIds){
-            System.out.println("    " + anObj);
-        }
-
-        Object argumentsObj = funObj.get("arguments",funObj);
-	if (argumentsObj == null)
-	    System.out.println("  'arguments' is null");
-        else {
-	    ScriptableObject argumentsProperty = (ScriptableObject) argumentsObj;
-	    System.out.println("  'arguments' parameters:");
-	    allIds = argumentsProperty.getAllIds();
-	    for (Object anObj: allIds){
-		System.out.println("    " + anObj);
-	    }
-        }
-
-
-/*
-        Object anObj = thisObj.get("arguments",thisObj);
-        if (anObj == Scriptable.NOT_FOUND)
-            System.out.println("      thisObj.arguments not found");
-        else {
-            System.out.println("      thisObj.arguments is " +
-              anObj.getClass().getName());
-
-            Scriptable argumentsProperty = (Scriptable) anObj;
-            anObj = argumentsProperty.get("callee",argumentsProperty);
-            if (anObj == null)
-                System.out.println("         arguments.callee is null");
-            else if (anObj == Scriptable.NOT_FOUND)
-                System.out.println("         arguments.callee not found");
-            else
-                System.out.println("         arguments.callee is " +
-                  anObj.getClass().getName());
-	    
-            anObj = argumentsProperty.get("caller",argumentsProperty);
-            if (anObj == null)
-                System.out.println("         arguments.caller is null");
-            else if (anObj == Scriptable.NOT_FOUND)
-                System.out.println("         arguments.caller not found");
-            else
-                System.out.println("         arguments.caller is " +
-                  anObj.getClass().getName());
-        }
-
-        if (funObj == null)
-            System.out.println("      funObj is null");
-        else {
-            anObj = funObj.get("arguments",funObj);
-            if (anObj == null)
-                System.out.println("      funObj.arguments is null");
-            else if (anObj == Scriptable.NOT_FOUND)
-                System.out.println("      funObj.arguments not found");
-            else
-                System.out.println("      funObj.arguments is " +
-                  anObj.getClass().getName());
-        }
-*/
     }
+    public static Integer javaHashCode(Context cx, Scriptable thisObj,
+                                       Object[] args, Function funObj)
+    {
+        return new Integer(args[0].hashCode());
+    }
+*/
 }

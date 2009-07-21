@@ -8,8 +8,9 @@
 try {
         // this goes into the global namespace, but less likely to collide with
         //   client JS code than methods in Rhino shell (load, print, etc.)
-    _$envjs$makeObjectIntoWindow$_ = function($w, $env,
-                                              $parentWindow, $initTop){
+    this.__proto__._$envjs$makeObjectIntoWindow$_ = function($w, $env,
+                                                             $parentWindow,
+                                                             $initTop){
 
         // The Window Object
         var __this__ = $w;

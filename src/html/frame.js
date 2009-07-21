@@ -57,18 +57,65 @@ __extend__(HTMLFrameElement.prototype, {
         this.setAttribute('src', value);
 
         if (value.length > 0){
-            if (!this._content){
-                var frameWindow = {};
-                try {
-                    _$envjs$makeObjectIntoWindow$_(frameWindow, $env, window);
-                    this._content = frameWindow;
-                    frameWindow.location = value;
-                } catch(e){
-                    $error("failed to load frame content: from " + value, e);
-                }
-            }
+            try {
 
-	    this._content.location = value;
+        /* this code semi-duplicated in dom/implementation.js -- sorry */
+                var frameWindow;
+                var makingNewWinFlag = !(this._content);
+                if (makingNewWinFlag)
+                            // a blank object, inherits from original global
+                                  //  v EnvjsRhinoSupraGlobal.java
+                    frameWindow = createAGlobalObject();
+                else
+                    frameWindow = this._content;
+
+
+                // define local variables with content of things that are
+                //   in current global/window, because when the following
+                //   function executes we'll have a new/blank
+                //   global/window and won't be able to get at them....
+                var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+                var localCopy_$env       = $env;
+                var localCopy_parent     = window.parent;
+                var localCopy_top        = window.top;
+
+                // a local function gives us something whose scope
+                //   is easy to change
+                var mkAndLoadNewWindow   = function(){
+                    if (makingNewWinFlag){
+                        localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                          localCopy_parent, localCopy_top);
+                    }
+
+                    frameWindow.location = value;
+                }
+
+
+                // change scope of window object creation
+                //   functions, so that functions/code they create
+                //   will be scoped to new window object
+        // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldLoadScope       = getFunctionObjectsScope(load);
+                var oldLoadScriptScope = getFunctionObjectsScope(
+                      $env.loadLocalScript);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                                                             localCopy_mkWinFn);
+
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+                setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(load,                  frameWindow);
+                setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+                mkAndLoadNewWindow();
+                this._content = frameWindow;
+
+                // now restore the scope
+                setFunctionObjectsScope(load, oldLoadScope);
+                setFunctionObjectsScope($env.loadLocalScript,
+                                        oldLoadScriptScope);
+            } catch(e){
+                $error("failed to load frame content: from " + value, e);
+            }
         }
     },
     get contentDocument(){

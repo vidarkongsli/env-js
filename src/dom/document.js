@@ -59,6 +59,14 @@ __extend__(DOMDocument.prototype, {
         }
         // populate Document with Parsed Nodes
         try {
+            // make sure thid document object is empty before we try to load ...
+            this.childNodes      = new DOMNodeList(this, this);
+            this.firstChild      = null;
+            this.lastChild       = null;
+            this.attributes      = new DOMNamedNodeMap(this, this);
+            this._namespaces     = new DOMNamespaceNodeMap(this, this);
+            this._readonly = false;
+
             __parseLoop__(this.implementation, this, parser);
             //doc = html2dom(xmlStr+"", doc);
         	//$log("\nhtml2xml\n" + doc.xml);
