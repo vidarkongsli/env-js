@@ -57,3 +57,25 @@ test("handling of iframes", function() {
           "Can get element from DOM inside of IFRAME");
      }catch(e){print(e);}
 });
+
+test("handling of inline CSS styles", function() {
+  expect(6);
+
+  var node = document.createElement("A");
+  node.style.marginTop = "10px";
+  node.style.marginBottom = "10px";
+  try{ok (node.getAttribute("style") == "margin-top: 10px;\nmargin-bottom: 10px", "Setting CSS2Properties values puts CSS text in style attribute");
+     }catch(e){printe(e);}
+  node.setAttribute("style", "left: auto");
+  try{ok (node.style.marginTop == "", "Setting attribute 'style' overwrites CSS2Properties values");
+      ok (node.style.marginBottom == "", "Setting attribute 'style' overwrites CSS2Properties values");
+      ok (node.style.left == "auto", "Setting attribute 'style' properly sets CSS2Properties values");
+     }catch(e){print(e);}
+  node.removeAttribute("style");
+  try{ok (node.style.left == "", "Removing attribute 'style' properly removes CSS2Properties values");
+     }catch(e){print(e);}
+  node.innerHTML = "<span style='font-size: medium;'></span>";
+  var innerNode = node.childNodes[0];
+  try{ok (innerNode.style.fontSize == "medium", "Parsing inline styles into CSS2Properties values");
+     }catch(e){print(e);}
+});
