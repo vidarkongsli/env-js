@@ -231,20 +231,22 @@ var Envjs = function(){
 		if (timer.at <= now){
 		    f = timer.fn;
 		    f();
-		    timer.at = Date.now() + timer.interval;
+		    timer.at += timer.interval;
 		}
 	    }
 	    empty = true;
 	    sleep = null;
 	    now = Date.now();
 	    for (i in timers){
-		empty  = false;
+		empty = false;
 		timer = timers[i];
 		after = timer.at - now
 		sleep = (sleep === null || after < sleep) ? after : sleep;
 	    }
 	    sleep = sleep < 0 ? 0 : sleep;
-	    if (empty || ( wait !== 0 ) && ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
+	    if (empty ||
+                ( wait !== 0 ) &&
+                 ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
 		break;
 	    }
 	    if (sleep) {
@@ -3986,7 +3988,7 @@ __extend__(DOMImplementation.prototype,{
     createDocument : function(nsuri, qname, doctype){
       //TODO - this currently returns an empty doc
       //but needs to handle the args
-        return new HTMLDocument($implementation);
+        return new HTMLDocument($implementation, null);
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
@@ -4232,6 +4234,8 @@ function __parseLoop__(impl, doc, p) {
             // change scope of window object creation functions, so that
             //   functions/code they create will be scoped to new window object
                 // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+            var oldMalnwScope      = getFunctionObjectsScope(
+              mkAndLoadNewWindow);
             var oldMkWinScope      = getFunctionObjectsScope(localCopy_mkWinFn);
             var oldLoadScope       = getFunctionObjectsScope(load);
             var oldLoadScriptScope = getFunctionObjectsScope(
@@ -4245,6 +4249,7 @@ function __parseLoop__(impl, doc, p) {
             mkAndLoadNewWindow();
 
             // now restore the scope
+            setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
             setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
             setFunctionObjectsScope(load, oldLoadScope);
             setFunctionObjectsScope($env.loadLocalScript, oldLoadScriptScope);
@@ -4590,7 +4595,7 @@ $implementation.errorChecking = false;$debug("Defining Document");
  * @author Jon van Noort (jon@webarcana.com.au)
  * @param  implementation : DOMImplementation - the creator Implementation
  */
-var DOMDocument = function(implementation) {
+var DOMDocument = function(implementation, docParentWindow) {
     //$log("\tcreating dom document");
     this.DOMNode = DOMNode;
     this.DOMNode(this);
@@ -4598,7 +4603,7 @@ var DOMDocument = function(implementation) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
-    this._parentWindow = null;            // "private" variable providing the read-only document.parentWindow property
+    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -4664,7 +4669,6 @@ __extend__(DOMDocument.prototype, {
     },
     load: function(url){
 		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        this._parentWindow = $w;
         var scripts, _this = this;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, $w.document.async);
@@ -5324,9 +5328,9 @@ $debug("Defining HTMLDocument");
  *
  * @extends DOMDocument
  */
-var HTMLDocument = function(implementation) {
+var HTMLDocument = function(implementation, docParentWindow) {
   this.DOMDocument = DOMDocument;
-  this.DOMDocument(implementation);
+  this.DOMDocument(implementation, docParentWindow);
 
   this._refferer = "";
   this._domain;
@@ -6409,15 +6413,15 @@ __extend__(HTMLFrameElement.prototype, {
                 //   global/window and won't be able to get at them....
                 var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
                 var localCopy_$env       = $env;
-                var localCopy_parent     = window.parent;
-                var localCopy_top        = window.top;
+                var localCopy_window     = window;
 
                 // a local function gives us something whose scope
                 //   is easy to change
                 var mkAndLoadNewWindow   = function(){
                     if (makingNewWinFlag){
                         localCopy_mkWinFn(frameWindow, localCopy_$env,
-                                          localCopy_parent, localCopy_top);
+                                          localCopy_window,
+                                          localCopy_window.top);
                     }
 
                     frameWindow.location = value;
@@ -6428,14 +6432,16 @@ __extend__(HTMLFrameElement.prototype, {
                 //   functions, so that functions/code they create
                 //   will be scoped to new window object
         // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
                 var oldLoadScope       = getFunctionObjectsScope(load);
                 var oldLoadScriptScope = getFunctionObjectsScope(
-                      $env.loadLocalScript);
-                var oldMkWinScope      = getFunctionObjectsScope(
-                                                             localCopy_mkWinFn);
+                  $env.loadLocalScript);
 
-                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
                 setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
                 setFunctionObjectsScope(load,                  frameWindow);
                 setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
 
@@ -6443,9 +6449,11 @@ __extend__(HTMLFrameElement.prototype, {
                 this._content = frameWindow;
 
                 // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
                 setFunctionObjectsScope(load, oldLoadScope);
                 setFunctionObjectsScope($env.loadLocalScript,
-                                        oldLoadScriptScope);
+                  oldLoadScriptScope);
             } catch(e){
                 $error("failed to load frame content: from " + value, e);
             }
@@ -10319,7 +10327,7 @@ __extend__(HTMLDocument.prototype, {
 	
 
 
-var $document =  new HTMLDocument($implementation);
+var $document =  new HTMLDocument($implementation, $w);
 $w.__defineGetter__("document", function(){
 	return $document;
 });

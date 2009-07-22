@@ -127,8 +127,13 @@ public class EnvjsRhinoSupraGlobal extends Global
                                 Function funObj)
     {
         System.out.println("whereAmI : " + Context.toString(args[0]));
-//        System.out.println(thisObj.getClass().getName() +
-//                             " (" + thisObj.hashCode() + ")");
+            ////////////
+        System.out.println(" this: " + thisObj.getClass().getName() +
+                             " (" + thisObj.hashCode() + ")");
+        if (args[1] != null)
+            System.out.println("   fn: " + args[1].getClass().getName() +
+                               " (" + args[1].hashCode() + ")");
+            ////////////
         System.out.println("  scope:");
         Scriptable temp = thisObj;
         while (temp != null){

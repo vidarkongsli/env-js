@@ -33,7 +33,7 @@ __extend__(DOMImplementation.prototype,{
     createDocument : function(nsuri, qname, doctype){
       //TODO - this currently returns an empty doc
       //but needs to handle the args
-        return new HTMLDocument($implementation);
+        return new HTMLDocument($implementation, null);
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
@@ -279,6 +279,8 @@ function __parseLoop__(impl, doc, p) {
             // change scope of window object creation functions, so that
             //   functions/code they create will be scoped to new window object
                 // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+            var oldMalnwScope      = getFunctionObjectsScope(
+              mkAndLoadNewWindow);
             var oldMkWinScope      = getFunctionObjectsScope(localCopy_mkWinFn);
             var oldLoadScope       = getFunctionObjectsScope(load);
             var oldLoadScriptScope = getFunctionObjectsScope(
@@ -292,6 +294,7 @@ function __parseLoop__(impl, doc, p) {
             mkAndLoadNewWindow();
 
             // now restore the scope
+            setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
             setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
             setFunctionObjectsScope(load, oldLoadScope);
             setFunctionObjectsScope($env.loadLocalScript, oldLoadScriptScope);

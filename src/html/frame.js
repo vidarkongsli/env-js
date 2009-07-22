@@ -76,15 +76,15 @@ __extend__(HTMLFrameElement.prototype, {
                 //   global/window and won't be able to get at them....
                 var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
                 var localCopy_$env       = $env;
-                var localCopy_parent     = window.parent;
-                var localCopy_top        = window.top;
+                var localCopy_window     = window;
 
                 // a local function gives us something whose scope
                 //   is easy to change
                 var mkAndLoadNewWindow   = function(){
                     if (makingNewWinFlag){
                         localCopy_mkWinFn(frameWindow, localCopy_$env,
-                                          localCopy_parent, localCopy_top);
+                                          localCopy_window,
+                                          localCopy_window.top);
                     }
 
                     frameWindow.location = value;
@@ -95,14 +95,16 @@ __extend__(HTMLFrameElement.prototype, {
                 //   functions, so that functions/code they create
                 //   will be scoped to new window object
         // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
                 var oldLoadScope       = getFunctionObjectsScope(load);
                 var oldLoadScriptScope = getFunctionObjectsScope(
-                      $env.loadLocalScript);
-                var oldMkWinScope      = getFunctionObjectsScope(
-                                                             localCopy_mkWinFn);
+                  $env.loadLocalScript);
 
-                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
                 setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
                 setFunctionObjectsScope(load,                  frameWindow);
                 setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
 
@@ -110,9 +112,11 @@ __extend__(HTMLFrameElement.prototype, {
                 this._content = frameWindow;
 
                 // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
                 setFunctionObjectsScope(load, oldLoadScope);
                 setFunctionObjectsScope($env.loadLocalScript,
-                                        oldLoadScriptScope);
+                  oldLoadScriptScope);
             } catch(e){
                 $error("failed to load frame content: from " + value, e);
             }
