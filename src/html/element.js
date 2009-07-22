@@ -105,6 +105,13 @@ __extend__(HTMLElement.prototype, {
 		        this.updateCss2Props();
 		    }
 		},
+		__removeAttribute: HTMLElement.prototype.removeAttribute,
+		removeAttribute: function (name) {
+			this.__removeAttribute(name);
+			if (name === "style") {
+				this.updateCss2Props();
+			}
+		},
 		get title() { 
 		    return this.getAttribute("title")||""; 
 		    
