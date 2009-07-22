@@ -9209,7 +9209,7 @@ $debug("Initializing Window Timer.");
 var $timers = [];
 
 window.setTimeout = function(fn, time){
-	var num = $timers.length+1;
+	var num = $timers.length;
 	var tfn;
 	
     if (typeof fn == 'string') {
@@ -9230,7 +9230,7 @@ window.setTimeout = function(fn, time){
 };
 
 window.setInterval = function(fn, time){
-	var num = $timers.length+1;
+	var num = $timers.length;
 	
     if (typeof fn == 'string') {
         var fnstr = fn; 
