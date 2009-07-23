@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      lang="en" dir="ltr" id="html">
+  <head>
+    <title>Document for testing arbitrary-depth IFRAME nesting in env.js</title>
+  </head>
+  <body>
+    <p>
+      This document will be loaded into an IFRAME, and the following
+      JavaScript finds an element in the parent document that contains
+      the nesting level count, increments it, and then produces an
+      identical element with the result in this document.
+
+      <script>
+        var counterAsText = window.parent.document.
+          getElementById('nestingLevel').innerHTML;
+        var newCount = parseInt(counterAsText) + 1;
+        document.write('\x3cspan id="nestingLevel"\x3e' + newCount +
+                       '\x3c/span\x3e');
+      </script>
+    </p>
+  </body>
+</html>
