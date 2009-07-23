@@ -3752,6 +3752,14 @@ function __parseLoop__(impl, doc, p) {
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
+      else if (iNodeParent.nodeName.toLowerCase() == 'iframe'){
+         if (iNodeParent.src && iNodeParent.src.length > 0){
+           // don't actually load anything, so we're "done" immediately:
+           var event = document.createEvent();
+           event.initEvent("load");
+           iNodeParent.dispatchEvent( event );
+         }
+      }
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
 
     }
@@ -5881,6 +5889,12 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+	if (this.getAttribute('src').length > 0){
+	    // don't actually load anything, so we're "done" immediately:
+	    var event = document.createEvent();
+	    event.initEvent("load");
+	    this.dispatchEvent( event );
+	}
     },
     get contentDocument(){
         $debug("getting content document for (i)frame");

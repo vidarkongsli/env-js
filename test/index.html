@@ -25,7 +25,26 @@
 		<div id="nothiddendivchild"></div>
 	</div>
 	<!-- this iframe is outside the #main so it won't reload constantly wasting time, but it means the tests must be "safe" and clean up after themselves -->
-	<iframe id="loadediframe" name="loadediframe" style="display:none;" src="html/iframe.html"></iframe>
+        <iframe id="loadediframe" name="loadediframe" style="display:none;"
+                src="html/iframe.html">
+            <script>
+                // kind of a cheat--env.js isn't smart enough to choose between
+                //   either loading from 'src' or parsing its content, so it
+                //   does both, which is exploited here to ensure that the
+                //   onload handler is installed before env.js "finishes
+                //   loading" (which happens when the /iframe tag is parsed
+                var iframeElem = document.getElementById('loadediframe');
+                iframeElem.onload = function(){
+                    var t = document.createTextNode(
+  'Paragraph created by execution of iframe-onload event handler.');
+                    var p = document.createElement('p');
+                    p.setAttribute('id', 'pCreatedByIframeOnload');
+                    p.appendChild(t);
+                    iframeElem.appendChild(p);
+                }
+            </script>
+        </iframe>
+
 	<dl id="dl" style="display:none;">
 	<div id="main" style="display: none;">
 		<p id="firstp">See <a id="simon1" href="http://simon.incutio.com/archive/2003/03/25/#getElementsBySelector" rel="bookmark">this blog entry</a> for more information.</p>
@@ -186,7 +205,7 @@ Z</textarea>
 
     <!-- test execution of main pages's body-onload tag functionality -->
     <script>
-        bodyElem = document.getElementsByTagName('body')[0];
+        var bodyElem = document.getElementsByTagName('body')[0];
         bodyElem.onload = function(){
             var t = document.createTextNode(
               'Look, a dynamically-generated paragraph!');
