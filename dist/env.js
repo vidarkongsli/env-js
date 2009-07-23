@@ -4165,9 +4165,19 @@ __extend__(DOMDocument.prototype, {
             _this._url = url;
             
         	$info("Sucessfully loaded document at "+url);
-        	var event = document.createEvent();
-        	event.initEvent("load");
-        	$w.dispatchEvent( event );
+
+                // first fire body-onload event
+            var event = document.createEvent();
+            event.initEvent("load");
+            try {  // assume <body> element, but just in case....
+                $w.document.getElementsByTagName('body')[0].
+                  dispatchEvent( event );
+            } catch (e){;}
+
+                // then fire window-onload event
+            event = document.createEvent();
+            event.initEvent("load");
+            $w.dispatchEvent( event );
         };
         xhr.send();
     },
@@ -7372,7 +7382,7 @@ $debug("Defining MouseEvent");
 /*
 *	mouseevent.js
 */
-$debug("Defining MouseEvent");
+$debug("Defining UiEvent");
 /*
 *	uievent.js
 */

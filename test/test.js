@@ -30,6 +30,7 @@ window.onload = function(){
   load(
     "test/unit/dom.js",
     "test/unit/window.js",
+    "test/unit/onload.js",
     "test/unit/parser.js",
     "test/unit/timer.js",
     //NOTE: keep this test last because Prototype pollutes
