@@ -186,5 +186,18 @@ Z</textarea>
 	</dl>
 	
 	<ol id="tests"></ol>
+
+    <!-- test execution of main pages's body-onload tag functionality -->
+    <script>
+        bodyElem = document.getElementsByTagName('body')[0];
+        bodyElem.onload = function(){
+            var t = document.createTextNode(
+              'Look, a dynamically-generated paragraph!');
+            var p = document.createElement('p');
+            p.setAttribute('id', 'pCreatedByBodyOnload');
+            p.appendChild(t);
+            bodyElem.appendChild(p);
+        }
+    </script>
 </body>
 </html>
