@@ -70,6 +70,32 @@
     </script>
     <img id="anImg" src="html/img1.png" onload="imgOnloadEventHandler();" />
 
+    <script>
+        function onloadHandlerThatShouldntExecute(){
+            var t = document.createTextNode(
+'Paragraph created by execution of script-onload *BAD* event handler.');
+            var p = document.createElement('p');
+            p.setAttribute('id', 'pShouldntBeCreated');
+            p.appendChild(t);
+            document.getElementsByTagName('body')[0].appendChild(p);
+        }
+    </script>
+    <script onload="onloadHandlerThatShouldntExecute();">
+        function scriptOnloadEventHandler(tag){
+            var t = document.createTextNode(
+'Paragraph created by execution of script-onload event handler.');
+            var p = document.createElement('p');
+            p.setAttribute('id', 'pCreatedByScriptOnload'+tag);
+            p.appendChild(t);
+            document.getElementsByTagName('body')[0].appendChild(p);
+        }
+    </script>
+    <script src="html/missingScript.js"
+            onload="scriptOnloadEventHandler('A');" />
+    <script src="html/missingScript.js"
+            onload="scriptOnloadEventHandler('B');"></script>
+
+
 	<dl id="dl" style="display:none;">
 	<div id="main" style="display: none;">
 		<p id="firstp">See <a id="simon1" href="http://simon.incutio.com/archive/2003/03/25/#getElementsBySelector" rel="bookmark">this blog entry</a> for more information.</p>

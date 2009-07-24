@@ -9,12 +9,12 @@
 
 module("onload-events");
 
-// depends on <script> block in test/index.html
+// depends on <script> blocks and elements in test/index.html
 test("Execution of onload events in top-level document",
   function() {
 
         // top-level window-onload works, or test framework wouldn't run.....
-    expect(6);
+    expect(9);
 
     var mtch = document.getElementById('pCreatedByBodyOnload').innerHTML.
       match(/dynamically-generated paragraph/);
@@ -57,6 +57,23 @@ test("Execution of onload events in top-level document",
     iframe.src = "html/img2.png";
     try{ ok(aCounter == 11,
         "img-onload handler executes when img.src assigned");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pCreatedByScriptOnloadA').innerHTML.
+      match(/script-onload event handler/);
+    try{ ok(mtch && mtch.length > 0,
+        "Got confirmation that script-onload handler executed, empty tag");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pCreatedByScriptOnloadB').innerHTML.
+      match(/script-onload event handler/);
+    try{ ok(mtch && mtch.length > 0,
+        "Script-onload handler executed, with open/close tag pair");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pShouldntBeCreated');
+    try{ ok(!(mtch),
+"Confirmed that script-onload handler that shouldn't execute actually didn't");
     }catch(e){print(e);}
 });
 
