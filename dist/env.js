@@ -3521,6 +3521,27 @@ var DOMImplementation = function() {
     this.namespaceAware = true;       // by default, handle namespaces
     this.errorChecking  = true;       // by default, test for exceptions
 };
+
+var $handleEndOfNormalOrEmptyElement = function(node, doc){
+
+    if (node.nodeName.toLowerCase() == 'iframe'){
+	if (node.src && node.src.length > 0){
+	    // don't actually load anything, so we're "done" immediately:
+	    var event = doc.createEvent();
+	    event.initEvent("load");
+	    node.dispatchEvent( event );
+	}
+    }
+    else if (node.nodeName.toLowerCase() == 'link'){
+        if (node.href && node.href.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
+}
+
 __extend__(DOMImplementation.prototype,{
     // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
@@ -3752,16 +3773,9 @@ function __parseLoop__(impl, doc, p) {
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
-      else if (iNodeParent.nodeName.toLowerCase() == 'iframe'){
-         if (iNodeParent.src && iNodeParent.src.length > 0){
-           // don't actually load anything, so we're "done" immediately:
-           var event = document.createEvent();
-           event.initEvent("load");
-           iNodeParent.dispatchEvent( event );
-         }
-      }
+      else
+         $handleEndOfNormalOrEmptyElement(iNodeParent, doc);
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -3847,6 +3861,8 @@ function __parseLoop__(impl, doc, p) {
         iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
+
+      $handleEndOfNormalOrEmptyElement(iNode, doc);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
@@ -6315,6 +6331,9 @@ __extend__(HTMLLinkElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'')
     }
 });
 
@@ -8901,7 +8920,7 @@ $w.dispatchEvent = function(event){
     
         if (this["on" + event.type]) {
             $debug('calling event handler '+event.type+' on target '+this);
-            this["on" + event.type].call(_this, event);
+            this["on" + event.type].call(this, event);
         }
     }
     if(this.parentNode){

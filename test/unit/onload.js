@@ -10,11 +10,11 @@
 module("onload-events");
 
 // depends on <script> block in test/index.html
-test("Execution of body & iframe onload events in top-level document",
+test("Execution of onload events in top-level document",
   function() {
 
         // top-level window-onload works, or test framework wouldn't run.....
-    expect(3);
+    expect(4);
 
     var mtch = document.getElementById('pCreatedByBodyOnload').innerHTML.
       match(/dynamically-generated paragraph/);
@@ -37,9 +37,14 @@ test("Execution of body & iframe onload events in top-level document",
     try{ ok(aCounter == 1,
         "iframe-onload handler executes when iframe.src assigned");
     }catch(e){print(e);}
+
+    mtch = document.getElementById('sCreatedByLinkOnload').innerHTML.
+      match(/CreatedByLinkOnloadEvent/);
+    try{ ok(mtch && mtch.length > 0, "link-onload handler executed");
+    }catch(e){print(e);}
 });
 
 
-// still to test:  onload events for:  <frame>, <frameset>, <img>, <link>
+// still to test:  onload events for:  <frame>, <frameset>, <img>
 //                                     image, layer
 

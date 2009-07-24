@@ -3,7 +3,20 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>jQuery Test Suite</title>
-	<link rel="Stylesheet" media="screen" href="data/testsuite.css" />
+
+    <script>
+        function testLinkOnload(){
+            var t = document.createTextNode(
+              '#styleCreatedByLinkOnloadEvent { color: red; }');
+            var s = document.createElement('style');
+            s.setAttribute('id', 'sCreatedByLinkOnload');
+            s.appendChild(t);
+            document.getElementsByTagName('head')[0].appendChild(s);
+        }
+    </script>
+    <link rel="Stylesheet" media="screen" href="data/testsuite.css"
+              onload="testLinkOnload();" />
+
 	<script>var jQuery = "jQuery", $ = "$"; // For testing .noConflict()</script>
 	<script type="text/javascript" src="../dist/jquery.js"></script>
 	<script type="text/javascript" src="data/testrunner.js"></script>
@@ -25,25 +38,25 @@
 		<div id="nothiddendivchild"></div>
 	</div>
 	<!-- this iframe is outside the #main so it won't reload constantly wasting time, but it means the tests must be "safe" and clean up after themselves -->
-        <iframe id="loadediframe" name="loadediframe" style="display:none;"
-                src="html/iframe.html">
-            <script>
-                // kind of a cheat--env.js isn't smart enough to choose between
-                //   either loading from 'src' or parsing its content, so it
-                //   does both, which is exploited here to ensure that the
-                //   onload handler is installed before env.js "finishes
-                //   loading" (which happens when the /iframe tag is parsed
-                var iframeElem = document.getElementById('loadediframe');
-                iframeElem.onload = function(){
-                    var t = document.createTextNode(
-  'Paragraph created by execution of iframe-onload event handler.');
-                    var p = document.createElement('p');
-                    p.setAttribute('id', 'pCreatedByIframeOnload');
-                    p.appendChild(t);
-                    iframeElem.appendChild(p);
-                }
-            </script>
-        </iframe>
+	<iframe id="loadediframe" name="loadediframe" style="display:none;"
+			src="html/iframe.html">
+		<script>
+			// kind of a cheat--env.js isn't smart enough to choose between
+			//   either loading from 'src' or parsing its content, so it
+			//   does both, which is exploited here to ensure that the
+			//   onload handler is installed before env.js "finishes
+			//   loading" (which happens when the /iframe tag is parsed
+			var iframeElem = document.getElementById('loadediframe');
+			iframeElem.onload = function(){
+				var t = document.createTextNode(
+'Paragraph created by execution of iframe-onload event handler.');
+				var p = document.createElement('p');
+				p.setAttribute('id', 'pCreatedByIframeOnload');
+				p.appendChild(t);
+				iframeElem.appendChild(p);
+			}
+		</script>
+	</iframe>
 
 	<dl id="dl" style="display:none;">
 	<div id="main" style="display: none;">
