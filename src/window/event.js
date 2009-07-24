@@ -55,7 +55,7 @@ $w.dispatchEvent = function(event){
     
         if (this["on" + event.type]) {
             $debug('calling event handler '+event.type+' on target '+this);
-            this["on" + event.type].call(_this, event);
+            this["on" + event.type].call(this, event);
         }
     }
     if(this.parentNode){

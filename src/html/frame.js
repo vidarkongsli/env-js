@@ -56,7 +56,7 @@ __extend__(HTMLFrameElement.prototype, {
     set src(value){
         this.setAttribute('src', value);
 
-        if (value.length > 0){
+        if (value && value.length > 0){
             try {
 
         /* this code semi-duplicated in dom/implementation.js -- sorry */
@@ -120,6 +120,10 @@ __extend__(HTMLFrameElement.prototype, {
             } catch(e){
                 $error("failed to load frame content: from " + value, e);
             }
+
+            var event = document.createEvent();
+            event.initEvent("load");
+            this.dispatchEvent( event );
         }
     },
     get contentDocument(){

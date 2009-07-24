@@ -11,6 +11,88 @@ var DOMImplementation = function() {
     this.namespaceAware = true;       // by default, handle namespaces
     this.errorChecking  = true;       // by default, test for exceptions
 };
+
+var $handleEndOfNormalOrEmptyElement = function(node, doc){
+
+    //handle frame and iframe tags
+    if (node.nodeName.toLowerCase() == 'frame' ||
+        node.nodeName.toLowerCase() == 'iframe'   ){
+
+        if (node.src && node.src.length > 0){
+            $debug("getting content document for (i)frame from " +
+                   node.src);
+
+            // create a new global/window object, such that its methods and
+            //   objects are defined within the scope of the new global.
+            //   Then load content from .src into it
+            try {
+
+        /* this code semi-duplicated in html/frame.js -- sorry */
+                // a blank object, pre-configured to inherit original global
+                //                   vvvv from EnvjsRhinoSupraGlobal.java
+                var frameWindow = createAGlobalObject();
+
+                // define local variables with content of things that are
+                //   in current global/window, because when the following
+                //   function executes we'll have a new/blank
+                //   global/window and won't be able to get at them....
+                var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+                var localCopy_$env       = $env;
+                var localCopy_window     = window;
+
+                // a local function gives us a scope that's easy to change
+                var mkAndLoadNewWindow   = function(){
+                  localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                    localCopy_window, localCopy_window.top);
+                  node._content = frameWindow;
+                  frameWindow.location = node.src;
+                }
+
+
+
+                // change scope of window object creation functions, so that
+                //   functions/code they create will be scoped to new window
+                    // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
+                var oldLoadScope       = getFunctionObjectsScope(load);
+                var oldLoadScriptScope = getFunctionObjectsScope(
+                  $env.loadLocalScript);
+
+                setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+                setFunctionObjectsScope(load,                  frameWindow);
+                setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+                mkAndLoadNewWindow();
+
+                // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
+                setFunctionObjectsScope(load, oldLoadScope);
+                setFunctionObjectsScope($env.loadLocalScript,
+                                        oldLoadScriptScope);
+            } catch(e){
+                $error("failed to load frame content: from " + node.src, e);
+            }
+
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'link'){
+        if (node.href && node.href.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
+}
+
 __extend__(DOMImplementation.prototype,{
     // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
@@ -242,67 +324,8 @@ function __parseLoop__(impl, doc, p) {
          p.replaceEntities = true;
          $env.loadLocalScript(iNodeParent, p);
       }
-      //handle frame and iframe tags
-      else if (iNodeParent.nodeName.toLowerCase() == 'frame' ||
-               iNodeParent.nodeName.toLowerCase() == 'iframe'   ){
-        if (iNodeParent.src.length > 0){
-          $debug("getting content document for (i)frame from " +
-                 iNodeParent.src);
-
-
-          // create a new global/window object, such that its methods and
-          //   objects are defined within the scope of the new global
-          try {
-
-        /* this code semi-duplicated in html/frame.js -- sorry */
-            // a blank object, pre-configured to inherit from original global
-            var frameWindow = createAGlobalObject();  // EnvjsRhinoSupraGlobal
-
-            // define local variables with content of things that are
-            //   in current global/window, because when the following
-            //   function executes we'll have a new/blank
-            //   global/window and won't be able to get at them....
-            var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
-            var localCopy_$env       = $env;
-            var localCopy_window     = window;
-
-            // a local function gives us something whose scope is easy to change
-            var mkAndLoadNewWindow   = function(){
-              localCopy_mkWinFn(frameWindow, localCopy_$env,
-                                localCopy_window, localCopy_window.top);
-              iNodeParent._content = frameWindow;
-              frameWindow.location = iNodeParent.src;
-            }
-
-
-
-            // change scope of window object creation functions, so that
-            //   functions/code they create will be scoped to new window object
-                // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
-            var oldMalnwScope      = getFunctionObjectsScope(
-              mkAndLoadNewWindow);
-            var oldMkWinScope      = getFunctionObjectsScope(localCopy_mkWinFn);
-            var oldLoadScope       = getFunctionObjectsScope(load);
-            var oldLoadScriptScope = getFunctionObjectsScope(
-              $env.loadLocalScript);
-
-            setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
-            setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
-            setFunctionObjectsScope(load,                  frameWindow);
-            setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
-
-            mkAndLoadNewWindow();
-
-            // now restore the scope
-            setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
-            setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
-            setFunctionObjectsScope(load, oldLoadScope);
-            setFunctionObjectsScope($env.loadLocalScript, oldLoadScriptScope);
-          } catch(e){
-            $error("failed to load frame content: from " + iNodeParent.src, e);
-          }
-        }
-      }
+      else
+         $handleEndOfNormalOrEmptyElement(iNodeParent, doc);
 
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
@@ -390,6 +413,8 @@ function __parseLoop__(impl, doc, p) {
         iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
+
+      $handleEndOfNormalOrEmptyElement(iNode, doc);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
