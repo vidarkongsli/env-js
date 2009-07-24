@@ -133,6 +133,9 @@ __extend__(HTMLFrameElement.prototype, {
     },
     get contentWindow(){
         return this._content;
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'')
     }
 });
 

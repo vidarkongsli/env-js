@@ -81,6 +81,7 @@
             <fileset dir="${SRC_DIR}" includes="html/area.js" />
             <fileset dir="${SRC_DIR}" includes="html/base.js" />
             <fileset dir="${SRC_DIR}" includes="html/blockquote-q.js" />
+            <fileset dir="${SRC_DIR}" includes="html/body.js" />
             <fileset dir="${SRC_DIR}" includes="html/button.js" />
             <fileset dir="${SRC_DIR}" includes="html/col-colgroup.js" />
             <fileset dir="${SRC_DIR}" includes="html/del-ins.js" />

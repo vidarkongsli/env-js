@@ -31,7 +31,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
-          else if(tagName.match(/BODY/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
           else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
           else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
