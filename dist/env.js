@@ -3540,6 +3540,14 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc){
             node.dispatchEvent( event );
         }
     }
+    else if (node.nodeName.toLowerCase() == 'img'){
+        if (node.src && node.src.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
 }
 
 __extend__(DOMImplementation.prototype,{
@@ -6074,6 +6082,9 @@ __extend__(HTMLImageElement.prototype, {
     },
     set width(value){
         this.setAttribute('width', value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'')
     }
 });
 
