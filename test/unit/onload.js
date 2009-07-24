@@ -9,12 +9,12 @@
 
 module("onload-events");
 
-
+// depends on <script> blocks and elements in test/index.html
 test("Execution of onload events in top-level document",
   function() {
 
         // top-level window-onload works, or test framework wouldn't run.....
-    expect(4);
+    expect(9);
 
     var mtch = document.getElementById('pCreatedByBodyOnload').innerHTML.
       match(/dynamically-generated paragraph/);
@@ -42,9 +42,41 @@ test("Execution of onload events in top-level document",
       match(/CreatedByLinkOnloadEvent/);
     try{ ok(mtch && mtch.length > 0, "link-onload handler executed");
     }catch(e){print(e);}
+
+    mtch = document.getElementById('pCreatedByImgOnload').innerHTML.
+      match(/img-onload event handler/);
+    try{ ok(mtch && mtch.length > 0,
+        "Got confirmation that img-onload handler executed");
+    }catch(e){print(e);}
+
+    var img = document.getElementById('anImg');
+    aCounter = 10;
+    img.onload = function(){
+        aCounter++;
+    }
+    img.src = "html/img2.png";
+    try{ ok(aCounter == 11,
+        "img-onload handler executes when img.src assigned");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pCreatedByScriptOnloadA').innerHTML.
+      match(/script-onload event handler/);
+    try{ ok(mtch && mtch.length > 0,
+        "Got confirmation that script-onload handler executed, empty tag");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pCreatedByScriptOnloadB').innerHTML.
+      match(/script-onload event handler/);
+    try{ ok(mtch && mtch.length > 0,
+        "Script-onload handler executed, with open/close tag pair");
+    }catch(e){print(e);}
+
+    mtch = document.getElementById('pShouldntBeCreated');
+    try{ ok(!(mtch),
+"Confirmed that script-onload handler that shouldn't execute actually didn't");
+    }catch(e){print(e);}
 });
 
 
-// still to test:  onload events for:  <frame>, <frameset>, <img>
-//                                     image, layer
+// still to test:  onload events for:  <frame>, <frameset>, image obj, layer obj
 

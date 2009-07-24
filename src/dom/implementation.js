@@ -12,15 +12,23 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 
-var $handleEndOfNormalOrEmptyElement = function(node, doc){
+var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
+    if(node.nodeName.toLowerCase() == 'script'){
+        p.replaceEntities = true;
+        $env.loadLocalScript(node, p);
 
-    //handle frame and iframe tags
-    if (node.nodeName.toLowerCase() == 'frame' ||
-        node.nodeName.toLowerCase() == 'iframe'   ){
+        // only fire event if we actually had something to load
+        if (node.src && node.src.length > 0){
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'frame' ||
+             node.nodeName.toLowerCase() == 'iframe'   ){
 
         if (node.src && node.src.length > 0){
-            $debug("getting content document for (i)frame from " +
-                   node.src);
+            $debug("getting content document for (i)frame from " + node.src);
 
             // create a new global/window object, such that its methods and
             //   objects are defined within the scope of the new global.
@@ -85,6 +93,14 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc){
     }
     else if (node.nodeName.toLowerCase() == 'link'){
         if (node.href && node.href.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'img'){
+        if (node.src && node.src.length > 0){
             // don't actually load anything, so we're "done" immediately:
             var event = doc.createEvent();
             event.initEvent("load");
@@ -319,14 +335,7 @@ function __parseLoop__(impl, doc, p) {
     }
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      //handle script tag
-      if      (iNodeParent.nodeName.toLowerCase() == 'script'){
-         p.replaceEntities = true;
-         $env.loadLocalScript(iNodeParent, p);
-      }
-      else
-         $handleEndOfNormalOrEmptyElement(iNodeParent, doc);
-
+      $handleEndOfNormalOrEmptyElement(iNodeParent, doc, p);
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
 
@@ -414,7 +423,7 @@ function __parseLoop__(impl, doc, p) {
       }
 
 
-      $handleEndOfNormalOrEmptyElement(iNode, doc);
+      $handleEndOfNormalOrEmptyElement(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
