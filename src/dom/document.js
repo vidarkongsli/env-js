@@ -104,13 +104,13 @@ __extend__(DOMDocument.prototype, {
             event.initEvent("load");
             try {  // assume <body> element, but just in case....
                 $w.document.getElementsByTagName('body')[0].
-                  dispatchEvent( event );
+                  dispatchEvent( event, false );
             } catch (e){;}
 
                 // then fire window-onload event
             event = document.createEvent();
             event.initEvent("load");
-            $w.dispatchEvent( event );
+            $w.dispatchEvent( event, false );
         };
         xhr.send();
     },

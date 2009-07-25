@@ -5,7 +5,31 @@
   <head>
     <title>Document for testing arbitrary-depth IFRAME nesting in env.js</title>
   </head>
-  <body>
+  <body onload="bodyOnloadHandler();">
+    <script>
+        window.top.numberNestedIframeLoads += 1;
+        function aPara(pId, pText, n){
+            var t = document.createTextNode(pText + " " + n);
+            var p = document.createElement('p');
+            p.setAttribute('id', pId + n);
+            p.appendChild(t);
+            document.getElementsByTagName('body')[0].appendChild(p);
+        }
+
+        window.onload = function(){     aPara("pCreatedWindowOnload",
+                                              "para window onload",
+                                        window.top.numberNestedIframeLoads);
+                                        window.top.winLoadCount += 1;     }
+        function bodyOnloadHandler(){   aPara("pCreatedBodyOnload",
+                                              "para body onload",
+                                        window.top.numberNestedIframeLoads);
+                                        window.top.bodyLoadCount += 1;    }
+        function iframeOnloadHandler(){ aPara("pCreatedIframeOnload",
+                                              "para iframe onload",
+                                        window.top.numberNestedIframeLoads);
+                                        window.top.frameLoadCount += 1;   }
+    </script>
+
     <p>
       This document will be loaded into an IFRAME, and the following
       JavaScript finds an element in the parent document that contains

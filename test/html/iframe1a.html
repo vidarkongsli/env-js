@@ -4,7 +4,7 @@
   <head>
     <title>Content document 'iframe1a.html' for env.js unit test suite</title>
   </head>
-  <body onload="checkEventsWithinIframe(this);">
+  <body onload="checkEventsWithinIframe();">
     <quote id="anotherElementWithText">
       This is the text content of a block-quote element.
     </quote>
@@ -25,12 +25,12 @@
     </script>
 
     <script>// append 'p id=appended "An appended paragraph"' to doc....
-      function checkEventsWithinIframe(body_elem){
+      function checkEventsWithinIframe(){
         var t = document.createTextNode("An appended paragraph");
         var p = document.createElement("p");
         p.setAttribute("id", "appended");
         p.appendChild(t);
-        body_elem.appendChild(p);
+        document.getElementsByTagName('body')[0].appendChild(p);
       }
     </script>
   </body>

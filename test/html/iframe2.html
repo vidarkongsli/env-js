@@ -17,5 +17,20 @@
       test in <code>../unit/frame.js</code>.  Value must be equal to the
       test's 'startingDepth' variable, minus 1, for things to work.
     </p>
+
+    <!-- abbreviated copy of code also in iframeN.html -->
+    <script>
+        function aPara(pId, pText){
+            var t = document.createTextNode(pText + " 1");
+            var p = document.createElement('p');
+            p.setAttribute('id', pId + "1");
+            p.appendChild(t);
+            document.getElementsByTagName('body')[0].appendChild(p);
+        }
+
+        function iframeOnloadHandler(){ aPara("pCreatedIframeOnload",
+                                              "para iframe onload");
+                                        window.top.frameLoadCount++;   }
+    </script>
   </body>
 </html>

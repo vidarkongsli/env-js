@@ -118,7 +118,7 @@ test("IFRAMEs reload with accessible content", function() {
 test("IFRAMEs can be nested, created dynamically", function() {
     var startingDepth = 3;
     var endingDepth   = 7
-    expect(5 + (3*((endingDepth - startingDepth)+1)));
+    expect(5 + (10*((endingDepth - startingDepth)+1)));
 
     // manually load iframe3.html
     var firstIframe = document.getElementById('emptyiframe');
@@ -130,6 +130,8 @@ test("IFRAMEs can be nested, created dynamically", function() {
     // w/ id's =      emptyiframe               nested1Level
 
 
+
+    ////////////////////////////////////////
     // first, verify that we've got the structure we expect:
     var mtch = firstIframe.contentDocument.title.match(/nested-IFRAME/);
     try{ok (mtch && mtch.length > 0,
@@ -156,20 +158,29 @@ test("IFRAMEs can be nested, created dynamically", function() {
     }catch(e){print(e);}
 
 
+    ////////////////////////////////////////
     // OK, now we'll programatically extend the nesting depth from 2 to many
+    window.numberNestedIframeLoads = 0;
+    window.winLoadCount = 0;
+    window.bodyLoadCount = 0;
+    window.frameLoadCount = 0;
     for (var c = startingDepth, bottomIframe = secondIframe; c <= endingDepth;
          c++){
 
         // add a new iframe within the current leaf iframe
         var newIframe = bottomIframe.contentDocument.createElement("iframe");
         newIframe.setAttribute("id", "iframe_of_depth_" + c);
+        newIframe.setAttribute("onload", "iframeOnloadHandler();");
         var bottomBody = bottomIframe.contentDocument.
           getElementsByTagName('body')[0];
         bottomBody.appendChild(newIframe);
         newIframe.src = "html/iframeN.html";
         bottomIframe = newIframe;
 
-        // verify contents of just-leaded iframe
+
+
+        ////////////////////////////////////////
+        // verify contents of just-loaded iframe
         mtch = bottomIframe.contentDocument.getElementById('nestingLevel').
           innerHTML.match(/[0-9]+/);
         try{ok (mtch && mtch.length > 0 && parseInt(mtch[0]) == c,
@@ -184,6 +195,45 @@ test("IFRAMEs can be nested, created dynamically", function() {
 
         try{ok (bottomIframe.contentWindow.top == window,
             "nested " + c + " levels: IFRAME has correct .top");
+        }catch(e){print(e);}
+
+
+
+        ////////////////////////////////////////
+        // verify events related to iframe load:
+        //  iframe.onload (container); window.onload and body.onload (contained)
+        var num = (c - startingDepth) + 1;
+        try{ok (num == window.numberNestedIframeLoads,
+            "nested " + c + " levels: event <script> executed");
+        }catch(e){print(e);}
+
+        try{ok (num == window.winLoadCount,
+            "nested " + c + " levels: window-onload handler executed");
+        }catch(e){print(e);}
+        try{ok (num == window.bodyLoadCount,
+            "nested " + c + " levels: body-onload handler executed");
+        }catch(e){print(e);}
+        try{ok (num == window.frameLoadCount,
+            "nested " + c + " levels: iframe-onload handler executed");
+        }catch(e){print(e);}
+
+        mtch = bottomIframe.contentWindow.parent.document.
+          getElementById("pCreatedIframeOnload" + num).innerHTML.
+          match(/para iframe onload ([0-9]+)/);
+        try{ok (mtch && mtch.length > 0 && parseInt(mtch[1]) == num,
+            "nested " + c + " levels: confirmed iframe-onload");
+        }catch(e){print(e);}
+        mtch = bottomIframe.contentDocument.
+          getElementById("pCreatedWindowOnload" + num).innerHTML.
+          match(/para window onload ([0-9]+)/);
+        try{ok (mtch && mtch.length > 0 && parseInt(mtch[1]) == num,
+            "nested " + c + " levels: confirmed window-onload");
+        }catch(e){print(e);}
+        mtch = bottomIframe.contentDocument.
+          getElementById("pCreatedBodyOnload" + num).innerHTML.
+          match(/para body onload ([0-9]+)/);
+        try{ok (mtch && mtch.length > 0 && parseInt(mtch[1]) == num,
+            "nested " + c + " levels: confirmed body-onload");
         }catch(e){print(e);}
     }
 });

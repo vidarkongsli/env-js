@@ -46,7 +46,7 @@ __extend__(HTMLImageElement.prototype, {
 
         var event = document.createEvent();
         event.initEvent("load");
-        this.dispatchEvent( event );
+        this.dispatchEvent( event, false );
     },
     get width(){
         return this.getAttribute('width');

@@ -123,7 +123,7 @@ __extend__(HTMLFrameElement.prototype, {
 
             var event = document.createEvent();
             event.initEvent("load");
-            this.dispatchEvent( event );
+            this.dispatchEvent( event, false );
         }
     },
     get contentDocument(){

@@ -21,7 +21,7 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
         if (node.src && node.src.length > 0){
             var event = doc.createEvent();
             event.initEvent("load");
-            node.dispatchEvent( event );
+            node.dispatchEvent( event, false );
         }
     }
     else if (node.nodeName.toLowerCase() == 'frame' ||
@@ -88,7 +88,7 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
 
             var event = doc.createEvent();
             event.initEvent("load");
-            node.dispatchEvent( event );
+            node.dispatchEvent( event, false );
         }
     }
     else if (node.nodeName.toLowerCase() == 'link'){
@@ -96,7 +96,7 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
             // don't actually load anything, so we're "done" immediately:
             var event = doc.createEvent();
             event.initEvent("load");
-            node.dispatchEvent( event );
+            node.dispatchEvent( event, false );
         }
     }
     else if (node.nodeName.toLowerCase() == 'img'){
@@ -104,7 +104,7 @@ var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
             // don't actually load anything, so we're "done" immediately:
             var event = doc.createEvent();
             event.initEvent("load");
-            node.dispatchEvent( event );
+            node.dispatchEvent( event, false );
         }
     }
 }

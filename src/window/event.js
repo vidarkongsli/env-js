@@ -36,10 +36,15 @@ $w.removeEventListener = function(type, fn){
 		});
 };
 
-$w.dispatchEvent = function(event){
+$w.dispatchEvent = function(event, bubbles){
     $debug("dispatching event " + event.type);
+
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
+
+    if (bubbles == undefined || bubbles == null)
+        bubbles = true;
+
     if (!event.target) {
         event.target = this;
     }
@@ -58,7 +63,7 @@ $w.dispatchEvent = function(event){
             this["on" + event.type].call(this, event);
         }
     }
-    if(this.parentNode){
+    if (bubbles && this.parentNode){
         this.parentNode.dispatchEvent.call(this.parentNode,event);
     }
 };
