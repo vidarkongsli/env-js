@@ -123,9 +123,20 @@ __extend__(HTMLElement.prototype, {
 	        return;
 	    
         },
+
 		onclick: function(event){
 		    __eval__(this.getAttribute('onclick')||'')
 	    },
+        // non-ECMA function, but no other way for click events to enter env.js
+        __click__: function(element){
+            var event = new Event({
+              target:element,
+              currentTarget:element
+            });
+            event.initEvent("click");
+            element.dispatchEvent(event);
+        },
+
 		ondblclick: function(event){
             __eval__(this.getAttribute('ondblclick')||'');
 	    },
@@ -197,14 +208,6 @@ var __registerEventAttrs__ = function(elm){
     return elm;
 };
 	
-var __click__ = function(element){
-	var event = new Event({
-	  target:element,
-	  currentTarget:element
-	});
-	event.initEvent("click");
-	element.dispatchEvent(event);
-};
 var __submit__ = function(element){
 	var event = new Event({
 	  target:element,
