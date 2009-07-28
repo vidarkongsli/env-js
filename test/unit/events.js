@@ -23,10 +23,6 @@ module("events");
 //   to the *Checks convenience functions).
 
 
-function zero_ish(val){
-    return (val==null || val==undefined || val==0);
-}
-
 function loadChecks(tag, imgCount, count){
     expect(4);
 
@@ -40,21 +36,21 @@ function loadChecks(tag, imgCount, count){
         tag + ": Img-tag onload event(s) recorded separately");
     }catch(e){print(e);}
 
-    try{ ok( zero_ish(eCounters["body onclick"]) &&
-             zero_ish(eCounters["h1 onclick"]) &&
-             zero_ish(eCounters["h2 onclick"]) &&
-             zero_ish(eCounters["div onclick"]) &&
-             zero_ish(eCounters["table onclick"]) &&
-             zero_ish(eCounters["tbody onclick"]) &&
-             zero_ish(eCounters["tr onclick"]) &&
-             zero_ish(eCounters["td onclick"]) &&
-             zero_ish(eCounters["ul onclick"]) &&
-             zero_ish(eCounters["li onclick"]) &&
-             zero_ish(eCounters["p onclick"]) &&
-             zero_ish(eCounters["b onclick"]) &&
-             zero_ish(eCounters["i onclick"]) &&
-             zero_ish(eCounters["a onclick"]) &&
-             zero_ish(eCounters["img onclick"]),
+    try{ ok( eCounters["body onclick"] == 0 &&
+             eCounters["h1 onclick"] == 0 &&
+             eCounters["h2 onclick"] == 0 &&
+             eCounters["div onclick"] == 0 &&
+             eCounters["table onclick"] == 0 &&
+             eCounters["tbody onclick"] == 0 &&
+             eCounters["tr onclick"] == 0 &&
+             eCounters["td onclick"] == 0 &&
+             eCounters["ul onclick"] == 0 &&
+             eCounters["li onclick"] == 0 &&
+             eCounters["p onclick"] == 0 &&
+             eCounters["b onclick"] == 0 &&
+             eCounters["i onclick"] == 0 &&
+             eCounters["a onclick"] == 0 &&
+             eCounters["img onclick"] == 0,
         tag + ": Onload events recorded once.");
     }catch(e){print(e);}
 
@@ -93,8 +89,8 @@ function clickChecks(tag, upperCount, lowerCount){
 
     var eCounters = document.getElementById('eventsFrame').
                       contentWindow.eCounters;
-    try{ ok( zero_ish(eCounters["body onload"]) &&
-             zero_ish(eCounters["img onload"]),
+    try{ ok( eCounters["body onload"] == 0 &&
+             eCounters["img onload"] == 0,
         tag + ": Onload events not triggered by click");
     }catch(e){print(e);}
 
@@ -118,8 +114,8 @@ function clickChecks(tag, upperCount, lowerCount){
         tag + ": Click event bubbled through outer elements");
     }catch(e){print(e);}
 
-    try{ ok( zero_ish(eCounters["h1 onclick"]) &&
-             zero_ish(eCounters["h2 onclick"]),
+    try{ ok( eCounters["h1 onclick"] == 0 &&
+             eCounters["h2 onclick"] == 0,
         tag + ": No click events for Hx elements");
     }catch(e){print(e);}
 
