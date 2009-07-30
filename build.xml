@@ -85,6 +85,7 @@
             <fileset dir="${SRC_DIR}" includes="html/button.js" />
             <fileset dir="${SRC_DIR}" includes="html/col-colgroup.js" />
             <fileset dir="${SRC_DIR}" includes="html/del-ins.js" />
+            <fileset dir="${SRC_DIR}" includes="html/div.js" />
             <fileset dir="${SRC_DIR}" includes="html/fieldset.js" />
             <fileset dir="${SRC_DIR}" includes="html/form.js" />
             <fileset dir="${SRC_DIR}" includes="html/frame.js" />

@@ -135,7 +135,7 @@ __extend__(HTMLFrameElement.prototype, {
         return this._content;
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 

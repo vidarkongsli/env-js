@@ -9,7 +9,7 @@ var HTMLBodyElement = function(ownerDocument) {
 HTMLBodyElement.prototype = new HTMLElement;
 __extend__(HTMLBodyElement.prototype, {
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 

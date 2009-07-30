@@ -125,7 +125,7 @@ __extend__(HTMLElement.prototype, {
         },
 
 		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'')
+		    __eval__(this.getAttribute('onclick')||'', this)
 	    },
         // non-ECMA function, but no other way for click events to enter env.js
         __click__: function(element){
@@ -138,37 +138,57 @@ __extend__(HTMLElement.prototype, {
         },
 
 		ondblclick: function(event){
-            __eval__(this.getAttribute('ondblclick')||'');
+            __eval__(this.getAttribute('ondblclick')||'', this);
 	    },
 		onkeydown: function(event){
-            __eval__(this.getAttribute('onkeydown')||'');
+            __eval__(this.getAttribute('onkeydown')||'', this);
 	    },
 		onkeypress: function(event){
-            __eval__(this.getAttribute('onkeypress')||'');
+            __eval__(this.getAttribute('onkeypress')||'', this);
 	    },
 		onkeyup: function(event){
-            __eval__(this.getAttribute('onkeyup')||'');
+            __eval__(this.getAttribute('onkeyup')||'', this);
 	    },
 		onmousedown: function(event){
-            __eval__(this.getAttribute('onmousedown')||'');
+            __eval__(this.getAttribute('onmousedown')||'', this);
 	    },
 		onmousemove: function(event){
-            __eval__(this.getAttribute('onmousemove')||'');
+            __eval__(this.getAttribute('onmousemove')||'', this);
 	    },
 		onmouseout: function(event){
-            __eval__(this.getAttribute('onmouseout')||'');
+            __eval__(this.getAttribute('onmouseout')||'', this);
 	    },
 		onmouseover: function(event){
-            __eval__(this.getAttribute('onmouseover')||'');
+            __eval__(this.getAttribute('onmouseover')||'', this);
 	    },
 		onmouseup: function(event){
-            __eval__(this.getAttribute('onmouseup')||'');
+            __eval__(this.getAttribute('onmouseup')||'', this);
 	    }
 });
 
-var __eval__ = function(script){
+var __eval__ = function(script, startingNode){
+    if (script == "")
+        return;                    // don't assemble environment if no script...
+
     try{
-        eval(script);
+        var doEval = function(scriptText){
+            eval(scriptText);
+        }
+
+        var listOfScopes = [];
+        for (var node = startingNode; node != null; node = node.parentNode)
+            listOfScopes.push(node);
+        listOfScopes.push(window);
+
+
+        var oldScopesArray = configureFunctionObjectsScopeChain(
+          doEval,        // the function whose scope chain to change
+          listOfScopes); // last array element is "head" of new chain
+        doEval.call(startingNode, script);
+        restoreScopeOfSetOfObjects(oldScopesArray);
+                         // oldScopesArray is N-element array of two-element
+                         // arrays.  First element is JS object whose scope
+                         // was modified, second is original value to restore.
     }catch(e){
         $error(e);
     }

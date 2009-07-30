@@ -4962,7 +4962,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
           else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
           else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
           else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
           else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
@@ -5256,7 +5256,7 @@ __extend__(HTMLElement.prototype, {
         },
 
 		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'')
+		    __eval__(this.getAttribute('onclick')||'', this)
 	    },
         // non-ECMA function, but no other way for click events to enter env.js
         __click__: function(element){
@@ -5269,37 +5269,57 @@ __extend__(HTMLElement.prototype, {
         },
 
 		ondblclick: function(event){
-            __eval__(this.getAttribute('ondblclick')||'');
+            __eval__(this.getAttribute('ondblclick')||'', this);
 	    },
 		onkeydown: function(event){
-            __eval__(this.getAttribute('onkeydown')||'');
+            __eval__(this.getAttribute('onkeydown')||'', this);
 	    },
 		onkeypress: function(event){
-            __eval__(this.getAttribute('onkeypress')||'');
+            __eval__(this.getAttribute('onkeypress')||'', this);
 	    },
 		onkeyup: function(event){
-            __eval__(this.getAttribute('onkeyup')||'');
+            __eval__(this.getAttribute('onkeyup')||'', this);
 	    },
 		onmousedown: function(event){
-            __eval__(this.getAttribute('onmousedown')||'');
+            __eval__(this.getAttribute('onmousedown')||'', this);
 	    },
 		onmousemove: function(event){
-            __eval__(this.getAttribute('onmousemove')||'');
+            __eval__(this.getAttribute('onmousemove')||'', this);
 	    },
 		onmouseout: function(event){
-            __eval__(this.getAttribute('onmouseout')||'');
+            __eval__(this.getAttribute('onmouseout')||'', this);
 	    },
 		onmouseover: function(event){
-            __eval__(this.getAttribute('onmouseover')||'');
+            __eval__(this.getAttribute('onmouseover')||'', this);
 	    },
 		onmouseup: function(event){
-            __eval__(this.getAttribute('onmouseup')||'');
+            __eval__(this.getAttribute('onmouseup')||'', this);
 	    }
 });
 
-var __eval__ = function(script){
+var __eval__ = function(script, startingNode){
+    if (script == "")
+        return;                    // don't assemble environment if no script...
+
     try{
-        eval(script);
+        var doEval = function(scriptText){
+            eval(scriptText);
+        }
+
+        var listOfScopes = [];
+        for (var node = startingNode; node != null; node = node.parentNode)
+            listOfScopes.push(node);
+        listOfScopes.push(window);
+
+
+        var oldScopesArray = configureFunctionObjectsScopeChain(
+          doEval,        // the function whose scope chain to change
+          listOfScopes); // last array element is "head" of new chain
+        doEval.call(startingNode, script);
+        restoreScopeOfSetOfObjects(oldScopesArray);
+                         // oldScopesArray is N-element array of two-element
+                         // arrays.  First element is JS object whose scope
+                         // was modified, second is original value to restore.
     }catch(e){
         $error(e);
     }
@@ -5743,7 +5763,7 @@ var HTMLBodyElement = function(ownerDocument) {
 HTMLBodyElement.prototype = new HTMLElement;
 __extend__(HTMLBodyElement.prototype, {
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -5864,7 +5884,34 @@ __extend__(HTMLModElement.prototype, {
     }
 });
 
-$w.HTMLModElement = HTMLModElement;	$debug("Defining HTMLFieldSetElement");
+$w.HTMLModElement = HTMLModElement;	/*
+ * This file is a component of env.js,
+ *     http://github.com/gleneivey/env-js/commits/master/README
+ * a Pure JavaScript Browser Environment
+ * Copyright 2009 John Resig, licensed under the MIT License
+ *     http://www.opensource.org/licenses/mit-license.php
+ */
+
+
+$debug("Defining HTMLTextAreaElement");
+/*
+* HTMLDivElement - DOM Level 2
+*/
+var HTMLDivElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLDivElement.prototype = new HTMLElement;
+__extend__(HTMLDivElement.prototype, {
+    get align(){
+        return this.getAttribute('align') || 'left';
+    },
+    set align(value){
+        this.setAttribute('align', value);
+    }
+});
+
+$w.HTMLDivElement = HTMLDivElement;$debug("Defining HTMLFieldSetElement");
 /* 
 * HTMLFieldSetElement - DOM Level 2
 */
@@ -6096,7 +6143,7 @@ __extend__(HTMLFrameElement.prototype, {
         return this._content;
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6251,7 +6298,7 @@ __extend__(HTMLImageElement.prototype, {
         this.setAttribute('width', value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6262,6 +6309,8 @@ $w.HTMLImageElement = HTMLImageElement;$debug("Defining HTMLInputElement");
 var HTMLInputElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+
+    this._oldValue = "";
 };
 HTMLInputElement.prototype = new HTMLElement;
 __extend__(HTMLInputElement.prototype, {
@@ -6362,13 +6411,18 @@ __extend__(HTMLInputElement.prototype, {
     set value(value){
         this.setAttribute('value',value);
     },
-	blur:function(){
-	    __blur__(this);
-	    
+    blur:function(){
+        __blur__(this);
+
+        if (this._oldValue != this.getAttribute('value')){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
     },
-	focus:function(){
-	    __focus__(this);
-	    
+    focus:function(){
+        __focus__(this);
+        this._oldValue = this.getAttribute('value');
     },
 	select:function(){
 	    __select__(this);
@@ -6377,6 +6431,9 @@ __extend__(HTMLInputElement.prototype, {
 	click:function(){
 	    __click__(this);
 	    
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 
@@ -6511,7 +6568,7 @@ __extend__(HTMLLinkElement.prototype, {
         this.setAttribute('type',value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6850,17 +6907,19 @@ __extend__(HTMLScriptElement.prototype, {
         this.setAttribute('type',value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
 $w.HTMLScriptElement = HTMLScriptElement;$debug("Defining HTMLSelectElement");
-/* 
+/*
 * HTMLSelectElement - DOM Level 2
 */
 var HTMLSelectElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+
+    this._oldIndex = -1;
 };
 HTMLSelectElement.prototype = new HTMLElement;
 __extend__(HTMLSelectElement.prototype, {
@@ -6953,9 +7012,19 @@ __extend__(HTMLSelectElement.prototype, {
     },
     blur: function(){
         __blur__(this);
+
+        if (this._oldIndex != this.selectedIndex){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
     },
     focus: function(){
         __focus__(this);
+        this._oldIndex = this.selectedIndex;
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 

@@ -77,30 +77,6 @@ test("IFRAMEs load with accessible content", function() {
 });
 
 
-test("Global scope for JS code in an iframe refers to that iframe's window/document", function() {
-    expect(2);
-
-    var idoc = document.getElementById('loadediframe').contentDocument;
-    var mtch = idoc.getElementById('js_generated_p').innerHTML.match(/Dynamic/);
-    try{ ok(mtch && mtch.length > 0,
-        "Can get content from dynamically-generate p element");
-    }catch(e){print(e);}
-
-    mtch = idoc.getElementById('internalDocRefResult').innerHTML.
-                  match(/exists-found/);
-    try{ ok(mtch && mtch.length > 0,
-        "Got confirmation of access to 'document' object in iframe");
-    }catch(e){print(e);}
-
-/*
-    mtch = idoc.getElementById('appended').innerHTML.match(/appended para/);
-    try{ ok(mtch && mtch.length > 0,
-        "Got confirmation of body-onload execution in iframe");
-    }catch(e){print(e);}
-*/
-});
-
-
 test("IFRAMEs still load when .src is set after the page is parsed",function() {
     var iframe = document.getElementById('emptyiframe');
     iframe.src = "html/iframe1.html";

@@ -27,6 +27,7 @@ window.onload = function(){
     "test/unit/dom.js",
     "test/unit/window.js",
     "test/unit/onload.js",
+    "test/unit/scope.js",     // must come before frame.js changes page content
     "test/unit/frame.js",
     "test/unit/events.js",
     "test/unit/parser.js",

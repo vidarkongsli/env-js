@@ -37,7 +37,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
           else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
           else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
           else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
           else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}

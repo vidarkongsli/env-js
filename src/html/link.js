@@ -73,7 +73,7 @@ __extend__(HTMLLinkElement.prototype, {
         this.setAttribute('type',value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'')
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 

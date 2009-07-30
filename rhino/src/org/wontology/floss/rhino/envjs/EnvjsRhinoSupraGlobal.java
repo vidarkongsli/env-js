@@ -9,6 +9,7 @@
 
 package org.wontology.floss.rhino.envjs;
 
+import java.util.*;
 import java.lang.reflect.*;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.tools.shell.Global;
@@ -26,6 +27,8 @@ public class EnvjsRhinoSupraGlobal extends Global
             "createAGlobalObject",
             "getFunctionObjectsScope",
             "setFunctionObjectsScope",
+            "configureFunctionObjectsScopeChain",
+            "restoreScopeOfSetOfObjects",
             "load",                       // overrides ...shell.Global.load()
             // debug helper functions
 //            "whereAmI",
@@ -49,14 +52,6 @@ public class EnvjsRhinoSupraGlobal extends Global
                 ; // ignore properties that don't cast to Scriptable
             }
         }
-
-
-        // env.js needs access to this array on both sides of a change
-        // in global object, and won't be able to create new properties
-        // on "this" object by the time we start executing JS code
-        NativeArray envjsGlobalStack = (NativeArray) cx.newArray(this, 0);
-        defineProperty("_$envjs$globalObjectStack$_", envjsGlobalStack,
-                       ScriptableObject.DONTENUM);
     }
 
 
@@ -122,17 +117,67 @@ public class EnvjsRhinoSupraGlobal extends Global
     }
 
 
+    public static NativeArray configureFunctionObjectsScopeChain(Context cx,
+        Scriptable thisObj, Object[] args, Function funObj)
+    {
+        Object[] objectPair;
+        List pairs = new ArrayList();
+
+        // save original scope for our target function object
+        Scriptable targetFn = (Scriptable) args[0];
+        objectPair = new Object[] { targetFn, targetFn.getParentScope() };
+        pairs.add(cx.newArray(funObj, objectPair));
+
+        NativeArray argArray = (NativeArray) args[1];
+        // change fn obj's scope to point to first element in array
+        targetFn.setParentScope((Scriptable) argArray.get(0, thisObj));
+
+
+        int c;
+        long len = argArray.getLength();
+        for (c=0; c < len-1; c++){
+            // save original scopes from objects we're putting into new chain
+            Scriptable elem = (Scriptable) argArray.get(c, thisObj);
+	    objectPair = new Object[] { elem, elem.getParentScope() };
+            pairs.add(cx.newArray(funObj, objectPair));
+
+            // set current obj's scope to point to next object
+            Scriptable scope = (Scriptable) argArray.get(c+1, thisObj);
+            elem.setParentScope(scope);
+        }
+
+        // return original scope information for later restore
+        return (NativeArray) cx.newArray(funObj, pairs.toArray());
+    }
+
+
+    public static void restoreScopeOfSetOfObjects(Context cx,
+        Scriptable thisObj, Object[] args, Function funObj)
+    {
+        NativeArray jsPairs = (NativeArray) args[0];
+
+        int c;
+        long len = jsPairs.getLength();
+        for (c=0; c < len; c++){
+            NativeArray objAndItsScope = (NativeArray) jsPairs.get(c, thisObj);
+            Scriptable anObj    = (Scriptable) objAndItsScope.get(0, thisObj);
+            Scriptable oldScope = (Scriptable) objAndItsScope.get(1, thisObj);
+            anObj.setParentScope(oldScope);
+        }
+    }
+
+
 /*
     public static void whereAmI(Context cx, Scriptable thisObj, Object[] args,
                                 Function funObj)
     {
         System.out.println("whereAmI : " + Context.toString(args[0]));
             ////////////
-        System.out.println(" this: " + thisObj.getClass().getName() +
-                             " (" + thisObj.hashCode() + ")");
-        if (args[1] != null)
-            System.out.println("   fn: " + args[1].getClass().getName() +
-                               " (" + args[1].hashCode() + ")");
+//        System.out.println(" this: " + thisObj.getClass().getName() +
+//                             " (" + thisObj.hashCode() + ")");
+//        if (args[1] != null)
+//            System.out.println("   fn: " + args[1].getClass().getName() +
+//                               " (" + args[1].hashCode() + ")");
             ////////////
         System.out.println("  scope:");
         Scriptable temp = thisObj;
