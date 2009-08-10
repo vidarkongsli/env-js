@@ -231,20 +231,22 @@ var Envjs = function(){
 		if (timer.at <= now){
 		    f = timer.fn;
 		    f();
-		    timer.at = Date.now() + timer.interval;
+		    timer.at += timer.interval;
 		}
 	    }
 	    empty = true;
 	    sleep = null;
 	    now = Date.now();
 	    for (i in timers){
-		empty  = false;
+		empty = false;
 		timer = timers[i];
 		after = timer.at - now
 		sleep = (sleep === null || after < sleep) ? after : sleep;
 	    }
 	    sleep = sleep < 0 ? 0 : sleep;
-	    if (empty || ( wait !== 0 ) && ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
+	    if (empty ||
+                ( wait !== 0 ) &&
+                 ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
 		break;
 	    }
 	    if (sleep) {
@@ -9221,12 +9223,21 @@ window.setTimeout = function(fn, time){
 		tfn = function() {
 			fn();
 			window.clearInterval(num);
-		}
+        };
 	}
-	$debug("Creating timer number "+num);
-    $timers[num] = new $env.timer(tfn, time);
-    $timers[num].start();
-	return num;
+
+    if (time === 0){
+        if (typeof fn == 'string')
+            eval(fn);
+        else
+            fn();
+    }
+    else {
+        $debug("Creating timer number "+num);
+        $timers[num] = new $env.timer(tfn, time);
+        $timers[num].start();
+        return num;
+    }
 };
 
 window.setInterval = function(fn, time){
