@@ -7,7 +7,7 @@
  */
 
 
-$debug("Defining HTMLTextAreaElement");
+$debug("Defining HTMLDivElement");
 /*
 * HTMLDivElement - DOM Level 2
 */
