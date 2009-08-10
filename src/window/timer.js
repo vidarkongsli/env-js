@@ -21,12 +21,21 @@ window.setTimeout = function(fn, time){
 		tfn = function() {
 			fn();
 			window.clearInterval(num);
-		}
+        };
 	}
-	$debug("Creating timer number "+num);
-    $timers[num] = new $env.timer(tfn, time);
-    $timers[num].start();
-	return num;
+
+    if (time === 0){
+        if (typeof fn == 'string')
+            eval(fn);
+        else
+            fn();
+    }
+    else {
+        $debug("Creating timer number "+num);
+        $timers[num] = new $env.timer(tfn, time);
+        $timers[num].start();
+        return num;
+    }
 };
 
 window.setInterval = function(fn, time){

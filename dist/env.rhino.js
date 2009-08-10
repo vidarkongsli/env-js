@@ -5384,13 +5384,13 @@ HTMLDocument.prototype = new DOMDocument;
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
           // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking &&
+          if (__ownerDocument__(this).implementation.errorChecking && 
                 (!__isValidName__(tagName))) {
               throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
           }
           tagName = tagName.toUpperCase();
           // create DOMElement specifying 'this' as ownerDocument
-          //This is an html document so we need to use explicit interfaces per the
+          //This is an html document so we need to use explicit interfaces per the 
           if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
           else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
@@ -5440,27 +5440,27 @@ __extend__(HTMLDocument.prototype, {
           else{
             node = new HTMLElement(this);
           }
-
+        
           // assign values to properties (and aliases)
           node.tagName  = tagName;
           return node;
     },
     get anchors(){
         return new HTMLCollection(this.getElementsByTagName('a'), 'Anchor');
-
+        
     },
     get applets(){
         return new HTMLCollection(this.getElementsByTagName('applet'), 'Applet');
-
+        
     },
-    get body(){
+    get body(){ 
         var nodelist = this.getElementsByTagName('body');
         return nodelist.item(0);
-
+        
     },
     set body(html){
         return this.replaceNode(this.body,html);
-
+        
     },
 
     get title(){
@@ -5488,44 +5488,44 @@ __extend__(HTMLDocument.prototype, {
     //set/get cookie see cookie.js
     get domain(){
         return this._domain||window.location.domain;
-
+        
     },
     set domain(){
-        /* TODO - requires a bit of thought to enforce domain restrictions */
-        return;
-
+        /* TODO - requires a bit of thought to enforce domain restrictions */ 
+        return; 
+        
     },
     get forms(){
       return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
     },
     get images(){
         return new HTMLCollection(this.getElementsByTagName('img'), 'Image');
-
+        
     },
-    get lastModified(){
+    get lastModified(){ 
         /* TODO */
-        return this._lastModified;
-
+        return this._lastModified; 
+    
     },
     get links(){
         return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
-
+        
     },
     get location(){
         return $w.location
     },
     get referrer(){
         /* TODO */
-        return this._refferer;
-
+        return this._refferer; 
+        
     },
     get URL(){
         /* TODO*/
-        return this._url;
-
+        return this._url; 
+        
     },
-	close : function(){
-	    /* TODO */
+	close : function(){ 
+	    /* TODO */ 
 	    this._open = false;
     },
 	getElementsByName : function(name){
@@ -5542,28 +5542,28 @@ __extend__(HTMLDocument.prototype, {
         }
         return retNodes;
 	},
-	open : function(){
+	open : function(){ 
 	    /* TODO */
-	    this._open = true;
+	    this._open = true;  
     },
-	write: function(htmlstring){
+	write: function(htmlstring){ 
 	    /* TODO */
-	    return;
-
+	    return; 
+	
     },
-	writeln: function(htmlstring){
-	    this.write(htmlstring+'\n');
+	writeln: function(htmlstring){ 
+	    this.write(htmlstring+'\n'); 
     },
-	toString: function(){
-	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : "");
+	toString: function(){ 
+	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
     },
-	get innerHTML(){
-	    return this.documentElement.outerHTML;
-
+	get innerHTML(){ 
+	    return this.documentElement.outerHTML; 
+	    
     },
 	get __html__(){
 	    return true;
-
+	    
     }
 });
 
@@ -9517,11 +9517,14 @@ window.setTimeout = function(fn, time){
 		tfn = function() {
 			fn();
 			window.clearInterval(num);
-		};
+        };
 	}
 
     if (time === 0){
-        tfn();
+        if (typeof fn == 'string')
+            eval(fn);
+        else
+            fn();
     }
     else {
         $debug("Creating timer number "+num);

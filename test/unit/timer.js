@@ -1,10 +1,13 @@
 module("timer");
 
 test("runnable callbacks are run until wait", function() {
-	expect(2);
+	expect(1);
 	var occurred = 0;
 	setTimeout(function(){ occurred = Date.now(); }, 0);
-	ok( occurred === 0, "Timeout should not have been executed" );
+// don't execute the following any more--have reverted window/timer.js changes
+// so that setTimeout/Interval functions with time=0 *are* executed prior
+// within the call to setTimeout/Interval
+//	ok( occurred === 0, "Timeout should not have been executed" );
 	$wait();
 	ok( occurred !== 0, "Timeout was not executed" );
 });
@@ -43,6 +46,10 @@ test("wait(n) does not execute nonrunnable callbacks", function() {
 	ok( occurred !== 0, "Timeout should have been executed" );
 });
 
+// don't execute the following any more--have reverted window/timer.js changes
+// so that setTimeout/Interval functions with time=0 *are* executed prior
+// within the call to setTimeout/Interval
+/*
 test("cleared callbacks don't get executed", function() {
 	expect(1);
 	var occurred = 0;
@@ -51,3 +58,4 @@ test("cleared callbacks don't get executed", function() {
 	$wait();
 	ok( occurred === 0, "Timeout should not have executed" );
 });
+*/
