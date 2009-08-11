@@ -8,9 +8,9 @@ $debug("Defining HTMLDocument");
  *
  * @extends DOMDocument
  */
-var HTMLDocument = function(implementation) {
+var HTMLDocument = function(implementation, docParentWindow) {
   this.DOMDocument = DOMDocument;
-  this.DOMDocument(implementation);
+  this.DOMDocument(implementation, docParentWindow);
 
   this._refferer = "";
   this._domain;
@@ -31,13 +31,13 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
-          else if(tagName.match(/BODY/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
           else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
           else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
           else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
           else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
           else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
           else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}

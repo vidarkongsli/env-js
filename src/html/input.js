@@ -5,6 +5,8 @@ $debug("Defining HTMLInputElement");
 var HTMLInputElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+
+    this._oldValue = "";
 };
 HTMLInputElement.prototype = new HTMLElement;
 __extend__(HTMLInputElement.prototype, {
@@ -105,13 +107,18 @@ __extend__(HTMLInputElement.prototype, {
     set value(value){
         this.setAttribute('value',value);
     },
-	blur:function(){
-	    __blur__(this);
-	    
+    blur:function(){
+        __blur__(this);
+
+        if (this._oldValue != this.getAttribute('value')){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
     },
-	focus:function(){
-	    __focus__(this);
-	    
+    focus:function(){
+        __focus__(this);
+        this._oldValue = this.getAttribute('value');
     },
 	select:function(){
 	    __select__(this);
@@ -120,6 +127,9 @@ __extend__(HTMLInputElement.prototype, {
 	click:function(){
 	    __click__(this);
 	    
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 

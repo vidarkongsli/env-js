@@ -55,21 +55,87 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+
+        if (value && value.length > 0){
+            try {
+
+        /* this code semi-duplicated in dom/implementation.js -- sorry */
+                var frameWindow;
+                var makingNewWinFlag = !(this._content);
+                if (makingNewWinFlag)
+                            // a blank object, inherits from original global
+                                  //  v EnvjsRhinoSupraGlobal.java
+                    frameWindow = createAGlobalObject();
+                else
+                    frameWindow = this._content;
+
+
+                // define local variables with content of things that are
+                //   in current global/window, because when the following
+                //   function executes we'll have a new/blank
+                //   global/window and won't be able to get at them....
+                var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+                var localCopy_$env       = $env;
+                var localCopy_window     = window;
+
+                // a local function gives us something whose scope
+                //   is easy to change
+                var mkAndLoadNewWindow   = function(){
+                    if (makingNewWinFlag){
+                        localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                          localCopy_window,
+                                          localCopy_window.top);
+                    }
+
+                    frameWindow.location = value;
+                }
+
+
+                // change scope of window object creation
+                //   functions, so that functions/code they create
+                //   will be scoped to new window object
+        // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
+                var oldLoadScope       = getFunctionObjectsScope(load);
+                var oldLoadScriptScope = getFunctionObjectsScope(
+                  $env.loadLocalScript);
+
+                setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+                setFunctionObjectsScope(load,                  frameWindow);
+                setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+                mkAndLoadNewWindow();
+                this._content = frameWindow;
+
+                // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
+                setFunctionObjectsScope(load, oldLoadScope);
+                setFunctionObjectsScope($env.loadLocalScript,
+                  oldLoadScriptScope);
+            } catch(e){
+                $error("failed to load frame content: from " + value, e);
+            }
+
+            var event = document.createEvent();
+            event.initEvent("load");
+            this.dispatchEvent( event, false );
+        }
     },
     get contentDocument(){
-        $debug("getting content document for (i)frame");
-        if(!this._content){
-            this._content = new HTMLDocument($implementation);
-            if(this.src.length > 0){
-                $info("Loading frame content from " + this.src);
-                try{
-                    this._content.load(this.src);
-                }catch(e){
-                    $error("failed to load frame content: from " + this.src, e);
-                }
-            }
-        }
+        if (!this._content)
+            return null;
+        return this._content.document;
+    },
+    get contentWindow(){
         return this._content;
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 

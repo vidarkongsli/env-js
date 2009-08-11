@@ -1,2 +1,4 @@
-dist/env.*.js
+dist/env.*.*.*.js
+dist/env.rhino.*.*.*.js
 *~
+rhino/build

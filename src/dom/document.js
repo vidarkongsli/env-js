@@ -7,14 +7,15 @@ $debug("Defining Document");
  * @author Jon van Noort (jon@webarcana.com.au)
  * @param  implementation : DOMImplementation - the creator Implementation
  */
-var DOMDocument = function(implementation) {
+var DOMDocument = function(implementation, docParentWindow) {
     //$log("\tcreating dom document");
     this.DOMNode = DOMNode;
     this.DOMNode(this);
     
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
-    this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
+    this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
+    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -41,6 +42,12 @@ __extend__(DOMDocument.prototype, {
     get all(){
         return this.getElementsByTagName("*");
     },
+    get documentElement(){
+        return this._documentElement;
+    },
+    get parentWindow(){
+        return this._parentWindow;
+    },
     loadXML : function(xmlStr) {
         // create SAX Parser
         var parser = new XMLP(xmlStr+'');
@@ -52,6 +59,14 @@ __extend__(DOMDocument.prototype, {
         }
         // populate Document with Parsed Nodes
         try {
+            // make sure thid document object is empty before we try to load ...
+            this.childNodes      = new DOMNodeList(this, this);
+            this.firstChild      = null;
+            this.lastChild       = null;
+            this.attributes      = new DOMNamedNodeMap(this, this);
+            this._namespaces     = new DOMNamespaceNodeMap(this, this);
+            this._readonly = false;
+
             __parseLoop__(this.implementation, this, parser);
             //doc = html2dom(xmlStr+"", doc);
         	//$log("\nhtml2xml\n" + doc.xml);
@@ -83,9 +98,19 @@ __extend__(DOMDocument.prototype, {
             _this._url = url;
             
         	$info("Sucessfully loaded document at "+url);
-        	var event = document.createEvent();
-        	event.initEvent("load");
-        	$w.dispatchEvent( event );
+
+                // first fire body-onload event
+            var event = document.createEvent();
+            event.initEvent("load");
+            try {  // assume <body> element, but just in case....
+                $w.document.getElementsByTagName('body')[0].
+                  dispatchEvent( event, false );
+            } catch (e){;}
+
+                // then fire window-onload event
+            event = document.createEvent();
+            event.initEvent("load");
+            $w.dispatchEvent( event, false );
         };
         xhr.send();
     },
@@ -287,9 +312,9 @@ __extend__(DOMDocument.prototype, {
           var all = this.all;
           for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches & node is alive (ie, connected (in)directly to the _documentElement)
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node)._documentElement._id == this._documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -301,14 +326,14 @@ __extend__(DOMDocument.prototype, {
           return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this._documentElement.normalize();
     },
     get nodeType(){
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         //$log("Serializing " + this);
-        return this.documentElement.xml;
+        return this._documentElement.xml;
     },
 	toString: function(){ 
 	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 

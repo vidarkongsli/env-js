@@ -5,15 +5,20 @@
  */
 
 
-// The Window Object
-var __this__ = this;
-this.__defineGetter__('window', function(){
-  return __this__;
-});
+try {
+        // this goes into the global namespace, but less likely to collide with
+        //   client JS code than methods in Rhino shell (load, print, etc.)
+    this.__proto__._$envjs$makeObjectIntoWindow$_ = function($w, $env,
+                                                             $parentWindow,
+                                                             $initTop){
 
-try{
-(function($w, $env){
-        /*
+        // The Window Object
+        var __this__ = $w;
+        $w.__defineGetter__('window', function(){
+            return __this__;
+        });
+
+/*
 *	window.js
 *   - this file will be wrapped in a closure providing the window object as $w
 */
@@ -46,7 +51,8 @@ var $defaultStatus = "Done";
 var $event = null;
 
 //A read-only array of window objects
-var $frames = [];
+//var $frames = [];    // TODO: since window.frames can be accessed like a
+                       //   hash, will need an object to really implement
 
 // a read-only reference to the History object
 /**>  $history - see location.js <**/
@@ -57,9 +63,9 @@ var $innerHeight = 600, $innerWidth = 800;
 // a read-only reference to the Location object.  the location object does expose read/write properties
 /**> $location - see location.js <**/
 
-// a read only property specifying the name of the window.  Can be set when using open()
-// and may be used when specifying the target attribute of links
-var $name = 'Resig Env Browser';
+// The name of window/frame.  Set directly, when using open(), or in frameset.
+// May be used when specifying the target attribute of links
+var $name;
 
 // a read-only reference to the Navigator object
 /**> $navigator - see navigator.js <**/
@@ -81,18 +87,14 @@ var $pageXOffset = 0, $pageYOffset = 0;
 //A read-only reference to the Window object that contains this window or frame.  If the window is
 // a top-level window, parent refers to the window itself.  If this window is a frame, this property
 // refers to the window or frame that conatins it.
-var $parent;
+var $parent = $parentWindow;
 
 // a read-only refernce to the Screen object that specifies information about the screen: 
 // the number of available pixels and the number of available colors.
 /**> $screen - see screen.js <**/
-
 // read only properties that specify the coordinates of the upper-left corner of the screen.
 var $screenX = 0, $screenY = 0;
 var $screenLeft = $screenX, $screenTop = $screenY;
-
-// a read-only refernce to this window itself.
-var $self;
 
 // a read/write string that specifies the current contents of the status line.
 var $status = '';
@@ -100,9 +102,9 @@ var $status = '';
 // a read-only reference to the top-level window that contains this window.  If this
 // window is a top-level window it is simply a refernce to itself.  If this window 
 // is a frame, the top property refers to the top-level window that contains the frame.
-var $top;
+var $top = $initTop;
 
-// the window property is identical to the self property.
+// the window property is identical to the self property and to this obj
 var $window = $w;
 
 $debug("Initializing Window.");
@@ -112,7 +114,10 @@ __extend__($w,{
   set defaultStatus(_defaultStatus){$defaultStatus = _defaultStatus;},
   //get document(){return $document;}, - see document.js
   get event(){return $event;},
-  get frames(){return $frames;},
+
+  get frames(){return undefined;}, // TODO: not yet any code to maintain list
+  get length(){return undefined;}, //   should be frames.length, but.... TODO
+
   //get history(){return $history;}, - see location.js
   get innerHeight(){return $innerHeight;},
   get innerWidth(){return $innerWidth;},
@@ -120,6 +125,7 @@ __extend__($w,{
   get clientWidth(){return $innerWidth;},
   //get location(){return $location;}, see location.js
   get name(){return $name;},
+  set name(newName){ $name = newName; },
   //get navigator(){return $navigator;}, see navigator.js
   get opener(){return $opener;},
   get outerHeight(){return $outerHeight;},
@@ -132,7 +138,7 @@ __extend__($w,{
   get screenTop(){return $screenTop;},
   get screenX(){return $screenX;},
   get screenY(){return $screenY;},
-  get self(){return $self;},
+  get self(){return $window;},
   get status(){return $status;},
   set status(_status){$status = _status;},
   get top(){return $top || $window;},
@@ -140,11 +146,11 @@ __extend__($w,{
 });
 
 $w.open = function(url, name, features, replace){
-  //TODO
+  //TODO.  Remember to set $opener, $name
 };
 
 $w.close = function(){
-  //TODO
+  //TODO.  Remember to set $closed
 };     
   
 /* Time related functions - see timer.js
@@ -3521,6 +3527,104 @@ var DOMImplementation = function() {
     this.namespaceAware = true;       // by default, handle namespaces
     this.errorChecking  = true;       // by default, test for exceptions
 };
+
+var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
+    if(node.nodeName.toLowerCase() == 'script'){
+        p.replaceEntities = true;
+        $env.loadLocalScript(node, p);
+
+        // only fire event if we actually had something to load
+        if (node.src && node.src.length > 0){
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event, false );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'frame' ||
+             node.nodeName.toLowerCase() == 'iframe'   ){
+
+        if (node.src && node.src.length > 0){
+            $debug("getting content document for (i)frame from " + node.src);
+
+            // create a new global/window object, such that its methods and
+            //   objects are defined within the scope of the new global.
+            //   Then load content from .src into it
+            try {
+
+        /* this code semi-duplicated in html/frame.js -- sorry */
+                // a blank object, pre-configured to inherit original global
+                //                   vvvv from EnvjsRhinoSupraGlobal.java
+                var frameWindow = createAGlobalObject();
+
+                // define local variables with content of things that are
+                //   in current global/window, because when the following
+                //   function executes we'll have a new/blank
+                //   global/window and won't be able to get at them....
+                var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+                var localCopy_$env       = $env;
+                var localCopy_window     = window;
+
+                // a local function gives us a scope that's easy to change
+                var mkAndLoadNewWindow   = function(){
+                  localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                    localCopy_window, localCopy_window.top);
+                  node._content = frameWindow;
+                  frameWindow.location = node.src;
+                }
+
+
+
+                // change scope of window object creation functions, so that
+                //   functions/code they create will be scoped to new window
+                    // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
+                var oldLoadScope       = getFunctionObjectsScope(load);
+                var oldLoadScriptScope = getFunctionObjectsScope(
+                  $env.loadLocalScript);
+
+                setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+                setFunctionObjectsScope(load,                  frameWindow);
+                setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+                mkAndLoadNewWindow();
+
+                // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
+                setFunctionObjectsScope(load, oldLoadScope);
+                setFunctionObjectsScope($env.loadLocalScript,
+                                        oldLoadScriptScope);
+            } catch(e){
+                $error("failed to load frame content: from " + node.src, e);
+            }
+
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event, false );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'link'){
+        if (node.href && node.href.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event, false );
+        }
+    }
+    else if (node.nodeName.toLowerCase() == 'img'){
+        if (node.src && node.src.length > 0){
+            // don't actually load anything, so we're "done" immediately:
+            var event = doc.createEvent();
+            event.initEvent("load");
+            node.dispatchEvent( event, false );
+        }
+    }
+}
+
 __extend__(DOMImplementation.prototype,{
     // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
@@ -3543,7 +3647,7 @@ __extend__(DOMImplementation.prototype,{
     createDocument : function(nsuri, qname, doctype){
       //TODO - this currently returns an empty doc
       //but needs to handle the args
-        return new HTMLDocument($implementation);
+        return new HTMLDocument($implementation, null);
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
@@ -3739,7 +3843,7 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
@@ -3747,13 +3851,8 @@ function __parseLoop__(impl, doc, p) {
     }
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      //handle script tag
-      if(iNodeParent.nodeName.toLowerCase() == 'script'){
-         p.replaceEntities = true;
-         $env.loadLocalScript(iNodeParent, p);
-      }
+      $handleEndOfNormalOrEmptyElement(iNodeParent, doc, p);
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -3836,9 +3935,11 @@ function __parseLoop__(impl, doc, p) {
 
       // if this is the Root Element
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent.documentElement = iNode;        // register this Element as the Document.documentElement
+        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
+
+      $handleEndOfNormalOrEmptyElement(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
@@ -4089,14 +4190,15 @@ $implementation.errorChecking = false;$debug("Defining Document");
  * @author Jon van Noort (jon@webarcana.com.au)
  * @param  implementation : DOMImplementation - the creator Implementation
  */
-var DOMDocument = function(implementation) {
+var DOMDocument = function(implementation, docParentWindow) {
     //$log("\tcreating dom document");
     this.DOMNode = DOMNode;
     this.DOMNode(this);
     
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
-    this.documentElement = null;          // This is a convenience attribute that allows direct access to the child node that is the root element of the document
+    this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
+    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
     
     this.nodeName  = "#document";
     this._id = 0;
@@ -4123,6 +4225,12 @@ __extend__(DOMDocument.prototype, {
     get all(){
         return this.getElementsByTagName("*");
     },
+    get documentElement(){
+        return this._documentElement;
+    },
+    get parentWindow(){
+        return this._parentWindow;
+    },
     loadXML : function(xmlStr) {
         // create SAX Parser
         var parser = new XMLP(xmlStr+'');
@@ -4134,6 +4242,14 @@ __extend__(DOMDocument.prototype, {
         }
         // populate Document with Parsed Nodes
         try {
+            // make sure thid document object is empty before we try to load ...
+            this.childNodes      = new DOMNodeList(this, this);
+            this.firstChild      = null;
+            this.lastChild       = null;
+            this.attributes      = new DOMNamedNodeMap(this, this);
+            this._namespaces     = new DOMNamespaceNodeMap(this, this);
+            this._readonly = false;
+
             __parseLoop__(this.implementation, this, parser);
             //doc = html2dom(xmlStr+"", doc);
         	//$log("\nhtml2xml\n" + doc.xml);
@@ -4165,9 +4281,19 @@ __extend__(DOMDocument.prototype, {
             _this._url = url;
             
         	$info("Sucessfully loaded document at "+url);
-        	var event = document.createEvent();
-        	event.initEvent("load");
-        	$w.dispatchEvent( event );
+
+                // first fire body-onload event
+            var event = document.createEvent();
+            event.initEvent("load");
+            try {  // assume <body> element, but just in case....
+                $w.document.getElementsByTagName('body')[0].
+                  dispatchEvent( event, false );
+            } catch (e){;}
+
+                // then fire window-onload event
+            event = document.createEvent();
+            event.initEvent("load");
+            $w.dispatchEvent( event, false );
         };
         xhr.send();
     },
@@ -4369,9 +4495,9 @@ __extend__(DOMDocument.prototype, {
           var all = this.all;
           for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches & node is alive (ie, connected (in)directly to the _documentElement)
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
+                if((__ownerDocument__(node)._documentElement._id == this._documentElement._id)){
                     retNode = node;
                     //$log("Found node with id = " + node.id);
                     break;
@@ -4383,14 +4509,14 @@ __extend__(DOMDocument.prototype, {
           return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this._documentElement.normalize();
     },
     get nodeType(){
         return DOMNode.DOCUMENT_NODE;
     },
     get xml(){
         //$log("Serializing " + this);
-        return this.documentElement.xml;
+        return this._documentElement.xml;
     },
 	toString: function(){ 
 	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
@@ -4807,9 +4933,9 @@ $debug("Defining HTMLDocument");
  *
  * @extends DOMDocument
  */
-var HTMLDocument = function(implementation) {
+var HTMLDocument = function(implementation, docParentWindow) {
   this.DOMDocument = DOMDocument;
-  this.DOMDocument(implementation);
+  this.DOMDocument(implementation, docParentWindow);
 
   this._refferer = "";
   this._domain;
@@ -4830,13 +4956,13 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
-          else if(tagName.match(/BODY/))                {node = new HTMLElement(this);}
+          else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
           else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
           else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
           else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
           else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLElement(this);}
+          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
           else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
           else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
           else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
@@ -5128,41 +5254,72 @@ __extend__(HTMLElement.prototype, {
 	        return;
 	    
         },
+
 		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'')
+		    __eval__(this.getAttribute('onclick')||'', this)
 	    },
+        // non-ECMA function, but no other way for click events to enter env.js
+        __click__: function(element){
+            var event = new Event({
+              target:element,
+              currentTarget:element
+            });
+            event.initEvent("click");
+            element.dispatchEvent(event);
+        },
+
 		ondblclick: function(event){
-            __eval__(this.getAttribute('ondblclick')||'');
+            __eval__(this.getAttribute('ondblclick')||'', this);
 	    },
 		onkeydown: function(event){
-            __eval__(this.getAttribute('onkeydown')||'');
+            __eval__(this.getAttribute('onkeydown')||'', this);
 	    },
 		onkeypress: function(event){
-            __eval__(this.getAttribute('onkeypress')||'');
+            __eval__(this.getAttribute('onkeypress')||'', this);
 	    },
 		onkeyup: function(event){
-            __eval__(this.getAttribute('onkeyup')||'');
+            __eval__(this.getAttribute('onkeyup')||'', this);
 	    },
 		onmousedown: function(event){
-            __eval__(this.getAttribute('onmousedown')||'');
+            __eval__(this.getAttribute('onmousedown')||'', this);
 	    },
 		onmousemove: function(event){
-            __eval__(this.getAttribute('onmousemove')||'');
+            __eval__(this.getAttribute('onmousemove')||'', this);
 	    },
 		onmouseout: function(event){
-            __eval__(this.getAttribute('onmouseout')||'');
+            __eval__(this.getAttribute('onmouseout')||'', this);
 	    },
 		onmouseover: function(event){
-            __eval__(this.getAttribute('onmouseover')||'');
+            __eval__(this.getAttribute('onmouseover')||'', this);
 	    },
 		onmouseup: function(event){
-            __eval__(this.getAttribute('onmouseup')||'');
+            __eval__(this.getAttribute('onmouseup')||'', this);
 	    }
 });
 
-var __eval__ = function(script){
+var __eval__ = function(script, startingNode){
+    if (script == "")
+        return;                    // don't assemble environment if no script...
+
     try{
-        eval(script);
+        var doEval = function(scriptText){
+            eval(scriptText);
+        }
+
+        var listOfScopes = [];
+        for (var node = startingNode; node != null; node = node.parentNode)
+            listOfScopes.push(node);
+        listOfScopes.push(window);
+
+
+        var oldScopesArray = configureFunctionObjectsScopeChain(
+          doEval,        // the function whose scope chain to change
+          listOfScopes); // last array element is "head" of new chain
+        doEval.call(startingNode, script);
+        restoreScopeOfSetOfObjects(oldScopesArray);
+                         // oldScopesArray is N-element array of two-element
+                         // arrays.  First element is JS object whose scope
+                         // was modified, second is original value to restore.
     }catch(e){
         $error(e);
     }
@@ -5202,14 +5359,6 @@ var __registerEventAttrs__ = function(elm){
     return elm;
 };
 	
-var __click__ = function(element){
-	var event = new Event({
-	  target:element,
-	  currentTarget:element
-	});
-	event.initEvent("click");
-	element.dispatchEvent(event);
-};
 var __submit__ = function(element){
 	var event = new Event({
 	  target:element,
@@ -5603,7 +5752,23 @@ __extend__(HTMLQuoteElement.prototype, {
     }
 });
 
-$w.HTMLQuoteElement = HTMLQuoteElement;		$debug("Defining HTMLButtonElement");
+$w.HTMLQuoteElement = HTMLQuoteElement;		$debug("Defining HTMLBodyElement");
+/*
+* HTMLBodyElement - DOM Level 2
+*/
+var HTMLBodyElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLBodyElement.prototype = new HTMLElement;
+__extend__(HTMLBodyElement.prototype, {
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
+    }
+});
+
+$w.HTMLBodyElement = HTMLBodyElement;
+$debug("Defining HTMLButtonElement");
 /* 
 * HTMLButtonElement - DOM Level 2
 */
@@ -5719,7 +5884,34 @@ __extend__(HTMLModElement.prototype, {
     }
 });
 
-$w.HTMLModElement = HTMLModElement;	$debug("Defining HTMLFieldSetElement");
+$w.HTMLModElement = HTMLModElement;	/*
+ * This file is a component of env.js,
+ *     http://github.com/gleneivey/env-js/commits/master/README
+ * a Pure JavaScript Browser Environment
+ * Copyright 2009 John Resig, licensed under the MIT License
+ *     http://www.opensource.org/licenses/mit-license.php
+ */
+
+
+$debug("Defining HTMLTextAreaElement");
+/*
+* HTMLDivElement - DOM Level 2
+*/
+var HTMLDivElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLDivElement.prototype = new HTMLElement;
+__extend__(HTMLDivElement.prototype, {
+    get align(){
+        return this.getAttribute('align') || 'left';
+    },
+    set align(value){
+        this.setAttribute('align', value);
+    }
+});
+
+$w.HTMLDivElement = HTMLDivElement;$debug("Defining HTMLFieldSetElement");
 /* 
 * HTMLFieldSetElement - DOM Level 2
 */
@@ -5871,21 +6063,87 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+
+        if (value && value.length > 0){
+            try {
+
+        /* this code semi-duplicated in dom/implementation.js -- sorry */
+                var frameWindow;
+                var makingNewWinFlag = !(this._content);
+                if (makingNewWinFlag)
+                            // a blank object, inherits from original global
+                                  //  v EnvjsRhinoSupraGlobal.java
+                    frameWindow = createAGlobalObject();
+                else
+                    frameWindow = this._content;
+
+
+                // define local variables with content of things that are
+                //   in current global/window, because when the following
+                //   function executes we'll have a new/blank
+                //   global/window and won't be able to get at them....
+                var localCopy_mkWinFn    = _$envjs$makeObjectIntoWindow$_;
+                var localCopy_$env       = $env;
+                var localCopy_window     = window;
+
+                // a local function gives us something whose scope
+                //   is easy to change
+                var mkAndLoadNewWindow   = function(){
+                    if (makingNewWinFlag){
+                        localCopy_mkWinFn(frameWindow, localCopy_$env,
+                                          localCopy_window,
+                                          localCopy_window.top);
+                    }
+
+                    frameWindow.location = value;
+                }
+
+
+                // change scope of window object creation
+                //   functions, so that functions/code they create
+                //   will be scoped to new window object
+        // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+                var oldMalnwScope      = getFunctionObjectsScope(
+                  mkAndLoadNewWindow);
+                var oldMkWinScope      = getFunctionObjectsScope(
+                  localCopy_mkWinFn);
+                var oldLoadScope       = getFunctionObjectsScope(load);
+                var oldLoadScriptScope = getFunctionObjectsScope(
+                  $env.loadLocalScript);
+
+                setFunctionObjectsScope(mkAndLoadNewWindow,    frameWindow);
+                setFunctionObjectsScope(localCopy_mkWinFn,     frameWindow);
+                setFunctionObjectsScope(load,                  frameWindow);
+                setFunctionObjectsScope($env.loadLocalScript,  frameWindow);
+
+                mkAndLoadNewWindow();
+                this._content = frameWindow;
+
+                // now restore the scope
+                setFunctionObjectsScope(mkAndLoadNewWindow, oldMalnwScope);
+                setFunctionObjectsScope(localCopy_mkWinFn, oldMkWinScope);
+                setFunctionObjectsScope(load, oldLoadScope);
+                setFunctionObjectsScope($env.loadLocalScript,
+                  oldLoadScriptScope);
+            } catch(e){
+                $error("failed to load frame content: from " + value, e);
+            }
+
+            var event = document.createEvent();
+            event.initEvent("load");
+            this.dispatchEvent( event, false );
+        }
     },
     get contentDocument(){
-        $debug("getting content document for (i)frame");
-        if(!this._content){
-            this._content = new HTMLDocument($implementation);
-            if(this.src.length > 0){
-                $info("Loading frame content from " + this.src);
-                try{
-                    this._content.load(this.src);
-                }catch(e){
-                    $error("failed to load frame content: from " + this.src, e);
-                }
-            }
-        }
+        if (!this._content)
+            return null;
+        return this._content.document;
+    },
+    get contentWindow(){
         return this._content;
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6028,12 +6286,19 @@ __extend__(HTMLImageElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+
+        var event = document.createEvent();
+        event.initEvent("load");
+        this.dispatchEvent( event, false );
     },
     get width(){
         return this.getAttribute('width');
     },
     set width(value){
         this.setAttribute('width', value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6044,6 +6309,8 @@ $w.HTMLImageElement = HTMLImageElement;$debug("Defining HTMLInputElement");
 var HTMLInputElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+
+    this._oldValue = "";
 };
 HTMLInputElement.prototype = new HTMLElement;
 __extend__(HTMLInputElement.prototype, {
@@ -6144,13 +6411,18 @@ __extend__(HTMLInputElement.prototype, {
     set value(value){
         this.setAttribute('value',value);
     },
-	blur:function(){
-	    __blur__(this);
-	    
+    blur:function(){
+        __blur__(this);
+
+        if (this._oldValue != this.getAttribute('value')){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
     },
-	focus:function(){
-	    __focus__(this);
-	    
+    focus:function(){
+        __focus__(this);
+        this._oldValue = this.getAttribute('value');
     },
 	select:function(){
 	    __select__(this);
@@ -6159,6 +6431,9 @@ __extend__(HTMLInputElement.prototype, {
 	click:function(){
 	    __click__(this);
 	    
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 
@@ -6291,6 +6566,9 @@ __extend__(HTMLLinkElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
@@ -6627,16 +6905,21 @@ __extend__(HTMLScriptElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
     }
 });
 
 $w.HTMLScriptElement = HTMLScriptElement;$debug("Defining HTMLSelectElement");
-/* 
+/*
 * HTMLSelectElement - DOM Level 2
 */
 var HTMLSelectElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+
+    this._oldIndex = -1;
 };
 HTMLSelectElement.prototype = new HTMLElement;
 __extend__(HTMLSelectElement.prototype, {
@@ -6729,9 +7012,19 @@ __extend__(HTMLSelectElement.prototype, {
     },
     blur: function(){
         __blur__(this);
+
+        if (this._oldIndex != this.selectedIndex){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
     },
     focus: function(){
         __focus__(this);
+        this._oldIndex = this.selectedIndex;
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 
@@ -7372,7 +7665,7 @@ $debug("Defining MouseEvent");
 /*
 *	mouseevent.js
 */
-$debug("Defining MouseEvent");
+$debug("Defining UiEvent");
 /*
 *	uievent.js
 */
@@ -8772,7 +9065,7 @@ $debug("Initializing Window Timer.");
 var $timers = [];
 
 window.setTimeout = function(fn, time){
-	var num = $timers.length+1;
+	var num = $timers.length;
 	var tfn;
 	
     if (typeof fn == 'string') {
@@ -8793,7 +9086,7 @@ window.setTimeout = function(fn, time){
 };
 
 window.setInterval = function(fn, time){
-	var num = $timers.length+1;
+	var num = $timers.length;
 	
     if (typeof fn == 'string') {
         var fnstr = fn; 
@@ -8858,10 +9151,15 @@ $w.removeEventListener = function(type, fn){
 		});
 };
 
-$w.dispatchEvent = function(event){
+$w.dispatchEvent = function(event, bubbles){
     $debug("dispatching event " + event.type);
+
     //the window scope defines the $event object, for IE(^^^) compatibility;
     $event = event;
+
+    if (bubbles == undefined || bubbles == null)
+        bubbles = true;
+
     if (!event.target) {
         event.target = this;
     }
@@ -8877,10 +9175,10 @@ $w.dispatchEvent = function(event){
     
         if (this["on" + event.type]) {
             $debug('calling event handler '+event.type+' on target '+this);
-            this["on" + event.type].call(_this, event);
+            this["on" + event.type].call(this, event);
         }
     }
-    if(this.parentNode){
+    if (bubbles && this.parentNode){
         this.parentNode.dispatchEvent.call(this.parentNode,event);
     }
 };
@@ -9365,7 +9663,7 @@ window.$profiler.stats = function(raw){
     };
 };
 
-if(Envjs.profile){
+if($env.profile){
     /**
     *   CSS2Properties
     */
@@ -9747,7 +10045,7 @@ __extend__(HTMLDocument.prototype, {
 	
 
 
-var $document =  new HTMLDocument($implementation);
+var $document =  new HTMLDocument($implementation, $w);
 $w.__defineGetter__("document", function(){
 	return $document;
 });
@@ -9888,8 +10186,15 @@ try{
 *	outro.js
 */
 
-})(window, Envjs); 
 
-}catch(e){
-    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" + Envjs.lineSource(e));
+    };        // close function definition begun in 'intro.js'
+
+
+        // turn "original" JS interpreter global object into the
+        //   "root" window object; third param value for new window's "parent"
+    _$envjs$makeObjectIntoWindow$_(this, Envjs, null, this);
+
+} catch(e){
+    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +
+        Envjs.lineSource(e));
 }

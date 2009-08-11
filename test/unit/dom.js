@@ -1,6 +1,7 @@
 // dependencies for the tests
 $w = { }
 $env = { debug: function() {} }
+$parentWindow = $initTop = null;
 load("src/window/window.js", "src/dom/node.js");
 
 
@@ -37,45 +38,4 @@ test("element.getElementsByTagName", function() {
 	expect(1);
   var body = document.getElementById('body');
   try{ok (body.getElementsByTagName('h1').length == 1, "Can get NodeList length : Expected 1 , Got " + body.getElementsByTagName('h1').length);}catch(e){print(e);}
-});
-
-test("handling of iframes", function() {
-        expect(3);
-
-  iElement = document.getElementById('loadediframe');
-  try{ok (iElement.id == "loadediframe",
-	  "Can get an IFRAME Element by id, expected id='loadediframe'");
-     }catch(e){print(e);}
-
-  iDocument = iElement.contentDocument;
-  try{ok (iDocument.nodeType == DOMNode.DOCUMENT_NODE,
-          "Can get 'document' object from IFRAME");
-     }catch(e){print(e);}
-
-  iContent = iDocument.getElementById('anElementWithText');
-  try{ok (iContent.innerHTML.match(/text content/).length > 0,
-          "Can get element from DOM inside of IFRAME");
-     }catch(e){print(e);}
-});
-
-test("handling of inline CSS styles", function() {
-  expect(6);
-
-  var node = document.createElement("A");
-  node.style.marginTop = "10px";
-  node.style.marginBottom = "10px";
-  try{ok (node.getAttribute("style") == "margin-top: 10px;\nmargin-bottom: 10px", "Setting CSS2Properties values puts CSS text in style attribute");
-     }catch(e){printe(e);}
-  node.setAttribute("style", "left: auto");
-  try{ok (node.style.marginTop == "", "Setting attribute 'style' overwrites CSS2Properties values");
-      ok (node.style.marginBottom == "", "Setting attribute 'style' overwrites CSS2Properties values");
-      ok (node.style.left == "auto", "Setting attribute 'style' properly sets CSS2Properties values");
-     }catch(e){print(e);}
-  node.removeAttribute("style");
-  try{ok (node.style.left == "", "Removing attribute 'style' properly removes CSS2Properties values");
-     }catch(e){print(e);}
-  node.innerHTML = "<span style='font-size: medium;'></span>";
-  var innerNode = node.childNodes[0];
-  try{ok (innerNode.style.fontSize == "medium", "Parsing inline styles into CSS2Properties values");
-     }catch(e){print(e);}
 });
