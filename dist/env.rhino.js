@@ -8246,9 +8246,7 @@ __extend__(CSS2Properties.prototype, {
         
     },
     getPropertyValue : function(name){
-		var camelCase = name.replace(/\-(\w)/g, function(all, letter){
-			return letter.toUpperCase();
-		});
+        var camelCase = __toCamelCase__(name);
         var i, value = this[camelCase];
         if(value === undefined){
             for(i=0;i<this.length;i++){
@@ -8276,9 +8274,7 @@ __extend__(CSS2Properties.prototype, {
         }
     },
     onSet:function(camelCaseName, value){
-        var dashedName = camelCaseName.replace(/[A-Z]/g, function(all) {
-            return "-" + all.toLowerCase();
-        });
+        var dashedName = __toDashed__(camelCaseName);
         var definition = dashedName + ": " + value;
         if (this.styleIndices[camelCaseName] !== undefined)
             this[this.styleIndices[camelCaseName]] = definition;
@@ -8293,7 +8289,7 @@ __extend__(CSS2Properties.prototype, {
 var __cssTextToStyles__ = function(css2props, cssText){
     var styleArray=[];
     var style, name, value, camelCaseName, w3cName, styles = cssText.split(';');
-    this.styleIndices = {};
+    css2props.styleIndices = {};
     for ( var i = 0; i < styles.length; i++ ) {
         //$log("Adding style property " + styles[i]);
     	style = styles[i].split(':');
@@ -8304,10 +8300,8 @@ var __cssTextToStyles__ = function(css2props, cssText){
     	    styleArray[idx] = w3cName = styles[i];
             //camel case for dash case
     	    value = trim(style[1]);
-            camelCaseName = trim(style[0].replace(/\-(\w)/g, function(all, letter){
-				return letter.toUpperCase();
-			}));
-            this.styleIndices[camelCaseName] = idx;
+            camelCaseName = trim(__toCamelCase__(style[0]));
+            css2props.styleIndices[camelCaseName] = idx;
             $debug('CSS Style Name:  ' + camelCaseName);
             if(css2props["_" + camelCaseName]!==undefined){
                 //set the value internally with camelcase name 
@@ -8318,6 +8312,19 @@ var __cssTextToStyles__ = function(css2props, cssText){
     }
     __setArray__(css2props, styleArray);
 };
+
+var __toCamelCase__ = function(name) {
+	return name.replace(/\-(\w)/g, function(all, letter){
+		return letter.toUpperCase();
+	});
+};
+
+var __toDashed__ = function(camelCaseName) {
+	return camelCaseName.replace(/[A-Z]/g, function(all) {
+		return "-" + all.toLowerCase();
+	});
+};
+
 //Obviously these arent all supported but by commenting out various sections
 //this provides a single location to configure what is exposed as supported.
 //These getters/setters will need to get fine-tuned in the future to deal with
