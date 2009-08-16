@@ -1,4 +1,12 @@
 
+<!--
+ * This file is a component of env.js,
+ *     http://github.com/gleneivey/env-js/commits/master/README
+ * a Pure JavaScript Browser Environment
+ * Copyright 2009 John Resig, licensed under the MIT License
+ *     http://www.opensource.org/licenses/mit-license.php
+  -->
+
 
 <project name="mainForEnvjs" default="jar" basedir="..">
 
@@ -13,6 +21,7 @@
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${classes}"/>
     <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${combined.dir}"/>
   </target>
 
   <target name="compile" depends="init">
@@ -29,7 +38,17 @@
   </target>
 
   <target name="jar" depends="compile">
-    <jar jarfile="${this.jar}"
+    <jar jarfile="${jar.jar}"
+         basedir="${classes}"
+         manifest="${src.dir}/manifest"
+         compress="${jar-compression}"
+     />
+  </target>
+
+  <target name="combined-jar" depends="compile">
+    <copy file="${rhino.jar}" tofile="${combined.jar}"/>
+    <jar jarfile="${combined.jar}"
+         update="true"
          basedir="${classes}"
          manifest="${src.dir}/manifest"
          compress="${jar-compression}"

@@ -5392,7 +5392,7 @@ __extend__(HTMLDocument.prototype, {
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
           if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
+          else if(tagName.match(/^AREA$/))              {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
           else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
@@ -5433,7 +5433,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
           else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
-          else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
+          else if(tagName.match(/TEXTAREA/))            {node = new HTMLTextAreaElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
           else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
           else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
@@ -6076,7 +6076,7 @@ $w.HTMLModElement = HTMLModElement;	/*
  */
 
 
-$debug("Defining HTMLTextAreaElement");
+$debug("Defining HTMLDivElement");
 /*
 * HTMLDivElement - DOM Level 2
 */
@@ -6094,7 +6094,8 @@ __extend__(HTMLDivElement.prototype, {
     }
 });
 
-$w.HTMLDivElement = HTMLDivElement;$debug("Defining HTMLFieldSetElement");
+$w.HTMLDivElement = HTMLDivElement;
+$debug("Defining HTMLFieldSetElement");
 /* 
 * HTMLFieldSetElement - DOM Level 2
 */
@@ -7542,7 +7543,118 @@ __extend__(HTMLTableCellElement.prototype, {
     
 });
 
-$w.HTMLTableCellElement	= HTMLTableCellElement;$debug("Defining HTMLTitleElement");
+$w.HTMLTableCellElement	= HTMLTableCellElement;$debug("Defining HTMLTextAreaElement");
+/*
+* HTMLTextAreaElement - DOM Level 2
+*/
+var HTMLTextAreaElement = function(ownerDocument) {
+    this.HTMLElement = HTMLElement;
+    this.HTMLElement(ownerDocument);
+};
+HTMLTextAreaElement.prototype = new HTMLElement;
+__extend__(HTMLTextAreaElement.prototype, {
+    get cols(){
+        return this.getAttribute('cols');
+    },
+    set cols(value){
+        this.setAttribute('cols', value);
+    },
+    get rows(){
+        return this.getAttribute('rows');
+    },
+    set rows(value){
+        this.setAttribute('rows', value);
+    },
+
+    get defaultValue(){
+        return this.getAttribute('defaultValue');
+    },
+    set defaultValue(value){
+        this.setAttribute('defaultValue', value);
+    },
+    get form(){
+        var parent = this.parent;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parent;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get access(){
+        return this.getAttribute('access');
+    },
+    set access(value){
+        this.setAttribute('access', value);
+    },
+    get disabled(){
+        return (this.getAttribute('disabled')=='disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled', (value ? 'disabled' :''));
+    },
+    get name(){
+        return this.getAttribute('name')||'';
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get readOnly(){
+        return (this.getAttribute('readonly')=='readonly');
+    },
+    set readOnly(value){
+        this.setAttribute('readonly', (value ? 'readonly' :''));
+    },
+    get tabIndex(){
+        return Number(this.getAttribute('tabindex'));
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',Number(value));
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+    blur:function(){
+        __blur__(this);
+
+        if (this._oldValue != this.getAttribute('value')){
+            var event = document.createEvent();
+            event.initEvent("change");
+            this.dispatchEvent( event );
+        }
+    },
+    focus:function(){
+        __focus__(this);
+        this._oldValue = this.getAttribute('value');
+    },
+    select:function(){
+        __select__(this);
+
+    },
+    click:function(){
+        __click__(this);
+
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
+    }
+});
+
+$w.HTMLTextAreaElement = HTMLTextAreaElement;
+$debug("Defining HTMLTitleElement");
 /* 
 * HTMLTitleElement - DOM Level 2
 */
@@ -9267,12 +9379,21 @@ window.setTimeout = function(fn, time){
 		tfn = function() {
 			fn();
 			window.clearInterval(num);
-		}
+        };
 	}
-	$debug("Creating timer number "+num);
-    $timers[num] = new $env.timer(tfn, time);
-    $timers[num].start();
-	return num;
+
+    if (time === 0){
+        if (typeof fn == 'string')
+            eval(fn);
+        else
+            fn();
+    }
+    else {
+        $debug("Creating timer number "+num);
+        $timers[num] = new $env.timer(tfn, time);
+        $timers[num].start();
+        return num;
+    }
 };
 
 window.setInterval = function(fn, time){
