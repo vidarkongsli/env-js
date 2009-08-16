@@ -152,10 +152,7 @@
     </target>
     
     <target name="test" description="Run the tests">
-      <java fork="true"
-            failonerror="true"
-            classname="org.wontology.floss.rhino.envjs.EnvjsRhinoMain"
-            classpath="rhino/js.jar:rhino/mainForEnvjs.jar">
+      <java fork="true" jar="rhino/env.js.jar" failonerror="true">
         <arg value="test/test.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
