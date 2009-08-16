@@ -28,7 +28,7 @@ __extend__(HTMLDocument.prototype, {
           // create DOMElement specifying 'this' as ownerDocument
           //This is an html document so we need to use explicit interfaces per the 
           if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/AREA/))                {node = new HTMLAreaElement(this);}
+          else if(tagName.match(/^AREA$/))              {node = new HTMLAreaElement(this);}
           else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
           else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
           else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
@@ -69,7 +69,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
           else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
-          else if(tagName.match(/TEXTAREA/))            {node = new HTMLElement(this);}
+          else if(tagName.match(/TEXTAREA/))            {node = new HTMLTextAreaElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
           else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
           else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
