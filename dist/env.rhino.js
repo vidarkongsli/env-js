@@ -177,7 +177,6 @@ var Envjs = function(){
     $env.loadFrame = function(frame, url){
         try {
 
-            /* this code semi-duplicated in dom/implementation.js -- sorry */
             var frameWindow,
             	makingNewWinFlag = !(frame._content);
             if (makingNewWinFlag)
@@ -194,7 +193,7 @@ var Envjs = function(){
             // global/window and won't be able to get at them....
             var local__window__    = $env.window,
             	local_env          = $env,
-            	local_window       = window;
+                local_window       = frame.ownerDocument.parentWindow;
 
             // a local function gives us something whose scope
             // is easy to change
@@ -213,7 +212,7 @@ var Envjs = function(){
             // change scope of window object creation
             //   functions, so that functions/code they create
             //   will be scoped to new window object
-            // *FunctionObjectsScope() from EnvjsRhinoSupraGlobal.java
+            // getScope()/setScope() from Window.java
             var scopes = {
                 frame : $env.getScope(__frame__),
                 window : $env.getScope(local__window__),
