@@ -37,60 +37,60 @@
     var timers = [];
 
     $env.timer = function(fn, interval){
-	this.fn = fn;
-	this.interval = interval;
-	this.at = Date.now() + interval;
-	this.index = timers.length;
-	timers[this.index] = this;
+    	this.fn = fn;
+    	this.interval = interval;
+    	this.at = Date.now() + interval;
+    	this.index = timers.length;
+    	timers[this.index] = this;
     };	
 
     $env.timer.prototype.start = function(){};
     $env.timer.prototype.stop = function(){
-	delete timers[this.index];
+	    delete timers[this.index];
     };
 
     // wait === null: execute any immediately runnable timers and return
     // wait(n) (n > 0): execute any timers as they fire but no longer than n ms
     // wait(0): execute any timers as they fire, waiting until there are none left
     $env.wait = function(wait) {
-	var i;
-	var empty;
-	var after;
-	var now;
-	var timer;
-	var sleep;
-	if (wait !== 0 && wait !== null && wait !== undefined){
-	    wait += Date.now();
-	}
-	for (;;) {
-	    for (i in timers){
-		timer = timers[i];
-		now = Date.now();
-		if (timer.at <= now){
-		    f = timer.fn;
-		    f();
-		    timer.at += timer.interval;
-		}
-	    }
-	    empty = true;
-	    sleep = null;
-	    now = Date.now();
-	    for (i in timers){
-		empty = false;
-		timer = timers[i];
-		after = timer.at - now
-		sleep = (sleep === null || after < sleep) ? after : sleep;
-	    }
-	    sleep = sleep < 0 ? 0 : sleep;
-	    if (empty ||
-                ( wait !== 0 ) &&
-                 ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
-		break;
-	    }
-	    if (sleep) {
-		java.lang.Thread.currentThread().sleep(sleep);
-	    }
-	}
+    	var i;
+    	var empty;
+    	var after;
+    	var now;
+    	var timer;
+    	var sleep;
+    	if (wait !== 0 && wait !== null && wait !== undefined){
+    	    wait += Date.now();
+    	}
+    	for (;;) {
+    	    for (i in timers){
+        		timer = timers[i];
+        		now = Date.now();
+        		if (timer.at <= now){
+        		    f = timer.fn;
+        		    f();
+        		    timer.at += timer.interval;
+        		}
+    	    }
+    	    empty = true;
+    	    sleep = null;
+    	    now = Date.now();
+    	    for (i in timers){
+        		empty = false;
+        		timer = timers[i];
+        		after = timer.at - now
+        		sleep = (sleep === null || after < sleep) ? after : sleep;
+	        }
+    	    sleep = sleep < 0 ? 0 : sleep;
+    	    if (empty ||
+                    ( wait !== 0 ) &&
+                     ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
+    		    break;
+    	    }
+    	    if (sleep) {
+    		    java.lang.Thread.currentThread().sleep(sleep);
+    	    }
+    	}
     };
 
     //Since we're running in rhino I guess we can safely assume
@@ -220,7 +220,7 @@
                 
         }
         if(responseHandler){
-          responseHandler();
+            responseHandler();
         }
     };
     
@@ -228,27 +228,66 @@
     htmlDocBuilder.setNamespaceAware(false);
     htmlDocBuilder.setValidating(false);
     
+    var htmlCleaner,
+        cleanDomSerializer,
+        cleanProperties;
     $env.parseHTML = function(htmlstring){
-        return htmlDocBuilder.newDocumentBuilder().parse(
+        var domdoc;//what's up dom doc?
+        if($env.cleanHTML){
+            htmlCleaner = htmlCleaner||new org.htmlcleaner.HtmlCleaner();
+            cleanDomSerializer = cleanDomSerializer||new org.htmlcleaner.DomSerializer();
+            cleanProperties = cleanProperties||new org.htmlcleaner.CleanerProperties();
+            domdoc = org.htmlcleaner.DomSerializer.createDOM(htmlCleaner.clean(htmlstring));
+        }else{
+            domdoc =  htmlDocBuilder.newDocumentBuilder().parse(
                   new java.io.ByteArrayInputStream(
-                        (new java.lang.String(htmlstring)).getBytes("UTF8")))+"";
+                        (new java.lang.String(htmlstring)).getBytes("UTF8")));
+        }
+        return domdoc;
     };
     
     var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
     xmlDocBuilder.setNamespaceAware(true);
-    xmlDocBuilder.setValidating(true);
+    xmlDocBuilder.setValidating(false);
     
     $env.parseXML = function(xmlstring){
         return xmlDocBuilder.newDocumentBuilder().parse(
                   new java.io.ByteArrayInputStream(
-                        (new java.lang.String(xmlstring)).getBytes("UTF8")))+"";
+                        (new java.lang.String(xmlstring)).getBytes("UTF8")));
     };
     
     
     $env.xpath = function(expression, doc){
-    return Packages.javax.xml.xpath.
-      XPathFactory.newInstance().newXPath().
-        evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
+        return Packages.javax.xml.xpath.
+          XPathFactory.newInstance().newXPath().
+            evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
+    };
+    
+    var jsonmlxslt;
+    $env.jsonml = function(xmlstring){
+        jsonmlxslt = jsonmlxslt||$env.xslt($env.xml2jsonml.toXMLString());
+        var jsonml = $env.xslttransform(jsonmlxslt, xmlstring);
+        //$env.debug('jsonml :\n'+jsonml);
+        return eval(jsonml);
+    };
+    var transformerFactory;
+    $env.xslt = function(xsltstring){
+        transformerFactory = transformerFactory||
+            Packages.javax.xml.transform.TransformerFactory.newInstance();
+        return transformerFactory.newTransformer(
+              new javax.xml.transform.dom.DOMSource(
+                  $env.parseXML(xsltstring)
+              )
+          );
+    };
+    $env.xslttransform = function(xslt, xmlstring){
+        var baos = new java.io.ByteArrayOutputStream();
+        xslt.transform(
+            new javax.xml.transform.dom.DOMSource($env.parseHTML(xmlstring)),
+            new javax.xml.transform.stream.StreamResult(baos)
+        );
+        return java.nio.charset.Charset.forName("UTF-8").
+            decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
     };
     
     $env.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
@@ -257,7 +296,10 @@
     $env.os_version     = java.lang.System.getProperty("os.version"); 
     $env.lang           = java.lang.System.getProperty("user.lang"); 
     $env.platform       = "Rhino ";//how do we get the version
-    
+
+    //injected by org.mozilla.javascript.tools.envjs.
+    $env.load = load;
+
     $env.safeScript = function(){
       //do nothing  
     };
@@ -272,7 +314,14 @@
         $env.debug("loading inline script :" + script.text);
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
         $env.debug("loading " + tmpFile);
-        load(tmpFile);
+        $env.load(tmpFile);
     };
+    
+    //injected by org.mozilla.javascript.tools.envjs.
+    $env.globalize = globalize;
+    $env.getScope = getScope;
+    $env.setScope = setScope;
+    $env.configureScope = configureScope;
+    $env.restoreScope = restoreScope;
     
 })(Envjs);

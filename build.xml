@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Env" default="all" basedir=".">
     <description>Builds, tests, and runs the project Env.</description>
-    <property name="BUILD_MAJOR"    value="0" />
-    <property name="BUILD_MINOR"    value="9" />
-    <property name="BUILD_ID"       value="7" />
+    <tstamp/>
     
     <property name="SRC_DIR"        
             location="src"           
@@ -28,6 +26,9 @@
             location="${PREFIX}/"             
             description="Folder for concatenated, min, lite and packed target" />
 
+    
+    <property file="build.properties"/>
+    
     <!-- Files names for distribution -->
     <property name="ENV_DIST"  
             location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js" />
@@ -49,6 +50,12 @@
           <!-- CORE -->
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
+            <filterchain>    
+                <replacetokens>
+                    <token key="VERSION" value="${BUILD}"/>
+                </replacetokens>
+            </filterchain>
+            <fileset dir="${SRC_DIR}" includes="build.js" />
             <fileset dir="${SRC_DIR}" includes="intro.js" />
             <fileset dir="${SRC_DIR}" includes="window/window.js" />
             <fileset dir="${SRC_DIR}" includes="platform/xmlsax.js" />
@@ -144,6 +151,12 @@
         <!-- RHINO -->
         <echo message="Building ${ENV_RHINO}" />
         <concat destfile="${ENV_RHINO}">
+            <filterchain>    
+                <replacetokens>
+                    <token key="VERSION" value="${BUILD}"/>
+                </replacetokens>
+            </filterchain>
+            <fileset dir="${SRC_DIR}"  includes="build.js" />
             <fileset dir="${SRC_DIR}"  includes="platform/core.js" />
             <fileset dir="${SRC_DIR}"  includes="platform/rhino.js" />
             <fileset dir="${DIST_DIR}" includes="env.js" />
@@ -153,7 +166,7 @@
     </target>
     
     <target name="test" description="Run the tests">
-      <java fork="true" jar="rhino/env.js.jar" failonerror="true">
+      <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
         <arg value="test/test.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>

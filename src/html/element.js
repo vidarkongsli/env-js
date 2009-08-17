@@ -181,11 +181,11 @@ var __eval__ = function(script, startingNode){
         listOfScopes.push(window);
 
 
-        var oldScopesArray = configureFunctionObjectsScopeChain(
+        var oldScopesArray = $env.configureScope(
           doEval,        // the function whose scope chain to change
           listOfScopes); // last array element is "head" of new chain
         doEval.call(startingNode, script);
-        restoreScopeOfSetOfObjects(oldScopesArray);
+        $env.restoreScope(oldScopesArray);
                          // oldScopesArray is N-element array of two-element
                          // arrays.  First element is JS object whose scope
                          // was modified, second is original value to restore.

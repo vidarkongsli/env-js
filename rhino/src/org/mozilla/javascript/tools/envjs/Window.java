@@ -4,18 +4,23 @@
  * a Pure JavaScript Browser Environment
  * Copyright 2009 John Resig, licensed under the MIT License
  *     http://www.opensource.org/licenses/mit-license.php
+
+ *  Contributed by Glen E. Ivey
  */
 
 
-package org.wontology.floss.rhino.envjs;
+package org.mozilla.javascript.tools.envjs;
 
-import java.util.*;
-import java.lang.reflect.*;
-import org.mozilla.javascript.*;
-import org.mozilla.javascript.tools.shell.Global;
-import org.mozilla.javascript.tools.shell.Environment;
+import java.util.List;
+import java.util.ArrayList;
+//import java.lang.reflect.*;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
-public class EnvjsRhinoSupraGlobal extends Global
+public class Window extends org.mozilla.javascript.tools.shell.Global
 {
     public void init(Context cx)
     {
@@ -24,17 +29,17 @@ public class EnvjsRhinoSupraGlobal extends Global
 
         // now, we add the JavaScript methods we want to provide for env.js
         String[] names = {
-            "createAGlobalObject",
-            "getFunctionObjectsScope",
-            "setFunctionObjectsScope",
-            "configureFunctionObjectsScopeChain",
-            "restoreScopeOfSetOfObjects",
-            "load",                       // overrides ...shell.Global.load()
+            "globalize",
+            "getScope",
+            "setScope",
+            "configureScope",
+            "restoreScope",
+            "load",// overrides ...shell.Global.load()
             // debug helper functions
-//            "whereAmI",
-//            "javaHashCode"
+            //"whereAmI",
+            //"javaHashCode"
         };
-        defineFunctionProperties(names, EnvjsRhinoSupraGlobal.class,
+        defineFunctionProperties(names, Window.class,
                                  ScriptableObject.DONTENUM);
 
 
@@ -46,7 +51,7 @@ public class EnvjsRhinoSupraGlobal extends Global
             try {
                 Scriptable aProp = (Scriptable) (this.get((String) anId, this));
                 if (aProp.getClassName() == "Function")
-                    aProp.setParentScope(EnvjsRhinoMain.global);
+                    aProp.setParentScope(Main.global);
             }
             catch (ClassCastException ccExcept) {
                 ; // ignore properties that don't cast to Scriptable
@@ -63,43 +68,51 @@ public class EnvjsRhinoSupraGlobal extends Global
     public static void load(Context cx, Scriptable thisObj,
                             Object[] args, Function funObj)
     {
-        Global.load(cx, funObj.getParentScope(), args, funObj);
+        org.mozilla.javascript.tools.shell.Global.load(
+        	cx, funObj.getParentScope(), args, funObj
+       	);
     }
 
 
-    public static Scriptable createAGlobalObject(Context cx, Scriptable thisObj,
-                                                 Object[] args, Function funObj)
+    public static Scriptable globalize( Context cx, 
+    									Scriptable thisObj,
+                                        Object[] args, 
+                                        Function funObj)
     {
-        Global gObj = (Global) (ScriptableObject.getTopLevelScope(funObj));
-        Class c = EnvjsRhinoSupraGlobal.class;
+        org.mozilla.javascript.tools.shell.Global gObj = 
+        	(org.mozilla.javascript.tools.shell.Global)
+        	(ScriptableObject.getTopLevelScope(funObj));
+        Class c = Window.class;
         while (gObj != null && gObj.getClass() != c)
-            gObj = (Global) gObj.getPrototype();
+            gObj = (org.mozilla.javascript.tools.shell.Global) gObj.getPrototype();
         if (gObj == null)
             throw new IllegalStateException(
-                "EnvjsRhinoSupraGlobal.createAGlobalObject: couldn't find " +
+                "Window.createAGlobalObject: couldn't find " +
                 "our Global scope obj.");
-        return new EnvjsRhinoGlobal(gObj);
+        return new Global(gObj);
     }
 
 
-    public static Scriptable getFunctionObjectsScope(Context cx,
-                                                     Scriptable thisObj,
-                                                     Object[] args,
-                                                     Function funObj)
+    public static Scriptable getScope(Context cx,
+                                      Scriptable thisObj,
+                                      Object[] args,
+                                      Function funObj)
     {
         if (args.length != 1)
             throw new IllegalArgumentException(
-                "EnvjsRhinoSupraGlobal.getFunctionObjectsScope: wrong " +
+                "Window.getFunctionObjectsScope: wrong " +
                 "argument count.");
         return ScriptableObject.getTopLevelScope((Function) args[0]);
     }
 
-    public static void setFunctionObjectsScope(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
+    public static void setScope(Context cx,
+		                                       Scriptable thisObj,
+		                                       Object[] args,
+		                                       Function funObj)
     {
         if (args.length != 2)
             throw new IllegalArgumentException(
-                "EnvjsRhinoSupraGlobal.setFunctionObjectsScope: wrong " +
+                "Window.setFunctionObjectsScope: wrong " +
                 "argument count.");
         // rely on Java to throw an exception if we can't do the casts we want
         //   instead of explicitly checking our argument types
@@ -117,8 +130,10 @@ public class EnvjsRhinoSupraGlobal extends Global
     }
 
 
-    public static NativeArray configureFunctionObjectsScopeChain(Context cx,
-        Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray configureScope(Context cx,
+		                                     Scriptable thisObj,
+		                                     Object[] args,
+		                                     Function funObj)
     {
         Object[] objectPair;
         List pairs = new ArrayList();
@@ -151,8 +166,10 @@ public class EnvjsRhinoSupraGlobal extends Global
     }
 
 
-    public static void restoreScopeOfSetOfObjects(Context cx,
-        Scriptable thisObj, Object[] args, Function funObj)
+    public static void restoreScope(Context cx,
+                                    Scriptable thisObj,
+                                    Object[] args,
+                                    Function funObj)
     {
         NativeArray jsPairs = (NativeArray) args[0];
 
@@ -168,7 +185,9 @@ public class EnvjsRhinoSupraGlobal extends Global
 
 
 /*
-    public static void whereAmI(Context cx, Scriptable thisObj, Object[] args,
+    public static void whereAmI(Context cx,
+                                Scriptable thisObj,
+                                Object[] args,
                                 Function funObj)
     {
         System.out.println("whereAmI : " + Context.toString(args[0]));
