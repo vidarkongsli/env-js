@@ -123,17 +123,25 @@ var Envjs = function(){
                     if($env.scriptTypes[types[i]]){
 						if(script.src){
                             $env.info("loading allowed external script :" + script.src);
-                            if($env.beforeload&&$env.beforeload[script.src]){
-                                //lets you register a function to execute 
-                                //before the script is loaded
-                                $env.beforeload[script.src]();
+                            //lets you register a function to execute 
+                            //before the script is loaded
+                            if($env.beforeload){
+                                for(src in $env.beforeload){
+                                    if(script.src.match(src)){
+                                        $env.beforeload[src]();
+                                    }
+                                }
                             }
                             base = "" + window.location;
 							load($env.location(script.src.match(/([^\?#]*)/)[1], base ));
-                            if($env.afterload&&$env.afterload[script.src]){
-                                //lets you register a function to execute 
-                                //after the script is loaded
-                                $env.afterload[script.src]();
+                            //lets you register a function to execute 
+                            //after the script is loaded
+                            if($env.afterload){
+                                for(src in $env.afterload){
+                                    if(script.src.match(src)){
+                                        $env.afterload[src]();
+                                    }
+                                }
                             }
                         }else{
                             $env.loadInlineScript(script);

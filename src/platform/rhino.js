@@ -54,7 +54,7 @@
                         run.apply(_this);
                     }
                 }catch(e){
-                    $env.error("erro running timed function", e);
+                    $env.warn("interuption running timed function");
                     _this.stop();
                     $env.onInterrupt();
                 };
@@ -64,8 +64,8 @@
             thread.start(); 
         };
         this.stop = sync(function(num){
-         running = false;
-         thread.interrupt();
+            running = false;
+            thread.interrupt();
         })
     };
     

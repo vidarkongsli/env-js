@@ -1,55 +1,48 @@
 module("timer");
 
-test("runnable callbacks are run until wait", function() {
+test("runnable callbacks are run immediately with timeout of 0", function() {
 	expect(1);
 	var occurred = 0;
-	setTimeout(function(){ occurred = Date.now(); }, 0);
-// don't execute the following any more--have reverted window/timer.js changes
-// so that setTimeout/Interval functions with time=0 *are* executed prior
-// within the call to setTimeout/Interval
-//	ok( occurred === 0, "Timeout should not have been executed" );
-	ok( occurred !== 0, "Timeout was not executed" );
+	setTimeout(function(){ 
+        occurred = Date.now(); 
+    }, 0);
+	ok( occurred !== 0, "Timeout callback was executed immediatly" );
 });
 
-test("wait() executes runnable callbacks", function() {
+test("runnable callbacks are run later with timeout more than 0", function() {
 	expect(1);
 	var occurred = 0;
-	setTimeout(function(){ occurred = Date.now(); }, 0);
-	ok( occurred !== 0, "Timeout was not executed" );
+	setTimeout(function(){ 
+        occurred = Date.now(); 
+    }, 1000);
+	ok( occurred === 0, "Timeout callback was not executed immediatly" );
+    java.lang.Thread.currentThread().sleep(1500);
 });
 
-test("wait() does not execute nonrunnable callbacks", function() {
-	expect(1);
+test("setTimeout execution runs callback after timeout period", function() {
+	expect(3);
 	var occurred = 0;
-	setTimeout(function(){ occurred = Date.now(); }, 100);
-	ok( occurred === 0, "Timeout should not have been executed" );
+	setTimeout(function(){ 
+        occurred = Date.now();
+	    ok( true, "callback was executed" );
+    }, 1000);
+	ok( occurred === 0, "Timeout callback was not executed immediatly" );
+    java.lang.Thread.currentThread().sleep(3000);
+	ok( occurred !== 0, "Timeout callback was executed" );
 });
 
-test("wait(0) executes nonrunnable callbacks", function() {
-	expect(1);
-	var occurred = 0;
-	setTimeout(function(){ occurred = Date.now(); }, 100);
-	ok( occurred !== 0, "Timeout should have been executed" );
-});
 
-test("wait(n) does not execute nonrunnable callbacks", function() {
+test("clearTimeout cancels execution of setTimeout callback", function() {
 	expect(2);
 	var occurred = 0;
-	setTimeout(function(){ occurred = Date.now(); }, 1000);
-	ok( occurred === 0, "Timeout should not have been executed" );
-	ok( occurred !== 0, "Timeout should have been executed" );
+	var id = setTimeout(function(){ 
+        occurred = Date.now();
+	    ok( false, "callback should not executed after clearTimeout" );
+    }, 1000);
+	ok( occurred === 0, "Timeout callback was not executed immediatly" );
+    clearTimeout(id);
+    java.lang.Thread.currentThread().sleep(3000);
+	ok( occurred === 0, "Timeout callback was not executed" );
 });
 
-// don't execute the following any more--have reverted window/timer.js changes
-// so that setTimeout/Interval functions with time=0 *are* executed prior
-// within the call to setTimeout/Interval
-/*
-test("cleared callbacks don't get executed", function() {
-	expect(1);
-	var occurred = 0;
-	timeout = setTimeout(function(){ occurred = Date.now(); }, 0);
-	clearTimeout( timeout );
-	$wait();
-	ok( occurred === 0, "Timeout should not have executed" );
-});
-*/
+
