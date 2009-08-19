@@ -23,6 +23,15 @@ module("events");
 //   to the *Checks convenience functions).
 
 
+var __click__ = function(element){
+    var event = new Event({
+      target:element,
+      currentTarget:element
+    });
+    event.initEvent("click");
+    element.dispatchEvent(event);
+}
+
 function loadChecks(tag, imgCount, count){
     expect(4);
 
@@ -134,7 +143,7 @@ test("Check that an event which should bubble actually does", function() {
     // simulate a "click" user action
     var img = document.getElementById('eventsFrame').contentDocument.
       getElementById('theIMG');
-    img.__click__(img);
+    __click__(img);
 
     clickChecks("Click img", 1, 1);
 });
@@ -143,7 +152,7 @@ test("Bubbling event ONLY bubbles 'up'", function() {
     // simulate a "click" user action
     var td = document.getElementById('eventsFrame').contentDocument.
       getElementById('theTD');
-    td.__click__(td);
+    __click__(td);
 
     clickChecks("Click td", 2, 1);
 });

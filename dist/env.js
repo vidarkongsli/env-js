@@ -1,5 +1,5 @@
 /*
- * Envjs env-js.1.0.rc1 
+ * Envjs env-js.1.0.rc2 
  * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008-2009 John Resig, under the MIT License
@@ -499,12 +499,12 @@ __extend__(DOMNamedNodeMap.prototype, {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
               this[itemIndex] = arg;                // over-write existing NamedNode
-              this[arg.name] = arg;
+              this[arg.name.toLowerCase()] = arg;
             }
       } else {
             // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
-            this[arg.name] = arg;
+            this[arg.name.toLowerCase()] = arg;
       }
     
       arg.ownerElement = this.parentNode;            // update ownerElement
@@ -652,12 +652,13 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
   for (var i=0; i<namednodemap.length; i++) {
     // compare name to each node's nodeName
     if(isnsmap){
-        if (namednodemap[i].localName == localName) {         // found it!
+        if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {         // found it!
           ret = i;
           break;
         }
     }else{
-        if (namednodemap[i].name == name) {         // found it!
+        
+        if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         // found it!
           ret = i;
           break;
         }
@@ -683,7 +684,8 @@ var __findNamedItemNSIndex__ = function(namednodemap, namespaceURI, localName) {
     // loop through all nodes
     for (var i=0; i<namednodemap.length; i++) {
       // compare name to each node's namespaceURI and localName
-      if ((namednodemap[i].namespaceURI == namespaceURI) && (namednodemap[i].localName == localName)) {
+      if ((namednodemap[i].namespaceURI.toLowerCase() == namespaceURI.toLowerCase()) && 
+          (namednodemap[i].localName.toLowerCase() == localName.toLowerCase())) {
         ret = i;                                 // found it!
         break;
       }
@@ -821,7 +823,7 @@ var DOMNode = function(ownerDocument) {
 
   this.nodeName = "";                            // The name of this node
   this.nodeValue = null;                           // The value of this node
-  this.className = "";                           // The CSS class name of this node.
+  //this.className = "";                           // The CSS class name of this node.
   
   // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
   // However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null
@@ -1631,6 +1633,7 @@ __extend__(DOMText.prototype,{
     },
     get xml(){
         return __escapeXML__(""+ this.nodeValue);
+        //return ""+ this.nodeValue;
     },
     toString: function(){
         return "Text #" + this._id;    
@@ -1744,13 +1747,16 @@ __extend__(DOMAttr.prototype, {
         this.nodeValue = value;
     },
     get specified(){
-        return (this.value.length > 0);
+        return (this!==null&&this!=undefined);
     },
     get nodeType(){
         return DOMNode.ATTRIBUTE_NODE;
     },
     get xml(){
-        return this.nodeName + '="' + __escapeXML__(this.nodeValue) + '" ';
+        if(this.nodeValue)
+            return this.nodeName + '="' + __escapeXML__(this.nodeValue) + '" ';
+        else
+            return '';
     },
     toString : function(){
         return "Attr #" + this._id + " " + this.name;
@@ -1769,7 +1775,7 @@ $debug("Defining Element");
 var DOMElement = function(ownerDocument) {
     this.DOMNode  = DOMNode;
     this.DOMNode(ownerDocument);                   
-    this.id = "";                                  // the ID of the element
+    //this.id = null;                                  // the ID of the element
 };
 DOMElement.prototype = new DOMNode;
 __extend__(DOMElement.prototype, {	
@@ -1790,17 +1796,17 @@ __extend__(DOMElement.prototype, {
         if (attr) {
             ret = attr.value;
         }
-        return ret; // if Attribute exists, return its value, otherwise, return ""
+        return ret; // if Attribute exists, return its value, otherwise, return null
     },
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        var value = value+'';
+        
         //I had to add this check becuase as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
         if(__ownerDocument__(this)){
-            if (!attr) {
+            if (attr===null||attr===undefined) {
                 attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
             }
             
@@ -1818,15 +1824,17 @@ __extend__(DOMElement.prototype, {
                 }
             }
             
-            if (__isIdDeclaration__(name)) {
-            //    this.id = value;  // cache ID for getElementById()
-            }
+            /*if (__isIdDeclaration__(name)) {
+                this.id = value;  // cache ID for getElementById()
+            }*/
             
             // assign values to properties (and aliases)
             attr.value     = value;
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
+        }else{
+            $warn('Element has no owner document '+this.tagName+'\n\t cant set attribute ' + name + ' = '+value );
         }
     },
     removeAttribute : function removeAttribute(name) {
@@ -3206,7 +3214,7 @@ function isEmpty(str) {
  * @param  str : string - The string to be escaped
  * @return : string - The escaped string
  */
-var escAmpRegEx = /&/g;
+var escAmpRegEx = /&(?!(amp;|lt;|gt;|quot|apos;))/g;
 var escLtRegEx = /</g;
 var escGtRegEx = />/g;
 var quotRegEx = /"/g;
@@ -3529,7 +3537,7 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 
-var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
+var __endHTMLElement__ = function(node, doc, p){
     if(node.nodeName.toLowerCase() == 'script'){
         p.replaceEntities = true;
         $env.loadLocalScript(node, p);
@@ -3798,7 +3806,7 @@ function __parseLoop__(impl, doc, p) {
     }
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      $handleEndOfNormalOrEmptyElement(iNodeParent, doc, p);
+      __endHTMLElement__(iNodeParent, doc, p);
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
 
@@ -3886,7 +3894,7 @@ function __parseLoop__(impl, doc, p) {
       }
 
 
-      $handleEndOfNormalOrEmptyElement(iNode, doc, p);
+      __endHTMLElement__(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
@@ -4178,9 +4186,15 @@ __extend__(DOMDocument.prototype, {
     get parentWindow(){
         return this._parentWindow;
     },
-    loadXML : function(xmlStr) {
+    loadXML : function(xmlString) {
         // create SAX Parser
-        var parser = new XMLP(xmlStr+'');
+        var htmlString;
+        if($env.fixHTML){
+            htmlString = $env.cleanHTML(xmlString);
+        }else{
+            htmlString = xmlString
+        }
+        var parser = new XMLP(htmlString+'');
         
         // create DOM Document
         if(this === $document){
@@ -4470,11 +4484,7 @@ __extend__(DOMDocument.prototype, {
     },
 	get defaultView(){ //TODO: why isnt this just 'return $w;'?
 		return { getComputedStyle: function(elem){
-			return { getPropertyValue: function(prop){
-				prop = prop.replace(/\-(\w)/g,function(m,c){ return c.toUpperCase(); });
-				var val = elem.style[prop];
-				if ( prop == "opacity" && val == "" ){ val = "1"; }return val;
-			}};
+			return $w.getComputedStyle(elem);
 		}};
 	},
     _genId : function() {
@@ -4939,7 +4949,7 @@ __extend__(HTMLDocument.prototype, {
           else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
           else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
           else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLSectionElement(this);}
+          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLTableSectionElement(this);}
           else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
           else if(tagName.match(/TEXTAREA/))            {node = new HTMLTextAreaElement(this);}
           else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
@@ -5089,11 +5099,10 @@ var HTMLElement = function(ownerDocument) {
 HTMLElement.prototype = new DOMElement;
 __extend__(HTMLElement.prototype, {
 		get className() { 
-		    return this.getAttribute("class")||""; 
-		    
+		    return this.getAttribute("class")||''; 
 	    },
-		set className(val) { 
-		    return this.setAttribute("class",trim(val)); 
+		set className(value) { 
+		    return this.setAttribute("class",trim(value)); 
 		    
 	    },
 		get dir() { 
@@ -5105,7 +5114,7 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		get id(){  
-		    return this.getAttribute('id')||''; 
+		    return this.getAttribute('id'); 
 		    
 	    },
 		set id(id){  
@@ -5135,7 +5144,7 @@ __extend__(HTMLElement.prototype, {
 		    doc = null;
 		},
 		get lang() { 
-		    return this.getAttribute("lang")||""; 
+		    return this.getAttribute("lang"); 
 		    
 	    },
 		set lang(val) { 
@@ -5164,33 +5173,36 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        this.updateCss2Props();
+		        __updateCss2Props__(this);
 	        }
 	        return this.$css2props
 		},
-		updateCss2Props: function() {
-			this.$css2props = new CSS2Properties({
-				onSet: (function(that) {
-					return function() { that.__setAttribute("style", this.cssText); }
-				})(this),
-				cssText:this.getAttribute("style")
-			});
-		},
-		__setAttribute: HTMLElement.prototype.setAttribute,
 		setAttribute: function (name, value) {
-		    this.__setAttribute(name, value);
+            DOMElement.prototype.setAttribute.apply(this,[name, value]);
 		    if (name === "style") {
-		        this.updateCss2Props();
+		        __updateCss2Props__(this);
 		    }
 		},
 		get title() { 
-		    return this.getAttribute("title")||""; 
+		    return this.getAttribute("title"); 
 		    
 	    },
-		set title(val) { 
-		    return this.setAttribute("title",val); 
+		set title(value) { 
+		    return this.setAttribute("title", value); 
 		    
 	    },
+		get tabIndex(){
+            var ti = this.getAttribute('tabindex');
+            if(ti!==null)
+                return Number(ti);
+            else
+                return 0;
+        },
+        set tabIndex(value){
+            if(value===undefined||value===null)
+                value = 0;
+            this.setAttribute('tabindex',Number(value));
+        },
 		//Not in the specs but I'll leave it here for now.
 		get outerHTML(){ 
 		    return this.xml; 
@@ -5203,17 +5215,9 @@ __extend__(HTMLElement.prototype, {
         },
 
 		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'', this)
+		    __eval__(this.getAttribute('onclick')||'', this);
 	    },
-        // non-ECMA function, but no other way for click events to enter env.js
-        __click__: function(element){
-            var event = new Event({
-              target:element,
-              currentTarget:element
-            });
-            event.initEvent("click");
-            element.dispatchEvent(event);
-        },
+        
 
 		ondblclick: function(event){
             __eval__(this.getAttribute('ondblclick')||'', this);
@@ -5272,6 +5276,10 @@ var __eval__ = function(script, startingNode){
     }
 };
 
+var __updateCss2Props__ = function(elem){
+	elem.$css2props = new CSS2Properties(elem);
+};
+
 var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 
         elm.addEventListener('click', elm.onclick ); 
@@ -5306,6 +5314,15 @@ var __registerEventAttrs__ = function(elm){
     return elm;
 };
 	
+// non-ECMA function, but no other way for click events to enter env.js
+var  __click__ = function(element){
+    var event = new Event({
+      target:element,
+      currentTarget:element
+    });
+    event.initEvent("click");
+    element.dispatchEvent(event);
+};
 var __submit__ = function(element){
 	var event = new Event({
 	  target:element,
@@ -5415,7 +5432,7 @@ var HTMLAnchorElement = function(ownerDocument) {
 HTMLAnchorElement.prototype = new HTMLElement;
 __extend__(HTMLAnchorElement.prototype, {
 	get accessKey() { 
-	    return this.getAttribute("accesskey") || ""; 
+	    return this.getAttribute("accesskey"); 
 	    
     },
 	set accessKey(val) { 
@@ -5423,7 +5440,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get charset() { 
-	    return this.getAttribute("charset") || ""; 
+	    return this.getAttribute("charset"); 
 	    
     },
 	set charset(val) { 
@@ -5431,7 +5448,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get coords() { 
-	    return this.getAttribute("coords") || ""; 
+	    return this.getAttribute("coords"); 
 	    
     },
 	set coords(val) { 
@@ -5439,7 +5456,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get href() { 
-	    return this.getAttribute("href") || ""; 
+	    return this.getAttribute("href"); 
 	    
     },
 	set href(val) { 
@@ -5447,7 +5464,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get hreflang() { 
-	    return this.getAttribute("hreflang") || ""; 
+	    return this.getAttribute("hreflang"); 
 	    
     },
 	set hreflang(val) { 
@@ -5455,7 +5472,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get name() { 
-	    return this.getAttribute("name") || ""; 
+	    return this.getAttribute("name"); 
 	    
     },
 	set name(val) { 
@@ -5463,7 +5480,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get rel() { 
-	    return this.getAttribute("rel") || ""; 
+	    return this.getAttribute("rel"); 
 	    
     },
 	set rel(val) { 
@@ -5471,7 +5488,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get rev() { 
-	    return this.getAttribute("rev") || ""; 
+	    return this.getAttribute("rev"); 
 	    
     },
 	set rev(val) { 
@@ -5479,23 +5496,15 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get shape() { 
-	    return this.getAttribute("shape") || ""; 
+	    return this.getAttribute("shape"); 
 	    
     },
 	set shape(val) { 
 	    return this.setAttribute("shape",val); 
 	    
     },
-	get tabIndex() { 
-	    return this.getAttribute("tabindex") || ""; 
-	    
-    },
-	set tabIndex(val) { 
-	    return this.setAttribute("tabindex",val); 
-	    
-    },
 	get target() { 
-	    return this.getAttribute("target") || ""; 
+	    return this.getAttribute("target"); 
 	    
     },
 	set target(val) { 
@@ -5503,7 +5512,7 @@ __extend__(HTMLAnchorElement.prototype, {
 	    
     },
 	get type() { 
-	    return this.getAttribute("type") || ""; 
+	    return this.getAttribute("type"); 
 	    
     },
 	set type(val) { 
@@ -5641,12 +5650,12 @@ __extend__(HTMLAreaElement.prototype, {
         //TODO
         return 0;
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return this.getAttribute('tabindex');
     },
     set tabIndex(value){
         this.setAttribute('tabindex',value);
-    },
+    },*/
     get target(){
         return this.getAttribute('target');
     },
@@ -5738,12 +5747,12 @@ __extend__(HTMLButtonElement.prototype, {
     set accessKey(value){
         this.setAttribute('accesskey',value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',Number(value));
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -5929,7 +5938,7 @@ __extend__(HTMLFormElement.prototype,{
         
     },
 	get name() {
-	    return this.getAttribute("name") || ""; 
+	    return this.getAttribute("name"); 
 	    
     },
 	set name(val) { 
@@ -5937,7 +5946,7 @@ __extend__(HTMLFormElement.prototype,{
 	    
     },
 	get target() { 
-	    return this.getAttribute("target") || ""; 
+	    return this.getAttribute("target"); 
 	    
     },
 	set target(val) { 
@@ -6276,12 +6285,12 @@ __extend__(HTMLInputElement.prototype, {
     set src(value){
         this.setAttribute('src', value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',Number(value));
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -6295,6 +6304,8 @@ __extend__(HTMLInputElement.prototype, {
         return this.getAttribute('value');
     },
     set value(value){
+        if(this.defaultValue===null&&this.value!==null)
+            this.defaultValue = this.value;
         this.setAttribute('value',value);
     },
     blur:function(){
@@ -6575,12 +6586,12 @@ __extend__(HTMLObjectElement.prototype, {
     set standby(value){
         this.setAttribute('standby',value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return this.getAttribute('tabindex');
     },
     set tabIndex(value){
         this.setAttribute('tabindex',value);
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -6681,6 +6692,8 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
+        if(this.defaultSelected===null&&this.selected!==null)
+            this.defaultSelected = this.selected;
         this.setAttribute('selected', (value ? 'selected' :''));
     },
     get value(){
@@ -6755,6 +6768,10 @@ __extend__(HTMLScriptElement.prototype, {
  		}
         return this.nodeValue;
 
+    },
+    set text(value){
+        this.nodeValue = value;
+        $env.loadInlineScript(this);
     },
     get htmlFor(){
         return this.getAttribute('for');
@@ -6884,12 +6901,12 @@ __extend__(HTMLSelectElement.prototype, {
     set size(value){
         this.setAttribute('size',value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',value);
-    },
+    },*/
     add : function(){
         __add__(this);
     },
@@ -7005,24 +7022,29 @@ __extend__(HTMLTableElement.prototype, {
     },
  
     appendChild : function (child) {
-
-        var tagName = child.tagName.toLowerCase();
-        if (tagName === "tr") {
-            // need an implcit <tbody> to contain this...
-            if (!this.currentBody) {
-                this.currentBody = document.createElement("tbody");
-            
-                DOMNode.prototype.appendChild.apply(this, [this.currentBody]);
+        
+        var tagName;
+        if(child.tagName){
+            tagName = child.tagName.toLowerCase();
+            if (tagName === "tr") {
+                // need an implcit <tbody> to contain this...
+                if (!this.currentBody) {
+                    this.currentBody = document.createElement("tbody");
+                
+                    DOMNode.prototype.appendChild.apply(this, [this.currentBody]);
+                }
+              
+                return this.currentBody.appendChild(child); 
+       
+            } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
+                this.currentBody = child;
+                return DOMNode.prototype.appendChild.apply(this, arguments);  
+                
+            } else {
+                return DOMNode.prototype.appendChild.apply(this, arguments);
             }
-          
-            return this.currentBody.appendChild(child); 
-   
-        } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
-            this.currentBody = child;
-            return DOMNode.prototype.appendChild.apply(this, arguments);  
-            
-        } else {
-            return DOMNode.prototype.appendChild.apply(this, arguments);
+        }else{
+            $error('HTMLTableElement.appendChild => child.tagName should not be undefined here... Fix ME!');
         }
     },
      
@@ -7299,6 +7321,12 @@ __extend__(HTMLTextAreaElement.prototype, {
     set disabled(value){
         this.setAttribute('disabled', (value ? 'disabled' :''));
     },
+    get maxLength(){
+        return Number(this.getAttribute('maxlength')||'0');
+    },
+    set maxLength(value){
+        this.setAttribute('maxlength', value);
+    },
     get name(){
         return this.getAttribute('name')||'';
     },
@@ -7311,12 +7339,12 @@ __extend__(HTMLTextAreaElement.prototype, {
     set readOnly(value){
         this.setAttribute('readonly', (value ? 'readonly' :''));
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',Number(value));
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -7324,10 +7352,12 @@ __extend__(HTMLTextAreaElement.prototype, {
         this.setAttribute('type',value);
     },
     get value(){
-        return this.getAttribute('value');
+        return this.text;
     },
     set value(value){
-        this.setAttribute('value',value);
+        if(this.defaultValue===null&&this.text!==null)
+            this.defaultValue = this.text;
+        return this.text = value;
     },
     blur:function(){
         __blur__(this);
@@ -7672,45 +7702,53 @@ var $onblur,
     $onresize;/*
 * CSS2Properties - DOM Level 2 CSS
 */
-var CSS2Properties = function(options){
-    __extend__(this, __supportedStyles__);
-    this.onSetCallback = options.onSet?options.onSet:(function(){});
-    this.styleIndices = {};
-    __cssTextToStyles__(this, options.cssText?options.cssText:"");
+var CSS2Properties = function(element){
+    //this.onSetCallback = options.onSet?options.onSet:(function(){});
+    this.styleIndex = __supportedStyles__();
+    this.nameMap = {};
+    this.__previous__ = {};
+    this.__element__ = element
+    __cssTextToStyles__(this, element.getAttribute('style')||'');
 };
 __extend__(CSS2Properties.prototype, {
     get cssText(){
-        return Array.prototype.join.apply(this,[';\n']);
+        var css = '';
+        for(var i=0;i<this.length;i++){
+            css+=this[i]+":"+this.getPropertyValue(this[i])+';'
+        }
+        return css;
     },
     set cssText(cssText){ 
         __cssTextToStyles__(this, cssText); 
     },
-    getPropertyCSSValue : function(){
-        
+    getPropertyCSSValue : function(name){
+        //?
     },
     getPropertyPriority : function(){
         
     },
     getPropertyValue : function(name){
-        var camelCase = __toCamelCase__(name);
-        var i, value = this[camelCase];
-        if(value === undefined){
-            for(i=0;i<this.length;i++){
-                if(this[i]===name){
-                    return this[i];
-                }
-            }
+        if(name in this.styleIndex){
+            //$info(name +' in style index');
+            return this.styleIndex[name]===null?
+                "":this.styleIndex[name];
+        }else if(name in this.nameMap){
+            return this.styleIndex[__toCamelCase__(name)];
         }
-        return value;
+        //$info(name +' not found');
+        return "";
     },
     item : function(index){
         return this[index];
     },
-    removeProperty: function(){
-        
+    removeProperty: function(name){
+        this.styleIndex[name] = null;
     },
-    setProperty: function(){
-        
+    setProperty: function(name, value){
+        //$info('setting css property '+name+' : '+value);
+        if (value!==undefined){
+            __parseStyle__(this, name, value);
+        }
     },
     toString:function(){
         if (this.length >0){
@@ -7718,1067 +7756,218 @@ __extend__(CSS2Properties.prototype, {
         }else{
             return '';
         }
-    },
-    onSet:function(camelCaseName, value){
-        var dashedName = __toDashed__(camelCaseName);
-        var definition = dashedName + ": " + value;
-        if (this.styleIndices[camelCaseName] !== undefined)
-            this[this.styleIndices[camelCaseName]] = definition;
-        else {
-            Array.prototype.push.apply(this, [definition]);
-            this.styleIndices[camelCaseName] = this.length - 1;
-        }
-        this.onSetCallback();
-    },
+    }
 });
 
+var __parseStyle__ = function(css2prop, name, value){
+    css2prop.styleIndex[name] = value;
+    var definition = __toDashed__(name);
+    if(css2prop.length===undefined){
+        Array.prototype.push.apply(css2prop, [definition]);
+        css2prop.nameMap[definition] = 0;
+    }else{
+        if(definition in css2prop.nameMap){
+            css2prop[css2prop.nameMap[definition]] = definition;
+        }else{
+            Array.prototype.push.apply(css2prop, [definition]);
+            css2prop.nameMap[definition] = css2prop.length;
+        }
+    }
+};
+
+
 var __cssTextToStyles__ = function(css2props, cssText){
-    var styleArray=[];
+    //var styleArray=[];
     var style, name, value, camelCaseName, w3cName, styles = cssText.split(';');
-    css2props.styleIndices = {};
     for ( var i = 0; i < styles.length; i++ ) {
         //$log("Adding style property " + styles[i]);
     	style = styles[i].split(':');
+        //$log(" style  " + style[0]);
     	if ( style.length == 2 ){
-    	    //keep a reference to the original name of the style which was set
-    	    //this is the w3c style setting method.
-    	    var idx = styleArray.length;
-    	    styleArray[idx] = w3cName = styles[i];
-            //camel case for dash case
-    	    value = trim(style[1]);
-            camelCaseName = trim(__toCamelCase__(style[0]));
-            css2props.styleIndices[camelCaseName] = idx;
-            $debug('CSS Style Name:  ' + camelCaseName);
-            if(css2props["_" + camelCaseName]!==undefined){
-                //set the value internally with camelcase name 
-                $debug('Setting css ' + camelCaseName + ' to ' + value);
-                css2props["_" + camelCaseName] = value;
-            };
+            //$log(" value  " + style[1]);
+    	    __parseStyle__(css2props, style[0].replace(" ",'','g'), style[1].replace(" ",'','g'));
     	}
     }
-    __setArray__(css2props, styleArray);
 };
 
 var __toCamelCase__ = function(name) {
-	return name.replace(/\-(\w)/g, function(all, letter){
-		return letter.toUpperCase();
-	});
+    //$info('__toCamelCase__'+name);
+    if(name){
+    	return name.replace(/\-(\w)/g, function(all, letter){
+    		return letter.toUpperCase();
+    	});
+    }
+    return name;
 };
 
 var __toDashed__ = function(camelCaseName) {
-	return camelCaseName.replace(/[A-Z]/g, function(all) {
-		return "-" + all.toLowerCase();
-	});
+    //$info("__toDashed__"+camelCaseName);
+    if(camelCaseName){
+    	return camelCaseName.replace(/[A-Z]/g, function(all) {
+    		return "-" + all.toLowerCase();
+    	});
+    }
+    return camelCaseName;
 };
 
 //Obviously these arent all supported but by commenting out various sections
 //this provides a single location to configure what is exposed as supported.
-//These getters/setters will need to get fine-tuned in the future to deal with
-//the variation on input formulations
-var __supportedStyles__ = (function(){
-    return{
-        _azimuth: "",
-        get azimuth() {
-            return this._azimuth;
-        },
-        set azimuth(val) {
-            this._azimuth = val;
-            this.onSet("azimuth", val);
-        },
-        _background:	"",
-        get background() {
-            return this._background;
-        },
-        set background(val) {
-            this._background = val;
-            this.onSet("background", val);
-        },
-        _backgroundAttachment:	"",
-        get backgroundAttachment() {
-            return this._backgroundAttachment;
-        },
-        set backgroundAttachment(val) {
-            this._backgroundAttachment = val;
-            this.onSet("backgroundAttachment", val);
-        },
-        _backgroundColor:	"",
-        get backgroundColor() {
-            return this._backgroundColor;
-        },
-        set backgroundColor(val) {
-            this._backgroundColor = val;
-            this.onSet("backgroundColor", val);
-        },
-        _backgroundImage:	"",
-        get backgroundImage() {
-            return this._backgroundImage;
-        },
-        set backgroundImage(val) {
-            this._backgroundImage = val;
-            this.onSet("backgroundImage", val);
-        },
-        _backgroundPosition:	"",
-        get backgroundPosition() {
-            return this._backgroundPosition;
-        },
-        set backgroundPosition(val) {
-            this._backgroundPosition = val;
-            this.onSet("backgroundPosition", val);
-        },
-        _backgroundRepeat:	"",
-        get backgroundRepeat() {
-            return this._backgroundRepeat;
-        },
-        set backgroundRepeat(val) {
-            this._backgroundRepeat = val;
-            this.onSet("backgroundRepeat", val);
-        },
-        _border:	"",
-        get border() {
-            return this._border;
-        },
-        set border(val) {
-            this._border = val;
-            this.onSet("border", val);
-        },
-        _borderBottom:	"",
-        get borderBottom() {
-            return this._borderBottom;
-        },
-        set borderBottom(val) {
-            this._borderBottom = val;
-            this.onSet("borderBottom", val);
-        },
-        _borderBottomColor:	"",
-        get borderBottomColor() {
-            return this._borderBottomColor;
-        },
-        set borderBottomColor(val) {
-            this._borderBottomColor = val;
-            this.onSet("borderBottomColor", val);
-        },
-        _borderBottomStyle:	"",
-        get borderBottomStyle() {
-            return this._borderBottomStyle;
-        },
-        set borderBottomStyle(val) {
-            this._borderBottomStyle = val;
-            this.onSet("borderBottomStyle", val);
-        },
-        _borderBottomWidth:	"",
-        get borderBottomWidth() {
-            return this._borderBottomWidth;
-        },
-        set borderBottomWidth(val) {
-            this._borderBottomWidth = val;
-            this.onSet("borderBottomWidth", val);
-        },
-        _borderCollapse:	"",
-        get borderCollapse() {
-            return this._borderCollapse;
-        },
-        set borderCollapse(val) {
-            this._borderCollapse = val;
-            this.onSet("borderCollapse", val);
-        },
-        _borderColor:	"",
-        get borderColor() {
-            return this._borderColor;
-        },
-        set borderColor(val) {
-            this._borderColor = val;
-            this.onSet("borderColor", val);
-        },
-        _borderLeft:	"",
-        get borderLeft() {
-            return this._borderLeft;
-        },
-        set borderLeft(val) {
-            this._borderLeft = val;
-            this.onSet("borderLeft", val);
-        },
-        _borderLeftColor:	"",
-        get borderLeftColor() {
-            return this._borderLeftColor;
-        },
-        set borderLeftColor(val) {
-            this._borderLeftColor = val;
-            this.onSet("borderLeftColor", val);
-        },
-        _borderLeftStyle:	"",
-        get borderLeftStyle() {
-            return this._borderLeftStyle;
-        },
-        set borderLeftStyle(val) {
-            this._borderLeftStyle = val;
-            this.onSet("borderLeftStyle", val);
-        },
-        _borderLeftWidth:	"",
-        get borderLeftWidth() {
-            return this._borderLeftWidth;
-        },
-        set borderLeftWidth(val) {
-            this._borderLeftWidth = val;
-            this.onSet("borderLeftWidth", val);
-        },
-        _borderRight:	"",
-        get borderRight() {
-            return this._borderRight;
-        },
-        set borderRight(val) {
-            this._borderRight = val;
-            this.onSet("borderRight", val);
-        },
-        _borderRightColor:	"",
-        get borderRightColor() {
-            return this._borderRightColor;
-        },
-        set borderRightColor(val) {
-            this._borderRightColor = val;
-            this.onSet("borderRightColor", val);
-        },
-        _borderRightStyle:	"",
-        get borderRightStyle() {
-            return this._borderRightStyle;
-        },
-        set borderRightStyle(val) {
-            this._borderRightStyle = val;
-            this.onSet("borderRightStyle", val);
-        },
-        _borderRightWidth:	"",
-        get borderRightWidth() {
-            return this._borderRightWidth;
-        },
-        set borderRightWidth(val) {
-            this._borderRightWidth = val;
-            this.onSet("borderRightWidth", val);
-        },
-        _borderSpacing:	"",
-        get borderSpacing() {
-            return this._borderSpacing;
-        },
-        set borderSpacing(val) {
-            this._borderSpacing = val;
-            this.onSet("borderSpacing", val);
-        },
-        _borderStyle:	"",
-        get borderStyle() {
-            return this._borderStyle;
-        },
-        set borderStyle(val) {
-            this._borderStyle = val;
-            this.onSet("borderStyle", val);
-        },
-        _borderTop:	"",
-        get borderTop() {
-            return this._borderTop;
-        },
-        set borderTop(val) {
-            this._borderTop = val;
-            this.onSet("borderTop", val);
-        },
-        _borderTopColor:	"",
-        get borderTopColor() {
-            return this._borderTopColor;
-        },
-        set borderTopColor(val) {
-            this._borderTopColor = val;
-            this.onSet("borderTopColor", val);
-        },
-        _borderTopStyle:	"",
-        get borderTopStyle() {
-            return this._borderTopStyle;
-        },
-        set borderTopStyle(val) {
-            this._borderTopStyle = val;
-            this.onSet("borderTopStyle", val);
-        },
-        _borderTopWidth:	"",
-        get borderTopWidth() {
-            return this._borderTopWidth;
-        },
-        set borderTopWidth(val) {
-            this._borderTopWidth = val;
-            this.onSet("borderTopWidth", val);
-        },
-        _borderWidth:	"",
-        get borderWidth() {
-            return this._borderWidth;
-        },
-        set borderWidth(val) {
-            this._borderWidth = val;
-            this.onSet("borderWidth", val);
-        },
-        _bottom:	"",
-        get bottom() {
-            return this._bottom;
-        },
-        set bottom(val) {
-            this._bottom = val;
-            this.onSet("bottom", val);
-        },
-        _captionSide:	"",
-        get captionSide() {
-            return this._captionSide;
-        },
-        set captionSide(val) {
-            this._captionSide = val;
-            this.onSet("captionSide", val);
-        },
-        _clear:	"",
-        get clear() {
-            return this._clear;
-        },
-        set clear(val) {
-            this._clear = val;
-            this.onSet("clear", val);
-        },
-        _clip:	"",
-        get clip() {
-            return this._clip;
-        },
-        set clip(val) {
-            this._clip = val;
-            this.onSet("clip", val);
-        },
-        _color:	"",
-        get color() {
-            return this._color;
-        },
-        set color(val) {
-            this._color = val;
-            this.onSet("color", val);
-        },
-        _content:	"",
-        get content() {
-            return this._content;
-        },
-        set content(val) {
-            this._content = val;
-            this.onSet("content", val);
-        },
-        _counterIncrement:	"",
-        get counterIncrement() {
-            return this._counterIncrement;
-        },
-        set counterIncrement(val) {
-            this._counterIncrement = val;
-            this.onSet("counterIncrement", val);
-        },
-        _counterReset:	"",
-        get counterReset() {
-            return this._counterReset;
-        },
-        set counterReset(val) {
-            this._counterReset = val;
-            this.onSet("counterReset", val);
-        },
-        _cssFloat:	"",
-        get cssFloat() {
-            return this._cssFloat;
-        },
-        set cssFloat(val) {
-            this._cssFloat = val;
-            this.onSet("cssFloat", val);
-        },
-        _cue:	"",
-        get cue() {
-            return this._cue;
-        },
-        set cue(val) {
-            this._cue = val;
-            this.onSet("cue", val);
-        },
-        _cueAfter:	"",
-        get cueAfter() {
-            return this._cueAfter;
-        },
-        set cueAfter(val) {
-            this._cueAfter = val;
-            this.onSet("cueAfter", val);
-        },
-        _cueBefore:	"",
-        get cueBefore() {
-            return this._cueBefore;
-        },
-        set cueBefore(val) {
-            this._cueBefore = val;
-            this.onSet("cueBefore", val);
-        },
-        _cursor:	"",
-        get cursor() {
-            return this._cursor;
-        },
-        set cursor(val) {
-            this._cursor = val;
-            this.onSet("cursor", val);
-        },
-        _direction:	"",
-        get direction() {
-            return this._direction;
-        },
-        set direction(val) {
-            this._direction = val;
-            this.onSet("direction", val);
-        },
-        _display:	"",
-        get display() {
-            return this._display;
-        },
-        set display(val) {
-            this._display = val;
-            this.onSet("display", val);
-        },
-        _elevation:	"",
-        get elevation() {
-            return this._elevation;
-        },
-        set elevation(val) {
-            this._elevation = val;
-            this.onSet("elevation", val);
-        },
-        _emptyCells:	"",
-        get emptyCells() {
-            return this._emptyCells;
-        },
-        set emptyCells(val) {
-            this._emptyCells = val;
-            this.onSet("emptyCells", val);
-        },
-        _font:	"",
-        get font() {
-            return this._font;
-        },
-        set font(val) {
-            this._font = val;
-            this.onSet("font", val);
-        },
-        _fontFamily:	"",
-        get fontFamily() {
-            return this._fontFamily;
-        },
-        set fontFamily(val) {
-            this._fontFamily = val;
-            this.onSet("fontFamily", val);
-        },
-        _fontSize:	"",
-        get fontSize() {
-            return this._fontSize;
-        },
-        set fontSize(val) {
-            this._fontSize = val;
-            this.onSet("fontSize", val);
-        },
-        _fontSizeAdjust:	"",
-        get fontSizeAdjust() {
-            return this._fontSizeAdjust;
-        },
-        set fontSizeAdjust(val) {
-            this._fontSizeAdjust = val;
-            this.onSet("fontSizeAdjust", val);
-        },
-        _fontStretch:	"",
-        get fontStretch() {
-            return this._fontStretch;
-        },
-        set fontStretch(val) {
-            this._fontStretch = val;
-            this.onSet("fontStretch", val);
-        },
-        _fontStyle:	"",
-        get fontStyle() {
-            return this._fontStyle;
-        },
-        set fontStyle(val) {
-            this._fontStyle = val;
-            this.onSet("fontStyle", val);
-        },
-        _fontVariant:	"",
-        get fontVariant() {
-            return this._fontVariant;
-        },
-        set fontVariant(val) {
-            this._fontVariant = val;
-            this.onSet("fontVariant", val);
-        },
-        _fontWeight:	"",
-        get fontWeight() {
-            return this._fontWeight;
-        },
-        set fontWeight(val) {
-            this._fontWeight = val;
-            this.onSet("fontWeight", val);
-        },
-        _height:	"",
-        get height() {
-            return this._height;
-        },
-        set height(val) {
-            this._height = val;
-            this.onSet("height", val);
-        },
-        _left:	"",
-        get left() {
-            return this._left;
-        },
-        set left(val) {
-            this._left = val;
-            this.onSet("left", val);
-        },
-        _letterSpacing:	"",
-        get letterSpacing() {
-            return this._letterSpacing;
-        },
-        set letterSpacing(val) {
-            this._letterSpacing = val;
-            this.onSet("letterSpacing", val);
-        },
-        _lineHeight:	"",
-        get lineHeight() {
-            return this._lineHeight;
-        },
-        set lineHeight(val) {
-            this._lineHeight = val;
-            this.onSet("lineHeight", val);
-        },
-        _listStyle:	"",
-        get listStyle() {
-            return this._listStyle;
-        },
-        set listStyle(val) {
-            this._listStyle = val;
-            this.onSet("listStyle", val);
-        },
-        _listStyleImage:	"",
-        get listStyleImage() {
-            return this._listStyleImage;
-        },
-        set listStyleImage(val) {
-            this._listStyleImage = val;
-            this.onSet("listStyleImage", val);
-        },
-        _listStylePosition:	"",
-        get listStylePosition() {
-            return this._listStylePosition;
-        },
-        set listStylePosition(val) {
-            this._listStylePosition = val;
-            this.onSet("listStylePosition", val);
-        },
-        _listStyleType:	"",
-        get listStyleType() {
-            return this._listStyleType;
-        },
-        set listStyleType(val) {
-            this._listStyleType = val;
-            this.onSet("listStyleType", val);
-        },
-        _margin:	"",
-        get margin() {
-            return this._margin;
-        },
-        set margin(val) {
-            this._margin = val;
-            this.onSet("margin", val);
-        },
-        _marginBottom:	"",
-        get marginBottom() {
-            return this._marginBottom;
-        },
-        set marginBottom(val) {
-            this._marginBottom = val;
-            this.onSet("marginBottom", val);
-        },
-        _marginLeft:	"",
-        get marginLeft() {
-            return this._marginLeft;
-        },
-        set marginLeft(val) {
-            this._marginLeft = val;
-            this.onSet("marginLeft", val);
-        },
-        _marginRight:	"",
-        get marginRight() {
-            return this._marginRight;
-        },
-        set marginRight(val) {
-            this._marginRight = val;
-            this.onSet("marginRight", val);
-        },
-        _marginTop:	"",
-        get marginTop() {
-            return this._marginTop;
-        },
-        set marginTop(val) {
-            this._marginTop = val;
-            this.onSet("marginTop", val);
-        },
-        _markerOffset:	"",
-        get markerOffset() {
-            return this._markerOffset;
-        },
-        set markerOffset(val) {
-            this._markerOffset = val;
-            this.onSet("markerOffset", val);
-        },
-        _marks:	"",
-        get marks() {
-            return this._marks;
-        },
-        set marks(val) {
-            this._marks = val;
-            this.onSet("marks", val);
-        },
-        _maxHeight:	"",
-        get maxHeight() {
-            return this._maxHeight;
-        },
-        set maxHeight(val) {
-            this._maxHeight = val;
-            this.onSet("maxHeight", val);
-        },
-        _maxWidth:	"",
-        get maxWidth() {
-            return this._maxWidth;
-        },
-        set maxWidth(val) {
-            this._maxWidth = val;
-            this.onSet("maxWidth", val);
-        },
-        _minHeight:	"",
-        get minHeight() {
-            return this._minHeight;
-        },
-        set minHeight(val) {
-            this._minHeight = val;
-            this.onSet("minHeight", val);
-        },
-        _minWidth:	"",
-        get minWidth() {
-            return this._minWidth;
-        },
-        set minWidth(val) {
-            this._minWidth = val;
-            this.onSet("minWidth", val);
-        },
-        _opacity:	1,
-        get opacity() {
-            return this._opacity;
-        },
-        set opacity(val) {
-            this._opacity = val;
-            this.onSet("opacity", val);
-        },
-        _orphans:	"",
-        get orphans() {
-            return this._orphans;
-        },
-        set orphans(val) {
-            this._orphans = val;
-            this.onSet("orphans", val);
-        },
-        _outline:	"",
-        get outline() {
-            return this._outline;
-        },
-        set outline(val) {
-            this._outline = val;
-            this.onSet("outline", val);
-        },
-        _outlineColor:	"",
-        get outlineColor() {
-            return this._outlineColor;
-        },
-        set outlineColor(val) {
-            this._outlineColor = val;
-            this.onSet("outlineColor", val);
-        },
-        _outlineOffset:	"",
-        get outlineOffset() {
-            return this._outlineOffset;
-        },
-        set outlineOffset(val) {
-            this._outlineOffset = val;
-            this.onSet("outlineOffset", val);
-        },
-        _outlineStyle:	"",
-        get outlineStyle() {
-            return this._outlineStyle;
-        },
-        set outlineStyle(val) {
-            this._outlineStyle = val;
-            this.onSet("outlineStyle", val);
-        },
-        _outlineWidth:	"",
-        get outlineWidth() {
-            return this._outlineWidth;
-        },
-        set outlineWidth(val) {
-            this._outlineWidth = val;
-            this.onSet("outlineWidth", val);
-        },
-        _overflow:	"",
-        get overflow() {
-            return this._overflow;
-        },
-        set overflow(val) {
-            this._overflow = val;
-            this.onSet("overflow", val);
-        },
-        _overflowX:	"",
-        get overflowX() {
-            return this._overflowX;
-        },
-        set overflowX(val) {
-            this._overflowX = val;
-            this.onSet("overflowX", val);
-        },
-        _overflowY:	"",
-        get overflowY() {
-            return this._overflowY;
-        },
-        set overflowY(val) {
-            this._overflowY = val;
-            this.onSet("overflowY", val);
-        },
-        _padding:	"",
-        get padding() {
-            return this._padding;
-        },
-        set padding(val) {
-            this._padding = val;
-            this.onSet("padding", val);
-        },
-        _paddingBottom:	"",
-        get paddingBottom() {
-            return this._paddingBottom;
-        },
-        set paddingBottom(val) {
-            this._paddingBottom = val;
-            this.onSet("paddingBottom", val);
-        },
-        _paddingLeft:	"",
-        get paddingLeft() {
-            return this._paddingLeft;
-        },
-        set paddingLeft(val) {
-            this._paddingLeft = val;
-            this.onSet("paddingLeft", val);
-        },
-        _paddingRight:	"",
-        get paddingRight() {
-            return this._paddingRight;
-        },
-        set paddingRight(val) {
-            this._paddingRight = val;
-            this.onSet("paddingRight", val);
-        },
-        _paddingTop:	"",
-        get paddingTop() {
-            return this._paddingTop;
-        },
-        set paddingTop(val) {
-            this._paddingTop = val;
-            this.onSet("paddingTop", val);
-        },
-        _page:	"",
-        get page() {
-            return this._page;
-        },
-        set page(val) {
-            this._page = val;
-            this.onSet("page", val);
-        },
-        _pageBreakAfter:	"",
-        get pageBreakAfter() {
-            return this._pageBreakAfter;
-        },
-        set pageBreakAfter(val) {
-            this._pageBreakAfter = val;
-            this.onSet("pageBreakAfter", val);
-        },
-        _pageBreakBefore:	"",
-        get pageBreakBefore() {
-            return this._pageBreakBefore;
-        },
-        set pageBreakBefore(val) {
-            this._pageBreakBefore = val;
-            this.onSet("pageBreakBefore", val);
-        },
-        _pageBreakInside:	"",
-        get pageBreakInside() {
-            return this._pageBreakInside;
-        },
-        set pageBreakInside(val) {
-            this._pageBreakInside = val;
-            this.onSet("pageBreakInside", val);
-        },
-        _pause:	"",
-        get pause() {
-            return this._pause;
-        },
-        set pause(val) {
-            this._pause = val;
-            this.onSet("pause", val);
-        },
-        _pauseAfter:	"",
-        get pauseAfter() {
-            return this._pauseAfter;
-        },
-        set pauseAfter(val) {
-            this._pauseAfter = val;
-            this.onSet("pauseAfter", val);
-        },
-        _pauseBefore:	"",
-        get pauseBefore() {
-            return this._pauseBefore;
-        },
-        set pauseBefore(val) {
-            this._pauseBefore = val;
-            this.onSet("pauseBefore", val);
-        },
-        _pitch:	"",
-        get pitch() {
-            return this._pitch;
-        },
-        set pitch(val) {
-            this._pitch = val;
-            this.onSet("pitch", val);
-        },
-        _pitchRange:	"",
-        get pitchRange() {
-            return this._pitchRange;
-        },
-        set pitchRange(val) {
-            this._pitchRange = val;
-            this.onSet("pitchRange", val);
-        },
-        _position:	"",
-        get position() {
-            return this._position;
-        },
-        set position(val) {
-            this._position = val;
-            this.onSet("position", val);
-        },
-        _quotes:	"",
-        get quotes() {
-            return this._quotes;
-        },
-        set quotes(val) {
-            this._quotes = val;
-            this.onSet("quotes", val);
-        },
-        _richness:	"",
-        get richness() {
-            return this._richness;
-        },
-        set richness(val) {
-            this._richness = val;
-            this.onSet("richness", val);
-        },
-        _right:	"",
-        get right() {
-            return this._right;
-        },
-        set right(val) {
-            this._right = val;
-            this.onSet("right", val);
-        },
-        _size:	"",
-        get size() {
-            return this._size;
-        },
-        set size(val) {
-            this._size = val;
-            this.onSet("size", val);
-        },
-        _speak:	"",
-        get speak() {
-            return this._speak;
-        },
-        set speak(val) {
-            this._speak = val;
-            this.onSet("speak", val);
-        },
-        _speakHeader:	"",
-        get speakHeader() {
-            return this._speakHeader;
-        },
-        set speakHeader(val) {
-            this._speakHeader = val;
-            this.onSet("speakHeader", val);
-        },
-        _speakNumeral:	"",
-        get speakNumeral() {
-            return this._speakNumeral;
-        },
-        set speakNumeral(val) {
-            this._speakNumeral = val;
-            this.onSet("speakNumeral", val);
-        },
-        _speakPunctuation:	"",
-        get speakPunctuation() {
-            return this._speakPunctuation;
-        },
-        set speakPunctuation(val) {
-            this._speakPunctuation = val;
-            this.onSet("speakPunctuation", val);
-        },
-        _speechRate:	"",
-        get speechRate() {
-            return this._speechRate;
-        },
-        set speechRate(val) {
-            this._speechRate = val;
-            this.onSet("speechRate", val);
-        },
-        _stress:	"",
-        get stress() {
-            return this._stress;
-        },
-        set stress(val) {
-            this._stress = val;
-            this.onSet("stress", val);
-        },
-        _tableLayout:	"",
-        get tableLayout() {
-            return this._tableLayout;
-        },
-        set tableLayout(val) {
-            this._tableLayout = val;
-            this.onSet("tableLayout", val);
-        },
-        _textAlign:	"",
-        get textAlign() {
-            return this._textAlign;
-        },
-        set textAlign(val) {
-            this._textAlign = val;
-            this.onSet("textAlign", val);
-        },
-        _textDecoration:	"",
-        get textDecoration() {
-            return this._textDecoration;
-        },
-        set textDecoration(val) {
-            this._textDecoration = val;
-            this.onSet("textDecoration", val);
-        },
-        _textIndent:	"",
-        get textIndent() {
-            return this._textIndent;
-        },
-        set textIndent(val) {
-            this._textIndent = val;
-            this.onSet("textIndent", val);
-        },
-        _textShadow:	"",
-        get textShadow() {
-            return this._textShadow;
-        },
-        set textShadow(val) {
-            this._textShadow = val;
-            this.onSet("textShadow", val);
-        },
-        _textTransform:	"",
-        get textTransform() {
-            return this._textTransform;
-        },
-        set textTransform(val) {
-            this._textTransform = val;
-            this.onSet("textTransform", val);
-        },
-        _top:	"",
-        get top() {
-            return this._top;
-        },
-        set top(val) {
-            this._top = val;
-            this.onSet("top", val);
-        },
-        _unicodeBidi:	"",
-        get unicodeBidi() {
-            return this._unicodeBidi;
-        },
-        set unicodeBidi(val) {
-            this._unicodeBidi = val;
-            this.onSet("unicodeBidi", val);
-        },
-        _verticalAlign:	"",
-        get verticalAlign() {
-            return this._verticalAlign;
-        },
-        set verticalAlign(val) {
-            this._verticalAlign = val;
-            this.onSet("verticalAlign", val);
-        },
-        _visibility:	"",
-        get visibility() {
-            return this._visibility;
-        },
-        set visibility(val) {
-            this._visibility = val;
-            this.onSet("visibility", val);
-        },
-        _voiceFamily:	"",
-        get voiceFamily() {
-            return this._voiceFamily;
-        },
-        set voiceFamily(val) {
-            this._voiceFamily = val;
-            this.onSet("voiceFamily", val);
-        },
-        _volume:	"",
-        get volume() {
-            return this._volume;
-        },
-        set volume(val) {
-            this._volume = val;
-            this.onSet("volume", val);
-        },
-        _whiteSpace:	"",
-        get whiteSpace() {
-            return this._whiteSpace;
-        },
-        set whiteSpace(val) {
-            this._whiteSpace = val;
-            this.onSet("whiteSpace", val);
-        },
-        _widows:	"",
-        get widows() {
-            return this._widows;
-        },
-        set widows(val) {
-            this._widows = val;
-            this.onSet("widows", val);
-        },
-        _width:	"",
-        get width() {
-            return this._width;
-        },
-        set width(val) {
-            this._width = val;
-            this.onSet("width", val);
-        },
-        _wordSpacing:	"",
-        get wordSpacing() {
-            return this._wordSpacing;
-        },
-        set wordSpacing(val) {
-            this._wordSpacing = val;
-            this.onSet("wordSpacing", val);
-        },
-        _zIndex:	"",
-        get zIndex() {
-            return this._zIndex;
-        },
-        set zIndex(val) {
-            this._zIndex = val;
-            this.onSet("zIndex", val);
-        }
-    };
-})()
+var __supportedStyles__ = function(){
+    return {
+            azimuth:                null,
+            background:	            null,
+            backgroundAttachment:	null,
+            backgroundColor:	    null,
+            backgroundImage:	    null,
+            backgroundPosition:	    null,
+            backgroundRepeat:	    null,
+            border:	                null,
+            borderBottom:	        null,
+            borderBottomColor:	    null,
+            borderBottomStyle:	    null,
+            borderBottomWidth:	    null,
+            borderCollapse:	        null,
+            borderColor:	        null,
+            borderLeft:	            null,
+            borderLeftColor:	    null,
+            borderLeftStyle:	    null,
+            borderLeftWidth:	    null,
+            borderRight:	        null,
+            borderRightColor:	    null,
+            borderRightStyle:	    null,
+            borderRightWidth:	    null,
+            borderSpacing:	        null,
+            borderStyle:	        null,
+            borderTop:	            null,
+            borderTopColor:	        null,
+            borderTopStyle:	        null,
+            borderTopWidth:	        null,
+            borderWidth:	        null,
+            bottom:	                null,
+            captionSide:	        null,
+            clear:	                null,
+            clip:	                null,
+            color:	                null,
+            content:	            null,
+            counterIncrement:	    null,
+            counterReset:	        null,
+            cssFloat:	            null,
+            cue:	                null,
+            cueAfter:	            null,
+            cueBefore:	            null,
+            cursor:	                null,
+            direction:	            'ltr',
+            display:	            'block',
+            elevation:	            null,
+            emptyCells:	            null,
+            font:	                null,
+            fontFamily:	            null,
+            fontSize:	            "1em",
+            fontSizeAdjust:	null,
+            fontStretch:	null,
+            fontStyle:	null,
+            fontVariant:	null,
+            fontWeight:	null,
+            height:	'1px',
+            left:	null,
+            letterSpacing:	null,
+            lineHeight:	null,
+            listStyle:	null,
+            listStyleImage:	null,
+            listStylePosition:	null,
+            listStyleType:	null,
+            margin:	null,
+            marginBottom:	"0px",
+            marginLeft:	"0px",
+            marginRight:	"0px",
+            marginTop:	"0px",
+            markerOffset:	null,
+            marks:	null,
+            maxHeight:	null,
+            maxWidth:	null,
+            minHeight:	null,
+            minWidth:	null,
+            opacity:	1,
+            orphans:	null,
+            outline:	null,
+            outlineColor:	null,
+            outlineOffset:	null,
+            outlineStyle:	null,
+            outlineWidth:	null,
+            overflow:	null,
+            overflowX:	null,
+            overflowY:	null,
+            padding:	null,
+            paddingBottom:	"0px",
+            paddingLeft:	"0px",
+            paddingRight:	"0px",
+            paddingTop:	"0px",
+            page:	null,
+            pageBreakAfter:	null,
+            pageBreakBefore:	null,
+            pageBreakInside:	null,
+            pause:	null,
+            pauseAfter:	null,
+            pauseBefore:	null,
+            pitch:	null,
+            pitchRange:	null,
+            position:	null,
+            quotes:	null,
+            richness:	null,
+            right:	null,
+            size:	null,
+            speak:	null,
+            speakHeader:	null,
+            speakNumeral:	null,
+            speakPunctuation:	null,
+            speechRate:	null,
+            stress:	null,
+            tableLayout:	null,
+            textAlign:	null,
+            textDecoration:	null,
+            textIndent:	null,
+            textShadow:	null,
+            textTransform:	null,
+            top:	null,
+            unicodeBidi:	null,
+            verticalAlign:	null,
+            visibility:	null,
+            voiceFamily:	null,
+            volume:	null,
+            whiteSpace:	null,
+            widows:	null,
+            width:	'1px',
+            wordSpacing:	null,
+            zIndex:	1
+        };
+};
+
+
+for(var style in __supportedStyles__()){
+    (function(name){
+        if(name === 'width' || name === 'height'){
+            CSS2Properties.prototype.__defineGetter__(name, function(){
+                if(this.getPropertyValue('display')==='none'){
+                    return '0px';
+                }
+                //$info(name+' = '+this.getPropertyValue(name));
+                return this.getPropertyValue(name);
+            });
+            CSS2Properties.prototype.__defineSetter__(name, function(value){
+                this.setProperty(name, value);
+            });
+        }else{
+            CSS2Properties.prototype.__defineGetter__(name, function(){
+                //$log(" css2properties.get  " + name);
+                return this.getPropertyValue(name);
+            });
+            CSS2Properties.prototype.__defineSetter__(name, function(value){
+                this.setProperty(name, value);
+            });
+       }
+    })(style);
+};
+
 
 $w.CSS2Properties = CSS2Properties;/* 
 * CSSRule - DOM Level 2
@@ -9069,33 +8258,11 @@ $debug("Initializing Window Timer.");
 var $timers = [];
 
 window.setTimeout = function(fn, time){
-	var num = $timers.length;
-	var tfn;
-	
-    if (typeof fn == 'string') {
-        tfn = function() { 
-            eval(fn); 
-			window.clearInterval(num);
-        }; 
-    } else {
-		tfn = function() {
-			fn();
-			window.clearInterval(num);
-        };
-	}
-
-    if (time === 0){
-        if (typeof fn == 'string')
-            eval(fn);
-        else
-            fn();
-    }
-    else {
-        $debug("Creating timer number "+num);
-        $timers[num] = new $env.timer(tfn, time);
-        $timers[num].start();
-        return num;
-    }
+  var num;
+  return num = window.setInterval(function(){
+    fn();
+    window.clearInterval(num);
+  }, time);
 };
 
 window.setInterval = function(fn, time){
@@ -9110,7 +8277,7 @@ window.setInterval = function(fn, time){
 	if(time===0){
 	    fn();
 	}else{
-	    $debug("Creating timer number "+num);
+	    //$debug("Creating timer number "+num);
     	$timers[num] = new $env.timer(fn, time);
     	$timers[num].start();
 	}
@@ -9118,15 +8285,14 @@ window.setInterval = function(fn, time){
 };
 
 window.clearInterval = window.clearTimeout = function(num){
+	//$log("clearing interval "+num);
 	if ( $timers[num] ) {
 	    
-	    $debug("Deleting timer number "+num);
 		$timers[num].stop();
 		delete $timers[num];
 	}
 };	
-	
-window.$wait = function(wait){ $env.wait(wait); }/*
+	/*
 * event.js
 */
 // Window Events
@@ -9137,7 +8303,7 @@ var $events = [],
     $onunload;
 
 $w.addEventListener = function(type, fn){
-  //$log("adding event listener " + type);
+    $debug("adding event listener \n\t" + type +" \n\tfor "+this+" with callback \n\t"+fn);
 	if ( !this.uuid ) {
 		this.uuid = $events.length;
 		$events[this.uuid] = {};
@@ -9174,25 +8340,29 @@ $w.dispatchEvent = function(event, bubbles){
         bubbles = true;
 
     if (!event.target) {
+        $debug("no event target : "+event.target);
         event.target = this;
     }
     $debug("event target: " + event.target);
-    if ( event.type ) {
+    if ( event.type && this.nodeType || this===window) {
+        $debug("nodeType: " + this.nodeType);
         if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;
             $events[this.uuid][event.type].forEach(function(fn){
                 $debug('calling event handler '+fn+' on target '+_this);
-                fn.call( _this, event );
+                fn( event );
             });
         }
     
         if (this["on" + event.type]) {
-            $debug('calling event handler '+event.type+' on target '+this);
-            this["on" + event.type].call(this, event);
+            $debug('calling event handler on'+event.type+' on target '+this);
+            this["on" + event.type](event);
         }
+    }else{
+        $debug("non target: " + event.target + " \n this->"+this);
     }
     if (bubbles && this.parentNode){
-        this.parentNode.dispatchEvent.call(this.parentNode,event);
+        this.parentNode.dispatchEvent(event);
     }
 };
 	
@@ -9268,10 +8438,21 @@ XMLHttpRequest.prototype = {
         					    $debug("parsing response text into xml document");
         						responseXML = $domparser.parseFromString(_this.responseText+"");
                                 return responseXML;
-        					} catch(e) { return null;/*TODO: need to flag an error here*/}
+        					} catch(e) { 
+                                $error('response XML does not apear to be well formed xml', e);
+        						responseXML = $domparser.parseFromString("<html>"+
+                                    "<head/><body><p> parse error </p></body></html>");
+                                return responseXML;
+                            }
       					}
-      				}else{return null;}
+      				}else{
+                        $env.warn('response XML does not apear to be xml');
+                        return null;
+                    }
       			});
+                _this.__defineSetter__("responseXML",function(xml){
+                    responseXML = xml;
+                });
 			}, data);
 			_this.onreadystatechange();
 		}
@@ -9324,6 +8505,7 @@ $debug("Initializing Window CSS");
 // attributes and values used to render the specified element in this
 // window.  Any length values are always expressed in pixel, or
 // absolute values.
+
 $w.getComputedStyle = function(elt, pseudo_elt){
   //TODO
   //this is a naive implementation

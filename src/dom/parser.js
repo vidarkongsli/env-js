@@ -1131,7 +1131,7 @@ function isEmpty(str) {
  * @param  str : string - The string to be escaped
  * @return : string - The escaped string
  */
-var escAmpRegEx = /&/g;
+var escAmpRegEx = /&(?!(amp;|lt;|gt;|quot|apos;))/g;
 var escLtRegEx = /</g;
 var escGtRegEx = />/g;
 var quotRegEx = /"/g;

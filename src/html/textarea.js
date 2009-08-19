@@ -52,6 +52,12 @@ __extend__(HTMLTextAreaElement.prototype, {
     set disabled(value){
         this.setAttribute('disabled', (value ? 'disabled' :''));
     },
+    get maxLength(){
+        return Number(this.getAttribute('maxlength')||'0');
+    },
+    set maxLength(value){
+        this.setAttribute('maxlength', value);
+    },
     get name(){
         return this.getAttribute('name')||'';
     },
@@ -64,12 +70,12 @@ __extend__(HTMLTextAreaElement.prototype, {
     set readOnly(value){
         this.setAttribute('readonly', (value ? 'readonly' :''));
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',Number(value));
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -77,10 +83,12 @@ __extend__(HTMLTextAreaElement.prototype, {
         this.setAttribute('type',value);
     },
     get value(){
-        return this.getAttribute('value');
+        return this.text;
     },
     set value(value){
-        this.setAttribute('value',value);
+        if(this.defaultValue===null&&this.text!==null)
+            this.defaultValue = this.text;
+        return this.text = value;
     },
     blur:function(){
         __blur__(this);

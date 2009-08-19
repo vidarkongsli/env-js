@@ -31,7 +31,7 @@ window.onload = function(){
     "test/unit/frame.js",
     "test/unit/events.js",
     "test/unit/parser.js",
-    "test/unit/timer.js",
+    /*"test/unit/timer.js",*/
     //NOTE: keep this test last because Prototype pollutes
     //the namespace and several DOM objects
     "test/unit/prototypecompat.js"

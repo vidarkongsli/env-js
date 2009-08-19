@@ -48,9 +48,15 @@ __extend__(DOMDocument.prototype, {
     get parentWindow(){
         return this._parentWindow;
     },
-    loadXML : function(xmlStr) {
+    loadXML : function(xmlString) {
         // create SAX Parser
-        var parser = new XMLP(xmlStr+'');
+        var htmlString;
+        if($env.fixHTML){
+            htmlString = $env.cleanHTML(xmlString);
+        }else{
+            htmlString = xmlString
+        }
+        var parser = new XMLP(htmlString+'');
         
         // create DOM Document
         if(this === $document){
@@ -340,11 +346,7 @@ __extend__(DOMDocument.prototype, {
     },
 	get defaultView(){ //TODO: why isnt this just 'return $w;'?
 		return { getComputedStyle: function(elem){
-			return { getPropertyValue: function(prop){
-				prop = prop.replace(/\-(\w)/g,function(m,c){ return c.toUpperCase(); });
-				var val = elem.style[prop];
-				if ( prop == "opacity" && val == "" ){ val = "1"; }return val;
-			}};
+			return $w.getComputedStyle(elem);
 		}};
 	},
     _genId : function() {

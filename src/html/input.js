@@ -86,12 +86,12 @@ __extend__(HTMLInputElement.prototype, {
     set src(value){
         this.setAttribute('src', value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',Number(value));
-    },
+    },*/
     get type(){
         return this.getAttribute('type');
     },
@@ -105,6 +105,8 @@ __extend__(HTMLInputElement.prototype, {
         return this.getAttribute('value');
     },
     set value(value){
+        if(this.defaultValue===null&&this.value!==null)
+            this.defaultValue = this.value;
         this.setAttribute('value',value);
     },
     blur:function(){

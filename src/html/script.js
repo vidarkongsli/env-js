@@ -23,6 +23,10 @@ __extend__(HTMLScriptElement.prototype, {
         return this.nodeValue;
 
     },
+    set text(value){
+        this.nodeValue = value;
+        $env.loadInlineScript(this);
+    },
     get htmlFor(){
         return this.getAttribute('for');
     },

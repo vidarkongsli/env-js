@@ -36,63 +36,39 @@
     
     var timers = [];
 
-    $env.timer = function(fn, interval){
-    	this.fn = fn;
-    	this.interval = interval;
-    	this.at = Date.now() + interval;
-    	this.index = timers.length;
-    	timers[this.index] = this;
-    };	
-
-    $env.timer.prototype.start = function(){};
-    $env.timer.prototype.stop = function(){
-	    delete timers[this.index];
+    //For Java the window.timer is created using the java.lang.Thread in combination
+    //with the java.lang.Runnable
+    $env.timer = function(fn, time){
+       var running = true;
+        
+        var run = sync(function(){ //while happening only thing in this timer    
+    	    //$env.debug("running timed function");
+            fn();
+        });
+        var _this = this;
+        var thread = new java.lang.Thread(new java.lang.Runnable({
+            run: function(){
+                try {
+                    while (running){
+                        java.lang.Thread.currentThread().sleep(time);
+                        run.apply(_this);
+                    }
+                }catch(e){
+                    $env.error("erro running timed function", e);
+                    _this.stop();
+                    $env.onInterrupt();
+                };
+            }
+        }));
+        this.start = function(){ 
+            thread.start(); 
+        };
+        this.stop = sync(function(num){
+         running = false;
+         thread.interrupt();
+        })
     };
-
-    // wait === null: execute any immediately runnable timers and return
-    // wait(n) (n > 0): execute any timers as they fire but no longer than n ms
-    // wait(0): execute any timers as they fire, waiting until there are none left
-    $env.wait = function(wait) {
-    	var i;
-    	var empty;
-    	var after;
-    	var now;
-    	var timer;
-    	var sleep;
-    	if (wait !== 0 && wait !== null && wait !== undefined){
-    	    wait += Date.now();
-    	}
-    	for (;;) {
-    	    for (i in timers){
-        		timer = timers[i];
-        		now = Date.now();
-        		if (timer.at <= now){
-        		    f = timer.fn;
-        		    f();
-        		    timer.at += timer.interval;
-        		}
-    	    }
-    	    empty = true;
-    	    sleep = null;
-    	    now = Date.now();
-    	    for (i in timers){
-        		empty = false;
-        		timer = timers[i];
-        		after = timer.at - now
-        		sleep = (sleep === null || after < sleep) ? after : sleep;
-	        }
-    	    sleep = sleep < 0 ? 0 : sleep;
-    	    if (empty ||
-                    ( wait !== 0 ) &&
-                     ( ( sleep > 0 && !wait ) || ( Date.now() + sleep > wait ) ) ) {
-    		    break;
-    	    }
-    	    if (sleep) {
-    		    java.lang.Thread.currentThread().sleep(sleep);
-    	    }
-    	}
-    };
-
+    
     //Since we're running in rhino I guess we can safely assume
     //java is 'enabled'.  I'm sure this requires more thought
     //than I've given it here
@@ -101,11 +77,27 @@
     
     //Used in the XMLHttpRquest implementation to run a
     // request in a seperate thread
+    $env.onInterrupt = function(){};
     $env.runAsync = function(fn){
         $env.debug("running async");
-        (new java.lang.Thread(new java.lang.Runnable({
-            run: fn
-        }))).start();
+        var running = true;
+        
+        var run = sync(function(){ //while happening only thing in this timer    
+    	    //$env.debug("running timed function");
+            fn();
+        });
+        
+        var async = (new java.lang.Thread(new java.lang.Runnable({
+            run: run
+        })));
+        
+        try{
+            async.start();
+        }catch(e){
+            $env.error("error while running async", e);
+            async.interrupt();
+            $env.onInterrupt();
+        }
     };
     
     //Used to write to a local file
@@ -145,14 +137,22 @@
         var url = java.net.URL(xhr.url);//, $w.location);
       var connection;
         if ( /^file\:/.test(url) ) {
-            if ( xhr.method == "PUT" ) {
-                var text =  data || "" ;
-                $env.writeToFile(text, url);
-            } else if ( xhr.method == "DELETE" ) {
-                $env.deleteFile(url);
-            } else {
-                connection = url.openConnection();
-                connection.connect();
+            try{
+                if ( xhr.method == "PUT" ) {
+                    var text =  data || "" ;
+                    $env.writeToFile(text, url);
+                } else if ( xhr.method == "DELETE" ) {
+                    $env.deleteFile(url);
+                } else {
+                    connection = url.openConnection();
+                    connection.connect();
+                }
+            }catch(e){
+                $env.error('failed to open file '+ url, e);
+                connection = null;
+                xhr.readyState = 4;
+                xhr.statusText = "Local File Protocol Error";
+                xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
             }
         } else { 
             connection = url.openConnection();
@@ -220,6 +220,7 @@
                 
         }
         if(responseHandler){
+            $env.debug('calling ajax response handler');
             responseHandler();
         }
     };
@@ -229,21 +230,45 @@
     htmlDocBuilder.setValidating(false);
     
     var htmlCleaner,
-        cleanDomSerializer,
-        cleanProperties;
-    $env.parseHTML = function(htmlstring){
-        var domdoc;//what's up dom doc?
-        if($env.cleanHTML){
-            htmlCleaner = htmlCleaner||new org.htmlcleaner.HtmlCleaner();
-            cleanDomSerializer = cleanDomSerializer||new org.htmlcleaner.DomSerializer();
-            cleanProperties = cleanProperties||new org.htmlcleaner.CleanerProperties();
-            domdoc = org.htmlcleaner.DomSerializer.createDOM(htmlCleaner.clean(htmlstring));
-        }else{
-            domdoc =  htmlDocBuilder.newDocumentBuilder().parse(
-                  new java.io.ByteArrayInputStream(
-                        (new java.lang.String(htmlstring)).getBytes("UTF8")));
+        cleanXMLSerializer,
+        cleanerProperties,
+        htmlTransformer,
+        htmlOutputProps;
+    $env.fixHTML = false;
+    $env.cleanHTML = function(xmlString){
+        var htmlString;
+        $env.debug('Cleaning html :\n'+xmlString);
+        if(!htmlCleaner){
+            cleanerProperties = new org.htmlcleaner.CleanerProperties();
+            cleanerProperties.setOmitHtmlEnvelope(true);
+            cleanerProperties.setTranslateSpecialEntities(true);
+            cleanerProperties.setAdvancedXmlEscape(true);
+            cleanerProperties.setUseCdataForScriptAndStyle(false);
+            cleanerProperties.setOmitXmlDeclaration(true);
+            htmlCleaner = new org.htmlcleaner.HtmlCleaner(cleanerProperties);
+            cleanXMLSerializer = new org.htmlcleaner.SimpleXmlSerializer(cleanerProperties);
+            //may have been initialized in $env.xslt
+            /*transformerFactory = transformerFactory||
+                Packages.javax.xml.transform.TransformerFactory.newInstance();
+            htmlTransformer = transformerFactory.newTransformer();
+            htmlOutputProps = new java.util.Properties();
+            htmlOutputProps.put(javax.xml.transform.OutputKeys.METHOD, "xml");
+            htmlOutputProps.put(javax.xml.transform.OutputKeys.INDENT , "no");
+            htmlOutputProps.put(javax.xml.transform.OutputKeys.ENCODING  , "UTF-8");
+            htmlOutputProps.put(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION  , "yes");
+            htmlTransformer.setOutputProperties(htmlOutputProps)*/
         }
-        return domdoc;
+        
+        /*var node = cleanXMLSerializer.createDOM(htmlCleaner.clean(xmlString)),
+            outText = new java.io.StringWriter();
+        htmlTransformer.transform(
+            new javax.xml.transform.dom.DOMSource(node),
+            new javax.xml.transform.stream.StreamResult(outText));
+            
+        htmlString = outText.toString()+'';*/
+        htmlString = cleanXMLSerializer.getXmlAsString(htmlCleaner.clean(xmlString));
+        //$env.info('Cleaned html :\n'+htmlString);
+        return htmlString;
     };
     
     var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -311,7 +336,6 @@
     
     
     $env.loadInlineScript = function(script){
-        $env.debug("loading inline script :" + script.text);
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
         $env.debug("loading " + tmpFile);
         $env.load(tmpFile);

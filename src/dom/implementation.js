@@ -12,7 +12,7 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 
-var $handleEndOfNormalOrEmptyElement = function(node, doc, p){
+var __endHTMLElement__ = function(node, doc, p){
     if(node.nodeName.toLowerCase() == 'script'){
         p.replaceEntities = true;
         $env.loadLocalScript(node, p);
@@ -281,7 +281,7 @@ function __parseLoop__(impl, doc, p) {
     }
 
     else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      $handleEndOfNormalOrEmptyElement(iNodeParent, doc, p);
+      __endHTMLElement__(iNodeParent, doc, p);
       iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
 
@@ -369,7 +369,7 @@ function __parseLoop__(impl, doc, p) {
       }
 
 
-      $handleEndOfNormalOrEmptyElement(iNode, doc, p);
+      __endHTMLElement__(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events

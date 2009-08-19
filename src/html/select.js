@@ -85,12 +85,12 @@ __extend__(HTMLSelectElement.prototype, {
     set size(value){
         this.setAttribute('size',value);
     },
-    get tabIndex(){
+    /*get tabIndex(){
         return Number(this.getAttribute('tabindex'));
     },
     set tabIndex(value){
         this.setAttribute('tabindex',value);
-    },
+    },*/
     add : function(){
         __add__(this);
     },

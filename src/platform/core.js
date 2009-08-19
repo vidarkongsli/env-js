@@ -104,6 +104,7 @@ var Envjs = function(){
         "text/envjs"        :true
     };
     
+    $env.onScriptLoadError = function(){};
     $env.loadLocalScript = function(script, parser){
         $env.debug("loading script ");
         var types, type, src, i, base, 
@@ -151,6 +152,7 @@ var Envjs = function(){
             }
         }catch(e){
             $env.error("Error loading script.", e);
+            $env.onScriptLoadError(script);
         }finally{
             if(parser){
                 parser.appendFragment(docWrites.join(''));

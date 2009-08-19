@@ -11,11 +11,10 @@ var HTMLElement = function(ownerDocument) {
 HTMLElement.prototype = new DOMElement;
 __extend__(HTMLElement.prototype, {
 		get className() { 
-		    return this.getAttribute("class")||""; 
-		    
+		    return this.getAttribute("class")||''; 
 	    },
-		set className(val) { 
-		    return this.setAttribute("class",trim(val)); 
+		set className(value) { 
+		    return this.setAttribute("class",trim(value)); 
 		    
 	    },
 		get dir() { 
@@ -27,7 +26,7 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		get id(){  
-		    return this.getAttribute('id')||''; 
+		    return this.getAttribute('id'); 
 		    
 	    },
 		set id(id){  
@@ -57,7 +56,7 @@ __extend__(HTMLElement.prototype, {
 		    doc = null;
 		},
 		get lang() { 
-		    return this.getAttribute("lang")||""; 
+		    return this.getAttribute("lang"); 
 		    
 	    },
 		set lang(val) { 
@@ -86,33 +85,36 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        this.updateCss2Props();
+		        __updateCss2Props__(this);
 	        }
 	        return this.$css2props
 		},
-		updateCss2Props: function() {
-			this.$css2props = new CSS2Properties({
-				onSet: (function(that) {
-					return function() { that.__setAttribute("style", this.cssText); }
-				})(this),
-				cssText:this.getAttribute("style")
-			});
-		},
-		__setAttribute: HTMLElement.prototype.setAttribute,
 		setAttribute: function (name, value) {
-		    this.__setAttribute(name, value);
+            DOMElement.prototype.setAttribute.apply(this,[name, value]);
 		    if (name === "style") {
-		        this.updateCss2Props();
+		        __updateCss2Props__(this);
 		    }
 		},
 		get title() { 
-		    return this.getAttribute("title")||""; 
+		    return this.getAttribute("title"); 
 		    
 	    },
-		set title(val) { 
-		    return this.setAttribute("title",val); 
+		set title(value) { 
+		    return this.setAttribute("title", value); 
 		    
 	    },
+		get tabIndex(){
+            var ti = this.getAttribute('tabindex');
+            if(ti!==null)
+                return Number(ti);
+            else
+                return 0;
+        },
+        set tabIndex(value){
+            if(value===undefined||value===null)
+                value = 0;
+            this.setAttribute('tabindex',Number(value));
+        },
 		//Not in the specs but I'll leave it here for now.
 		get outerHTML(){ 
 		    return this.xml; 
@@ -125,17 +127,9 @@ __extend__(HTMLElement.prototype, {
         },
 
 		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'', this)
+		    __eval__(this.getAttribute('onclick')||'', this);
 	    },
-        // non-ECMA function, but no other way for click events to enter env.js
-        __click__: function(element){
-            var event = new Event({
-              target:element,
-              currentTarget:element
-            });
-            event.initEvent("click");
-            element.dispatchEvent(event);
-        },
+        
 
 		ondblclick: function(event){
             __eval__(this.getAttribute('ondblclick')||'', this);
@@ -194,6 +188,10 @@ var __eval__ = function(script, startingNode){
     }
 };
 
+var __updateCss2Props__ = function(elem){
+	elem.$css2props = new CSS2Properties(elem);
+};
+
 var __registerEventAttrs__ = function(elm){
     if(elm.hasAttribute('onclick')){ 
         elm.addEventListener('click', elm.onclick ); 
@@ -228,6 +226,15 @@ var __registerEventAttrs__ = function(elm){
     return elm;
 };
 	
+// non-ECMA function, but no other way for click events to enter env.js
+var  __click__ = function(element){
+    var event = new Event({
+      target:element,
+      currentTarget:element
+    });
+    event.initEvent("click");
+    element.dispatchEvent(event);
+};
 var __submit__ = function(element){
 	var event = new Event({
 	  target:element,

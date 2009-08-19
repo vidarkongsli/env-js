@@ -40,10 +40,21 @@ XMLHttpRequest.prototype = {
         					    $debug("parsing response text into xml document");
         						responseXML = $domparser.parseFromString(_this.responseText+"");
                                 return responseXML;
-        					} catch(e) { return null;/*TODO: need to flag an error here*/}
+        					} catch(e) { 
+                                $error('response XML does not apear to be well formed xml', e);
+        						responseXML = $domparser.parseFromString("<html>"+
+                                    "<head/><body><p> parse error </p></body></html>");
+                                return responseXML;
+                            }
       					}
-      				}else{return null;}
+      				}else{
+                        $env.warn('response XML does not apear to be xml');
+                        return null;
+                    }
       			});
+                _this.__defineSetter__("responseXML",function(xml){
+                    responseXML = xml;
+                });
 			}, data);
 			_this.onreadystatechange();
 		}

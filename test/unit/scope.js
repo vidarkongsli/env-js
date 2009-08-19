@@ -18,6 +18,14 @@ module("scope");
 //   event handlers (page-global and attribute-assigned), as well as
 //   confirming the independence of scoping in frames.
 
+var __click__ = function(element){
+    var event = new Event({
+      target:element,
+      currentTarget:element
+    });
+    event.initEvent("click");
+    element.dispatchEvent(event);
+};
 
 // this test depends on 'iframe1.html' having been loaded into 'index.html's
 //   'loadediframe' element (and not modified prior to this test's execution)
@@ -58,7 +66,7 @@ test("Event handler attribute has access to (correct) 'document'", function() {
     }catch(e){print(e);}
 
     var img1 = idoc.getElementById('img1');
-    img1.__click__(img1);
+    __click__(img1);
     mtch = idoc.getElementById('p1').innerHTML.match(/img1 click/);
     try{ ok(mtch && mtch.length > 0,
         "img1 event handler executed correctly");
@@ -77,7 +85,7 @@ test("Event handler attribute has access to (correct) 'this'", function() {
     }catch(e){print(e);}
 
     var div1 = idoc.getElementById('div1');
-    div1.__click__(div1);
+    __click__(div1);
     mtch = idoc.getElementById('p2').innerHTML.match(/div1 click/);
     try{ ok(mtch && mtch.length > 0,
         "div1 event handler executed correctly");
@@ -122,7 +130,7 @@ test("Handler defined in frame lexically scopes to frame", function() {
     }catch(e){print(e);}
 
     var div2 = idoc.getElementById('div2');
-    div2.__click__(div2);
+    __click__(div2);
     lex = idoc.getElementById('lex');
     mtch = lex.innerHTML.match(/Lexical scoping is Overridden/);
     try{ ok(mtch && mtch.length > 0,
@@ -147,7 +155,7 @@ test("In-frame object-assigned handler scopes to frame", function() {
     }catch(e){print(e);}
 
     bVar = 13; // handler shouldn't pick up this version of 'bVar';
-    p4.__click__(p4);  // should bubble to div3 and handler
+    __click__(p4);  // should bubble to div3 and handler
     mtch = p4.innerHTML.match(/number 42/);
     try{ ok(mtch && mtch.length > 0,
         "div3 event handler executed correctly");
@@ -174,7 +182,7 @@ test("Handler defined in root lexically scopes to root", function() {
     }catch(e){print(e);}
 
     var div3 = idoc.getElementById('div3');
-    div3.__click__(div3);
+    __click__(div3);
     mtch = p4.innerHTML.match(/contains good text/);
     try{ ok(mtch && mtch.length > 0,
         "new div3 event handler executed correctly");
