@@ -40,9 +40,9 @@ git submodule update #load the dicovered dependencies
 
 if [ $DEBUG -eq 1 ]; then
     echo 'running with rhino debugger'
-    java -cp js.jar org.mozilla.javascript.tools.debugger.Main test.js;
+    java -cp js.jar org.mozilla.javascript.tools.envjs.Main test.js;
 else
     echo 'running with rhino'
-    java -jar js.jar -w -debug test.js;
+    java -cp js.jar org.mozilla.javascript.tools.envjs.Main test.js;
 fi
 
