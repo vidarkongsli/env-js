@@ -23,7 +23,6 @@ XMLHttpRequest.prototype = {
 	setRequestHeader: function(header, value){
 		this.headers[header] = value;
 	},
-	getResponseHeader: function(header){ },
 	send: function(data){
 		var _this = this;
 		
@@ -73,6 +72,7 @@ XMLHttpRequest.prototype = {
 		//TODO
 	},
 	getResponseHeader: function(header){
+        $debug('GETTING RESPONSE HEADER '+header);
 	  var rHeader, returnedHeaders;
 		if (this.readyState < 3){
 			throw new Error("INVALID_STATE_ERR");
@@ -82,8 +82,13 @@ XMLHttpRequest.prototype = {
 				if (rHeader.match(new RegExp(header, "i")))
 					returnedHeaders.push(this.responseHeaders[rHeader]);
 			}
-			if (returnedHeaders.length){ return returnedHeaders.join(", "); }
-		}return null;
+            
+			if (returnedHeaders.length){ 
+                $debug('GOT RESPONSE HEADER '+returnedHeaders.join(", "));
+                return returnedHeaders.join(", "); 
+            }
+		}
+        return null;
 	},
 	getAllResponseHeaders: function(){
 	  var header, returnedHeaders = [];

@@ -280,7 +280,7 @@ XMLP.prototype.appendFragment = function(xmlfragment) {
 
 XMLP.prototype._parse = function() {
 
-        if(this.m_iP == this.m_xml.length) {
+    if(this.m_iP == this.m_xml.length) {
         return XMLP._NONE;
     }
 
@@ -300,6 +300,7 @@ XMLP.prototype._parse = function() {
             }
         }
         else{
+              
             return this._parseElement(this.m_iP + 1);
         }
     }
@@ -307,6 +308,7 @@ XMLP.prototype._parse = function() {
         return this._parseEntity(this.m_iP + 1);
     }
     else{
+          
         return this._parseText(this.m_iP);
     }
 

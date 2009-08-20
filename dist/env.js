@@ -1,5 +1,5 @@
 /*
- * Envjs env-js.1.0.rc4 
+ * Envjs env-js.1.0.rc5 
  * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008-2009 John Resig, under the MIT License
@@ -335,8 +335,7 @@ var __findItemIndex__ = function (nodelist, id) {
  * @param  refChildIndex : int     - the array index to insert the Node before
  */
 var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
-    if ((refChildIndex >= 0) && (refChildIndex < nodelist.length)) { // bounds check
-        
+    if ((refChildIndex >= 0) && (refChildIndex <= nodelist.length)) { // bounds check
         if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
             // append the children of DocumentFragment
             Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes.toArray()));
@@ -657,7 +656,6 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
           break;
         }
     }else{
-        
         if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         // found it!
           ret = i;
           break;
@@ -872,8 +870,12 @@ __extend__(DOMNode.prototype, {
     insertBefore : function(newChild, refChild) {
         var prevNode;
         
-        if(newChild==null || refChild==null){
+        if(newChild==null){
             return newChild;
+        }
+        if(refChild==null){
+            this.appendChild(newChild);
+            return this.newChild;
         }
         
         // test for exceptions
@@ -897,7 +899,6 @@ __extend__(DOMNode.prototype, {
         if (refChild) {                                // if refChild is specified, insert before it
             // find index of refChild
             var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
-            
             // throw Exception if there is no child node with this id
             if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
               throw(new DOMException(DOMException.NOT_FOUND_ERR));
@@ -911,8 +912,7 @@ __extend__(DOMNode.prototype, {
             }
             
             // insert newChild into childNodes
-            __insertBefore__(this.childNodes, newChild, 
-                __findItemIndex__(this.childNodes, refChild._id));
+            __insertBefore__(this.childNodes, newChild, itemIndex);
             
             // do node pointer surgery
             prevNode = refChild.previousSibling;
@@ -932,6 +932,7 @@ __extend__(DOMNode.prototype, {
                 newChild.parentNode = this;                // set the parentNode of the newChild
                 refChild.previousSibling = newChild;       // link refChild to newChild
             }
+            
         }else {                                         // otherwise, append to end
             prevNode = this.lastChild;
             this.appendChild(newChild);
@@ -2069,6 +2070,12 @@ __extend__(DOMProcessingInstruction.prototype, {
       // The content of this processing instruction.
         return this.nodeName;
     },
+    set target(value){
+      // The target of this processing instruction.
+      // XML defines this as being the first token following the markup that begins the processing instruction.
+      // The content of this processing instruction.
+        this.nodeName = value;
+    },
     get nodeType(){
         return DOMNode.PROCESSING_INSTRUCTION_NODE;
     },
@@ -2363,7 +2370,7 @@ XMLP.prototype.appendFragment = function(xmlfragment) {
 
 XMLP.prototype._parse = function() {
 
-        if(this.m_iP == this.m_xml.length) {
+    if(this.m_iP == this.m_xml.length) {
         return XMLP._NONE;
     }
 
@@ -2383,6 +2390,7 @@ XMLP.prototype._parse = function() {
             }
         }
         else{
+              
             return this._parseElement(this.m_iP + 1);
         }
     }
@@ -2390,6 +2398,7 @@ XMLP.prototype._parse = function() {
         return this._parseEntity(this.m_iP + 1);
     }
     else{
+          
         return this._parseText(this.m_iP);
     }
 
@@ -3695,7 +3704,8 @@ __extend__(DOMImplementation.prototype,{
  *
  * @return : DOMDocument
  */
-function __parseLoop__(impl, doc, p) {
+
+function __parseLoop__(impl, doc, p, isWindowDocument) {
     var iEvt, iNode, iAttr, strName;
     var iNodeParent = doc;
 
@@ -3712,10 +3722,11 @@ function __parseLoop__(impl, doc, p) {
     }
 
   // loop until SAX parser stops emitting events
+  var q = 0;
   while(true) {
     // get next event
     iEvt = p.next();
-
+    
     if (iEvt == XMLP._ELM_B) {                      // Begin-Element Event
       var pName = p.getName();                      // get the Element name
       pName = trim(pName, true, true);              // strip spaces from Element name
@@ -3724,7 +3735,6 @@ function __parseLoop__(impl, doc, p) {
 
       if (!impl.namespaceAware) {
         iNode = doc.createElement(p.getName());     // create the Element
-
         // add attributes to Element
         for(var i = 0; i < p.getAttributeCount(); i++) {
           strName = p.getAttributeName(i);          // get Attribute name
@@ -3805,9 +3815,9 @@ function __parseLoop__(impl, doc, p) {
       iNodeParent = iNode;                          // descend one level of the DOM Tree
     }
 
-    else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      __endHTMLElement__(iNodeParent, doc, p);
-      iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
+    else if(iEvt == XMLP._ELM_E) {                  // End-Element Event        
+        __endHTMLElement__(iNodeParent, doc, p);
+        iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -3892,7 +3902,6 @@ function __parseLoop__(impl, doc, p) {
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
         iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
-
 
       __endHTMLElement__(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
@@ -5126,8 +5135,8 @@ __extend__(HTMLElement.prototype, {
 		    
 	    },
 		set innerHTML(html){
-		    //$debug("htmlElement.innerHTML("+html+")");
 		    //Should be replaced with HTMLPARSER usage
+            //$debug('SETTING INNER HTML ('+this+'+'+html.substring(0,64));
 		    var doc = new DOMParser().
 			  parseFromString('<div>'+html+'</div>');
             var parent = doc.documentElement;
@@ -8449,7 +8458,6 @@ XMLHttpRequest.prototype = {
 	setRequestHeader: function(header, value){
 		this.headers[header] = value;
 	},
-	getResponseHeader: function(header){ },
 	send: function(data){
 		var _this = this;
 		
@@ -8499,6 +8507,7 @@ XMLHttpRequest.prototype = {
 		//TODO
 	},
 	getResponseHeader: function(header){
+        $debug('GETTING RESPONSE HEADER '+header);
 	  var rHeader, returnedHeaders;
 		if (this.readyState < 3){
 			throw new Error("INVALID_STATE_ERR");
@@ -8508,8 +8517,13 @@ XMLHttpRequest.prototype = {
 				if (rHeader.match(new RegExp(header, "i")))
 					returnedHeaders.push(this.responseHeaders[rHeader]);
 			}
-			if (returnedHeaders.length){ return returnedHeaders.join(", "); }
-		}return null;
+            
+			if (returnedHeaders.length){ 
+                $debug('GOT RESPONSE HEADER '+returnedHeaders.join(", "));
+                return returnedHeaders.join(", "); 
+            }
+		}
+        return null;
 	},
 	getAllResponseHeaders: function(){
 	  var header, returnedHeaders = [];

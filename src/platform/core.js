@@ -36,6 +36,8 @@ var Envjs = function(){
     $env.warn   = function(){};
     $env.error  = function(){};
     
+    
+    $env.debugParser = false;
     //uncomment these if you want to get some internal log statementes
     /*$env.debug  = function(msg){
         $env.log(msg,"DEBUG"); 

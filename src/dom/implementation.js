@@ -170,7 +170,8 @@ __extend__(DOMImplementation.prototype,{
  *
  * @return : DOMDocument
  */
-function __parseLoop__(impl, doc, p) {
+
+function __parseLoop__(impl, doc, p, isWindowDocument) {
     var iEvt, iNode, iAttr, strName;
     var iNodeParent = doc;
 
@@ -187,10 +188,11 @@ function __parseLoop__(impl, doc, p) {
     }
 
   // loop until SAX parser stops emitting events
+  var q = 0;
   while(true) {
     // get next event
     iEvt = p.next();
-
+    
     if (iEvt == XMLP._ELM_B) {                      // Begin-Element Event
       var pName = p.getName();                      // get the Element name
       pName = trim(pName, true, true);              // strip spaces from Element name
@@ -199,7 +201,6 @@ function __parseLoop__(impl, doc, p) {
 
       if (!impl.namespaceAware) {
         iNode = doc.createElement(p.getName());     // create the Element
-
         // add attributes to Element
         for(var i = 0; i < p.getAttributeCount(); i++) {
           strName = p.getAttributeName(i);          // get Attribute name
@@ -280,9 +281,9 @@ function __parseLoop__(impl, doc, p) {
       iNodeParent = iNode;                          // descend one level of the DOM Tree
     }
 
-    else if(iEvt == XMLP._ELM_E) {                  // End-Element Event
-      __endHTMLElement__(iNodeParent, doc, p);
-      iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
+    else if(iEvt == XMLP._ELM_E) {                  // End-Element Event        
+        __endHTMLElement__(iNodeParent, doc, p);
+        iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
     }
 
     else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
@@ -367,7 +368,6 @@ function __parseLoop__(impl, doc, p) {
       if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
         iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
-
 
       __endHTMLElement__(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode

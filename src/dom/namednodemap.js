@@ -218,7 +218,6 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
           break;
         }
     }else{
-        
         if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         // found it!
           ret = i;
           break;

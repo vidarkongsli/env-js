@@ -54,7 +54,7 @@
                         run.apply(_this);
                     }
                 }catch(e){
-                    $env.warn("interuption running timed function");
+                    $env.debug("interuption running timed function");
                     _this.stop();
                     $env.onInterrupt();
                 };
@@ -146,6 +146,27 @@
                 } else {
                     connection = url.openConnection();
                     connection.connect();
+                    //try to add some canned headers that make sense
+                    
+                    try{
+                        if(xhr.url.match(/html$/)){
+                            xhr.responseHeaders["Content-Type"] = 'text/html';
+                        }else if(xhr.url.match(/.xml$/)){
+                            xhr.responseHeaders["Content-Type"] = 'text/xml';
+                        }else if(xhr.url.match(/.js$/)){
+                            xhr.responseHeaders["Content-Type"] = 'text/javascript';
+                        }else if(xhr.url.match(/.json$/)){
+                            xhr.responseHeaders["Content-Type"] = 'application/json';
+                        }else{
+                            xhr.responseHeaders["Content-Type"] = 'text/plain';
+                        }
+                    //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
+                    //xhr.responseHeaders['Content-Length'] = headerValue+'';
+                    //xhr.responseHeaders['Date'] = new Date()+'';*/
+                    }catch(e){
+                        $env.error('failed to load response headers',e);
+                    }
+                    	
                 }
             }catch(e){
                 $env.error('failed to open file '+ url, e);
@@ -178,45 +199,50 @@
 			}
 			
             
-            var respheadlength = connection.getHeaderFields().size();
-            // Stick the response headers into responseHeaders
-            for (var i = 0; i < respheadlength; i++) { 
-                var headerName = connection.getHeaderFieldKey(i); 
-                var headerValue = connection.getHeaderField(i); 
-                if (headerName)
-                    xhr.responseHeaders[headerName+''] = headerValue+'';
-            }
         }
         if(connection){
-                xhr.readyState = 4;
-                xhr.status = parseInt(connection.responseCode,10) || undefined;
-                xhr.statusText = connection.responseMessage || "";
-                
-                var contentEncoding = connection.getContentEncoding() || "utf-8",
-                    baos = new java.io.ByteArrayOutputStream(),
-                    buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
-                    length,
-                    stream = null,
-                    responseXML = null;
-
-                try{
-                    stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
-                            new java.util.zip.GZIPInputStream(connection.getInputStream()) :
-                            connection.getInputStream();
-                }catch(e){
-                    $env.error('failed to open connection stream \n'+e.toString(), e);
-                    stream = connection.getErrorStream();
+            try{
+                var respheadlength = connection.getHeaderFields().size();
+                // Stick the response headers into responseHeaders
+                for (var i = 0; i < respheadlength; i++) { 
+                    var headerName = connection.getHeaderFieldKey(i); 
+                    var headerValue = connection.getHeaderField(i); 
+                    if (headerName)
+                        xhr.responseHeaders[headerName+''] = headerValue+'';
                 }
-                
-                while ((length = stream.read(buffer)) != -1) {
-                    baos.write(buffer, 0, length);
-                }
+            }catch(e){
+                $env.error('failed to load response headers',e);
+            }
+            
+            xhr.readyState = 4;
+            xhr.status = parseInt(connection.responseCode,10) || undefined;
+            xhr.statusText = connection.responseMessage || "";
+            
+            var contentEncoding = connection.getContentEncoding() || "utf-8",
+                baos = new java.io.ByteArrayOutputStream(),
+                buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+                length,
+                stream = null,
+                responseXML = null;
 
-                baos.close();
-                stream.close();
+            try{
+                stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
+                        new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+                        connection.getInputStream();
+            }catch(e){
+                $env.error('failed to open connection stream \n'+e.toString(), e);
+                stream = connection.getErrorStream();
+            }
+            
+            while ((length = stream.read(buffer)) != -1) {
+                baos.write(buffer, 0, length);
+            }
 
-                xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
-                    decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
+            baos.close();
+            stream.close();
+
+            xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
+                decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
                 
         }
         if(responseHandler){

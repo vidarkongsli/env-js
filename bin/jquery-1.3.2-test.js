@@ -67,7 +67,7 @@ load("build/runtest/env.js");
                 //allow unanticipated xhr error with no ajax.handleError 
                 //callback (eg jQuery.getScript) to exit gracefully
                 $env.onInterrupt = function(){
-                    ok(false, 'gracefully continuing test');
+                    $env.info('thread interupt: gracefully continuing test');
                     start();
                 };
                 
