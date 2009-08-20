@@ -344,7 +344,7 @@ __extend__(DOMDocument.prototype, {
 	toString: function(){ 
 	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
     },
-	get defaultView(){ //TODO: why isnt this just 'return $w;'?
+	get defaultView(){ 
 		return { getComputedStyle: function(elem){
 			return $w.getComputedStyle(elem);
 		}};

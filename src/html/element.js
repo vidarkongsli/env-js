@@ -85,14 +85,17 @@ __extend__(HTMLElement.prototype, {
 		scrollRight: 0,
 		get style(){
 		    if(this.$css2props === null){
-		        __updateCss2Props__(this);
+	            this.$css2props = new CSS2Properties(this);
 	        }
-	        return this.$css2props
+	        return this.$css2props;
 		},
+        set style(values){
+		    __updateCss2Props__(this, values);
+        },
 		setAttribute: function (name, value) {
             DOMElement.prototype.setAttribute.apply(this,[name, value]);
 		    if (name === "style") {
-		        __updateCss2Props__(this);
+		        __updateCss2Props__(this, value);
 		    }
 		},
 		get title() { 
@@ -188,8 +191,11 @@ var __eval__ = function(script, startingNode){
     }
 };
 
-var __updateCss2Props__ = function(elem){
-	elem.$css2props = new CSS2Properties(elem);
+var __updateCss2Props__ = function(elem, values){
+    if(elem.$css2props === null){
+        elem.$css2props = new CSS2Properties(elem);
+    }
+    __cssTextToStyles__(elem.$css2props, values);
 };
 
 var __registerEventAttrs__ = function(elm){

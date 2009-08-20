@@ -29,6 +29,7 @@ load("build/runtest/env.js");
                         $env.location('jqenv-'+Date.now()+'.html')
                     );
                 };
+                
                 //allow jquery to run ajax
                 isLocal = false;
                 
