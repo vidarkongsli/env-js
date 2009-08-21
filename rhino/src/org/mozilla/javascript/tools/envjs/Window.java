@@ -13,7 +13,6 @@ package org.mozilla.javascript.tools.envjs;
 
 import java.util.List;
 import java.util.ArrayList;
-//import java.lang.reflect.*;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeArray;
@@ -69,22 +68,23 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
                             Object[] args, Function funObj)
     {
         org.mozilla.javascript.tools.shell.Global.load(
-        	cx, funObj.getParentScope(), args, funObj
-       	);
+            cx, funObj.getParentScope(), args, funObj
+        );
     }
 
 
     public static Scriptable globalize( Context cx, 
-    									Scriptable thisObj,
+                                        Scriptable thisObj,
                                         Object[] args, 
                                         Function funObj)
     {
         org.mozilla.javascript.tools.shell.Global gObj = 
-        	(org.mozilla.javascript.tools.shell.Global)
-        	(ScriptableObject.getTopLevelScope(funObj));
+            (org.mozilla.javascript.tools.shell.Global)
+            (ScriptableObject.getTopLevelScope(funObj));
         Class c = Window.class;
         while (gObj != null && gObj.getClass() != c)
-            gObj = (org.mozilla.javascript.tools.shell.Global) gObj.getPrototype();
+            gObj = (org.mozilla.javascript.tools.shell.Global)
+                   gObj.getPrototype();
         if (gObj == null)
             throw new IllegalStateException(
                 "Window.createAGlobalObject: couldn't find " +
@@ -106,9 +106,9 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     }
 
     public static void setScope(Context cx,
-		                                       Scriptable thisObj,
-		                                       Object[] args,
-		                                       Function funObj)
+                                Scriptable thisObj,
+                                Object[] args,
+                                Function funObj)
     {
         if (args.length != 2)
             throw new IllegalArgumentException(
@@ -131,9 +131,9 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
 
 
     public static NativeArray configureScope(Context cx,
-		                                     Scriptable thisObj,
-		                                     Object[] args,
-		                                     Function funObj)
+                                             Scriptable thisObj,
+                                             Object[] args,
+                                             Function funObj)
     {
         Object[] objectPair;
         List pairs = new ArrayList();
@@ -153,7 +153,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
         for (c=0; c < len-1; c++){
             // save original scopes from objects we're putting into new chain
             Scriptable elem = (Scriptable) argArray.get(c, thisObj);
-	    objectPair = new Object[] { elem, elem.getParentScope() };
+        objectPair = new Object[] { elem, elem.getParentScope() };
             pairs.add(cx.newArray(funObj, objectPair));
 
             // set current obj's scope to point to next object

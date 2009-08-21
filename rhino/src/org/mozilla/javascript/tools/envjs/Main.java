@@ -15,16 +15,12 @@ package org.mozilla.javascript.tools.envjs;
 public class Main extends org.mozilla.javascript.tools.shell.Main
 {
 
-    // don't really care that this is singleton, but many methods that
-    // use it are static, so...
-    private static org.mozilla.javascript.tools.shell.Global window;
-
     static
     {           
-    	// replace the generic Global object, instantiated in
+        // replace the generic Global object, instantiated in
         // Main.java's static initializer, with our extended version
 
-        window = new Window();
+        Window window = new Window();
         // not calling global.initQuitAction()  Doesn't matter because env.js
         // doesn't call the "quit" JS method provided by the Rhino shell app
 
