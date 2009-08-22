@@ -8185,7 +8185,6 @@ $w.__defineGetter__("location", function(url){
 *	history.js
 */
 
-    $info("Initializing Window History.");
 	$currentHistoryIndex = 0;
 	$history = [];
 	
@@ -9412,7 +9411,6 @@ var loadCookies = function(){
 //We simply use the default ajax get to load the .cookies.js file
 //if it doesn't exist we create it with a post.  Cookies are maintained
 //in memory, but serialized with each set.
-$info("Loading Cookies");
 try{
 	//TODO - load cookies
 	loadCookies();
