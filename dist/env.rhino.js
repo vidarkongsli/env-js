@@ -484,7 +484,12 @@ var Envjs = function(){
                         new java.util.zip.GZIPInputStream(connection.getInputStream()) :
                         connection.getInputStream();
             }catch(e){
-                $env.error('failed to open connection stream \n'+e.toString(), e);
+                if (connection.getResponseCode() == 404)
+                    $env.info('failed to open connection stream \n' +
+                              e.toString(), e);
+                else
+                    $env.error('failed to open connection stream \n' +
+                               e.toString(), e);
                 stream = connection.getErrorStream();
             }
             
