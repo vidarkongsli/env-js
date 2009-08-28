@@ -112,7 +112,7 @@ __extend__(HTMLInputElement.prototype, {
     blur:function(){
         __blur__(this);
 
-        if (this._oldValue != this.getAttribute('value')){
+        if (this._oldValue != this.value){
             var event = document.createEvent();
             event.initEvent("change");
             this.dispatchEvent( event );
@@ -120,7 +120,7 @@ __extend__(HTMLInputElement.prototype, {
     },
     focus:function(){
         __focus__(this);
-        this._oldValue = this.getAttribute('value');
+        this._oldValue = this.value;
     },
 	select:function(){
 	    __select__(this);
