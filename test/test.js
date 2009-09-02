@@ -14,6 +14,7 @@ load("dist/env.rhino.js");
 // }
 
 window.onload = function(){
+  print("\n\nTesting with '" + whichJarFile + "' JavaScript interpreter jar");
   print("Handling onload for test.js");
 
   // Load the test runner
@@ -24,17 +25,22 @@ window.onload = function(){
   print("Loading tests.");
   // Load the tests
   load(
-    "test/unit/dom.js",
-    "test/unit/window.js",
-    "test/unit/onload.js",
-    "test/unit/scope.js",     // must come before frame.js changes page content
-    "test/unit/frame.js",
-    "test/unit/events.js",
-    "test/unit/parser.js",
-    "test/unit/timer.js",
-    //NOTE: keep this test last because Prototype pollutes
-    //the namespace and several DOM objects
-    "test/unit/prototypecompat.js"
+      "test/unit/dom.js",
+      "test/unit/window.js"
+  );
+  if (whichJarFile == "envjs")
+    load(
+      "test/unit/onload.js",
+      "test/unit/scope.js",   // must come before frame.js changes page content
+      "test/unit/frame.js",
+      "test/unit/events.js"
+    );
+  load(
+      "test/unit/parser.js",
+      "test/unit/timer.js",
+      //NOTE: keep this test last because Prototype pollutes
+      //the namespace and several DOM objects
+      "test/unit/prototypecompat.js"
   );
   var end = new Date().getTime();
   

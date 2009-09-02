@@ -54,7 +54,29 @@ var Envjs = function(){
     };
     
     $env.info("Initializing Core Platform Env");
-    
+
+
+    // if we're running in an environment without env.js' custom extensions
+    // for manipulating the JavaScript scope chain, put in trivial emulations
+    $env.debug("performing check for custom Java methods in env-js.jar");
+    var countOfMissing = 0, dontCare;
+    try { dontCare = globalize; }
+    catch (ex){      globalize         = function(){ return {}; };
+                                                       countOfMissing++; }
+    try { dontCare = getScope; }
+    catch (ex){      getScope          = function(){}; countOfMissing++; }
+    try { dontCare = setScope; }
+    catch (ex){      setScope          = function(){}; countOfMissing++; }
+    try { dontCare = configureScope; }
+    catch (ex){      configureScope    = function(){}; countOfMissing++; }
+    try { dontCare = restoreScope; }
+    catch (ex){      restoreScope      = function(){}; countOfMissing++; }
+    if (countOfMissing != 0 && countOfMissing != 5)
+        $env.warning("Some but not all of scope-manipulation functions were " +
+                     "not present in environment.  JavaScript execution may " +
+                     "not occur correctly.");
+
+
     $env.lineSource = function(e){};
     
     $env.hashCode = function(obj){};
@@ -185,7 +207,7 @@ var Envjs = function(){
         try {
 
             var frameWindow,
-            	makingNewWinFlag = !(frame._content);
+                makingNewWinFlag = !(frame._content);
             if (makingNewWinFlag)
                 // a blank object, inherits from original global
                 // see org.mozilla.javascript.tools.envjs.Window.java
@@ -199,7 +221,7 @@ var Envjs = function(){
             // function executes we'll have a new/blank
             // global/window and won't be able to get at them....
             var local__window__    = $env.window,
-            	local_env          = $env,
+                local_env          = $env,
                 local_window       = frame.ownerDocument.parentWindow;
 
             // a local function gives us something whose scope
@@ -240,7 +262,6 @@ var Envjs = function(){
             $env.setScope(local__window__, scopes.window);
             $env.setScope($env.load, scopes.global_load);
             $env.setScope($env.loadLocalScript, scopes.local_load);
-            
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
         }
