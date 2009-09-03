@@ -15,7 +15,7 @@
         }
     </script>
     <link rel="Stylesheet" media="screen" href="data/testsuite.css"
-              onload="testLinkOnload();" />
+              onload="try{testLinkOnload();}catch(e){;}" />
 
 	<script>var jQuery = "jQuery", $ = "$"; // For testing .noConflict()</script>
 	<script type="text/javascript" src="../dist/jquery.js"></script>
@@ -61,14 +61,23 @@
     <iframe id="emptyiframe" name="emtpyiframe" style="display:none;"></iframe>
 
     <script>
-        eventFrameLoaded = eventFrameClicked = 0;
-        function eventOnloadHandler(){  eventFrameLoaded  += 1;}
-        function eventOnclickHandler(){ eventFrameClicked += 1;}
+        if (whichJarFile == "envjs"){
+          eventFrameLoaded = eventFrameClicked = 0;
+          function eventOnloadHandler(){  eventFrameLoaded  += 1;}
+          function eventOnclickHandler(){ eventFrameClicked += 1;}
+
+            document.write('                                                  \
+            \x3ciframe id="eventsFrame" name="eventsFrame"                \
+                           src="html/events.html"                             \
+                     onload="eventOnloadHandler();"                     \
+                     onclick="eventOnclickHandler();"                   \
+            \x3e\x3c/iframe\x3e                                           \
+            \x3ciframe id="scopeFrame" name="scopeFrame"                  \
+                     src="html/scope.html"                              \
+            \x3e\x3c/iframe\x3e                                           \
+            ');
+        }
     </script>
-    <iframe id="eventsFrame" name="eventsFrame" src="html/events.html"
-            onload="eventOnloadHandler();" onclick="eventOnclickHandler()";
-    ></iframe>
-    <iframe id="scopeFrame" name="scopeFrame" src="html/scope.html"></iframe>
 
     <script>
         function imgOnloadEventHandler(){
@@ -80,7 +89,8 @@
             document.getElementsByTagName('body')[0].appendChild(p);
         }
     </script>
-    <img id="anImg" src="html/img1.png" onload="imgOnloadEventHandler();" />
+    <img id="anImg" src="html/img1.png"
+         onload="try{imgOnloadEventHandler();}catch(e){;}" />
 
     <script>
         function onloadHandlerThatShouldntExecute(){
@@ -103,9 +113,9 @@
         }
     </script>
     <script src="html/missingScript.js"
-            onload="scriptOnloadEventHandler('A');" />
+            onload="try{scriptOnloadEventHandler('A');}catch(e){;}" />
     <script src="html/missingScript.js"
-            onload="scriptOnloadEventHandler('B');"></script>
+            onload="try{scriptOnloadEventHandler('B');}catch(e){;}"></script>
 
 
 	<dl id="dl" style="display:none;">

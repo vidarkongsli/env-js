@@ -13,7 +13,7 @@
   <head>
     <title>Content document for IFRAME element in env.js unit test suite</title>
   </head>
-  <body onload="checkEventsWithinIframe();">
+  <body onload="try{checkEventsWithinIframe();}catch(e){;}">
     <p id="anElementWithText">
       This is the text content of a paragraph element.
     </p>
