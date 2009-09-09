@@ -11,10 +11,6 @@
         return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
     };
     
-    $env.hashCode = function(obj){
-        return obj?obj.hashCode().toString()+'':null;
-    };
-    
     //For Java the window.location object is a java.net.URL
     $env.location = function(path, base){
       var protocol = new RegExp('(^file\:|^http\:|^https\:)');
@@ -260,46 +256,36 @@
     htmlDocBuilder.setNamespaceAware(false);
     htmlDocBuilder.setValidating(false);
     
-    var htmlCleaner,
-        cleanXMLSerializer,
-        cleanerProperties,
-        htmlTransformer,
-        htmlOutputProps;
-    $env.fixHTML = false;
-    $env.cleanHTML = function(xmlString){
-        var htmlString;
-        $env.debug('Cleaning html :\n'+xmlString);
-        if(!htmlCleaner){
-            cleanerProperties = new org.htmlcleaner.CleanerProperties();
-            cleanerProperties.setOmitHtmlEnvelope(true);
-            cleanerProperties.setTranslateSpecialEntities(true);
-            cleanerProperties.setAdvancedXmlEscape(true);
-            cleanerProperties.setUseCdataForScriptAndStyle(false);
-            cleanerProperties.setOmitXmlDeclaration(true);
-            htmlCleaner = new org.htmlcleaner.HtmlCleaner(cleanerProperties);
-            cleanXMLSerializer = new org.htmlcleaner.SimpleXmlSerializer(cleanerProperties);
-            //may have been initialized in $env.xslt
-            /*transformerFactory = transformerFactory||
-                Packages.javax.xml.transform.TransformerFactory.newInstance();
-            htmlTransformer = transformerFactory.newTransformer();
-            htmlOutputProps = new java.util.Properties();
-            htmlOutputProps.put(javax.xml.transform.OutputKeys.METHOD, "xml");
-            htmlOutputProps.put(javax.xml.transform.OutputKeys.INDENT , "no");
-            htmlOutputProps.put(javax.xml.transform.OutputKeys.ENCODING  , "UTF-8");
-            htmlOutputProps.put(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION  , "yes");
-            htmlTransformer.setOutputProperties(htmlOutputProps)*/
+    var tidy;
+    $env.tidyHTML = false;
+    $env.tidy = function(htmlString){
+        $env.debug('Cleaning html :\n'+htmlString);
+        var xmlString,
+		    baos = new java.io.ByteArrayOutputStream(),
+		    bais = new java.io.ByteArrayInputStream(
+			           (new java.lang.String(htmlString)).
+					        getBytes("UTF8"));
+		try{
+	        if(!tidy){
+	            tidy = new org.w3c.tidy.Tidy();
+	        }
+            $env.debug('tidying');
+	        tidy.parse(bais,baos);
+			xmlString = java.nio.charset.Charset.forName("UTF-8").
+                decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
+            $env.debug('finished tidying');
+		}catch(e){
+            $env.error('error in html tidy', e);
+        }finally{
+            try{
+                bais.close();
+                baos.close();
+            }catch(ee){
+                //swallow
+            }
         }
-        
-        /*var node = cleanXMLSerializer.createDOM(htmlCleaner.clean(xmlString)),
-            outText = new java.io.StringWriter();
-        htmlTransformer.transform(
-            new javax.xml.transform.dom.DOMSource(node),
-            new javax.xml.transform.stream.StreamResult(outText));
-            
-        htmlString = outText.toString()+'';*/
-        htmlString = cleanXMLSerializer.getXmlAsString(htmlCleaner.clean(xmlString));
-        //$env.info('Cleaned html :\n'+htmlString);
-        return htmlString;
+        $env.debug('Cleaned html :\n'+xmlString);
+        return xmlString;
     };
     
     var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -322,7 +308,7 @@
     var jsonmlxslt;
     $env.jsonml = function(xmlstring){
         jsonmlxslt = jsonmlxslt||$env.xslt($env.xml2jsonml.toXMLString());
-        var jsonml = $env.xslttransform(jsonmlxslt, xmlstring);
+        var jsonml = $env.transform(jsonmlxslt, xmlstring);
         //$env.debug('jsonml :\n'+jsonml);
         return eval(jsonml);
     };
@@ -336,7 +322,7 @@
               )
           );
     };
-    $env.xslttransform = function(xslt, xmlstring){
+    $env.transform = function(xslt, xmlstring){
         var baos = new java.io.ByteArrayOutputStream();
         xslt.transform(
             new javax.xml.transform.dom.DOMSource($env.parseHTML(xmlstring)),
@@ -356,10 +342,6 @@
     //injected by org.mozilla.javascript.tools.envjs.
     $env.load = load;
 
-    $env.safeScript = function(){
-      //do nothing  
-    };
-    
     $env.scriptTypes = {
         "text/javascript"   :false,
         "text/envjs"        :true

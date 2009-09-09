@@ -31,26 +31,33 @@ var Envjs = function(){
     $env.profile = false;
     
     $env.log = function(msg, level){};
-    $env.debug  = function(){};
-    $env.info   = function(){};
-    $env.warn   = function(){};
-    $env.error  = function(){};
+	
+    $env.DEBUG  = 4;
+    $env.INFO   = 3;
+    $env.WARN   = 2;
+    $env.ERROR  = 1;
+	$env.NONE   = 0;
+	
+    //set this if you want to get some internal log statements
+    $env.logLevel = $env.INFO;
     
-    
-    $env.debugParser = false;
-    //uncomment these if you want to get some internal log statementes
-    /*$env.debug  = function(msg){
-        $env.log(msg,"DEBUG"); 
-    };*/
-    $env.info   = function(msg){
-        $env.log(msg,"INFO"); 
+    $env.debug  = function(msg){
+		if($env.logLevel >= $env.DEBUG)
+            $env.log(msg,"DEBUG"); 
+    };
+    $env.info = function(msg){
+        if($env.logLevel >= $env.INFO)
+            $env.log(msg,"INFO"); 
     };
     $env.warn   = function(msg){
-        $env.log(msg,"WARNIING");    
+        if($env.logLevel >= $env.WARN)
+            $env.log(msg,"WARNIING");    
     };
     $env.error = function(msg, e){
-        $env.log(msg+ " Line: "+ $env.lineSource(e),'ERROR');
-        $env.log(e||"",'ERROR');
+        if ($env.logLevel >= $env.ERROR) {
+			$env.log(msg + " Line: " + $env.lineSource(e), 'ERROR');
+			$env.log(e || "", 'ERROR');
+		}
     };
     
     $env.info("Initializing Core Platform Env");
@@ -79,15 +86,12 @@ var Envjs = function(){
 
     $env.lineSource = function(e){};
     
-    $env.hashCode = function(obj){};
-    
     //resolves location relative to base or window location
     $env.location = function(path, base){};
     
     //For Java the window.timer is created using the java.lang.Thread in combination
     //with the java.lang.Runnable
     $env.timer = function(fn, time){};	
-    $env.wait = function(wait){};
     
     $env.javaEnabled = false;	
     
@@ -119,10 +123,6 @@ var Envjs = function(){
     
     $env.load = function(){};
     
-    $env.safeScript = function(){
-      //do nothing  
-    };
-    
     $env.scriptTypes = {
         "text/javascript"   :false,
         "text/envjs"        :true
@@ -149,10 +149,10 @@ var Envjs = function(){
                             $env.info("loading allowed external script :" + script.src);
                             //lets you register a function to execute 
                             //before the script is loaded
-                            if($env.beforeload){
-                                for(src in $env.beforeload){
+                            if($env.beforeScriptLoad){
+                                for(src in $env.beforeScriptLoad){
                                     if(script.src.match(src)){
-                                        $env.beforeload[src]();
+                                        $env.beforeScriptLoad[src]();
                                     }
                                 }
                             }
@@ -160,10 +160,10 @@ var Envjs = function(){
 							load($env.location(script.src.match(/([^\?#]*)/)[1], base ));
                             //lets you register a function to execute 
                             //after the script is loaded
-                            if($env.afterload){
-                                for(src in $env.afterload){
+                            if($env.afterScriptLoad){
+                                for(src in $env.afterScriptLoad){
                                     if(script.src.match(src)){
-                                        $env.afterload[src]();
+                                        $env.afterScriptLoad[src]();
                                     }
                                 }
                             }

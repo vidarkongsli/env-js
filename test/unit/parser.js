@@ -90,14 +90,14 @@ test("Toggle entity replacement", function() {
     equals(XMLP._ELM_E, p.next(), "Closing body tag"); // _ELM_E </body>
     equals(XMLP._ELM_E, p.next(), "Closing html tag"); // _ELM_E </html>
 });
-
-/*test("Clean HTML", function() {
+/**
+test("Clean HTML", function() {
     expect(3);
     var domParser = new DOMParser(),
     	htmlstr = "<div><p>this is a pig... &apos;oink! oink!&apos;</div>";
         
-    Envjs.fixHTML = true;
-    equals(Envjs.cleanHTML(htmlstr), 
+    Envjs.tidyHTML = true;
+    equals(Envjs.tidy(htmlstr), 
         "<div><p>this is a pig... 'oink! oink!'</p></div>",
         'got expected xmlstring');
         
@@ -107,6 +107,6 @@ test("Toggle entity replacement", function() {
     equals(domnode.xml, 
         "<div><p>this is a pig... 'oink! oink!'</p></div>",
         'got expected value for .xml');
-    Envjs.fixHTML = false;
+    Envjs.tidyHTML = false;
 
 });*/

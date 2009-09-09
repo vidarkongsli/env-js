@@ -31,6 +31,23 @@ Building:
 Testing:
 * run "ant test"
 
+Java command line:
+
+env.rhino.js can be run either with a "generic" version of the Rhino
+library (js.jar), or with the repackaged/extended version of Rhino
+supplied with env.js (env-js.jar).  If your application uses multiple
+windows, frames, or iframes, or if it depends on precise adherence to
+JavaScript object scoping in event handlers, you will have to use
+env-js.jar.  Simple applications may be able to run with the generic
+version of Rhino.
+
+The command line used for testing env.js can be found in build.xml,
+although the general form is:
+     java -jar [jar file] [javascript file]
+Where "jar file" is either "dist/env-js.jar", "rhino/js.jar", or your
+local path to a different version of the Rhino js.jar file.  The
+"javascript file" is the path to the JavaScript you wish to execute.
+
 Installing:
 1) Include the proper env.js file for your platform.
      load('env.rhino.js'); //if in a Rhino script
@@ -63,22 +80,6 @@ Installing:
      // run any setup code for your framework
      // tell the framework that the document is loaded
 
-Java command line:
-
-env.rhino.js can be run either with a "generic" version of the Rhino
-library (js.jar), or with the repackaged/extended version of Rhino
-supplied with env.js (env-js.jar).  If your application uses multiple
-windows, frames, or iframes, or if it depends on precise adherence to
-JavaScript object scoping in event handlers, you will have to use
-env-js.jar.  Simple applications may be able to run with the generic
-version of Rhino.
-
-The command line used for testing env.js can be found in build.xml,
-although the general form is:
-     java -jar [jar file] [javascript file]
-Where "jar file" is either "dist/env-js.jar", "rhino/js.jar", or your
-local path to a different version of the Rhino js.jar file.  The
-"javascript file" is the path to the JavaScript you wish to execute.
 
     
 Testing jQuery Compatibility:

@@ -1,5 +1,5 @@
 /*
- * Envjs env-js.1.0.rc5 
+ * Envjs env-js.1.0.rc6 
  * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008-2009 John Resig, under the MIT License
@@ -2221,10 +2221,16 @@ XMLP.prototype._addAttribute = function(name, value) {
 
 XMLP.prototype._checkStructure = function(iEvent) {
 
-        if(XMLP._STATE_PROLOG == this.m_iState) {
-                if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
-            if(SAXStrings.indexOfNonWhitespace(this.getContent(), this.getContentBegin(), this.getContentEnd()) != -1) {
-                                return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+    if(XMLP._STATE_PROLOG == this.m_iState) {
+
+	    //The prolog is initial state of the document before parsing
+	    //has really begun.  A rigid xml parsing implementation would not
+		//allow anything but '<' as the first non-whitespace character
+        if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
+            if(SAXStrings.indexOfNonWhitespace(this.getContent(), 
+			    this.getContentBegin(), this.getContentEnd()) != -1) {
+                    //TODO: HTML Helper here.
+                    return this._setErr(XMLP.ERR_DOC_STRUCTURE);
             }
         }
 
@@ -2232,8 +2238,14 @@ XMLP.prototype._checkStructure = function(iEvent) {
             this.m_iState = XMLP._STATE_DOCUMENT;
             // Don't return - fall through to next state
         }
+		
     }
+	
+	
     if(XMLP._STATE_DOCUMENT == this.m_iState) {
+        //The document is the state that the parser is in after the
+		//first element event, and remains in that state until
+		//the initial element is closed
         if((XMLP._ELM_B == iEvent) || (XMLP._ELM_EMP == iEvent)) {
             this.m_stack.push(this.getName());
         }
@@ -2250,26 +2262,37 @@ XMLP.prototype._checkStructure = function(iEvent) {
             return iEvent;
         }
     }
+	
+	
     if(XMLP._STATE_MISC == this.m_iState) {
-                if((XMLP._ELM_B == iEvent) || (XMLP._ELM_E == iEvent) || (XMLP._ELM_EMP == iEvent) || (XMLP.EVT_DTD == iEvent)) {
-                        return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+        //The misc parser state occurs after the root element has been
+		//closed.  basically a rigid xml parser would throw an error
+		//for any element or text found after this
+        if((XMLP._ELM_B == iEvent) || 
+		   (XMLP._ELM_E == iEvent) || 
+		   (XMLP._ELM_EMP == iEvent) || 
+		   (XMLP.EVT_DTD == iEvent)) {
+            //TODO: HTML Helper here.
+            return this._setErr(XMLP.ERR_DOC_STRUCTURE);
         }
 
         if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
-                        if(SAXStrings.indexOfNonWhitespace(this.getContent(), this.getContentBegin(), this.getContentEnd()) != -1) {
-                                return this._setErr(XMLP.ERR_DOC_STRUCTURE);
+            if(SAXStrings.indexOfNonWhitespace(this.getContent(), 
+			     this.getContentBegin(), this.getContentEnd()) != -1) {
+                    //TODO: HTML Helper here.
+                    return this._setErr(XMLP.ERR_DOC_STRUCTURE);
             }
         }
     }
 
     return iEvent;
 
-}
+};
 
 
 XMLP.prototype._clearAttributes = function() {
     this.m_atts = new Array();
-}
+};
 
 
 XMLP.prototype._findAttributeIndex = function(name) {
@@ -2280,92 +2303,98 @@ XMLP.prototype._findAttributeIndex = function(name) {
     }
     return -1;
 
-}
+};
 
 
 XMLP.prototype.getAttributeCount = function() {
 
     return this.m_atts ? this.m_atts.length : 0;
 
-}
+};
 
 
 XMLP.prototype.getAttributeName = function(index) {
 
-    return ((index < 0) || (index >= this.m_atts.length)) ? null : this.m_atts[index][XMLP._ATT_NAME];
+    return ((index < 0) || (index >= this.m_atts.length)) ? 
+       null : 
+       this.m_atts[index][XMLP._ATT_NAME];
 
-}
+};
 
 
 XMLP.prototype.getAttributeValue = function(index) {
 
-    return ((index < 0) || (index >= this.m_atts.length)) ? null : __unescapeXML__(this.m_atts[index][XMLP._ATT_VAL]);
+    return ((index < 0) || (index >= this.m_atts.length)) ? 
+       null : 
+	   __unescapeXML__(this.m_atts[index][XMLP._ATT_VAL]);
 
-}
+};
 
 
 XMLP.prototype.getAttributeValueByName = function(name) {
 
     return this.getAttributeValue(this._findAttributeIndex(name));
 
-}
+};
 
 
 XMLP.prototype.getColumnNumber = function() {
 
     return SAXStrings.getColumnNumber(this.m_xml, this.m_iP);
 
-}
+};
 
 
 XMLP.prototype.getContent = function() {
 
-    return (this.m_cSrc == XMLP._CONT_XML) ? this.m_xml : this.m_cAlt;
+    return (this.m_cSrc == XMLP._CONT_XML) ? 
+	   this.m_xml : 
+	   this.m_cAlt;
 
-}
+};
 
 
 XMLP.prototype.getContentBegin = function() {
 
     return this.m_cB;
 
-}
+};
 
 
 XMLP.prototype.getContentEnd = function() {
 
     return this.m_cE;
 
-}
+};
 
 
 XMLP.prototype.getLineNumber = function() {
 
     return SAXStrings.getLineNumber(this.m_xml, this.m_iP);
 
-}
+};
 
 
 XMLP.prototype.getName = function() {
 
     return this.m_name;
 
-}
+};
 
 
 XMLP.prototype.next = function() {
 
     return this._checkStructure(this._parse());
 
-}
+};
 
 XMLP.prototype.appendFragment = function(xmlfragment) {
 
-        var start = this.m_xml.slice(0,this.m_iP);
-        var end = this.m_xml.slice(this.m_iP);
-        this.m_xml = start+xmlfragment+end;
+    var start = this.m_xml.slice(0,this.m_iP);
+    var end = this.m_xml.slice(this.m_iP);
+    this.m_xml = start+xmlfragment+end;
 
-}
+};
 
 
 XMLP.prototype._parse = function() {
@@ -2410,9 +2439,11 @@ XMLP.prototype._parseAttribute = function(iB, iE) {
     var iNB, iNE, iEq, iVB, iVE;
     var cQuote, strN, strV;
 
-        this.m_cAlt = ""; //resets the value so we don't use an old one by accident (see testAttribute7 in the test suite)
+    //resets the value so we don't use an old one by 
+	//accident (see testAttribute7 in the test suite)
+	this.m_cAlt = ""; 
 
-        iNB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
+    iNB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
     if((iNB == -1) ||(iNB >= iE)) {
         return iNB;
     }
@@ -4198,8 +4229,8 @@ __extend__(DOMDocument.prototype, {
     loadXML : function(xmlString) {
         // create SAX Parser
         var htmlString;
-        if($env.fixHTML){
-            htmlString = $env.cleanHTML(xmlString);
+        if($env.tidyHTML){
+            htmlString = $env.tidy(xmlString);
         }else{
             htmlString = xmlString
         }

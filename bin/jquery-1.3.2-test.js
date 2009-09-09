@@ -3,14 +3,12 @@ load("build/runtest/env.js");
 
 (function($env){
     
-    //$env.fixHTML = false;
-    
     $env("test/index.html", {
         //let it load the script from the html
         scriptTypes: {
             "text/javascript"   :true
         },
-        afterload:{
+        afterScriptLoad:{
             'qunit/testrunner.js': function(){
                 //hook into qunit.log
                 var count = 0;

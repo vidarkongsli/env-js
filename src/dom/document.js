@@ -51,8 +51,8 @@ __extend__(DOMDocument.prototype, {
     loadXML : function(xmlString) {
         // create SAX Parser
         var htmlString;
-        if($env.fixHTML){
-            htmlString = $env.cleanHTML(xmlString);
+        if($env.tidyHTML){
+            htmlString = $env.tidy(xmlString);
         }else{
             htmlString = xmlString
         }
