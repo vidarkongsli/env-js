@@ -16,7 +16,7 @@ var Event = function(options){
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,
       $eventPhase = options.eventPhase?options.eventPhase:Event.CAPTURING_PHASE,
-      $target = options.eventPhase?options.eventPhase:document,
+      $target = options.target?options.target:document,
       $timestamp = options.timestamp?options.timestamp:new Date().getTime().toString(),
       $type = options.type?options.type:"";
   return __extend__(this,{
