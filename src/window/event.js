@@ -3,7 +3,7 @@
 */
 // Window Events
 $debug("Initializing Window Event.");
-var $events = [],
+var $events = [{}],
     $onerror,
     $onload,
     $onunload;
