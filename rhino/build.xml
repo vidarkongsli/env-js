@@ -37,6 +37,9 @@
     <property name="RHINO_JAR"      
             location="js.jar"  
             description="Rhino JS Engine"/>
+    <property name="JLINE_JAR"      
+            location="jline-0.9.94.jar"  
+            description="jLine Command Line"/>
     <property name='JAVA_DEBUG' 
               value='on'/>
     <property name='JAVA_TARGET' 
@@ -91,6 +94,7 @@
              manifest="${SRC_DIR}/META-INF/MANIFEST.MF"
              compress="${JAR_COMPRESSION}">
              <fileset dir="${CLASS_DIR}" includes="**/*.class"/>
+             <zipfileset src="${JLINE_JAR}" includes="**/*"/>
          </jar>
         <copy file="${ENV_JAR_DIST}" tofile="${ENV_JAR_LATEST}"/>
     </target>

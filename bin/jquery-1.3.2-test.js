@@ -5,6 +5,7 @@ load("build/runtest/env.js");
     
     $env("test/index.html", {
         //let it load the script from the html
+		logLevel: $env.INFO,
         scriptTypes: {
             "text/javascript"   :true
         },

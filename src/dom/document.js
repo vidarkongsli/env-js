@@ -119,9 +119,9 @@ __extend__(DOMDocument.prototype, {
             $w.dispatchEvent( event, false );
 			
 			//also use DOMContentLoaded event
-            event = document.createEvent();
-            event.initEvent("DOMContentLoaded");
-            $w.dispatchEvent( event, false );
+            var domContentLoaded = document.createEvent();
+            domContentLoaded.initEvent("DOMContentLoaded");
+            $w.dispatchEvent( domContentLoaded, false );
         };
         xhr.send();
     },

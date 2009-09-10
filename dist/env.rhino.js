@@ -1,5 +1,5 @@
 /*
- * Envjs env-js.1.0.rc6 
+ * Envjs env-js.1.0.rc7 
  * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008-2009 John Resig, under the MIT License
@@ -637,7 +637,7 @@ var Envjs = function(){
     $env.restoreScope = restoreScope;
     
 })(Envjs);/*
- * Envjs env-js.1.0.rc6 
+ * Envjs env-js.1.0.rc7 
  * Pure JavaScript Browser Environment
  *   By John Resig <http://ejohn.org/>
  * Copyright 2008-2009 John Resig, under the MIT License
@@ -4933,6 +4933,11 @@ __extend__(DOMDocument.prototype, {
             event = document.createEvent();
             event.initEvent("load");
             $w.dispatchEvent( event, false );
+			
+			//also use DOMContentLoaded event
+            var domContentLoaded = document.createEvent();
+            domContentLoaded.initEvent("DOMContentLoaded");
+            $w.dispatchEvent( domContentLoaded, false );
         };
         xhr.send();
     },
@@ -8352,7 +8357,7 @@ var Event = function(options){
       $cancelable = options.cancelable?options.cancelable:true,
       $currentTarget = options.currentTarget?options.currentTarget:null,
       $eventPhase = options.eventPhase?options.eventPhase:Event.CAPTURING_PHASE,
-      $target = options.eventPhase?options.eventPhase:document,
+      $target = options.target?options.target:document,
       $timestamp = options.timestamp?options.timestamp:new Date().getTime().toString(),
       $type = options.type?options.type:"";
   return __extend__(this,{
@@ -9004,7 +9009,7 @@ window.clearInterval = window.clearTimeout = function(num){
 */
 // Window Events
 $debug("Initializing Window Event.");
-var $events = [],
+var $events = [{}],
     $onerror,
     $onload,
     $onunload;

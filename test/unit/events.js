@@ -156,3 +156,43 @@ test("Bubbling event ONLY bubbles 'up'", function() {
 
     clickChecks("Click td", 2, 1);
 });
+
+/*
+ * Re ticket #68
+ * http://envjs.lighthouseapp.com/projects/21590/tickets/68-wrong-this-in-wdispatchevent-for-on-callbacks 
+ * will close once we verify this test is correct and it passes
+ 
+test("Check that 'this' in event handlers refers to the object receiving the event", function() {
+    expect(4);
+
+    // get a few objects the event will bubble up to
+    var img = document.getElementById('eventsFrame')
+      .contentDocument.getElementById('theIMG');
+    var a = document.getElementById('eventsFrame')
+      .contentDocument.getElementById('theA');
+    var p = document.getElementById('eventsFrame')
+      .contentDocument.getElementById('theP');
+    var li = document.getElementById('eventsFrame')
+      .contentDocument.getElementById('theLI');
+
+    // add handlers
+    addHdlr = function(elem, id) {
+        elem.addEventListener('click', function(event){
+            try{
+                Envjs.log(event.target+'='+img);
+                Envjs.log(this+'='+elem);
+                ok( event.target === img && this === elem,
+                    "Scope: 'this' refers to element '" + id + "'");
+            }catch(e){print(e);}
+        });
+    }
+    addHdlr(img, "theIMG");
+    addHdlr(a, "theA");
+    addHdlr(p, "theP");
+    addHdlr(li, "theLI");
+
+    // create and dispatch event
+    __click__(img);    
+});*/
+
+
