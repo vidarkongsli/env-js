@@ -14,6 +14,14 @@
             document.getElementsByTagName('head')[0].appendChild(s);
         }
     </script>
+    <script>
+        function testXMLSpecialCharacters(){
+            if(true && true && 0>-1){
+                var f = 0&1;
+				f&=1;    
+			}
+        }
+    </script>
     <link rel="Stylesheet" media="screen" href="data/testsuite.css"
               onload="try{testLinkOnload();}catch(e){;}" />
 
