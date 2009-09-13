@@ -26,7 +26,8 @@ window.onload = function(){
   // Load the tests
   load(
       "test/unit/dom.js",
-      "test/unit/window.js"
+      "test/unit/window.js",
+      "test/unit/elementmembers.js"
   );
   if (whichJarFile == "envjs")
     load(

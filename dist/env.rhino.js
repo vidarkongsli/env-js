@@ -5781,6 +5781,20 @@ var HTMLElement = function(ownerDocument) {
 };
 HTMLElement.prototype = new DOMElement;
 __extend__(HTMLElement.prototype, {
+    $recursivelyGatherTextFromNodeTree: function(aNode) {
+        var accumulateText = "";
+        var idx; var n;
+        for (idx=0;idx < aNode.childNodes.length;idx++){
+            n = aNode.childNodes.item(idx);
+        if      (n.nodeType == DOMNode.TEXT_NODE)
+                accumulateText += n.data;
+            else
+                accumulateText += this.$recursivelyGatherTextFromNodeTree(n);
+        }
+
+        return accumulateText;
+    },
+
 		get className() { 
 		    return this.getAttribute("class")||''; 
 	    },
@@ -5826,6 +5840,12 @@ __extend__(HTMLElement.prototype, {
 		    //Mark for garbage collection
 		    doc = null;
 		},
+        get innerText(){
+            return this.$recursivelyGatherTextFromNodeTree(this);
+        },
+        set innerText(newText){
+            this.innerHTML = newText;  // a paranoid would HTML-escape, but...
+        },
 		get lang() { 
 		    return this.getAttribute("lang"); 
 		    
@@ -8087,21 +8107,8 @@ var HTMLTitleElement = function(ownerDocument) {
 };
 HTMLTitleElement.prototype = new HTMLElement;
 __extend__(HTMLTitleElement.prototype, {
-    $recursivelyGatherTextFromNodeTree: function(aNode) {
-        var accumulateText = "";
-        var idx; var n;
-        for (idx=0;idx < aNode.childNodes.length;idx++){
-            n = aNode.childNodes.item(idx);
-	    if      (n.nodeType == DOMNode.TEXT_NODE)
-                accumulateText += n.data;
-            else
-                accumulateText += this.$recursivelyGatherTextFromNodeTree(n);
-        }
-
-        return accumulateText;
-    },
     get text() {
-        return this.$recursivelyGatherTextFromNodeTree(this);
+        return this.innerText;
     },
 
     set text(titleStr) {
