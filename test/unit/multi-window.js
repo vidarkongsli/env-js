@@ -12,8 +12,11 @@ module("multi-window");
 test("2nd window.location= operation flagged as error", function() {
     expect(1);
 
-    try{ ok(true,
-        "");
+    var gotAnException = false;
+    window.onload = function(){;};
+    try{         window.location = "test/html/trivial.html";    }
+    catch (e){   gotAnException = true;                         }
+    try{ ok(gotAnException, "prohibited window.location setter call fails");
     }catch(e){print(e);}
 });
 

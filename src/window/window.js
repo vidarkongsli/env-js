@@ -126,11 +126,15 @@ __extend__($w,{
 });
 
 $w.open = function(url, name, features, replace){
-  //TODO.  Remember to set $opener, $name
+  $opener = this;
+  $name = name;
+
+  var newWindow = $env.makeNewWindow(this);
 };
 
 $w.close = function(){
-  //TODO.  Remember to set $closed
+
+  $closed = true;
 };     
   
 /* Time related functions - see timer.js

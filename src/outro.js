@@ -8,7 +8,7 @@
 
     // turn "original" JS interpreter global object into the
     // "root" window object; third param value for new window's "parent"
-    Envjs.window(this, Envjs, null, this);
+    Envjs.window(this, Envjs, null, this, true);
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +

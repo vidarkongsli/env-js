@@ -7,17 +7,20 @@
 
 
 try {
-        
-    Envjs.window = function($w, 
+
+    Envjs.window = function($w,
                             $env,
                             $parentWindow,
-                            $initTop){
+                            $initTop,
+                            $thisIsTheOriginalWindow){
 
-    // The Window Object
-    var __this__ = $w;
-    $w.__defineGetter__('window', function(){
-        return __this__;
-    });
+        // The Window Object
+        var __this__ = $w;
+        $w.__defineGetter__('window', function(){
+            return __this__;
+        });
+        $w.$isOriginalWindow = $thisIsTheOriginalWindow;
+        $w.$haveCalledWindowLocationSetter = false;
 
 /*
 *	window.js
@@ -147,11 +150,15 @@ __extend__($w,{
 });
 
 $w.open = function(url, name, features, replace){
-  //TODO.  Remember to set $opener, $name
+  $opener = this;
+  $name = name;
+
+  var newWindow = $env.makeNewWindow(this);
 };
 
 $w.close = function(){
-  //TODO.  Remember to set $closed
+
+  $closed = true;
 };     
   
 /* Time related functions - see timer.js
@@ -8127,7 +8134,10 @@ $debug("Initializing Window Location.");
 var $location = '';
 
 $w.__defineSetter__("location", function(url){
-    //$w.onunload();
+    if ($w.$isOriginalWindow && $w.$haveCalledWindowLocationSetter)
+        throw new Error("Cannot call 'window.location=' multiple times from the context used to load 'env.js'.  Try using 'window.open()' to get a new context.");
+    $w.$haveCalledWindowLocationSetter = true;
+
 	$location = $env.location(url);
 	setHistory($location);
 	$w.document.load($location);
@@ -9465,7 +9475,7 @@ try{
 
     // turn "original" JS interpreter global object into the
     // "root" window object; third param value for new window's "parent"
-    Envjs.window(this, Envjs, null, this);
+    Envjs.window(this, Envjs, null, this, true);
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +

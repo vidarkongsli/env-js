@@ -7,7 +7,10 @@ $debug("Initializing Window Location.");
 var $location = '';
 
 $w.__defineSetter__("location", function(url){
-    //$w.onunload();
+    if ($w.$isOriginalWindow && $w.$haveCalledWindowLocationSetter)
+        throw new Error("Cannot call 'window.location=' multiple times from the context used to load 'env.js'.  Try using 'window.open()' to get a new context.");
+    $w.$haveCalledWindowLocationSetter = true;
+
 	$location = $env.location(url);
 	setHistory($location);
 	$w.document.load($location);
