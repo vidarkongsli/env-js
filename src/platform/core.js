@@ -209,8 +209,8 @@ var Envjs = function(){
         try {
             frameElement._content = frameElement._content                 ?
                 $env.loadExistingWindow(frameElement._content, url)       :
-	        $env.makeAndLoadNewWindow(
-		    frameElement.ownerDocument.parentWindow, url);
+                $env.makeAndLoadNewWindow(
+                    frameElement.ownerDocument.parentWindow, url);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
         }
@@ -221,91 +221,61 @@ var Envjs = function(){
         // in current global/window, because when the following
         // function executes we'll have a new/blank
         // global/window and won't be able to get at them....
-        var local__window__    = $env.window,
-            local_env          = $env,
+        var local_env          = $env,
             local_window       = windowObj.opener;
 
-
         // a local function gives us something whose scope we can manipulate
-        var __frame__   = function(){
+        var inWindowsContext = function(){
             windowObj.location = url;
         }
 
-
-        // save scope settings we're about to muck with
-        //       getScope()/setScope() from Window.java
-        var scopes = {
-            frame :          $env.getScope(__frame__),
-            window :         $env.getScope(local__window__),
-            global_load:     $env.getScope(load),
-            local_load:      $env.getScope($env.loadLocalScript)
-        };
-
-        // set scope chain of all relevant objects
-        $env.setScope(__frame__,             windowObj);
-        $env.setScope(local__window__,       windowObj);
-        $env.setScope($env.load,             windowObj);
-        $env.setScope($env.loadLocalScript,  windowObj);
-
-        // invoke our local fn to window-ify object from globalize()
-        __frame__();
-
-        // now restore the scopes
-        $env.setScope(__frame__,             scopes.frame);
-        $env.setScope(local__window__,       scopes.window);
-        $env.setScope($env.load,             scopes.global_load);
-        $env.setScope($env.loadLocalScript,  scopes.local_load);
-
+        var scopes = recordScopesOfKeyObjects(inWindowsContext);
+        setScopesOfKeyObjects(inWindowsContext, windowObj);
+        inWindowsContext();
+        restoreScopesOfKeyObjects(inWindowsContext, scopes);
         return windowObj;
     };
 
     $env.makeAndLoadNewWindow = function(openingWindow, url){
-        var newWindow = $env.globalize();
-
-        // define local variables with content of things that are
-        // in current global/window, because when the following
-        // function executes we'll have a new/blank
-        // global/window and won't be able to get at them....
         var local__window__    = $env.window,
             local_env          = $env,
             local_window       = openingWindow;
 
-
-        // a local function gives us something whose scope we can manipulate
-        var __frame__   = function(){
+        var newWindow = $env.globalize();
+        var inNewContext = function(){
             local__window__(newWindow, local_env, local_window,
                             local_window.top, false);
-
-            // have to execute .location= in modified-scopes environment
             newWindow.location = url;
         }
 
+        var scopes = recordScopesOfKeyObjects(inNewContext);
+        setScopesOfKeyObjects(inNewContext, newWindow);
+        inNewContext(); // invoke local fn to window-ify object from globalize()
+        restoreScopesOfKeyObjects(inNewContext, scopes);
+        return newWindow;
+    };
 
-        // save scope settings we're about to muck with
-        //       getScope()/setScope() from Window.java
-        var scopes = {
-            frame :          $env.getScope(__frame__),
-            window :         $env.getScope(local__window__),
+    function recordScopesOfKeyObjects(fnToExecInOtherContext){
+        return {                //   getScope()/setScope() from Window.java
+            frame :          $env.getScope(fnToExecInOtherContext),
+            window :         $env.getScope($env.window),
             global_load:     $env.getScope(load),
             local_load:      $env.getScope($env.loadLocalScript)
         };
+    }
 
-        // set scope chain of all relevant objects
-        $env.setScope(__frame__,             newWindow);
-        $env.setScope(local__window__,       newWindow);
-        $env.setScope($env.load,             newWindow);
-        $env.setScope($env.loadLocalScript,  newWindow);
+    function setScopesOfKeyObjects(fnToExecInOtherContext, windowObj){
+        $env.setScope(fnToExecInOtherContext,  windowObj);
+        $env.setScope($env.window,             windowObj);
+        $env.setScope($env.load,               windowObj);
+        $env.setScope($env.loadLocalScript,    windowObj);
+    }
 
-        // invoke our local fn to window-ify object from globalize()
-        __frame__();
-
-        // now restore the scopes
-        $env.setScope(__frame__,             scopes.frame);
-        $env.setScope(local__window__,       scopes.window);
-        $env.setScope($env.load,             scopes.global_load);
-        $env.setScope($env.loadLocalScript,  scopes.local_load);
-
-        return newWindow;
-    };
+    function restoreScopesOfKeyObjects(fnToExecInOtherContext, scopes){
+        $env.setScope(fnToExecInOtherContext,  scopes.frame);
+        $env.setScope($env.window,             scopes.window);
+        $env.setScope($env.load,               scopes.global_load);
+        $env.setScope($env.loadLocalScript,    scopes.local_load);
+    }
 })(Envjs);
 
