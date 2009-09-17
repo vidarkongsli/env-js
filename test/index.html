@@ -69,20 +69,24 @@
     <iframe id="emptyiframe" name="emtpyiframe" style="display:none;"></iframe>
 
     <script>
-        if (whichJarFile == "envjs"){
+        var usingEnvjsSpecificJar = false;
+        try {
+          usingEnvjsSpecificJar = whichJarFile == "envjs";
+        } catch (e){;}
+        if (usingEnvjsSpecificJar){
           eventFrameLoaded = eventFrameClicked = 0;
           function eventOnloadHandler(){  eventFrameLoaded  += 1;}
           function eventOnclickHandler(){ eventFrameClicked += 1;}
 
             document.write('                                                  \
-            \x3ciframe id="eventsFrame" name="eventsFrame"                \
+            \x3ciframe id="eventsFrame" name="eventsFrame"                    \
                            src="html/events.html"                             \
-                     onload="eventOnloadHandler();"                     \
-                     onclick="eventOnclickHandler();"                   \
-            \x3e\x3c/iframe\x3e                                           \
-            \x3ciframe id="scopeFrame" name="scopeFrame"                  \
-                     src="html/scope.html"                              \
-            \x3e\x3c/iframe\x3e                                           \
+                     onload="eventOnloadHandler();"                           \
+                     onclick="eventOnclickHandler();"                         \
+            \x3e\x3c/iframe\x3e                                               \
+            \x3ciframe id="scopeFrame" name="scopeFrame"                      \
+                     src="html/scope.html"                                    \
+            \x3e\x3c/iframe\x3e                                               \
             ');
         }
     </script>

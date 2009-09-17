@@ -32,11 +32,11 @@
     <!-- Files names for distribution -->
     <property name="ENV_DIST"  
             location="${DIST_DIR}/env.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js" />
-    <property name="ENV_RHINO"   	
+    <property name="ENV_RHINO"
             location="${DIST_DIR}/env.rhino.${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_ID}.js"/>
     <property name="ENV_LATEST_DIST"  
             location="${DIST_DIR}/env.js" />
-    <property name="ENV_LATEST_RHINO"   	
+    <property name="ENV_LATEST_RHINO"
             location="${DIST_DIR}/env.rhino.js"/>
     
     <!-- BUILD TARGETS -->
@@ -172,6 +172,10 @@
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
         <arg value="test/test-with-rhino-jar.js"/>
+        <jvmarg value="-Dfile.encoding=utf-8"/>
+      </java>
+      <java fork="true" jar="${RHINO_JAR}" failonerror="true">
+        <arg value="test/envjs-call-load-test.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
     </target>

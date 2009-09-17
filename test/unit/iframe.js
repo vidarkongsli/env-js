@@ -7,7 +7,7 @@
  */
 
 
-module("frame");
+module("iframe");
 
 
 // In general, the tests here use the files ../html/iframe*.html
@@ -149,13 +149,13 @@ test("IFRAMEs can be nested, created dynamically", function() {
         newIframe.setAttribute("onload", "iframeOnloadHandler();");
         var bottomBody = bottomIframe.contentDocument.
           getElementsByTagName('body')[0];
-          
+
         bottomBody.appendChild(newIframe);
         newIframe.src = "html/iframeN.html";
         bottomIframe = newIframe;
 
 
-        
+
         ////////////////////////////////////////
         // verify contents of just-loaded iframe
         mtch = bottomIframe.contentDocument.getElementById('nestingLevel').

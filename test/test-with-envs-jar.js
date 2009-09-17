@@ -2,5 +2,5 @@
 // version of the JS interpreter: env-js.jar
 
 whichJarFile = "envjs";
-load("test/test.js");
+load("test/primaryTests.js");
 

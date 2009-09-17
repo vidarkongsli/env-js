@@ -2,5 +2,5 @@
 // unmodified version of the Rhino JS interpreter: rhino.jar
 
 whichJarFile = "rhino";
-load("test/test.js");
+load("test/primaryTests.js");
 
