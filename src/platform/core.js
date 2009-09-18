@@ -67,8 +67,8 @@ var Envjs = function(){
     // for manipulating the JavaScript scope chain, put in trivial emulations
     $env.debug("performing check for custom Java methods in env-js.jar");
     var countOfMissing = 0, dontCare;
-    try { dontCare = globalize; }
-    catch (ex){      globalize         = function(){ return {}; };
+    try { dontCare = getFreshScopeObj; }
+    catch (ex){      getFreshScopeObj  = function(){ return {}; };
                                                        countOfMissing++; }
     try { dontCare = getScope; }
     catch (ex){      getScope          = function(){}; countOfMissing++; }
@@ -198,7 +198,7 @@ var Envjs = function(){
     $env.loadInlineScript = function(script){};
     
     
-    $env.globalize = function(){};
+    $env.getFreshScopeObj = function(){};
     $env.getScope = function(){};
     $env.setScope = function(){};
     $env.configureScope = function(){};
@@ -237,7 +237,7 @@ var Envjs = function(){
     };
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
-        var newWindow = $env.globalize();
+        var newWindow = $env.getFreshScopeObj();
 
         var local__window__    = $env.window,
             local_env          = $env,
@@ -258,7 +258,7 @@ var Envjs = function(){
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
         setScopesOfKeyObjects(inNewContext, newWindow);
-        inNewContext(); // invoke local fn to window-ify object from globalize()
+        inNewContext(); // invoke local fn to window-ify new scope object
         restoreScopesOfKeyObjects(inNewContext, scopes);
         return newWindow;
     };

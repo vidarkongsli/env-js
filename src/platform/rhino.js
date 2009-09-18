@@ -355,7 +355,7 @@
     };
     
     //injected by org.mozilla.javascript.tools.envjs.
-    $env.globalize = globalize;
+    $env.getFreshScopeObj = getFreshScopeObj;
     $env.getScope = getScope;
     $env.setScope = setScope;
     $env.configureScope = configureScope;

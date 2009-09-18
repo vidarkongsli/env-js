@@ -28,7 +28,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
 
         // now, we add the JavaScript methods we want to provide for env.js
         String[] names = {
-            "globalize",
+            "getFreshScopeObj",
             "getScope",
             "setScope",
             "configureScope",
@@ -73,10 +73,10 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     }
 
 
-    public static Scriptable globalize( Context cx, 
-                                        Scriptable thisObj,
-                                        Object[] args, 
-                                        Function funObj)
+    public static Scriptable getFreshScopeObj( Context cx,
+                                               Scriptable thisObj,
+                                               Object[] args,
+                                               Function funObj)
     {
         org.mozilla.javascript.tools.shell.Global gObj = 
             (org.mozilla.javascript.tools.shell.Global)
