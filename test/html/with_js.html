@@ -7,6 +7,16 @@
     </script>
   </head>
   <body>
-    <h1>Hello, &quot;World&quot;!</h1>
+    <h1 id="HeaderLevel1">Hello, &quot;World&quot;!</h1>
+
+    <script type="text/javascript">
+      aWindowScopeVariable = "hello, scope";
+      function getTestVariables(){
+        return [ aWindowScopeVariable, notAlwaysPresentVariable ];
+      }
+      function setTestVariable(newValue){
+        notAlwaysPresentVariable = newValue;
+      }
+    </script>
   </body>
 </html>

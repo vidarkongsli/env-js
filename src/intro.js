@@ -6,6 +6,7 @@ try {
     Envjs.window = function($w,
                             $env,
                             $parentWindow,
+                            $openingWindow,
                             $initTop,
                             $thisIsTheOriginalWindow){
 

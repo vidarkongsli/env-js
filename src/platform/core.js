@@ -209,7 +209,7 @@ var Envjs = function(){
         try {
             frameElement._content = frameElement._content                 ?
                 $env.loadExistingWindow(frameElement._content, url)       :
-                $env.makeAndLoadNewWindow(
+                $env.makeNewWindowMaybeLoad(this,
                     frameElement.ownerDocument.parentWindow, url);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
@@ -236,16 +236,24 @@ var Envjs = function(){
         return windowObj;
     };
 
-    $env.makeAndLoadNewWindow = function(openingWindow, url){
+    $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
+        var newWindow = $env.globalize();
+
         var local__window__    = $env.window,
             local_env          = $env,
-            local_window       = openingWindow;
+            local_opener       = openingWindow,
+            local_parent       = parentArg ? parentArg : newWindow;
 
-        var newWindow = $env.globalize();
         var inNewContext = function(){
-            local__window__(newWindow, local_env, local_window,
-                            local_window.top, false);
-            newWindow.location = url;
+            local__window__(newWindow,        // object to "window-ify"
+                            local_env,        // our scope for globals
+                            local_parent,     // win's "parent"
+                            local_opener,     // win's "opener
+                            local_parent.top, // win's "top"
+                            false             // this win isn't the original
+                           );
+            if (url)
+                newWindow.location = url;
         }
 
         var scopes = recordScopesOfKeyObjects(inNewContext);

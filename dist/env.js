@@ -11,6 +11,7 @@ try {
     Envjs.window = function($w,
                             $env,
                             $parentWindow,
+                            $openingWindow,
                             $initTop,
                             $thisIsTheOriginalWindow){
 
@@ -76,7 +77,7 @@ var $name;
 
 // a read/write reference to the Window object that contained the script that called open() to 
 //open this browser window.  This property is valid only for top-level window objects.
-var $opener;
+var $opener = $openingWindow;
 
 // Read-only properties that specify the total height and width, in pixels, of the browser window.
 // These dimensions include the height and width of the menu bar, toolbars, scrollbars, window
@@ -150,10 +151,14 @@ __extend__($w,{
 });
 
 $w.open = function(url, name, features, replace){
-  $opener = this;
-  $name = name;
+  if (features)
+    $env.warn("'features' argument for 'window.open()' not yet implemented");
+  if (replace)
+    $env.warn("'features' argument for 'window.open()' not yet implemented");
 
-  var newWindow = $env.makeNewWindow(this);
+  var newWindow = $env.makeNewWindowMaybeLoad(this, null, url);
+  newWindow.$name = name;
+  return newWindow;
 };
 
 $w.close = function(){
@@ -9474,8 +9479,14 @@ try{
 
 
     // turn "original" JS interpreter global object into the
-    // "root" window object; third param value for new window's "parent"
-    Envjs.window(this, Envjs, null, this, true);
+    // "root" window object
+    Envjs.window(this,    // object to "window-ify"
+                 Envjs,   // our scope for globals
+                 this,    // a root window's parent is itself
+                 null,    // "opener" for new window
+                 this,    // "top" for new window
+                 true     // identify this as the original (not reloadable) win
+                );
 
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +
