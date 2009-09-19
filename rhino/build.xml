@@ -83,6 +83,7 @@
                debug="${JAVA_DEBUG}"
                target="${JAVA_TARGET}"
                source="${JAVA_SRC}">
+            <compilerarg value="-Xlint:unchecked"/>
         </javac>
     </target>
     

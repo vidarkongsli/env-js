@@ -12,7 +12,11 @@
     <script type="text/javascript">
       aWindowScopeVariable = "hello, scope";
       function getTestVariables(){
-        return [ aWindowScopeVariable, notAlwaysPresentVariable ];
+        var testVal = null;
+        try { testVal = notAlwaysPresentVariable; }
+        catch (e){}
+
+        return [ aWindowScopeVariable, testVal ];
       }
       function setTestVariable(newValue){
         notAlwaysPresentVariable = newValue;

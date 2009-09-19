@@ -89,10 +89,18 @@ var $outerHeight = $innerHeight, $outerWidth = $innerWidth;
 //to the right and down.  These are not supported by IE.
 var $pageXOffset = 0, $pageYOffset = 0;
 
-//A read-only reference to the Window object that contains this window or frame.  If the window is
-// a top-level window, parent refers to the window itself.  If this window is a frame, this property
-// refers to the window or frame that conatins it.
+
+// A read-only reference to the Window object that contains this window
+// or frame.  If the window is a top-level window, parent refers to
+// the window itself.  If this window is a frame, this property refers
+// to the window or frame that conatins it.
 var $parent = $parentWindow;
+try {
+    if ($parentWindow.$thisWindowsProxyObject)
+        $parent  =$parentWindow.$thisWindowsProxyObject;
+} catch(e){}
+
+
 
 // a read-only refernce to the Screen object that specifies information about the screen: 
 // the number of available pixels and the number of available colors.
@@ -111,6 +119,11 @@ var $top = $initTop;
 
 // the window property is identical to the self property and to this obj
 var $window = $w;
+try {
+    if ($w.$thisWindowsProxyObject)
+        $window = $w.$thisWindowsProxyObject;
+} catch(e){}
+
 
 $debug("Initializing Window.");
 __extend__($w,{
@@ -4205,8 +4218,14 @@ var DOMDocument = function(implementation, docParentWindow) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
-    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
-    
+
+    // "private" variable providing the read-only document.parentWindow property
+    this._parentWindow = docParentWindow;
+    try {
+        if (docParentWindow.$thisWindowsProxyObject)
+            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
+    } catch(e){}
+
     this.nodeName  = "#document";
     this._id = 0;
     this._lastId = 0;

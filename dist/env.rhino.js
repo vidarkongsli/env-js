@@ -72,8 +72,11 @@ var Envjs = function(){
     // for manipulating the JavaScript scope chain, put in trivial emulations
     $env.debug("performing check for custom Java methods in env-js.jar");
     var countOfMissing = 0, dontCare;
-    try { dontCare = globalize; }
-    catch (ex){      globalize         = function(){ return {}; };
+    try { dontCare = getFreshScopeObj; }
+    catch (ex){      getFreshScopeObj  = function(){ return {}; };
+                                                       countOfMissing++; }
+    try { dontCare = getProxyFor; }
+    catch (ex){      getProxyFor       = function(obj){ return obj; };
                                                        countOfMissing++; }
     try { dontCare = getScope; }
     catch (ex){      getScope          = function(){}; countOfMissing++; }
@@ -203,7 +206,8 @@ var Envjs = function(){
     $env.loadInlineScript = function(script){};
     
     
-    $env.globalize = function(){};
+    $env.getFreshScopeObj = function(){};
+    $env.getProxyFor = function(){};
     $env.getScope = function(){};
     $env.setScope = function(){};
     $env.configureScope = function(){};
@@ -212,37 +216,34 @@ var Envjs = function(){
 
     $env.loadFrame = function(frameElement, url){
         try {
-            frameElement._content = frameElement._content                 ?
-                $env.loadExistingWindow(frameElement._content, url)       :
-                $env.makeNewWindowMaybeLoad(this,
+            if (frameElement._content)
+                $env.reloadAWindowProxy(frameElement._content, url);
+            else
+                frameElement._content = $env.makeNewWindowMaybeLoad(this,
                     frameElement.ownerDocument.parentWindow, url);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
         }
     };
 
-    $env.loadExistingWindow = function(windowObj, url){
-        // define local variables with content of things that are
-        // in current global/window, because when the following
-        // function executes we'll have a new/blank
-        // global/window and won't be able to get at them....
-        var local_env          = $env,
-            local_window       = windowObj.opener;
-
-        // a local function gives us something whose scope we can manipulate
-        var inWindowsContext = function(){
-            windowObj.location = url;
-        }
-
-        var scopes = recordScopesOfKeyObjects(inWindowsContext);
-        setScopesOfKeyObjects(inWindowsContext, windowObj);
-        inWindowsContext();
-        restoreScopesOfKeyObjects(inWindowsContext, scopes);
-        return windowObj;
-    };
+    $env.reloadAWindowProxy = function(oldWindowProxy, url){
+	var newWindowProxy = $env.makeNewWindowMaybeLoad(
+				 oldWindowProxy.opener,
+				 oldWindowProxy.parent,
+				 url);
+	oldWindowProxy.__proto__ = newWindowProxy.__proto__;
+	newWindowProxy.__proto__.
+	    $thisWindowsProxyObject = oldWindowProxy;
+    }
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
-        var newWindow = $env.globalize();
+        var newWindow = $env.getFreshScopeObj();
+        var newProxy  = $env.getProxyFor(newWindow);
+print("in makeNewWindowMaybeLoad");
+if (newProxy.__proto__ != newWindow)
+ print("OOOOPS!");
+        newWindow.$thisWindowsProxyObject = newProxy;
+
 
         var local__window__    = $env.window,
             local_env          = $env,
@@ -263,9 +264,9 @@ var Envjs = function(){
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
         setScopesOfKeyObjects(inNewContext, newWindow);
-        inNewContext(); // invoke local fn to window-ify object from globalize()
+        inNewContext(); // invoke local fn to window-ify new scope object
         restoreScopesOfKeyObjects(inNewContext, scopes);
-        return newWindow;
+        return newProxy;
     };
 
     function recordScopesOfKeyObjects(fnToExecInOtherContext){
@@ -649,7 +650,8 @@ var Envjs = function(){
     };
     
     //injected by org.mozilla.javascript.tools.envjs.
-    $env.globalize = globalize;
+    $env.getFreshScopeObj = getFreshScopeObj;
+    $env.getProxyFor = getProxyFor;
     $env.getScope = getScope;
     $env.setScope = setScope;
     $env.configureScope = configureScope;
@@ -746,10 +748,18 @@ var $outerHeight = $innerHeight, $outerWidth = $innerWidth;
 //to the right and down.  These are not supported by IE.
 var $pageXOffset = 0, $pageYOffset = 0;
 
-//A read-only reference to the Window object that contains this window or frame.  If the window is
-// a top-level window, parent refers to the window itself.  If this window is a frame, this property
-// refers to the window or frame that conatins it.
+
+// A read-only reference to the Window object that contains this window
+// or frame.  If the window is a top-level window, parent refers to
+// the window itself.  If this window is a frame, this property refers
+// to the window or frame that conatins it.
 var $parent = $parentWindow;
+try {
+    if ($parentWindow.$thisWindowsProxyObject)
+        $parent  =$parentWindow.$thisWindowsProxyObject;
+} catch(e){}
+
+
 
 // a read-only refernce to the Screen object that specifies information about the screen: 
 // the number of available pixels and the number of available colors.
@@ -768,6 +778,11 @@ var $top = $initTop;
 
 // the window property is identical to the self property and to this obj
 var $window = $w;
+try {
+    if ($w.$thisWindowsProxyObject)
+        $window = $w.$thisWindowsProxyObject;
+} catch(e){}
+
 
 $debug("Initializing Window.");
 __extend__($w,{
@@ -4862,8 +4877,14 @@ var DOMDocument = function(implementation, docParentWindow) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
-    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
-    
+
+    // "private" variable providing the read-only document.parentWindow property
+    this._parentWindow = docParentWindow;
+    try {
+        if (docParentWindow.$thisWindowsProxyObject)
+            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
+    } catch(e){}
+
     this.nodeName  = "#document";
     this._id = 0;
     this._lastId = 0;

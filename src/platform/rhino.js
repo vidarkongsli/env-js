@@ -356,6 +356,7 @@
     
     //injected by org.mozilla.javascript.tools.envjs.
     $env.getFreshScopeObj = getFreshScopeObj;
+    $env.getProxyFor = getProxyFor;
     $env.getScope = getScope;
     $env.setScope = setScope;
     $env.configureScope = configureScope;

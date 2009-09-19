@@ -29,6 +29,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
         // now, we add the JavaScript methods we want to provide for env.js
         String[] names = {
             "getFreshScopeObj",
+            "getProxyFor",
             "getScope",
             "setScope",
             "configureScope",
@@ -87,9 +88,29 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
                    gObj.getPrototype();
         if (gObj == null)
             throw new IllegalStateException(
-                "Window.createAGlobalObject: couldn't find " +
+                "Window.getFreshScopeObj: couldn't find " +
                 "our Global scope obj.");
         return new Global(gObj);
+    }
+
+
+    public static Scriptable getProxyFor(Context cx,
+                                         Scriptable thisObj,
+                                         Object[] args,
+                                         Function funObj)
+    {
+        if (args.length != 1)
+            throw new IllegalArgumentException(
+                "Window.getProxyFor: wrong argument count.");
+
+        Scriptable proxysTarget = (Scriptable) args[0];
+        if (proxysTarget == null)
+            throw new IllegalArgumentException(
+                "Window.getProxyFor: can't proxy 'null'.");
+
+        Scriptable proxysScope = proxysTarget.getParentScope() == null ?
+            proxysTarget : proxysTarget.getParentScope();
+        return new Proxy(proxysScope, proxysTarget);
     }
 
 
@@ -100,8 +121,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     {
         if (args.length != 1)
             throw new IllegalArgumentException(
-                "Window.getFunctionObjectsScope: wrong " +
-                "argument count.");
+                "Window.getScope: wrong argument count.");
         return ScriptableObject.getTopLevelScope((Function) args[0]);
     }
 
@@ -112,8 +132,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     {
         if (args.length != 2)
             throw new IllegalArgumentException(
-                "Window.setFunctionObjectsScope: wrong " +
-                "argument count.");
+                "Window.setScope: wrong argument count.");
         // rely on Java to throw an exception if we can't do the casts we want
         //   instead of explicitly checking our argument types
 
@@ -136,7 +155,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
                                              Function funObj)
     {
         Object[] objectPair;
-        List pairs = new ArrayList();
+        List<Scriptable> pairs = new ArrayList<Scriptable>();
 
         // save original scope for our target function object
         Scriptable targetFn = (Scriptable) args[0];
@@ -153,7 +172,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
         for (c=0; c < len-1; c++){
             // save original scopes from objects we're putting into new chain
             Scriptable elem = (Scriptable) argArray.get(c, thisObj);
-        objectPair = new Object[] { elem, elem.getParentScope() };
+            objectPair = new Object[] { elem, elem.getParentScope() };
             pairs.add(cx.newArray(funObj, objectPair));
 
             // set current obj's scope to point to next object

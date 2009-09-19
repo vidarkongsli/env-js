@@ -15,8 +15,14 @@ var DOMDocument = function(implementation, docParentWindow) {
     this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
     this.implementation = implementation; // The DOMImplementation object that handles this document.
     this._documentElement = null;         // "private" variable providing the read-only document.documentElement property
-    this._parentWindow = docParentWindow; // "private" variable providing the read-only document.parentWindow property
-    
+
+    // "private" variable providing the read-only document.parentWindow property
+    this._parentWindow = docParentWindow;
+    try {
+        if (docParentWindow.$thisWindowsProxyObject)
+            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
+    } catch(e){}
+
     this.nodeName  = "#document";
     this._id = 0;
     this._lastId = 0;

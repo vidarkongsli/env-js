@@ -21,7 +21,7 @@ test("2nd window.location= operation flagged as error", function() {
 });
 
 test("navigation-related window members", function() {
-    expect(10);
+    expect(25);
 
     var anotherWin;
     try{ ok(anotherWin = window.open("html/trivial.html"),
@@ -73,7 +73,6 @@ test("navigation-related window members", function() {
     }catch(e){print(e);}
 
 
-/*
     var thirdWin;
     try{ ok(thirdWin = window.open("html/with_js.html"),
         "2nd 'window.open' returns 3rd window");
@@ -144,6 +143,7 @@ test("navigation-related window members", function() {
         "creating variable in 3rd window scope doesn't affect 2nd window");
     }catch(e){print(e);}
 
+/*
 
     try{ ok(
         "");

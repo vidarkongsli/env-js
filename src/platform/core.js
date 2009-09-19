@@ -70,6 +70,9 @@ var Envjs = function(){
     try { dontCare = getFreshScopeObj; }
     catch (ex){      getFreshScopeObj  = function(){ return {}; };
                                                        countOfMissing++; }
+    try { dontCare = getProxyFor; }
+    catch (ex){      getProxyFor       = function(obj){ return obj; };
+                                                       countOfMissing++; }
     try { dontCare = getScope; }
     catch (ex){      getScope          = function(){}; countOfMissing++; }
     try { dontCare = setScope; }
@@ -199,6 +202,7 @@ var Envjs = function(){
     
     
     $env.getFreshScopeObj = function(){};
+    $env.getProxyFor = function(){};
     $env.getScope = function(){};
     $env.setScope = function(){};
     $env.configureScope = function(){};
@@ -207,37 +211,31 @@ var Envjs = function(){
 
     $env.loadFrame = function(frameElement, url){
         try {
-            frameElement._content = frameElement._content                 ?
-                $env.loadExistingWindow(frameElement._content, url)       :
-                $env.makeNewWindowMaybeLoad(this,
+            if (frameElement._content)
+                $env.reloadAWindowProxy(frameElement._content, url);
+            else
+                frameElement._content = $env.makeNewWindowMaybeLoad(this,
                     frameElement.ownerDocument.parentWindow, url);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
         }
     };
 
-    $env.loadExistingWindow = function(windowObj, url){
-        // define local variables with content of things that are
-        // in current global/window, because when the following
-        // function executes we'll have a new/blank
-        // global/window and won't be able to get at them....
-        var local_env          = $env,
-            local_window       = windowObj.opener;
-
-        // a local function gives us something whose scope we can manipulate
-        var inWindowsContext = function(){
-            windowObj.location = url;
-        }
-
-        var scopes = recordScopesOfKeyObjects(inWindowsContext);
-        setScopesOfKeyObjects(inWindowsContext, windowObj);
-        inWindowsContext();
-        restoreScopesOfKeyObjects(inWindowsContext, scopes);
-        return windowObj;
-    };
+    $env.reloadAWindowProxy = function(oldWindowProxy, url){
+	var newWindowProxy = $env.makeNewWindowMaybeLoad(
+				 oldWindowProxy.opener,
+				 oldWindowProxy.parent,
+				 url);
+	oldWindowProxy.__proto__ = newWindowProxy.__proto__;
+	newWindowProxy.__proto__.
+	    $thisWindowsProxyObject = oldWindowProxy;
+    }
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
+        var newProxy  = $env.getProxyFor(newWindow);
+        newWindow.$thisWindowsProxyObject = newProxy;
+
 
         var local__window__    = $env.window,
             local_env          = $env,
@@ -260,7 +258,7 @@ var Envjs = function(){
         setScopesOfKeyObjects(inNewContext, newWindow);
         inNewContext(); // invoke local fn to window-ify new scope object
         restoreScopesOfKeyObjects(inNewContext, scopes);
-        return newWindow;
+        return newProxy;
     };
 
     function recordScopesOfKeyObjects(fnToExecInOtherContext){
