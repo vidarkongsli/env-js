@@ -21,7 +21,7 @@ test("2nd window.location= operation flagged as error", function() {
 });
 
 test("navigation-related window members", function() {
-    expect(25);
+    expect(29);
 
     var anotherWin;
     try{ ok(anotherWin = window.open("html/trivial.html"),
@@ -143,23 +143,12 @@ test("navigation-related window members", function() {
         "creating variable in 3rd window scope doesn't affect 2nd window");
     }catch(e){print(e);}
 
-/*
 
-    try{ ok(
-        "");
-    }catch(e){print(e);}
-
-    try{ ok(
-        "");
-    }catch(e){print(e);}
-
-
-
-    try{ ok(anotherWindow.close() || true,
+    try{ ok(anotherWin.close() || true,
         "'.close()' executed without exception");
     }catch(e){print(e);}
 
-    try{ ok(anotherWindow.closed == true,
+    try{ ok(anotherWin.closed == true,
         "after closing window, '.closed' is true");
     }catch(e){print(e);}
 
@@ -170,6 +159,5 @@ test("navigation-related window members", function() {
     try{ ok(thirdWin.closed == false,
         "closing 2nd window doesn't affect 3rd window");
     }catch(e){print(e);}
-*/
 });
 
