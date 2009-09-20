@@ -86,10 +86,10 @@ var Envjs = function(){
     catch (ex){      configureScope    = function(){}; countOfMissing++; }
     try { dontCare = restoreScope; }
     catch (ex){      restoreScope      = function(){}; countOfMissing++; }
-    if (countOfMissing != 0 && countOfMissing != 5)
-        $env.warning("Some but not all of scope-manipulation functions were " +
-                     "not present in environment.  JavaScript execution may " +
-                     "not occur correctly.");
+    if (countOfMissing != 0 && countOfMissing != 6)
+        $env.warn("Some but not all of scope-manipulation functions were " +
+                  "not present in environment.  JavaScript execution may " +
+                  "not occur correctly.");
 
 
     $env.lineSource = function(e){};
@@ -227,23 +227,21 @@ var Envjs = function(){
     };
 
     $env.reloadAWindowProxy = function(oldWindowProxy, url){
-	var newWindowProxy = $env.makeNewWindowMaybeLoad(
-				 oldWindowProxy.opener,
-				 oldWindowProxy.parent,
-				 url);
-	oldWindowProxy.__proto__ = newWindowProxy.__proto__;
-	newWindowProxy.__proto__.
-	    $thisWindowsProxyObject = oldWindowProxy;
+        var newWindowProxy = $env.makeNewWindowMaybeLoad(
+                                 oldWindowProxy.opener,
+                                 oldWindowProxy.parent,
+                                 url);
+        var newWindow = newWindowProxy.__proto__;
+
+        oldWindowProxy.__proto__ = newWindow;
+        newWindow.$thisWindowsProxyObject = oldWindowProxy;
+        newWindow.document._parentWindow = oldWindowProxy;
     }
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
         var newProxy  = $env.getProxyFor(newWindow);
-print("in makeNewWindowMaybeLoad");
-if (newProxy.__proto__ != newWindow)
- print("OOOOPS!");
         newWindow.$thisWindowsProxyObject = newProxy;
-
 
         var local__window__    = $env.window,
             local_env          = $env,
@@ -259,7 +257,7 @@ if (newProxy.__proto__ != newWindow)
                             false             // this win isn't the original
                            );
             if (url)
-                newWindow.location = url;
+                newWindow.__loadAWindowsDocument__(url);
         }
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
@@ -756,7 +754,7 @@ var $pageXOffset = 0, $pageYOffset = 0;
 var $parent = $parentWindow;
 try {
     if ($parentWindow.$thisWindowsProxyObject)
-        $parent  =$parentWindow.$thisWindowsProxyObject;
+        $parent = $parentWindow.$thisWindowsProxyObject;
 } catch(e){}
 
 
@@ -8817,14 +8815,27 @@ $debug("Initializing Window Location.");
 var $location = '';
 
 $w.__defineSetter__("location", function(url){
-    if ($w.$isOriginalWindow && $w.$haveCalledWindowLocationSetter)
-        throw new Error("Cannot call 'window.location=' multiple times from the context used to load 'env.js'.  Try using 'window.open()' to get a new context.");
-    $w.$haveCalledWindowLocationSetter = true;
-
-	$location = $env.location(url);
-	setHistory($location);
-	$w.document.load($location);
+    if ($w.$isOriginalWindow){
+        if ($w.$haveCalledWindowLocationSetter)
+            throw new Error("Cannot call 'window.location=' multiple times " +
+              "from the context used to load 'env.js'.  Try using " +
+              "'window.open()' to get a new context.");
+        $w.$haveCalledWindowLocationSetter = true;
+        $w.__loadAWindowsDocument__(url);
+    }
+    else {
+        var proxy = $w;
+        if (proxy.$thisWindowsProxyObject)
+            proxy = proxy.$thisWindowsProxyObject;
+        $env.reloadAWindowProxy(proxy, url);
+    }
 });
+
+$w.__loadAWindowsDocument__ = function(url){
+    $location = $env.location(url);
+    setHistory($location);
+    $w.document.load($location);
+}
 
 $w.__defineGetter__("location", function(url){
 	var hash 	 = new RegExp('(\\#.*)'),
@@ -9111,7 +9122,10 @@ $w.dispatchEvent = function(event, bubbles){
         event.target = this;
     }
     $debug("event target: " + event.target);
-    if ( event.type && this.nodeType || this===window) {
+    if ( event.type && (this.nodeType             ||
+                        this === window           ||
+                        this.__proto__ === window ||
+                        this.$thisWindowsProxyObject === window)) {
         $debug("nodeType: " + this.nodeType);
         if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;

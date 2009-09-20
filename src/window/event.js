@@ -50,7 +50,10 @@ $w.dispatchEvent = function(event, bubbles){
         event.target = this;
     }
     $debug("event target: " + event.target);
-    if ( event.type && this.nodeType || this===window) {
+    if ( event.type && (this.nodeType             ||
+                        this === window           ||
+                        this.__proto__ === window ||
+                        this.$thisWindowsProxyObject === window)) {
         $debug("nodeType: " + this.nodeType);
         if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;

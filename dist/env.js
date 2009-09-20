@@ -97,7 +97,7 @@ var $pageXOffset = 0, $pageYOffset = 0;
 var $parent = $parentWindow;
 try {
     if ($parentWindow.$thisWindowsProxyObject)
-        $parent  =$parentWindow.$thisWindowsProxyObject;
+        $parent = $parentWindow.$thisWindowsProxyObject;
 } catch(e){}
 
 
@@ -8158,14 +8158,27 @@ $debug("Initializing Window Location.");
 var $location = '';
 
 $w.__defineSetter__("location", function(url){
-    if ($w.$isOriginalWindow && $w.$haveCalledWindowLocationSetter)
-        throw new Error("Cannot call 'window.location=' multiple times from the context used to load 'env.js'.  Try using 'window.open()' to get a new context.");
-    $w.$haveCalledWindowLocationSetter = true;
-
-	$location = $env.location(url);
-	setHistory($location);
-	$w.document.load($location);
+    if ($w.$isOriginalWindow){
+        if ($w.$haveCalledWindowLocationSetter)
+            throw new Error("Cannot call 'window.location=' multiple times " +
+              "from the context used to load 'env.js'.  Try using " +
+              "'window.open()' to get a new context.");
+        $w.$haveCalledWindowLocationSetter = true;
+        $w.__loadAWindowsDocument__(url);
+    }
+    else {
+        var proxy = $w;
+        if (proxy.$thisWindowsProxyObject)
+            proxy = proxy.$thisWindowsProxyObject;
+        $env.reloadAWindowProxy(proxy, url);
+    }
 });
+
+$w.__loadAWindowsDocument__ = function(url){
+    $location = $env.location(url);
+    setHistory($location);
+    $w.document.load($location);
+}
 
 $w.__defineGetter__("location", function(url){
 	var hash 	 = new RegExp('(\\#.*)'),
@@ -8452,7 +8465,10 @@ $w.dispatchEvent = function(event, bubbles){
         event.target = this;
     }
     $debug("event target: " + event.target);
-    if ( event.type && this.nodeType || this===window) {
+    if ( event.type && (this.nodeType             ||
+                        this === window           ||
+                        this.__proto__ === window ||
+                        this.$thisWindowsProxyObject === window)) {
         $debug("nodeType: " + this.nodeType);
         if ( this.uuid && $events[this.uuid][event.type] ) {
             var _this = this;

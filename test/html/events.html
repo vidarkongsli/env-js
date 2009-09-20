@@ -39,32 +39,49 @@
 
       // init only first time this page loads, re-init'ed in unit/events.js
       try {
-        if (!(eCounters)){
-          eCounters = {};
-          initECounters(eCounters);
+        if (!(window.top.eCounters)){
+          window.top.eCounters = {};
+          initECounters(window.top.eCounters);
           }
       } catch(e){
-        eCounters = {};
-        initECounters(eCounters);
+        window.top.eCounters = {};
+        initECounters(window.top.eCounters);
       }
 
-      function bodyOnloadHandler(){   eCounters["body onload"]   += 1; }
-      function bodyOnclickHandler(){  eCounters["body onclick"]  += 1; }
-      function h1OnclickHandler(){    eCounters["h1 onclick"]    += 1; }
-      function h2OnclickHandler(){    eCounters["h2 onclick"]    += 1; }
-      function divOnclickHandler(){   eCounters["div onclick"]   += 1; }
-      function tableOnclickHandler(){ eCounters["table onclick"] += 1; }
-      function tbodyOnclickHandler(){ eCounters["tbody onclick"] += 1; }
-      function trOnclickHandler(){    eCounters["tr onclick"]    += 1; }
-      function tdOnclickHandler(){    eCounters["td onclick"]    += 1; }
-      function ulOnclickHandler(){    eCounters["ul onclick"]    += 1; }
-      function liOnclickHandler(){    eCounters["li onclick"]    += 1; }
-      function pOnclickHandler(){     eCounters["p onclick"]     += 1; }
-      function bOnclickHandler(){     eCounters["b onclick"]     += 1; }
-      function iOnclickHandler(){     eCounters["i onclick"]     += 1; }
-      function aOnclickHandler(){     eCounters["a onclick"]     += 1; }
-      function imgOnclickHandler(){   eCounters["img onclick"]   += 1; }
-      function imgOnloadHandler(){    eCounters["img onload"]    += 1; }
+      function bodyOnloadHandler(){
+            window.top.eCounters["body onload"]   += 1; }
+      function bodyOnclickHandler(){
+            window.top.eCounters["body onclick"]  += 1; }
+      function h1OnclickHandler(){
+            window.top.eCounters["h1 onclick"]    += 1; }
+      function h2OnclickHandler(){
+            window.top.eCounters["h2 onclick"]    += 1; }
+      function divOnclickHandler(){
+            window.top.eCounters["div onclick"]   += 1; }
+      function tableOnclickHandler(){
+            window.top.eCounters["table onclick"] += 1; }
+      function tbodyOnclickHandler(){
+            window.top.eCounters["tbody onclick"] += 1; }
+      function trOnclickHandler(){
+            window.top.eCounters["tr onclick"]    += 1; }
+      function tdOnclickHandler(){
+            window.top.eCounters["td onclick"]    += 1; }
+      function ulOnclickHandler(){
+            window.top.eCounters["ul onclick"]    += 1; }
+      function liOnclickHandler(){
+            window.top.eCounters["li onclick"]    += 1; }
+      function pOnclickHandler(){
+            window.top.eCounters["p onclick"]     += 1; }
+      function bOnclickHandler(){
+            window.top.eCounters["b onclick"]     += 1; }
+      function iOnclickHandler(){
+            window.top.eCounters["i onclick"]     += 1; }
+      function aOnclickHandler(){
+            window.top.eCounters["a onclick"]     += 1; }
+      function imgOnclickHandler(){
+            window.top.eCounters["img onclick"]   += 1; }
+      function imgOnloadHandler(){
+            window.top.eCounters["img onload"]    += 1; }
     </script>
 
   </head>

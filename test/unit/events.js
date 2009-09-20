@@ -35,8 +35,7 @@ var __click__ = function(element){
 function loadChecks(tag, imgCount, count){
     expect(4);
 
-    var eCounters = document.getElementById('eventsFrame').
-                      contentWindow.eCounters;
+    var eCounters = window.top.eCounters;
     try{ ok( eCounters["body onload"] ==    count,
         tag + ": Body-tag onload event recorded");
     }catch(e){print(e);}
@@ -96,8 +95,7 @@ test("Check that an event which should NOT bubble actually does not",
 function clickChecks(tag, upperCount, lowerCount){
     expect(5);
 
-    var eCounters = document.getElementById('eventsFrame').
-                      contentWindow.eCounters;
+    var eCounters = window.top.eCounters;
     try{ ok( eCounters["body onload"] == 0 &&
              eCounters["img onload"] == 0,
         tag + ": Onload events not triggered by click");
@@ -136,9 +134,9 @@ function clickChecks(tag, upperCount, lowerCount){
 
 test("Check that an event which should bubble actually does", function() {
     // clear in-iframe event counters to zero
+    window.top.eCounters = {};
     fWin = document.getElementById('eventsFrame').contentWindow;
-    fWin.eCounters = {};
-    fWin.initECounters(fWin.eCounters);
+    fWin.initECounters(window.top.eCounters);
 
     // simulate a "click" user action
     var img = document.getElementById('eventsFrame').contentDocument.

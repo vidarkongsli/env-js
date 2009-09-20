@@ -81,10 +81,10 @@ var Envjs = function(){
     catch (ex){      configureScope    = function(){}; countOfMissing++; }
     try { dontCare = restoreScope; }
     catch (ex){      restoreScope      = function(){}; countOfMissing++; }
-    if (countOfMissing != 0 && countOfMissing != 5)
-        $env.warning("Some but not all of scope-manipulation functions were " +
-                     "not present in environment.  JavaScript execution may " +
-                     "not occur correctly.");
+    if (countOfMissing != 0 && countOfMissing != 6)
+        $env.warn("Some but not all of scope-manipulation functions were " +
+                  "not present in environment.  JavaScript execution may " +
+                  "not occur correctly.");
 
 
     $env.lineSource = function(e){};
@@ -222,20 +222,21 @@ var Envjs = function(){
     };
 
     $env.reloadAWindowProxy = function(oldWindowProxy, url){
-	var newWindowProxy = $env.makeNewWindowMaybeLoad(
-				 oldWindowProxy.opener,
-				 oldWindowProxy.parent,
-				 url);
-	oldWindowProxy.__proto__ = newWindowProxy.__proto__;
-	newWindowProxy.__proto__.
-	    $thisWindowsProxyObject = oldWindowProxy;
+        var newWindowProxy = $env.makeNewWindowMaybeLoad(
+                                 oldWindowProxy.opener,
+                                 oldWindowProxy.parent,
+                                 url);
+        var newWindow = newWindowProxy.__proto__;
+
+        oldWindowProxy.__proto__ = newWindow;
+        newWindow.$thisWindowsProxyObject = oldWindowProxy;
+        newWindow.document._parentWindow = oldWindowProxy;
     }
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
         var newProxy  = $env.getProxyFor(newWindow);
         newWindow.$thisWindowsProxyObject = newProxy;
-
 
         var local__window__    = $env.window,
             local_env          = $env,
@@ -251,7 +252,7 @@ var Envjs = function(){
                             false             // this win isn't the original
                            );
             if (url)
-                newWindow.location = url;
+                newWindow.__loadAWindowsDocument__(url);
         }
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
