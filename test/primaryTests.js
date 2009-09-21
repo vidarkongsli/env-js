@@ -24,7 +24,6 @@ window.onload = function(){
 // history members:  length, back(), forward(), go()
 // location members:  hash, href, reload(), replace()
 //                    host, hostname, pathname, port, protocol, search
-// document members:  URL
     );
   load(
       "test/unit/parser.js",

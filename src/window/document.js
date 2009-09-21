@@ -9,18 +9,6 @@
 */
 
 // read only reference to the Document object
-
-$debug("Initializing window.document.");
-var $async = false;
-__extend__(HTMLDocument.prototype, {
-	get async(){ return $async;},
-	set async(async){ $async = async; },
-	get baseURI(){ return $env.location('./'); },
-	get URL(){ return $w.location.href;  }
-});
-	
-
-
 var $document;
 {    // a temporary scope, nothing more
   var referrer = "";

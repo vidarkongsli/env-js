@@ -15,6 +15,7 @@ var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
   this._referrer = docReferrer;
   this._domain;
   this._open = false;
+  this.$async = false;
 };
 HTMLDocument.prototype = new DOMDocument;
 __extend__(HTMLDocument.prototype, {
@@ -153,11 +154,6 @@ __extend__(HTMLDocument.prototype, {
     get referrer(){
         return this._referrer;
     },
-    get URL(){
-        /* TODO*/
-        return this._url; 
-        
-    },
 	close : function(){ 
 	    /* TODO */ 
 	    this._open = false;
@@ -198,7 +194,12 @@ __extend__(HTMLDocument.prototype, {
 	get __html__(){
 	    return true;
 	    
-    }
+    },
+    get async(){ return this.$async;},
+    set async(async){ this.$async = async; },
+    get baseURI(){ return $env.location('./'); },
+    get URL(){ return $w.location.href;  },
+    set URL(url){ $w.location.href = url;  }
 });
 
 $w.HTMLDocument = HTMLDocument;
