@@ -4572,8 +4572,8 @@ function __parseLoop__(impl, doc, p, isWindowDocument) {
         iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
       }
 
-      __endHTMLElement__(iNode, doc, p);
       iNodeParent.appendChild(iNode);               // attach Element to parentNode
+      __endHTMLElement__(iNode, doc, p);
     }
     else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
       // get Text content
