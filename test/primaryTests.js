@@ -18,7 +18,6 @@ window.onload = function(){
       "test/unit/scope.js",   // must come before frame.js changes page content
       "test/unit/iframe.js",
       "test/unit/events.js",
-// new stuff to test: unload event(s)
       "test/unit/multi-window.js"
 //// new stuff to test:
 // history members:  length, back(), forward(), go()

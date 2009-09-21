@@ -32,16 +32,22 @@ var __click__ = function(element){
     element.dispatchEvent(event);
 }
 
-function loadChecks(tag, imgCount, count){
-    expect(4);
+function loadChecks(tag, loadCount, imgCount, unloadCount){
+    expect(5);
 
     var eCounters = window.top.eCounters;
-    try{ ok( eCounters["body onload"] ==    count,
-        tag + ": Body-tag onload event recorded");
+    try{ ok( eCounters["window onload"] == loadCount &&
+             eCounters["body onload"] == loadCount,
+        tag + ": Onload Events recorded");
     }catch(e){print(e);}
 
     try{ ok( eCounters["img onload"]  == imgCount,
         tag + ": Img-tag onload event(s) recorded separately");
+    }catch(e){print(e);}
+
+    try{ ok( eCounters["window onunload"] == unloadCount &&
+             eCounters["body onunload"] == unloadCount,
+        tag + ": Onunload events recorded");
     }catch(e){print(e);}
 
     try{ ok( eCounters["body onclick"] == 0 &&
@@ -62,27 +68,27 @@ function loadChecks(tag, imgCount, count){
         tag + ": Onload events recorded once.");
     }catch(e){print(e);}
 
-    try{ ok( eventFrameLoaded == count && eventFrameClicked == 0,
-        tag + ": " + count + " iframe events recorded on page load.");
+    try{ ok( eventFrameLoaded == loadCount && eventFrameClicked == 0,
+        tag + ": " + loadCount + " iframe events recorded on page load.");
     }catch(e){print(e);}
 }
 
 
 test("Check that events do/don't occur on document load", function() {
     // eCounters already initialized by code in ../html/events.html
-    loadChecks("Load", 1, 1);
+    loadChecks("Load", 1, 1, 0);
 });
 
 test("Check that events do/don't occur on manual iframe reload", function() {
     document.getElementById('eventsFrame').src = "html/events.html";
-    loadChecks("Reload", 2, 2);
+    loadChecks("Reload", 2, 2, 1);
 });
 
 test("Check that an event which should NOT bubble actually does not",
      function() {
     var img = document.getElementById('eventsFrame').contentDocument.
       getElementById('theIMG').src = "missing.png";
-    loadChecks("Load", 3, 2);
+    loadChecks("Img Load", 2, 3, 1);
 
     // note: if img-onload had bubbled up, previous tests probably would
     //   have failed (too large body-onload counts), too.  So this test
@@ -96,7 +102,10 @@ function clickChecks(tag, upperCount, lowerCount){
     expect(5);
 
     var eCounters = window.top.eCounters;
-    try{ ok( eCounters["body onload"] == 0 &&
+    try{ ok( eCounters["window onload"] == 0 &&
+             eCounters["window onunload"] == 0 &&
+             eCounters["body onload"] == 0 &&
+             eCounters["body onunload"] == 0 &&
              eCounters["img onload"] == 0,
         tag + ": Onload events not triggered by click");
     }catch(e){print(e);}

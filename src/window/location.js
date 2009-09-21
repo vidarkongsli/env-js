@@ -16,6 +16,7 @@ $w.__defineSetter__("location", function(url){
         $w.__loadAWindowsDocument__(url);
     }
     else {
+        $unloadEventsFor($w);
         var proxy = $w;
         if (proxy.$thisWindowsProxyObject)
             proxy = proxy.$thisWindowsProxyObject;

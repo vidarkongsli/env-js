@@ -211,8 +211,10 @@ var Envjs = function(){
 
     $env.loadFrame = function(frameElement, url){
         try {
-            if (frameElement._content)
+            if (frameElement._content){
+                $unloadEventsFor(frameElement._content);
                 $env.reloadAWindowProxy(frameElement._content, url);
+            }
             else
                 frameElement._content = $env.makeNewWindowMaybeLoad(this,
                     frameElement.ownerDocument.parentWindow, url);

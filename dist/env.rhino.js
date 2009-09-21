@@ -216,8 +216,10 @@ var Envjs = function(){
 
     $env.loadFrame = function(frameElement, url){
         try {
-            if (frameElement._content)
+            if (frameElement._content){
+                $unloadEventsFor(frameElement._content);
                 $env.reloadAWindowProxy(frameElement._content, url);
+            }
             else
                 frameElement._content = $env.makeNewWindowMaybeLoad(this,
                     frameElement.ownerDocument.parentWindow, url);
@@ -824,7 +826,7 @@ $w.open = function(url, name, features, replace){
   if (features)
     $env.warn("'features' argument for 'window.open()' not yet implemented");
   if (replace)
-    $env.warn("'features' argument for 'window.open()' not yet implemented");
+    $env.warn("'replace' argument for 'window.open()' not yet implemented");
 
   var newWindow = $env.makeNewWindowMaybeLoad(this, null, url);
   newWindow.$name = name;
@@ -832,9 +834,23 @@ $w.open = function(url, name, features, replace){
 };
 
 $w.close = function(){
-
+  $unloadEventsFor($w);
   $closed = true;
 };     
+
+var $unloadEventsFor = function(windowToUnload){
+  try {
+    var event = windowToUnload.document.createEvent();
+    event.initEvent("unload");
+    windowToUnload.document.getElementsByTagName('body')[0].
+      dispatchEvent(event, false);
+  }
+  catch (e){}   // maybe no/bad document loaded, ignore
+
+  var event = windowToUnload.document.createEvent();
+  event.initEvent("unload");
+  windowToUnload.dispatchEvent(event, false);
+};
   
 /* Time related functions - see timer.js
 *   - clearTimeout
@@ -6479,6 +6495,9 @@ HTMLBodyElement.prototype = new HTMLElement;
 __extend__(HTMLBodyElement.prototype, {
     onload: function(event){
         __eval__(this.getAttribute('onload')||'', this)
+    },
+    onunload: function(event){
+        __eval__(this.getAttribute('onunload')||'', this)
     }
 });
 
@@ -8831,6 +8850,7 @@ $w.__defineSetter__("location", function(url){
         $w.__loadAWindowsDocument__(url);
     }
     else {
+        $unloadEventsFor($w);
         var proxy = $w;
         if (proxy.$thisWindowsProxyObject)
             proxy = proxy.$thisWindowsProxyObject;
