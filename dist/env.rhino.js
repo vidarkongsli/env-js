@@ -795,7 +795,7 @@ __extend__($w,{
   get frames(){return undefined;}, // TODO: not yet any code to maintain list
   get length(){return undefined;}, //   should be frames.length, but.... TODO
 
-  //get history(){return $history;}, - see location.js
+  //get history(){return $history;}, - see history.js
   get innerHeight(){return $innerHeight;},
   get innerWidth(){return $innerWidth;},
   get clientHeight(){return $innerHeight;},
@@ -8940,18 +8940,18 @@ $w.__defineGetter__("location", function(url){
 		toString: function(){
 			return this.href;
 		},
-		reload: function(force){
+        reload: function(force){
             // ignore 'force': we don't implement a cache
             var thisWindow = $w;
             $unloadEventsFor(thisWindow);
             try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
             $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
-		},
-		replace: function(url){
+        },
+        replace: function(url){
             $location = url;
             $w.location.reload();
-		}
-	};
+        }
+    };
 });
 
 /*

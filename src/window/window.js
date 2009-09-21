@@ -111,7 +111,7 @@ __extend__($w,{
   get frames(){return undefined;}, // TODO: not yet any code to maintain list
   get length(){return undefined;}, //   should be frames.length, but.... TODO
 
-  //get history(){return $history;}, - see location.js
+  //get history(){return $history;}, - see history.js
   get innerHeight(){return $innerHeight;},
   get innerWidth(){return $innerWidth;},
   get clientHeight(){return $innerHeight;},

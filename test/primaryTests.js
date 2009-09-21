@@ -20,8 +20,6 @@ window.onload = function(){
       "test/unit/iframe.js",
       "test/unit/events.js",
       "test/unit/multi-window.js"
-//// new stuff to test:
-// history members:  length, back(), forward(), go()
     );
   load(
       "test/unit/parser.js",
