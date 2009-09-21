@@ -20,7 +20,7 @@ test("2nd window.location= operation flagged as error", function() {
     }catch(e){print(e);}
 });
 
-test("navigation-related window members", function() {
+test("window.open()-related behavior and members", function() {
     expect(30);
 
     var anotherWin;
@@ -164,4 +164,30 @@ test("navigation-related window members", function() {
         "closing 2nd window doesn't affect 3rd window");
     }catch(e){print(e);}
 });
+
+test("window.reload() behavior", function() {
+    expect(3);
+
+    var testWindow = window.open("html/trivial.html");
+    testWindow.checkingScope = 17;
+    try{ ok(testWindow.location.reload() || true,
+        "'window.location.reload()' completes without exception");
+    }catch(e){print(e);}
+
+    var variableNoLongerDefined = false;
+    try {
+        variableNoLongerDefined = (testWindow.checkingScope == undefined);
+    } catch (e){
+        variableNoLongerDefined = true;
+    }
+    try{ ok(variableNoLongerDefined, "reloaded window has clean scope");
+    }catch(e){print(e);}
+
+    var mtch = testWindow.document.getElementById('oneP').innerHTML.
+        match(/Nearly-empty HTML/);
+    try{ ok(mtch && mtch.length > 0,
+        "reloaded window has correct contents");
+    }catch(e){print(e);}
+});
+
 

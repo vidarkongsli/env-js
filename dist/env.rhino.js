@@ -238,7 +238,7 @@ var Envjs = function(){
         oldWindowProxy.__proto__ = newWindow;
         newWindow.$thisWindowsProxyObject = oldWindowProxy;
         newWindow.document._parentWindow = oldWindowProxy;
-    }
+    };
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
@@ -260,7 +260,7 @@ var Envjs = function(){
                            );
             if (url)
                 newWindow.__loadAWindowsDocument__(url);
-        }
+        };
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
         setScopesOfKeyObjects(inNewContext, newWindow);
@@ -5826,9 +5826,9 @@ __extend__(HTMLDocument.prototype, {
 	    return true;
 	    
     },
-	get async(){ return this.$async;},
-	set async(async){ this.$async = async; },
-	get baseURI(){ return $env.location('./'); },
+    get async(){ return this.$async;},
+    set async(async){ this.$async = async; },
+    get baseURI(){ return $env.location('./'); },
     get URL(){ return $w.location.href;  },
     set URL(url){ $w.location.href = url;  }
 });
@@ -8861,7 +8861,7 @@ $w.__loadAWindowsDocument__ = function(url){
     $location = $env.location(url);
     setHistory($location);
     $w.document.load($location);
-}
+};
 
 $w.__defineGetter__("location", function(url){
 	var hash 	 = new RegExp('(\\#.*)'),
@@ -8941,7 +8941,11 @@ $w.__defineGetter__("location", function(url){
 			return this.href;
 		},
 		reload: function(force){
-			//TODO
+            // ignore 'force': we don't implement a cache
+            var thisWindow = $w;
+            $unloadEventsFor(thisWindow);
+            try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
+            $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
 		},
 		replace: function(url){
 			//TODO

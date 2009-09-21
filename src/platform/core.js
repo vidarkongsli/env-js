@@ -233,7 +233,7 @@ var Envjs = function(){
         oldWindowProxy.__proto__ = newWindow;
         newWindow.$thisWindowsProxyObject = oldWindowProxy;
         newWindow.document._parentWindow = oldWindowProxy;
-    }
+    };
 
     $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
@@ -255,7 +255,7 @@ var Envjs = function(){
                            );
             if (url)
                 newWindow.__loadAWindowsDocument__(url);
-        }
+        };
 
         var scopes = recordScopesOfKeyObjects(inNewContext);
         setScopesOfKeyObjects(inNewContext, newWindow);
