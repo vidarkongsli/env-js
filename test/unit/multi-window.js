@@ -190,4 +190,18 @@ test("window.reload() behavior", function() {
     }catch(e){print(e);}
 });
 
+test("window.replace() behavior", function() {
+    expect(2);
+
+    var testWindow = window.open("html/trivial.html");
+    try{ ok(testWindow.location.replace("html/with_js.html") || true,
+        "'window.location.replace()' completes without exception");
+    }catch(e){print(e);}
+
+    var mtch = testWindow.document.getElementById('HeaderLevel1').
+        innerHTML.match(/Hello/);
+    try{ ok(mtch && mtch.length > 0, "replaced window has correct content");
+    }catch(e){print(e);}
+});
+
 

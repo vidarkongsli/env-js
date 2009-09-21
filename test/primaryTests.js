@@ -22,7 +22,6 @@ window.onload = function(){
       "test/unit/multi-window.js"
 //// new stuff to test:
 // history members:  length, back(), forward(), go()
-// location members:  replace()
     );
   load(
       "test/unit/parser.js",

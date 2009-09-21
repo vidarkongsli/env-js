@@ -8289,7 +8289,8 @@ $w.__defineGetter__("location", function(url){
             $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
 		},
 		replace: function(url){
-			//TODO
+            $location = url;
+            $w.location.reload();
 		}
 	};
 });
