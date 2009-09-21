@@ -77,7 +77,7 @@ __extend__(DOMImplementation.prototype,{
     createDocument : function(nsuri, qname, doctype){
       //TODO - this currently returns an empty doc
       //but needs to handle the args
-        return new HTMLDocument($implementation, null);
+        return new HTMLDocument($implementation, null, "");
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;

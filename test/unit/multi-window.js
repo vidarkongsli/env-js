@@ -21,7 +21,7 @@ test("2nd window.location= operation flagged as error", function() {
 });
 
 test("navigation-related window members", function() {
-    expect(29);
+    expect(30);
 
     var anotherWin;
     try{ ok(anotherWin = window.open("html/trivial.html"),
@@ -48,6 +48,10 @@ test("navigation-related window members", function() {
 
     try{ ok(anotherWin.parent == anotherWin,
         "2nd window's .parent is itself");
+    }catch(e){print(e);}
+
+    try{ ok(anotherWin.document.referrer == location.href,
+        "2nd window's document.referrer points to this one");
     }catch(e){print(e);}
 
 

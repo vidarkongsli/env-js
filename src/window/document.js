@@ -21,7 +21,15 @@ __extend__(HTMLDocument.prototype, {
 	
 
 
-var $document =  new HTMLDocument($implementation, $w);
+var $document;
+{    // a temporary scope, nothing more
+  var referrer = "";
+  try {
+    referrer = $openingWindow.location.href;
+  } catch (e){ /* or not */ }
+  $document = new HTMLDocument($implementation, $w, referrer);
+}
+
 $w.__defineGetter__("document", function(){
 	return $document;
 });

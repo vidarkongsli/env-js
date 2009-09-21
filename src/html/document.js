@@ -8,11 +8,11 @@ $debug("Defining HTMLDocument");
  *
  * @extends DOMDocument
  */
-var HTMLDocument = function(implementation, docParentWindow) {
+var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
   this.DOMDocument = DOMDocument;
   this.DOMDocument(implementation, docParentWindow);
 
-  this._refferer = "";
+  this._referrer = docReferrer;
   this._domain;
   this._open = false;
 };
@@ -151,9 +151,7 @@ __extend__(HTMLDocument.prototype, {
         return $w.location
     },
     get referrer(){
-        /* TODO */
-        return this._refferer; 
-        
+        return this._referrer;
     },
     get URL(){
         /* TODO*/

@@ -3681,7 +3681,7 @@ __extend__(DOMImplementation.prototype,{
     createDocument : function(nsuri, qname, doctype){
       //TODO - this currently returns an empty doc
       //but needs to handle the args
-        return new HTMLDocument($implementation, null);
+        return new HTMLDocument($implementation, null, "");
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
@@ -4980,11 +4980,11 @@ $debug("Defining HTMLDocument");
  *
  * @extends DOMDocument
  */
-var HTMLDocument = function(implementation, docParentWindow) {
+var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
   this.DOMDocument = DOMDocument;
   this.DOMDocument(implementation, docParentWindow);
 
-  this._refferer = "";
+  this._referrer = docReferrer;
   this._domain;
   this._open = false;
 };
@@ -5123,9 +5123,7 @@ __extend__(HTMLDocument.prototype, {
         return $w.location
     },
     get referrer(){
-        /* TODO */
-        return this._refferer; 
-        
+        return this._referrer;
     },
     get URL(){
         /* TODO*/
@@ -9394,7 +9392,15 @@ __extend__(HTMLDocument.prototype, {
 	
 
 
-var $document =  new HTMLDocument($implementation, $w);
+var $document;
+{    // a temporary scope, nothing more
+  var referrer = "";
+  try {
+    referrer = $openingWindow.location.href;
+  } catch (e){ /* or not */ }
+  $document = new HTMLDocument($implementation, $w, referrer);
+}
+
 $w.__defineGetter__("document", function(){
 	return $document;
 });
