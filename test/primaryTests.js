@@ -10,7 +10,8 @@ window.onload = function(){
 
   load(
       "test/unit/dom.js",
-      "test/unit/window.js"
+      "test/unit/window.js",
+      "test/unit/elementmembers.js"
   );
   if (whichJarFile == "envjs")
     load(
@@ -24,7 +25,6 @@ window.onload = function(){
 // location members:  hash, href, reload(), replace()
 //                    host, hostname, pathname, port, protocol, search
 // document members:  referrer, URL
-//                    clear(), close(), open(), write(), writeln()
     );
   load(
       "test/unit/parser.js",
