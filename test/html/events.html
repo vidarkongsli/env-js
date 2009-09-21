@@ -48,61 +48,98 @@
         initECounters(window.top.eCounters);
       }
 
-      function bodyOnloadHandler(){
-            window.top.eCounters["body onload"]   += 1; }
-      function bodyOnclickHandler(){
-            window.top.eCounters["body onclick"]  += 1; }
-      function h1OnclickHandler(){
-            window.top.eCounters["h1 onclick"]    += 1; }
-      function h2OnclickHandler(){
-            window.top.eCounters["h2 onclick"]    += 1; }
-      function divOnclickHandler(){
-            window.top.eCounters["div onclick"]   += 1; }
-      function tableOnclickHandler(){
-            window.top.eCounters["table onclick"] += 1; }
-      function tbodyOnclickHandler(){
-            window.top.eCounters["tbody onclick"] += 1; }
-      function trOnclickHandler(){
-            window.top.eCounters["tr onclick"]    += 1; }
-      function tdOnclickHandler(){
-            window.top.eCounters["td onclick"]    += 1; }
-      function ulOnclickHandler(){
-            window.top.eCounters["ul onclick"]    += 1; }
-      function liOnclickHandler(){
-            window.top.eCounters["li onclick"]    += 1; }
-      function pOnclickHandler(){
-            window.top.eCounters["p onclick"]     += 1; }
-      function bOnclickHandler(){
-            window.top.eCounters["b onclick"]     += 1; }
-      function iOnclickHandler(){
-            window.top.eCounters["i onclick"]     += 1; }
-      function aOnclickHandler(){
-            window.top.eCounters["a onclick"]     += 1; }
-      function imgOnclickHandler(){
-            window.top.eCounters["img onclick"]   += 1; }
-      function imgOnloadHandler(){
-            window.top.eCounters["img onload"]    += 1; }
+      function bodyOnloadHandler(elem){
+        if (elem === document.getElementById('theBODY'))
+          window.top.eCounters["body onload"]   += 1;
+      }
+      function bodyOnclickHandler(elem){
+        if (elem === document.getElementById('theBODY'))
+          window.top.eCounters["body onclick"]  += 1;
+      }
+      function h1OnclickHandler(elem){
+        if (elem === document.getElementById('theH1'))
+          window.top.eCounters["h1 onclick"]    += 1;
+      }
+      function h2OnclickHandler(elem){
+        if (elem === document.getElementById('theH2'))
+          window.top.eCounters["h2 onclick"]    += 1;
+      }
+      function divOnclickHandler(elem){
+        if (elem === document.getElementById('theDIV'))
+          window.top.eCounters["div onclick"]   += 1;
+      }
+      function tableOnclickHandler(elem){
+        if (elem === document.getElementById('theTABLE'))
+          window.top.eCounters["table onclick"] += 1;
+      }
+      function tbodyOnclickHandler(elem){
+        if (elem === document.getElementById('theTBODY'))
+          window.top.eCounters["tbody onclick"] += 1;
+      }
+      function trOnclickHandler(elem){
+        if (elem === document.getElementById('theTR'))
+          window.top.eCounters["tr onclick"]    += 1;
+      }
+      function tdOnclickHandler(elem){
+        if (elem === document.getElementById('theTD'))
+          window.top.eCounters["td onclick"]    += 1;
+      }
+      function ulOnclickHandler(elem){
+        if (elem === document.getElementById('theUL'))
+          window.top.eCounters["ul onclick"]    += 1;
+      }
+      function liOnclickHandler(elem){
+        if (elem === document.getElementById('theLI'))
+          window.top.eCounters["li onclick"]    += 1;
+      }
+      function pOnclickHandler(elem){
+        if (elem === document.getElementById('theP'))
+          window.top.eCounters["p onclick"]     += 1;
+      }
+      function bOnclickHandler(elem){
+        if (elem === document.getElementById('theB'))
+          window.top.eCounters["b onclick"]     += 1;
+      }
+      function iOnclickHandler(elem){
+        if (elem === document.getElementById('theI'))
+          window.top.eCounters["i onclick"]     += 1;
+      }
+      function aOnclickHandler(elem){
+        if (elem === document.getElementById('theA'))
+          window.top.eCounters["a onclick"]     += 1;
+      }
+      function imgOnclickHandler(elem){
+        if (elem === document.getElementById('theIMG'))
+          window.top.eCounters["img onclick"]   += 1;
+      }
+      function imgOnloadHandler(elem){
+        if (elem === document.getElementById('theIMG'))
+          window.top.eCounters["img onload"]    += 1;
+      }
     </script>
 
   </head>
-  <body onload="bodyOnloadHandler();" onclick="bodyOnclickHandler();">
-    <h1 id="theH1" onclick="h1OnclickHandler();">First header in document</h1>
-    <h2 id="theH2" onclick="h2OnclickHandler();">Second header in document</h2>
+  <body id="theBODY" onload="bodyOnloadHandler(this);"
+        onclick="bodyOnclickHandler(this);">
+    <h1 id="theH1" onclick="h1OnclickHandler(this);">
+      First header in document</h1>
+    <h2 id="theH2" onclick="h2OnclickHandler(this);">
+      Second header in document</h2>
 
-    <div id="theDIV" onclick="divOnclickHandler();">
-      <table id="theTABLE" onclick="tableOnclickHandler();">
-        <tbody id="theTBODY" onclick="tbodyOnclickHandler();">
-          <tr id="theTR" onclick="trOnclickHandler();">
-            <td id="theTD" onclick="tdOnclickHandler();">
-              <ul id="theUL" onclick="ulOnclickHandler();">
-                <li id="theLI" onclick="liOnclickHandler();">
-                  <p id="theP" onclick="pOnclickHandler();">
-                    Some text <b id="theB" onclick="bOnclickHandler();">
-                      more text <i id="theI" onclick="iOnclickHandler();">
-                        <a id="theA" href="#" onclick="aOnclickHandler();">
+    <div id="theDIV" onclick="divOnclickHandler(this);">
+      <table id="theTABLE" onclick="tableOnclickHandler(this);">
+        <tbody id="theTBODY" onclick="tbodyOnclickHandler(this);">
+          <tr id="theTR" onclick="trOnclickHandler(this);">
+            <td id="theTD" onclick="tdOnclickHandler(this);">
+              <ul id="theUL" onclick="ulOnclickHandler(this);">
+                <li id="theLI" onclick="liOnclickHandler(this);">
+                  <p id="theP" onclick="pOnclickHandler(this);">
+                    Some text <b id="theB" onclick="bOnclickHandler(this);">
+                      more text <i id="theI" onclick="iOnclickHandler(this);">
+                        <a id="theA" href="#" onclick="aOnclickHandler(this);">
                           <img id="theIMG" src="noImg.png" alt="image link"
-                               onclick="imgOnclickHandler();"
-                               onload="imgOnloadHandler();" />
+                               onclick="imgOnclickHandler(this);"
+                               onload="imgOnloadHandler(this);" />
                         </a>  fu fu
                       </i> bar bar,
                     </b> blah blah.
