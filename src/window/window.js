@@ -150,11 +150,11 @@ $w.open = function(url, name, features, replace){
 };
 
 $w.close = function(){
-  $unloadEventsFor($w);
+  $env.$unloadEventsFor($w);
   $closed = true;
 };     
 
-var $unloadEventsFor = function(windowToUnload){
+$env.$unloadEventsFor = function(windowToUnload){
   try {
     var event = windowToUnload.document.createEvent();
     event.initEvent("unload");

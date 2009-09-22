@@ -217,7 +217,7 @@ var Envjs = function(){
     $env.loadFrame = function(frameElement, url){
         try {
             if (frameElement._content){
-                $unloadEventsFor(frameElement._content);
+                $env.$unloadEventsFor(frameElement._content);
                 $env.reloadAWindowProxy(frameElement._content, url);
             }
             else
@@ -834,11 +834,11 @@ $w.open = function(url, name, features, replace){
 };
 
 $w.close = function(){
-  $unloadEventsFor($w);
+  $env.$unloadEventsFor($w);
   $closed = true;
 };     
 
-var $unloadEventsFor = function(windowToUnload){
+$env.$unloadEventsFor = function(windowToUnload){
   try {
     var event = windowToUnload.document.createEvent();
     event.initEvent("unload");
@@ -8849,7 +8849,7 @@ $w.__defineSetter__("location", function(url){
         $w.__loadAWindowsDocument__(url);
     }
     else {
-        $unloadEventsFor($w);
+        $env.$unloadEventsFor($w);
         var proxy = $w;
         if (proxy.$thisWindowsProxyObject)
             proxy = proxy.$thisWindowsProxyObject;
@@ -8943,7 +8943,7 @@ $w.__defineGetter__("location", function(url){
         reload: function(force){
             // ignore 'force': we don't implement a cache
             var thisWindow = $w;
-            $unloadEventsFor(thisWindow);
+            $env.$unloadEventsFor(thisWindow);
             try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
             $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
         },

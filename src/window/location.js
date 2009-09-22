@@ -16,7 +16,7 @@ $w.__defineSetter__("location", function(url){
         $w.__loadAWindowsDocument__(url);
     }
     else {
-        $unloadEventsFor($w);
+        $env.$unloadEventsFor($w);
         var proxy = $w;
         if (proxy.$thisWindowsProxyObject)
             proxy = proxy.$thisWindowsProxyObject;
@@ -110,7 +110,7 @@ $w.__defineGetter__("location", function(url){
         reload: function(force){
             // ignore 'force': we don't implement a cache
             var thisWindow = $w;
-            $unloadEventsFor(thisWindow);
+            $env.$unloadEventsFor(thisWindow);
             try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
             $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
         },
