@@ -34,7 +34,7 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
             "setScope",
             "configureScope",
             "restoreScope",
-            "load",// overrides ...shell.Global.load()
+            "loadIntoFnsScope",
             // debug helper functions
             //"whereAmI",
             //"javaHashCode"
@@ -65,8 +65,8 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     /* class methods intended to be called as JavaScript global functions */
 
 
-    public static void load(Context cx, Scriptable thisObj,
-                            Object[] args, Function funObj)
+    public static void loadIntoFnsScope(Context cx, Scriptable thisObj,
+                                        Object[] args, Function funObj)
     {
         org.mozilla.javascript.tools.shell.Global.load(
             cx, funObj.getParentScope(), args, funObj
