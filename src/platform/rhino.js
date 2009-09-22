@@ -339,9 +339,6 @@
     $env.lang           = java.lang.System.getProperty("user.lang"); 
     $env.platform       = "Rhino ";//how do we get the version
 
-    //injected by org.mozilla.javascript.tools.envjs.
-    $env.load = load;
-
     $env.scriptTypes = {
         "text/javascript"   :false,
         "text/envjs"        :true
@@ -351,7 +348,7 @@
     $env.loadInlineScript = function(script){
         var tmpFile = $env.writeToTempFile(script.text, 'js') ;
         $env.debug("loading " + tmpFile);
-        $env.load(tmpFile);
+        $env.loadIntoFnsScope(tmpFile);
     };
     
     //injected by org.mozilla.javascript.tools.envjs.

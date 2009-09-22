@@ -78,7 +78,9 @@ var Envjs = function(){
     catch (ex){      configureScope    = function(){}; countOfMissing++; }
     try { dontCare = restoreScope; }
     catch (ex){      restoreScope      = function(){}; countOfMissing++; }
-    if (countOfMissing != 0 && countOfMissing != 5)
+    try { $env.loadIntoFnsScope = loadIntoFnsScope; }
+    catch (ex){      $env.loadIntoFnsScope = load;     countOfMissing++; }
+    if (countOfMissing != 0 && countOfMissing != 6)
         $env.warning("Some but not all of scope-manipulation functions were " +
                      "not present in environment.  JavaScript execution may " +
                      "not occur correctly.");
@@ -120,8 +122,6 @@ var Envjs = function(){
     $env.os_version     = ''; 
     $env.lang           = ''; 
     $env.platform       = "Rhino ";//how do we get the version
-    
-    $env.load = function(){};
     
     $env.scriptTypes = {
         "text/javascript"   :false,
@@ -245,13 +245,13 @@ var Envjs = function(){
             var scopes = {
                 frame : $env.getScope(__frame__),
                 window : $env.getScope(local__window__),
-                global_load: $env.getScope(load),
+                global_load: $env.getScope($env.loadIntoFnsScope),
                 local_load: $env.getScope($env.loadLocalScript)
             };
 
             $env.setScope(__frame__,             frameWindow);
             $env.setScope(local__window__,       frameWindow);
-            $env.setScope($env.load,             frameWindow);
+            $env.setScope($env.loadIntoFnsScope, frameWindow);
             $env.setScope($env.loadLocalScript,  frameWindow);
 
             __frame__();
@@ -260,7 +260,7 @@ var Envjs = function(){
             // now restore the scope
             $env.setScope(__frame__, scopes.frame);
             $env.setScope(local__window__, scopes.window);
-            $env.setScope($env.load, scopes.global_load);
+            $env.setScope($env.loadIntoFnsScope, scopes.global_load);
             $env.setScope($env.loadLocalScript, scopes.local_load);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
