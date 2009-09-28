@@ -6,7 +6,7 @@ $debug("Defining DOMParser");
 var DOMParser = function(){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlString){
-        //$log("Parsing XML String: " +xmlString);
+        $debug("Parsing XML String: " +xmlString);
         return document.implementation.createDocument().loadXML(xmlString);
     }
 });
