@@ -20,9 +20,9 @@ __extend__(HTMLInputElement.prototype, {
         return this.getAttribute('defaultChecked');
     },
     get form(){
-        var parent = this.parent;
+        var parent = this.parentNode;
         while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parent;
+            parent = parent.parentNode;
         }
         return parent;
     },
