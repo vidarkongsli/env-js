@@ -7699,6 +7699,9 @@ __extend__(HTMLSelectElement.prototype, {
             this.selectedIndex = index;
         }
     },
+    get value(){    // if we only over-ride one, then getter becomes undefined
+        return this.getAttribute('value')||'';
+    },
 
     get length(){
         return this.options.length;
