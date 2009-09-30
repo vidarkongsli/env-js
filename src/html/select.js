@@ -3,15 +3,45 @@ $debug("Defining HTMLSelectElement");
 * HTMLSelectElement - DOM Level 2
 */
 var HTMLSelectElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
+    this.HTMLTypeValueInputs(ownerDocument);
 
     this._oldIndex = -1;
 };
-HTMLSelectElement.prototype = new HTMLElement;
+HTMLSelectElement.prototype = new HTMLTypeValueInputs;
+__extend__(HTMLSelectElement.prototype, inputElements_dataProperties);
+__extend__(HTMLButtonElement.prototype, inputElements_size);
+__extend__(HTMLSelectElement.prototype, inputElements_onchange);
+__extend__(HTMLSelectElement.prototype, inputElements_focusEvents);
 __extend__(HTMLSelectElement.prototype, {
-    get type(){
-        return this.getAttribute('type');
+
+    // over-ride the value setter in HTMLTypeValueInputs
+    set value(newValue) {
+        var options = this.options,
+            i, index;
+        for (i=0; i<options.length; i++) {
+            if (options[i].value == newValue) {
+                index = i;
+                break;
+            }
+        }
+        if (index !== undefined) {
+            this.setAttribute('value', newValue);
+            this.selectedIndex = index;
+        }
+    },
+
+    get length(){
+        return this.options.length;
+    },
+    get multiple(){
+        return this.getAttribute('multiple');
+    },
+    set multiple(value){
+        this.setAttribute('multiple',value);
+    },
+    get options(){
+        return this.getElementsByTagName('option');
     },
     get selectedIndex(){
         var options = this.options;
@@ -31,88 +61,14 @@ __extend__(HTMLSelectElement.prototype, {
             option.selected = 'selected';
         }
     },
-    get value(){
-        return this.getAttribute('value')||'';
-    },
-    set value(value) {
-        var options = this.options,
-            i, index;
-        for (i=0; i<options.length; i++) {
-            if (options[i].value == value) {
-                index = i;
-                break;
-            }
-        }
-        if (index !== undefined) {
-            this.setAttribute('value', value);
-            this.selectedIndex = index;
-        }
-    },
-    get length(){
-        return this.options.length;
-    },
-    get form(){
-        var parent = this.parent;
-        while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parent;
-        }
-        return parent;
-    },
-    get options(){
-        return this.getElementsByTagName('option');
-    },
-    get disabled(){
-        return (this.getAttribute('disabled')=='disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled', (value ? 'disabled' :''));
-    },
-    get multiple(){
-        return this.getAttribute('multiple');
-    },
-    set multiple(value){
-        this.setAttribute('multiple',value);
-    },
-    get name(){
-        return this.getAttribute('name')||'';
-    },
-    set name(value){
-        this.setAttribute('name',value);
-    },
-    get size(){
-        return Number(this.getAttribute('size'));
-    },
-    set size(value){
-        this.setAttribute('size',value);
-    },
-    /*get tabIndex(){
-        return Number(this.getAttribute('tabindex'));
-    },
-    set tabIndex(value){
-        this.setAttribute('tabindex',value);
-    },*/
+
     add : function(){
         __add__(this);
     },
     remove : function(){
         __remove__(this);
-    },
-    blur: function(){
-        __blur__(this);
-
-        if (this._oldIndex != this.selectedIndex){
-            var event = document.createEvent();
-            event.initEvent("change");
-            this.dispatchEvent( event );
-        }
-    },
-    focus: function(){
-        __focus__(this);
-        this._oldIndex = this.selectedIndex;
-    },
-    onchange: function(event){
-        __eval__(this.getAttribute('onchange')||'', this)
     }
 });
 
 $w.HTMLSelectElement = HTMLSelectElement;
+
