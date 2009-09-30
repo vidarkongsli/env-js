@@ -1,26 +1,19 @@
 $debug("Defining HTMLLegendElement");
-/* 
+/*
 * HTMLLegendElement - DOM Level 2
 */
 var HTMLLegendElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    this.HTMLInputCommon = HTMLInputCommon;
+    this.HTMLInputCommon(ownerDocument);
 };
-HTMLLegendElement.prototype = new HTMLElement;
+HTMLLegendElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLegendElement.prototype, {
-    get form(){
-        var parent = this.parent;
-        while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parent;
-        }
-        return parent;
+    get align(){
+        return this.getAttribute('align');
     },
-    get accessKey(){
-        return this.getAttribute('accesskey');
-    },
-    set accessKey(value){
-        this.setAttribute('accesskey',value);
+    set align(value){
+        this.setAttribute('align',value);
     }
 });
 
-$w.HTMLLegendElement = HTMLLegendElement;	
+$w.HTMLLegendElement = HTMLLegendElement;

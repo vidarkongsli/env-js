@@ -1,20 +1,19 @@
 $debug("Defining HTMLFieldSetElement");
-/* 
+/*
 * HTMLFieldSetElement - DOM Level 2
 */
 var HTMLFieldSetElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    this.HTMLLegendElement = HTMLLegendElement;
+    this.HTMLLegendElement(ownerDocument);
 };
-HTMLFieldSetElement.prototype = new HTMLElement;
+HTMLFieldSetElement.prototype = new HTMLLegendElement;
 __extend__(HTMLFieldSetElement.prototype, {
-    get form(){
-        var parent = this.parent;
-        while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parent;
-        }
-        return parent;
+    get margin(){
+        return this.getAttribute('margin');
+    },
+    set margin(value){
+        this.setAttribute('margin',value);
     }
 });
 
-$w.HTMLFieldSetElement = HTMLFieldSetElement;	
+$w.HTMLFieldSetElement = HTMLFieldSetElement;

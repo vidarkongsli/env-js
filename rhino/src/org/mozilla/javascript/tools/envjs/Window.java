@@ -35,9 +35,9 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
             "configureScope",
             "restoreScope",
             "loadIntoFnsScope",
+            "javaHashCode"
             // debug helper functions
-            //"whereAmI",
-            //"javaHashCode"
+            //"whereAmI"
         };
         defineFunctionProperties(names, Window.class,
                                  ScriptableObject.DONTENUM);
@@ -203,6 +203,20 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
     }
 
 
+    public static Integer javaHashCode(Context cx, Scriptable thisObj,
+                                       Object[] args, Function funObj)
+    {
+        if (args.length != 1)
+            throw new IllegalArgumentException(
+                "Window.javaHashCode: wrong argument count, should be 1.");
+        if (args[0] == null)
+            throw new IllegalArgumentException(
+                "Window.javaHashCode: argument can't be null.");
+
+        return new Integer(args[0].hashCode());
+    }
+
+
 /*
     public static void whereAmI(Context cx,
                                 Scriptable thisObj,
@@ -247,18 +261,6 @@ public class Window extends org.mozilla.javascript.tools.shell.Global
                 temp = temp.getPrototype();
             }
         }
-    }
-    public static Integer javaHashCode(Context cx, Scriptable thisObj,
-                                       Object[] args, Function funObj)
-    {
-        if (args.length != 1)
-            throw new IllegalArgumentException(
-                "Window.javaHashCode: wrong argument count, should be 1.");
-        if (args[0] == null)
-            throw new IllegalArgumentException(
-                "Window.javaHashCode: argument can't be null.");
-
-        return new Integer(args[0].hashCode());
     }
 */
 }

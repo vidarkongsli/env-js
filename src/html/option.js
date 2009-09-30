@@ -1,30 +1,18 @@
 $debug("Defining HTMLOptionElement");
-/* 
+/*
 * HTMLOptionElement - DOM Level 2
 */
 var HTMLOptionElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    this.HTMLInputCommon = HTMLInputCommon;
+    this.HTMLInputCommon(ownerDocument);
 };
-HTMLOptionElement.prototype = new HTMLElement;
+HTMLOptionElement.prototype = new HTMLInputCommon;
 __extend__(HTMLOptionElement.prototype, {
-    get form(){
-        var parent = this.parent;
-        while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parent;
-        }
-        return parent;
-    },
     get defaultSelected(){
         return this.getAttribute('defaultSelected');
     },
     set defaultSelected(value){
         this.setAttribute('defaultSelected',value);
-    },
-    get text(){
-         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ? 
-             this.innerHTML : 
-             this.nodeValue;
     },
     get index(){
         var options = this.parent.childNodes;
@@ -33,12 +21,6 @@ __extend__(HTMLOptionElement.prototype, {
                 return i;
         }
         return -1;
-    },
-    get disabled(){
-        return this.getAttribute('disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled',value);
     },
     get label(){
         return this.getAttribute('label');
@@ -54,9 +36,14 @@ __extend__(HTMLOptionElement.prototype, {
             this.defaultSelected = this.selected;
         this.setAttribute('selected', (value ? 'selected' :''));
     },
+    get text(){
+         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
+             this.innerHTML :
+             this.nodeValue;
+    },
     get value(){
         return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
-            this.text : 
+            this.text :
             this.getAttribute('value');
     },
     set value(value){
