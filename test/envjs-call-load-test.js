@@ -1,8 +1,6 @@
-
 load("dist/env.rhino.js");
+load("test/qunit.js");
 Envjs("test/index.html", {});
-load("test/testrunner.js");
-
 
 test("'index.html' loaded correctly via 'Envjs()' call", function(){
     expect(1);
@@ -16,3 +14,4 @@ test("window.location= following Envjs() initialization flagged as error",
     expect(0);
 });
 
+Envjs.wait(0);
