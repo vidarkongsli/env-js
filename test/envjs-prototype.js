@@ -1,3 +1,3 @@
 whichJarFile = "envjs"
 multiwindow = true;
-load("test/call-load-test.js");
+load("test/prototype.js");

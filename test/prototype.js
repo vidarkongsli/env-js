@@ -1,6 +1,10 @@
-whichJarFile = "rhino"
+if(!this.whichJarFile){
+  whichJarFile = "rhino"
+}
 whichInterpreter = whichJarFile + " interpreter jar";
-multiwindow = false;
+if(!this.multiwindow){
+  multiwindow = false;
+}
 load("dist/env.rhino.js");
 load("test/qunit.js");
 
