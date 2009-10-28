@@ -42,8 +42,9 @@ window.setTimeout = function(fn, time){
           eval(fn);
         } catch (e) {
           $env.error(e);
+        } finally {
+          window.clearInterval(num);
         }
-        window.clearInterval(num);          
       };
     } else {
       tfn = function() {
@@ -51,8 +52,9 @@ window.setTimeout = function(fn, time){
           fn();
         } catch (e) {
           $env.error(e);
+        } finally {
+          window.clearInterval(num);
         }
-        window.clearInterval(num);
       };
     }
     $debug("Creating timer number "+num);
@@ -127,6 +129,8 @@ window.$wait = $env.wait = $env.wait || function(wait) {
       try {
         earliest.running = true;
         f();
+      } catch (e) {
+        $env.error(e);
       } finally {
         earliest.running = false;
       }

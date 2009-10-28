@@ -185,11 +185,11 @@
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
-        <arg value="test/call-load-test.js"/>
+        <arg value="test/rhino-call-load-test.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
-        <arg value="test/prototype.js"/>
+        <arg value="test/rhino-prototype.js"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
       </java>
     </target>
