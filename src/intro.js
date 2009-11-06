@@ -1,6 +1,5 @@
 
 
-
 try {
 
     Envjs.window = function($w,
@@ -18,3 +17,5 @@ try {
         $w.$isOriginalWindow = $thisIsTheOriginalWindow;
         $w.$haveCalledWindowLocationSetter = false;
 
+        
+        

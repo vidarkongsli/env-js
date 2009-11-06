@@ -142,11 +142,11 @@ var Envjs = function(){
             writeln = document.writeln;
         //temporarily replace document write becuase the function
         //has a different meaning during parsing
-        document.write = function(text){
+        /*document.write = function(text){
 			docWrites.push(text);
-		};
+		};*/
         try{
-			if(script.type){
+            if(script.type){
                 types = script.type?script.type.split(";"):[];
                 for(i=0;i<types.length;i++){
                     if($env.scriptTypes[types[i]]){
@@ -191,12 +191,12 @@ var Envjs = function(){
             $env.error("Error loading script.", e);
             $env.onScriptLoadError(script);
         }finally{
-            if(parser){
+            /*if(parser){
                 parser.appendFragment(docWrites.join(''));
 			}
 			//return document.write to it's non-script loading form
             document.write = write;
-            document.writeln = writeln;
+            document.writeln = writeln;*/
         }
     };
     
@@ -210,34 +210,34 @@ var Envjs = function(){
     $env.configureScope = function(){};
     $env.restoreScope = function(){};
 
-
+    
     $env.loadFrame = function(frameElement, url){
         try {
             if (frameElement._content){
-                $env.$unloadEventsFor(frameElement._content);
-                $env.reloadAWindowProxy(frameElement._content, url);
+                $env.unload(frameElement._content);
+                $env.reload(frameElement._content, url);
             }
             else
-                frameElement._content = $env.makeNewWindowMaybeLoad(this,
+                frameElement._content = $env.newwindow(this,
                     frameElement.ownerDocument.parentWindow, url);
         } catch(e){
             $env.error("failed to load frame content: from " + url, e);
         }
     };
 
-    $env.reloadAWindowProxy = function(oldWindowProxy, url){
-        var newWindowProxy = $env.makeNewWindowMaybeLoad(
+    $env.reload = function(oldWindowProxy, url){
+        var newWindowProxy = $env.newwindow(
                                  oldWindowProxy.opener,
                                  oldWindowProxy.parent,
                                  url);
         var newWindow = newWindowProxy.__proto__;
-
+        
         oldWindowProxy.__proto__ = newWindow;
         newWindow.$thisWindowsProxyObject = oldWindowProxy;
         newWindow.document._parentWindow = oldWindowProxy;
     };
 
-    $env.makeNewWindowMaybeLoad = function(openingWindow, parentArg, url){
+    $env.newwindow = function(openingWindow, parentArg, url){
         var newWindow = $env.getFreshScopeObj();
         var newProxy  = $env.getProxyFor(newWindow);
         newWindow.$thisWindowsProxyObject = newProxy;
@@ -256,7 +256,7 @@ var Envjs = function(){
                             false             // this win isn't the original
                            );
             if (url)
-                newWindow.__loadAWindowsDocument__(url);
+                $env.load(url);
         };
 
         var scopes = recordScopesOfKeyObjects(inNewContext);

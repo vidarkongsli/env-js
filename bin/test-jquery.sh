@@ -42,10 +42,10 @@ cp bin/jquery-$VERSION-test.js $JQUERY_DIR/build/runtest/test.js
 
 if [ $DEBUG -eq 1 ]; then
     echo 'enabling rhino debugger'
-    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.debugger.Main/" $JQUERY_DIR/Makefile;
+    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.debugger.Main -opt -1/" $JQUERY_DIR/Makefile;
 else
     echo 'running with rhino'
-    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.envjs.Main/" $JQUERY_DIR/Makefile;
+    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.envjs.Main  -opt -1/" $JQUERY_DIR/Makefile;
 fi
 
 cd $JQUERY_DIR

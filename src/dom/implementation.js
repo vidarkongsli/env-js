@@ -12,52 +12,6 @@ var DOMImplementation = function() {
     this.errorChecking  = true;       // by default, test for exceptions
 };
 
-var __endHTMLElement__ = function(node, doc, p){
-    if(node.nodeName.toLowerCase() == 'script'){
-        // unless we're parsing in a window context, don't execute scripts
-        if (doc.parentWindow){
-            p.replaceEntities = true;
-            $env.loadLocalScript(node, p);
-
-            // only fire event if we actually had something to load
-            if (node.src && node.src.length > 0){
-                var event = doc.createEvent();
-                event.initEvent("load");
-                node.dispatchEvent( event, false );
-            }
-        }
-    }
-    else if (node.nodeName.toLowerCase() == 'frame' ||
-             node.nodeName.toLowerCase() == 'iframe'   ){
-
-        if (node.src && node.src.length > 0){
-            $debug("getting content document for (i)frame from " + node.src);
-
-            $env.loadFrame(node, $env.location(node.src));
-
-            var event = doc.createEvent();
-            event.initEvent("load");
-            node.dispatchEvent( event, false );
-        }
-    }
-    else if (node.nodeName.toLowerCase() == 'link'){
-        if (node.href && node.href.length > 0){
-            // don't actually load anything, so we're "done" immediately:
-            var event = doc.createEvent();
-            event.initEvent("load");
-            node.dispatchEvent( event, false );
-        }
-    }
-    else if (node.nodeName.toLowerCase() == 'img'){
-        if (node.src && node.src.length > 0){
-            // don't actually load anything, so we're "done" immediately:
-            var event = doc.createEvent();
-            event.initEvent("load");
-            node.dispatchEvent( event, false );
-        }
-    }
-}
-
 __extend__(DOMImplementation.prototype,{
     // @param  feature : string - The package name of the feature to test.
     //      the legal only values are "XML" and "CORE" (case-insensitive).
@@ -527,7 +481,7 @@ function __isNamespaceDeclaration__(attributeName) {
  */
 function __isIdDeclaration__(attributeName) {
   // test if attributeName is 'id' (case insensitive)
-  return (attributeName.toLowerCase() == 'id');
+  return attributeName?(attributeName.toLowerCase() == 'id'):false;
 };
 
 /**

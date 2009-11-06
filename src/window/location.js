@@ -13,22 +13,17 @@ $w.__defineSetter__("location", function(url){
               "from the context used to load 'env.js'.  Try using " +
               "'window.open()' to get a new context.");
         $w.$haveCalledWindowLocationSetter = true;
-        $w.__loadAWindowsDocument__(url);
+        $env.load(url);
     }
     else {
-        $env.$unloadEventsFor($w);
+        $env.unload($w);
         var proxy = $w;
         if (proxy.$thisWindowsProxyObject)
             proxy = proxy.$thisWindowsProxyObject;
-        $env.reloadAWindowProxy(proxy, url);
+        $env.reload(proxy, url);
     }
 });
 
-$w.__loadAWindowsDocument__ = function(url){
-    $location = $env.location(url);
-    setHistory($location);
-    $w.document.load($location);
-};
 
 $w.__defineGetter__("location", function(url){
 	var hash 	 = new RegExp('(\\#.*)'),
@@ -110,9 +105,9 @@ $w.__defineGetter__("location", function(url){
         reload: function(force){
             // ignore 'force': we don't implement a cache
             var thisWindow = $w;
-            $env.$unloadEventsFor(thisWindow);
+            $env.unload(thisWindow);
             try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
-            $env.reloadAWindowProxy(thisWindow, thisWindow.location.href);
+            $env.reload(thisWindow, thisWindow.location.href);
         },
         replace: function(url){
             $location = url;

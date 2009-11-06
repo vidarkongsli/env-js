@@ -1,7 +1,7 @@
 /*
 *	outro.js
 */
-
+    
 
     };// close function definition begun in 'intro.js'
 
@@ -15,7 +15,8 @@
                  this,    // "top" for new window
                  true     // identify this as the original (not reloadable) win
                 );
-
+    
+    
 } catch(e){
     Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +
         Envjs.lineSource(e));
