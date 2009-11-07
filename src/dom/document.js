@@ -77,7 +77,7 @@ __extend__(DOMDocument.prototype, {
 
             parseHtmlDocument(xmlString, this, null, null);
             
-            $env.wait();
+            $env.wait(-1);
         } catch (e) {
             $error(e);
         }
