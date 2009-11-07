@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -70,9 +70,10 @@
     <iframe id="emptyiframe" name="emtpyiframe" style="display:none;"></iframe>
 
     <script>
-        var usingEnvjsSpecificJar = false;
+        var usingEnvjsSpecificJar = false, rhino = false;
         try {
           usingEnvjsSpecificJar = whichJarFile == "envjs";
+          rhino = true;
         } catch (e){;}
         if (usingEnvjsSpecificJar){
           eventFrameLoaded = eventFrameClicked = 0;
@@ -108,7 +109,7 @@
     <script>
         function onloadHandlerThatShouldntExecute(){
             var t = document.createTextNode(
-'Paragraph created by execution of script-onload *BAD* event handler.');
+'Paragraph created by execution of script *BAD* event handler.');
             var p = document.createElement('p');
             p.setAttribute('id', 'pShouldntBeCreated');
             p.appendChild(t);
@@ -116,20 +117,38 @@
         }
     </script>
     <script onload="onloadHandlerThatShouldntExecute();">
-        function scriptOnloadEventHandler(tag){
+        function scriptEventHandler(tag){
             var t = document.createTextNode(
-'Paragraph created by execution of script-onload event handler.');
+'Paragraph created by execution of script event handler.');
             var p = document.createElement('p');
-            p.setAttribute('id', 'pCreatedByScriptOnload'+tag);
+            p.setAttribute('id', 'pCreatedByScript'+tag);
             p.appendChild(t);
             document.getElementsByTagName('body')[0].appendChild(p);
         }
     </script>
+    <script>
+      // Generic case: allow scripts (not on rhino, which can't detect failures)
+      if (!rhino) {
+        js_enabled = Envjs.scriptTypes["text/javascript"];
+        Envjs.scriptTypes["text/javascript"] = true;
+      }
+    </script>
     <script src="html/missingScript.js"
-            onload="try{scriptOnloadEventHandler('A');}catch(e){;}" />
-    <script src="html/missingScript.js"
-            onload="try{scriptOnloadEventHandler('B');}catch(e){;}"></script>
-
+             onerror="try{scriptEventHandler('A');}catch(e){;}"
+             onload="try{scriptEventHandler('B');}catch(e){;}"></script>
+    <script>
+      // Rhino case: these will succeed anyway
+      if (rhino) {
+        js_enabled = Envjs.scriptTypes["text/javascript"];
+        Envjs.scriptTypes["text/javascript"] = true;
+      }
+    </script>
+    <script src="html/script.js"
+             onerror="try{scriptEventHandler('C');}catch(e){;}"
+             onload="try{scriptEventHandler('D');}catch(e){;}"></script>
+    <script>
+      Envjs.scriptTypes["text/javascript"] = js_enabled;
+    </script>
 
 	<dl id="dl" style="display:none;">
 	<div id="main" style="display: none;">
