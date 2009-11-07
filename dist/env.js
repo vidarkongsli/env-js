@@ -4263,7 +4263,7 @@ __extend__(DOMDocument.prototype, {
 
             parseHtmlDocument(xmlString, this, null, null);
             
-            $env.wait();
+            $env.wait(-1);
         } catch (e) {
             $error(e);
         }
@@ -8489,8 +8489,11 @@ var convert_time = function(time) {
   if ( isNaN(time) || time < 0 ) {
     time = 0;
   }
-  if ( $event_loop_running && time < 4 ) {
-    time = 4;
+  // html5 says this should be at least 4, but the parser is using a setTimeout for the SAX stuff
+  // which messes up the world
+  var min = /* 4 */ 0;
+  if ( $event_loop_running && time < min ) {
+    time = min;
   }
   return time;
 }
@@ -8564,10 +8567,16 @@ window.clearInterval = window.clearTimeout = function(num){
 // wait(n) (n > 0): execute any timers as they fire until there are none left waiting at least n ms
 // but no more, even if there are future events/current threads
 // wait(0): execute any immediately runnable timers and return
+// wait(-n): keep sleeping until the next event is more than n ms in the future
 
 // FIX: make a priority queue ...
 
 window.$wait = $env.wait = $env.wait || function(wait) {
+  var delta_wait;
+  if (wait < 0) {
+    delta_wait = -wait;
+    wait = 0;
+  }
   var start = Date.now();
   var old_loop_running = $event_loop_running;
   $event_loop_running = true; 
@@ -8619,14 +8628,16 @@ window.$wait = $env.wait = $env.wait || function(wait) {
       // no events, but a wait requested: fall through to sleep
     } else {
       // there are events in the queue, but they aren't firable now
-      if ( wait === 0 || ( wait > 0 && wait < Date.now () ) ) {
+      if ( delta_wait && sleep <= delta_wait ) {
+        // if they will happen within the next delta, fall through to sleep
+      } else if ( wait === 0 || ( wait > 0 && wait < Date.now () ) ) {
         // loop ends even if there are events but the user specifcally asked not to wait too long
         break;
       }
       // there are events and the user wants to wait: fall through to sleep
     }
 
-    // Releated to ajax threads ... hopefully can go away ..
+    // Related to ajax threads ... hopefully can go away ..
     var interval =  $wait.interval || 100;
     if ( !sleep || sleep > interval ) {
       sleep = interval;
@@ -9730,7 +9741,8 @@ try{
 }catch(e){
 	//TODO - fail gracefully
 }	
-	var Html5Parser;
+	(function(window,document){
+var Html5Parser;
 (function () {window.nu_validator_htmlparser_HtmlParser = function(){
   var $intern_0 = '', $intern_19 = '" for "gwt:onLoadErrorFn"', $intern_17 = '" for "gwt:onPropertyErrorFn"', $intern_4 = '#', $intern_6 = '/', $intern_2 = '<script id="__gwt_marker_nu.validator.htmlparser.HtmlParser"><\/script>', $intern_14 = '=', $intern_5 = '?', $intern_16 = 'Bad handler "', $intern_20 = 'DOMContentLoaded', $intern_3 = '__gwt_marker_nu.validator.htmlparser.HtmlParser', $intern_7 = 'base', $intern_9 = 'clear.cache.gif', $intern_13 = 'content', $intern_18 = 'gwt:onLoadErrorFn', $intern_15 = 'gwt:onPropertyErrorFn', $intern_12 = 'gwt:property', $intern_8 = 'img', $intern_10 = 'meta', $intern_11 = 'name', $intern_1 = 'nu.validator.htmlparser.HtmlParser';
   var $wnd = window, $doc = document, gwtOnLoad, bodyDone, base = $intern_0, metaProps = {}, values = [], providers = [], answers = [], onLoadErrorFunc, propertyErrorFunc;
@@ -20498,6 +20510,8 @@ var com_google_gwt_lang_ClassLiteralHolder_Ljava_1lang_1Object_12_1classLit = ja
 if (nu_validator_htmlparser_HtmlParser) {  var __gwt_initHandlers = nu_validator_htmlparser_HtmlParser.__gwt_initHandlers;  nu_validator_htmlparser_HtmlParser.onScriptLoad(gwtOnLoad);}})();
 
 Html5Parser();
+
+})($w,$document);
 /*
 *	outro.js
 */

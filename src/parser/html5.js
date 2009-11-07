@@ -1,3 +1,4 @@
+(function(window,document){
 var Html5Parser;
 (function () {window.nu_validator_htmlparser_HtmlParser = function(){
   var $intern_0 = '', $intern_19 = '" for "gwt:onLoadErrorFn"', $intern_17 = '" for "gwt:onPropertyErrorFn"', $intern_4 = '#', $intern_6 = '/', $intern_2 = '<script id="__gwt_marker_nu.validator.htmlparser.HtmlParser"><\/script>', $intern_14 = '=', $intern_5 = '?', $intern_16 = 'Bad handler "', $intern_20 = 'DOMContentLoaded', $intern_3 = '__gwt_marker_nu.validator.htmlparser.HtmlParser', $intern_7 = 'base', $intern_9 = 'clear.cache.gif', $intern_13 = 'content', $intern_18 = 'gwt:onLoadErrorFn', $intern_15 = 'gwt:onPropertyErrorFn', $intern_12 = 'gwt:property', $intern_8 = 'img', $intern_10 = 'meta', $intern_11 = 'name', $intern_1 = 'nu.validator.htmlparser.HtmlParser';
@@ -10766,3 +10767,5 @@ var com_google_gwt_lang_ClassLiteralHolder_Ljava_1lang_1Object_12_1classLit = ja
 if (nu_validator_htmlparser_HtmlParser) {  var __gwt_initHandlers = nu_validator_htmlparser_HtmlParser.__gwt_initHandlers;  nu_validator_htmlparser_HtmlParser.onScriptLoad(gwtOnLoad);}})();
 
 Html5Parser();
+
+})($w,$document);
