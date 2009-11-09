@@ -146,6 +146,7 @@ var Envjs = function(){
             write = document.write,
             writeln = document.writeln,
             okay = true;
+        // SMP: see also the note in html/document.js about script.type
         var script_type = script.type === null ? "text/javascript" : script.type;
         try{
             if(script_type){
@@ -5800,6 +5801,10 @@ __extend__(HTMLDocument.prototype, {
 var __elementPopped__ = function(ns, name, node){
     // print('Element Popped: '+ns+" "+name+ " "+ node+" " +node.type+" "+node.nodeName);
     var doc = __ownerDocument__(node);
+    // SMP: subtle issue here: we're currently getting two kinds of script nodes from the html5 parser.
+    // The "fake" nodes come with a type of undefined. The "real" nodes come with the type that's given,
+    // or null if not given. So the following check has the side-effect of ignoring the "fake" nodes. So
+    // something to watch for if this code changes.
     var type = ( node.type === null ) ? "text/javascript" : node.type;
     try{
         if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript"){

@@ -141,6 +141,7 @@ var Envjs = function(){
             write = document.write,
             writeln = document.writeln,
             okay = true;
+        // SMP: see also the note in html/document.js about script.type
         var script_type = script.type === null ? "text/javascript" : script.type;
         try{
             if(script_type){
