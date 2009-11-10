@@ -165,9 +165,11 @@ var Envjs = function(){
                                 }
                             }
                             base = "" + window.location;
+                            var filename = $env.location(script.src.match(/([^\?#]*)/)[1], base );
                             try {                      
-                              load($env.location(script.src.match(/([^\?#]*)/)[1], base ));
+                              load(filename);
                             } catch(e) {
+                              $env.warn("could not load script "+ filename +": "+e );
                               okay = false;
                             }
                             //lets you register a function to execute 
@@ -1841,6 +1843,7 @@ __extend__(DOMNode.prototype, {
             return __ownerDocument__(this).importNode(this, deep);
         } catch (e) {
             //there shouldn't be any exceptions, but if there are, return null
+            // may want to warn: $debug("could not clone node: "+e.code);
             return null;
         }
     },
@@ -1900,7 +1903,9 @@ __extend__(DOMNode.prototype, {
     importNode : function(importedNode, deep) {
         
         var importNode;
-        //$debug("importing node " + importedNode.nodeName + "(?deep = "+deep+")");
+
+        // debug("importing node " + importedNode.nodeName + "(" + importedNode.nodeType + ")" + "(?deep = "+deep+")");
+
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
@@ -1949,7 +1954,7 @@ __extend__(DOMNode.prototype, {
                 // set the value of the local Attribute to match that of the importedAttribute
                 importNode.value = importedNode.value;
                 
-            } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT) {
+            } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
                 // create a local DocumentFragment
                 importNode = __ownerDocument__(this).createDocumentFragment();
             } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
@@ -2434,7 +2439,7 @@ __extend__(DOMAttr.prototype, {
     },
     get xml(){
         if(this.nodeValue)
-            return this.nodeName + '="' + __escapeXML__(this.nodeValue) + '" ';
+            return this.nodeName + '="' + __escapeXML__(this.nodeValue+"") + '" ';
         else
             return '';
     },
@@ -4270,6 +4275,9 @@ __extend__(DOMImplementation.prototype,{
         else if (feature.toLowerCase() == "core") {
             ret = (!version || (version == "2.0"));
         }
+        else if (feature == "http://www.w3.org/TR/SVG11/feature#BasicStructure") {
+            ret = (version == "1.1");
+        }
         return ret;
     },
     createDocumentType : function(qname, publicid, systemid){
@@ -5664,16 +5672,6 @@ __extend__(HTMLDocument.prototype, {
               this.mathplayerinitialized = true;
           }
           return this.createElement("m:" + local);
-        } else if ("http://www.w3.org/2000/svg" == uri) {
-          if (!this.renesisinitialized) {
-              var obj = this.createElement("object");
-              obj.setAttribute("id", "renesis");
-              obj.setAttribute("classid", "clsid:AC159093-1683-4BA2-9DCF-0C350141D7F2");
-              this.getElementsByTagName("head")[0].appendChild(obj);
-              this.namespaces.add("s", "http://www.w3.org/2000/svg", "#renesis");  
-              this.renesisinitialized = true;
-          }
-          return this.createElement("s:" + local);
         } else {
             return DOMDocument.prototype.createElementNS.apply(this,[uri, local]);
         }
