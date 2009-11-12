@@ -61,7 +61,7 @@ __extend__(HTMLTableElement.prototype, {
     appendChild : function (child) {
         
         var tagName;
-        if(child.tagName){
+        if(child&&child.nodeType==DOMNode.ELEMENT_NODE){
             tagName = child.tagName.toLowerCase();
             if (tagName === "tr") {
                 // need an implcit <tbody> to contain this...
@@ -81,7 +81,8 @@ __extend__(HTMLTableElement.prototype, {
                 return DOMNode.prototype.appendChild.apply(this, arguments);
             }
         }else{
-            $error('HTMLTableElement.appendChild => child.tagName should not be undefined here... Fix ME!');
+            //tables can still have text node from white space
+            return DOMNode.prototype.appendChild.apply(this, arguments);
         }
     },
      
