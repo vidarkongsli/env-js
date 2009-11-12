@@ -9,8 +9,13 @@ module("parser");
 
 test("Entity replaced", function() {
     expect(14);
-    var htmlstr = "<html><body>Hello, &quot;World&quot;!</body></html>";
-    var p = new XMLP(htmlstr);
+    var htmlstr = "<html><body id='body'>Hello, &quot;World&quot;!</body></html>";
+    var p = new DOMParser();
+    var doc = p.parseFromString(htmlstr);
+    //The html5 parser, to my surprise, is not replacing html entities
+    //equals(doc.getElementById('body').innerHTML, 'Hello, "World"!', "html5 parser replaces entities");
+    
+    p = new XMLP(htmlstr);
     equals(XMLP._ELM_B, p.next(), "Opening html tag"); // _ELM_B <html>
     equals(XMLP._ELM_B, p.next(), "Opening body tag"); // _ELM_B <body>
 

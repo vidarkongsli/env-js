@@ -6406,6 +6406,16 @@ __extend__(HTMLFormElement.prototype,{
 	reset:function(){
 	    __reset__(this);
 	    
+    },
+    onsubmit:function(){
+        if (__eval__(this.getAttribute('onsubmit')||'', this)) {
+            this.submit();
+        }
+    },
+    onreset:function(){
+        if (__eval__(this.getAttribute('onreset')||'', this)) {
+            this.reset();
+        }
     }
 });
 
@@ -7012,9 +7022,34 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
-        if(this.defaultSelected===null&&this.selected!==null)
+        if(this.defaultSelected===null && this.selected!==null){
             this.defaultSelected = this.selected;
-        this.setAttribute('selected', (value ? 'selected' :''));
+        }
+        var selectedValue = (value ? 'selected' : '');
+        if (this.getAttribute('selected') == selectedValue) {
+            // prevent inifinite loops (option's selected modifies 
+            // select's value which modifies option's selected)
+            return;
+        }
+        this.setAttribute('selected', selectedValue);
+        if (value) {
+            // set select's value to this option's value (this also 
+            // unselects previously selected value)
+            this.parentNode.value = this.value;
+        } else {
+            // if no other option is selected, select the first option in the select
+            var i, anythingSelected;
+            for (i=0; i<this.parentNode.options.length; i++) {
+                if (this.parentNode.options[i].selected) {
+                    anythingSelected = true;
+                    break;
+                }
+            }
+            if (!anythingSelected) {
+                this.parentNode.value = this.parentNode.options[0].value;
+            }
+        }
+
     },
     get text(){
          return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
@@ -7174,9 +7209,16 @@ __extend__(HTMLSelectElement.prototype, {
             this.selectedIndex = index;
         }
     },
-    get value(){    // if we only over-ride one, then getter becomes undefined
-        return this.getAttribute('value')||'';
+    get value() {
+        var value = this.getAttribute('value');
+        if (value === undefined || value === null) {
+            var index = this.selectedIndex;
+            return (index != -1) ? this.options[index].value : "";
+        } else {
+            return value;
+        }
     },
+
 
     get length(){
         return this.options.length;
@@ -7199,14 +7241,16 @@ __extend__(HTMLSelectElement.prototype, {
         };
         return -1;
     },
-    set selectedIndex(value){
-        if (this.selectedIndex != -1) {
-            this.options[this.selectedIndex].selected = '';
+    
+    set selectedIndex(value) {
+        var i;
+        for (i=0; i<this.options.length; i++) {
+            this.options[i].selected = (i == Number(value));
         }
-        var option = this.options[Number(value)];
-        if (option) {
-            option.selected = 'selected';
-        }
+    },
+    get type(){
+        var type = this.getAttribute('type');
+        return type?type:'select-one';
     },
 
     add : function(){
@@ -7312,7 +7356,7 @@ __extend__(HTMLTableElement.prototype, {
     appendChild : function (child) {
         
         var tagName;
-        if(child.tagName){
+        if(child&&child.nodeType==DOMNode.ELEMENT_NODE){
             tagName = child.tagName.toLowerCase();
             if (tagName === "tr") {
                 // need an implcit <tbody> to contain this...
@@ -7332,7 +7376,8 @@ __extend__(HTMLTableElement.prototype, {
                 return DOMNode.prototype.appendChild.apply(this, arguments);
             }
         }else{
-            $error('HTMLTableElement.appendChild => child.tagName should not be undefined here... Fix ME!');
+            //tables can still have text node from white space
+            return DOMNode.prototype.appendChild.apply(this, arguments);
         }
     },
      
