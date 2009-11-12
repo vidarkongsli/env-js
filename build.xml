@@ -143,7 +143,9 @@
             <fileset dir="${SRC_DIR}" includes="profile/profile.js" />
             <fileset dir="${SRC_DIR}" includes="window/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/cookie.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/html5.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/intro.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/html5.min.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/outro.js" />
             <fileset dir="${SRC_DIR}" includes="outro.js" />
         </concat>
         <echo message="${ENV_DIST} built." />

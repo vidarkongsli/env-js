@@ -4,3 +4,6 @@ dist/env-js.*.jar
 *~
 rhino/build
 jshost
+htmlparser/gwt*
+htmlparser/html5
+htmlparser/build
