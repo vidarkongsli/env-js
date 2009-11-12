@@ -172,42 +172,54 @@
       <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/test-with-envs-jar.js"/>
+        <arg value="test/test.js"/>
+        <arg value="envjs"/>
+        <arg value="primary-tests"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
       <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/envjs-call-load-test.js"/>
+        <arg value="test/test.js"/>
+        <arg value="envjs"/>
+        <arg value="call-load-test"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
       <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/envjs-prototype.js"/>
+        <arg value="test/test.js"/>
+        <arg value="envjs"/>
+        <arg value="prototype-test"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/test-with-rhino-jar.js"/>
+        <arg value="test/test.js"/>
+        <arg value="rhino"/>
+        <arg value="primary-tests"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/rhino-call-load-test.js"/>
+        <arg value="test/test.js"/>
+        <arg value="rhino"/>
+        <arg value="call-load-test"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
       <java fork="true" jar="${RHINO_JAR}" failonerror="true">
         <arg value="-opt"/>
         <arg value="-1"/>
-        <arg value="test/rhino-prototype.js"/>
+        <arg value="test/test.js"/>
+        <arg value="rhino"/>
+        <arg value="prototype-test"/>
         <jvmarg value="-Dfile.encoding=utf-8"/>
         <jvmarg value="-Xmx256m"/>
       </java>
