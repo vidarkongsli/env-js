@@ -63,7 +63,7 @@ __extend__(DOMElement.prototype, {
             }*/
             
             // assign values to properties (and aliases)
-            attr.value     = value;
+            attr.value     = value + '';
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);

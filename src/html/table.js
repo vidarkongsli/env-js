@@ -58,7 +58,7 @@ __extend__(HTMLTableElement.prototype, {
         }
     },
  
-    /*appendChild : function (child) {
+    appendChild : function (child) {
         
         var tagName;
         if(child.tagName){
@@ -83,7 +83,7 @@ __extend__(HTMLTableElement.prototype, {
         }else{
             $error('HTMLTableElement.appendChild => child.tagName should not be undefined here... Fix ME!');
         }
-    },*/
+    },
      
     get tBodies() {
         return new HTMLCollection(this.getElementsByTagName("tbody"));
@@ -114,8 +114,7 @@ __extend__(HTMLTableElement.prototype, {
         // the row is appended as the last row. If index is omitted 
         // or greater than the number of rows, an error will result
         if (idx === -1 || idx === numRows) {
-            lastRow = rows[rows.length-1];
-            lastRow.parentNode.appendChild(inserted);
+            this.appendChild(inserted);
         } else {
             rows[idx].parentNode.insertBefore(inserted, rows[idx]);
         }

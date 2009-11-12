@@ -1884,7 +1884,7 @@ __extend__(DOMElement.prototype, {
             }*/
             
             // assign values to properties (and aliases)
-            attr.value     = value;
+            attr.value     = value + '';
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
@@ -3750,7 +3750,7 @@ __extend__(DOMImplementation.prototype,{
  * @return : DOMDocument
  */
 
-function __parseLoop__(impl, doc, p, isWindowDocument) {
+/*function __parseLoop__(impl, doc, p, isWindowDocument) {
     var iEvt, iNode, iAttr, strName;
     var iNodeParent = doc;
 
@@ -4027,12 +4027,12 @@ function __parseLoop__(impl, doc, p, isWindowDocument) {
     else if(iEvt == XMLP._NONE) {                   // no more events
       //steven woods notes that unclosed tags are rejected elsewhere and this check
 	  //breaks a table patching routine
-	  /*if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
-        break;
-      }
-      else {
-        throw(new DOMException(DOMException.SYNTAX_ERR));  // one or more Tags were not closed properly
-      }*/
+	  //if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
+      //  break;
+      //}
+      //else {
+      //  throw(new DOMException(DOMException.SYNTAX_ERR));  // one or more Tags were not closed properly
+      //}
         break;
 
     }
@@ -4081,7 +4081,7 @@ function __parseLoop__(impl, doc, p, isWindowDocument) {
     }
 
   }
-};
+};*/
 
 
 /**
@@ -7309,7 +7309,7 @@ __extend__(HTMLTableElement.prototype, {
         }
     },
  
-    /*appendChild : function (child) {
+    appendChild : function (child) {
         
         var tagName;
         if(child.tagName){
@@ -7334,7 +7334,7 @@ __extend__(HTMLTableElement.prototype, {
         }else{
             $error('HTMLTableElement.appendChild => child.tagName should not be undefined here... Fix ME!');
         }
-    },*/
+    },
      
     get tBodies() {
         return new HTMLCollection(this.getElementsByTagName("tbody"));
@@ -7365,8 +7365,7 @@ __extend__(HTMLTableElement.prototype, {
         // the row is appended as the last row. If index is omitted 
         // or greater than the number of rows, an error will result
         if (idx === -1 || idx === numRows) {
-            lastRow = rows[rows.length-1];
-            lastRow.parentNode.appendChild(inserted);
+            this.appendChild(inserted);
         } else {
             rows[idx].parentNode.insertBefore(inserted, rows[idx]);
         }
@@ -7613,6 +7612,13 @@ var HTMLTableRowElement = function(ownerDocument) {
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
     
+    appendChild : function (child) {
+    
+       var retVal = DOMNode.prototype.appendChild.apply(this, arguments);
+       retVal.cellIndex = this.cells.length -1;
+             
+       return retVal;
+    },
     // align gets or sets the horizontal alignment of data within cells of the row.
     get align() {
         return this.getAttribute("align");
@@ -7693,9 +7699,11 @@ __extend__(HTMLTableRowElement.prototype, {
         }
             
         this.insertBefore(cell, node);
-        
+        cell.cellIndex = idx;
+          
         return cell;
     },
+
     
     deleteCell : function (idx) {
         var elem = this.cells[idx];
