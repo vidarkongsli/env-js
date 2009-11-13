@@ -1,5 +1,3 @@
-load("test/qunit.js");
-
 Envjs("test/index.html", {});
 
 test("'index.html' loaded correctly via 'Envjs()' call", function(){
@@ -13,5 +11,3 @@ test("window.location= following Envjs() initialization flagged as error",
      function(){
     expect(0);
 });
-
-Envjs.wait();

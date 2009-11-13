@@ -1,5 +1,3 @@
-load("test/qunit.js");
-
 window.addEventListener("load",function(){
   print("\n\nTesting with " + whichInterpreter);
   print("Handling onload for test.js");
@@ -11,5 +9,3 @@ window.addEventListener("load",function(){
 });
 
 window.location = "test/index.html";
-
-Envjs.wait();
