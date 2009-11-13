@@ -13,7 +13,7 @@ window.addEventListener("load",function(){
   if (multiwindow)
     load(
       "test/unit/onload.js",
-      "test/unit/scope.js",   // must come before frame.js changes page content
+      "test/unit/scope.js",   // must come before iframe.js changes page content
       "test/unit/iframe.js",
       "test/unit/events.js",
       "test/unit/multi-window.js"
