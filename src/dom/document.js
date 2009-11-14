@@ -35,6 +35,9 @@ var DOMDocument = function(implementation, docParentWindow) {
 };
 DOMDocument.prototype = new DOMNode;
 __extend__(DOMDocument.prototype, {	
+    toString : function(){
+        return '[object HTMLDocument]';
+    },
     addEventListener        : function(){ window.addEventListener.apply(this, arguments); },
 	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments); },
 	attachEvent             : function(){ window.addEventListener.apply(this, arguments); },

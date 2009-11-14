@@ -190,7 +190,7 @@ __extend__(DOMElement.prototype, {
         
         // serialize Attribute declarations
         var attrs = this.attributes.xml;
-        if (attrs.length > 0) attrs = " "+ attrs;
+        if (attrs.length > 0) attrs = ""+ attrs;
         
         // serialize this Element
         ret += "<" + this.nodeName.toLowerCase() + ns + attrs +">";
