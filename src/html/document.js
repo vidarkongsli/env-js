@@ -19,6 +19,9 @@ var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
 };
 HTMLDocument.prototype = new DOMDocument;
 __extend__(HTMLDocument.prototype, {
+    toString : function(){
+        return '[object HTMLDocument]';
+    },
     createElement: function(tagName){
           //print('createElement :'+tagName);
           // throw Exception if the tagName string contains an illegal character
