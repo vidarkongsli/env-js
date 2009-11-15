@@ -2643,12 +2643,11 @@ __extend__(DOMElement.prototype, {
         
         // serialize Attribute declarations
         var attrs = this.attributes.xml;
-        if (attrs.length > 0) attrs = ""+ attrs;
         
         // serialize this Element
         ret += "<" + this.nodeName.toLowerCase() + ns + attrs +">";
         ret += this.childNodes.xml;
-        ret += "</" + this.nodeName.toLowerCase()+">";
+        ret += "</" + this.nodeName.toLowerCase() + ">";
         
         return ret;
     },
