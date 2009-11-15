@@ -8569,7 +8569,7 @@ var convert_time = function(time) {
   return time;
 }
 
-window.setTimeout = function(fn, time){
+$w.setTimeout = function(fn, time){
   var num;
   time = convert_time(time);
   $timers.lock(function(){
@@ -8582,7 +8582,7 @@ window.setTimeout = function(fn, time){
         } catch (e) {
           $env.error(e);
         } finally {
-          window.clearInterval(num);
+          $w.clearInterval(num);
         }
       };
     } else {
@@ -8592,7 +8592,7 @@ window.setTimeout = function(fn, time){
         } catch (e) {
           $env.error(e);
         } finally {
-          window.clearInterval(num);
+          $w.clearInterval(num);
         }
       };
     }
@@ -8603,7 +8603,7 @@ window.setTimeout = function(fn, time){
   return num;
 };
 
-window.setInterval = function(fn, time){
+$w.setInterval = function(fn, time){
   time = convert_time(time);
   if ( time < 10 ) {
     time = 10;
@@ -8624,7 +8624,7 @@ window.setInterval = function(fn, time){
   return num;
 };
 
-window.clearInterval = window.clearTimeout = function(num){
+$w.clearInterval = $w.clearTimeout = function(num){
   //$log("clearing interval "+num);
   $timers.lock(function(){
     if ( $timers[num] ) {
@@ -8642,7 +8642,7 @@ window.clearInterval = window.clearTimeout = function(num){
 
 // FIX: make a priority queue ...
 
-window.$wait = $env.wait = $env.wait || function(wait) {
+$w.$wait = $env.wait = $env.wait || function(wait) {
   var delta_wait;
   if (wait < 0) {
     delta_wait = -wait;
