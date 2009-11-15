@@ -1,86 +1,112 @@
-// environment mocking for parser
-$w = { }
-$env = { debug: function() {} }
-$openingWindow = $parentWindow = $initTop = null;
+module("Html5Parser");
 
-load("src/window/window.js", "src/dom/parser.js", "src/dom/entities.js");
+var should = function(msg, options){
+    try{
+        if(options.be&&options.be=='equal'){
+            equals(
+                options.expected,
+                options.actual,
+                msg
+            );
+        }else if(options.be&&options.be==='safe'){
+            options.test();
+            ok(true, msg);
+        }else{
+            ok(false, 'unknown test '+options.be);
+        }
+    }catch(e){
+        //no nothing
+        equals(true, false, options.msg||'This test failed.');
+    }finally{
+        //TODO: might as well keep score here
+        return this;
+    }
+};
 
-module("parser");
+
+test("XML Standard Entities: Spot Check", function() {
+
+    expect(2);
+    var htmlstr = 
+        "<div id='xmlentity' \
+            style='&lt;Hello&gt;, &quot;W&apos;rld&quot;!'\
+            >&lt;Hello&gt;, &quot;W&apos;rld&quot;!</div>",
+        domParser = new DOMParser(),
+        doc = domParser.parseFromString(htmlstr);
+    
+    should("Replace entities at nodeValue",{ 
+        be:'equal',
+        actual : doc.
+            getElementById('xmlentity').
+            childNodes[0].
+            nodeValue,
+        expected : '<Hello>, "W\'rld"!'
+    }).
+    should("serialize only &amp;, &lt; and &gt; for TextNode with innerHTML",{
+        be: 'equal',
+        actual : doc.
+            getElementById('xmlentity').
+            innerHTML,
+        expected : '&lt;Hello&gt;, "W\'rld"!'
+    });
+      
+});
 
 test("HTML Standard Entities: Spot Check", function() {
-    
-    expect(3);
-    
-    var htmlstr = 
-        "<div id='xmlentity'>&lt;Hello&gt;, &quot;W&apos;rld&quot;!</div>",
-        domParser = new DOMParser(),
-        doc = domParser.parseFromString(htmlstr),
-        actual,
-        expected;
-    
-    actual = doc.
-        getElementById('xmlentity').
-        childNodes[0].
-        nodeValue;
-    expected = '<Hello>, "W\'rld"!';  
-    equals(
-        actual, 
-        expected, 
-        "parser replaces entities"
-    );
-        
-    actual = doc.
-        getElementById('xmlentity').
-        innerHTML;
-    expected = '&lt;Hello&gt;, "W\'rld"!';  
-    equals(
-        actual, 
-        expected, 
-        "innerHTML serializes back only &amp;, &lt; and &gt; for TextNode"
-    );
 
-    htmlstr  = "<div id='htmlentity'>&quot; &amp; &lt; &gt; "+
+    expect(1);
+    var htmlstr  = "<div id='htmlentity'>&quot; &amp; &lt; &gt; "+
                    "&nbsp; &copy; &reg; &yen; &para; " +
                    "&Ecirc; &Otilde; &aelig; &divide; &Kappa; &theta; "+
                    "&bull; &hellip; &trade; &rArr; &sum; &clubs; " +
-                   "&ensp; &mdash;</body></html>";
-    expected = '" &amp; &lt; &gt; '+
-               '\xA0 \xA9 \xAE \xA5 \xB6 '+
-               '\xCA \xD5 \xE6 \xF7 \u039A \u03B8 '+
-               '\u2022 \u2026 \u2122 \u21D2 \u2211 \u2663 '+
-               '\u2002 \u2014';
+                   "&ensp; &mdash;</div>",
+        domParser = new DOMParser(),
+        doc = domParser.parseFromString(htmlstr);
 
-    domParser = new DOMParser();
-    doc = domParser.parseFromString(htmlstr);
-    actual = doc.
-        getElementById('htmlentity').
-        innerHTML;
-
-    equals(
-        actual, 
-        expected, 
-        "html entities are not serialized back with innerHTML"
-    );
+    should("serialize only &amp;, &lt; and &gt; for TextNode with innerHTML",{
+        be:'equal',
+        actual:doc.
+            getElementById('htmlentity').
+            innerHTML,
+        expected : '" &amp; &lt; &gt; '+
+                   '\xA0 \xA9 \xAE \xA5 \xB6 '+
+                   '\xCA \xD5 \xE6 \xF7 \u039A \u03B8 '+
+                   '\u2022 \u2026 \u2122 \u21D2 \u2211 \u2663 '+
+                   '\u2002 \u2014'
+    });
+  
 });
 
-test("HTML Serialization Convention", function(){
+test("Serialization Conventions", function(){
     
 });
 
+test("Ugly HTML Parsing", function() {
 
-test("Ugly HTML", function() {
     expect(1);
-    //setup
     var domParser = new DOMParser(),
     	html = '<div id="pig"><p>this is a pig... &apos;oink! oink!&apos;</div>',
-        doc = domParser.parseFromString(html),
-        expected = '<div id="pig"><p>this is a pig... \'oink! oink!\'</p></div>',
-        actual   = doc.getElementById('pig').xml;
-        
-    equals(
-        actual, 
-        expected,
-        'got expected well formed html'
-    );
+        doc = domParser.parseFromString(html);
+       
+    should('correct the unclosed p tag',{ 
+        be:'equal',
+        actual:doc.
+            getElementById('pig').
+            xml, 
+        expected:'<div id="pig"><p>this is a pig... \'oink! oink!\'</p></div>'
+    });
+
+});
+
+test("Really Ugly HTML Parsing", function() {
+    
+    expect(1);
+    
+    should('parse the document without error',{
+        be:'safe',
+        test:function(){
+            window.open('html/malformed.html');
+        }
+    });
 
 });
