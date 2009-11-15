@@ -38,11 +38,11 @@ __extend__(DOMDocument.prototype, {
     toString : function(){
         return '[object HTMLDocument]';
     },
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments); },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments); },
-	attachEvent             : function(){ window.addEventListener.apply(this, arguments); },
-	detachEvent             : function(){ window.removeEventListener.apply(this, arguments); },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments); },
+    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
+	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
+	attachEvent             : function(){ $w.addEventListener.apply(this, arguments); },
+	detachEvent             : function(){ $w.removeEventListener.apply(this, arguments); },
+	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
 
     get styleSheets(){ 
         return [];/*TODO*/ 
@@ -78,7 +78,7 @@ __extend__(DOMDocument.prototype, {
             this._namespaces     = new DOMNamespaceNodeMap(this, this);
             this._readonly = false;
 
-            parseHtmlDocument(xmlString, this, null, null);
+            $w.parseHtmlDocument(xmlString, this, null, null);
             
             $env.wait(-1);
         } catch (e) {

@@ -148,7 +148,7 @@ __extend__(HTMLDocument.prototype, {
 
     //set/get cookie see cookie.js
     get domain(){
-        return this._domain||window.location.domain;
+        return this._domain||$w.location.domain;
         
     },
     set domain(){

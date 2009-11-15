@@ -1843,9 +1843,9 @@ __extend__(DOMElement.prototype, {
     set tagName(name){
         this.nodeName = name;  
     },
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
+    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
+	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
+	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
@@ -4238,11 +4238,11 @@ __extend__(DOMDocument.prototype, {
     toString : function(){
         return '[object HTMLDocument]';
     },
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments); },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments); },
-	attachEvent             : function(){ window.addEventListener.apply(this, arguments); },
-	detachEvent             : function(){ window.removeEventListener.apply(this, arguments); },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments); },
+    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
+	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
+	attachEvent             : function(){ $w.addEventListener.apply(this, arguments); },
+	detachEvent             : function(){ $w.removeEventListener.apply(this, arguments); },
+	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
 
     get styleSheets(){ 
         return [];/*TODO*/ 
@@ -4278,7 +4278,7 @@ __extend__(DOMDocument.prototype, {
             this._namespaces     = new DOMNamespaceNodeMap(this, this);
             this._readonly = false;
 
-            parseHtmlDocument(xmlString, this, null, null);
+            $w.parseHtmlDocument(xmlString, this, null, null);
             
             $env.wait(-1);
         } catch (e) {
@@ -5102,7 +5102,7 @@ __extend__(HTMLDocument.prototype, {
 
     //set/get cookie see cookie.js
     get domain(){
-        return this._domain||window.location.domain;
+        return this._domain||$w.location.domain;
         
     },
     set domain(){
@@ -5440,7 +5440,7 @@ var __eval__ = function(script, startingNode){
         var listOfScopes = [];
         for (var node = startingNode; node != null; node = node.parentNode)
             listOfScopes.push(node);
-        listOfScopes.push(window);
+        listOfScopes.push($w);
 
 
         var oldScopesArray = $env.configureScope(

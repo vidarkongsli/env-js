@@ -20,9 +20,9 @@ __extend__(DOMElement.prototype, {
     set tagName(name){
         this.nodeName = name;  
     },
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments) },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments) },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments) },
+    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
+	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
+	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
