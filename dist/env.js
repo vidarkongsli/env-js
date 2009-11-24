@@ -160,10 +160,10 @@ __extend__($w,{
   get status(){return $status;},
   set status(_status){$status = _status;},
   get top(){return $top || $window;},
-  get window(){return $window;},
+  get window(){return $window;} /*,
   toString : function(){
       return '[object Window]';
-  }
+  } FIX SMP */
 });
 
 $w.open = function(url, name, features, replace){
@@ -289,8 +289,6 @@ function __setArray__( target, array ) {
 	target.length = 0;
 	Array.prototype.push.apply( target, array );
 };
-
-
 $debug("Defining NodeList");
 /*
 * NodeList - DOM Level 2
@@ -3662,9 +3660,20 @@ __extend__(DOMImplementation.prototype,{
         return new DOMDocumentType();
     },
     createDocument : function(nsuri, qname, doctype){
-      //TODO - this currently returns an empty doc
-      //but needs to handle the args
-        return new HTMLDocument($implementation, null, "");
+        //TODO - this currently returns an empty doc
+        //but needs to handle the args
+        return new Document($implementation, null);
+    },
+    createHTMLDocument : function(title){
+        var doc = new HTMLDocument($implementation, null, "");
+        var html = doc.createElement("html"); doc.appendChild(html);
+        var head = doc.createElement("head"); html.appendChild(head);
+        var body = doc.createElement("body"); html.appendChild(body);
+        var t = doc.createElement("title"); head.appendChild(t);
+        if( title) {
+            t.appendChild(doc.createTextNode(title));
+        }
+        return doc;
     },
     translateErrCode : function(code) {
         //convert DOMException Code to human readable error message;
@@ -4198,7 +4207,14 @@ function __parseQName__(qualifiedName) {
 $debug("Initializing document.implementation");
 var $implementation =  new DOMImplementation();
 $implementation.namespaceAware = false;
-$implementation.errorChecking = false;$debug("Defining Document");
+$implementation.errorChecking = false;
+    
+// Local Variables:
+// espresso-indent-level:4
+// c-basic-offset:4
+// tab-width:4
+// End:
+$debug("Defining Document");
 /**
  * @class  DOMDocument - The Document interface represents the entire HTML 
  *      or XML document. Conceptually, it is the root of the document tree, 
@@ -4236,7 +4252,7 @@ var DOMDocument = function(implementation, docParentWindow) {
 DOMDocument.prototype = new DOMNode;
 __extend__(DOMDocument.prototype, {	
     toString : function(){
-        return '[object HTMLDocument]';
+        return '[object DOMDocument]';
     },
     addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
 	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
@@ -4552,7 +4568,7 @@ __extend__(DOMDocument.prototype, {
         return this.documentElement.xml;
     },
 	toString: function(){ 
-	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "DOMDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
     },
 	get defaultView(){ 
 		return { getComputedStyle: function(elem){
@@ -5163,7 +5179,7 @@ __extend__(HTMLDocument.prototype, {
 	    this.write(htmlstring+'\n'); 
     },
 	toString: function(){ 
-	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "HTMLDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
     },
 	get innerHTML(){ 
 	    return this.documentElement.outerHTML; 
@@ -5284,8 +5300,9 @@ __extend__(HTMLElement.prototype, {
 		set innerHTML(html){
 		    //Should be replaced with HTMLPARSER usage
             //$debug('SETTING INNER HTML ('+this+'+'+html.substring(0,64));
-		    var doc = new DOMParser().
-			  parseFromString(html);
+            var doc = new HTMLDocument($implementation,null,"");
+            $w.parseHtmlDocument(html,doc,null,null);
+            $env.wait(-1);
             var parent = doc.body;
 			while(this.firstChild != null){
 			    this.removeChild( this.firstChild );
@@ -5303,7 +5320,11 @@ __extend__(HTMLElement.prototype, {
             return __recursivelyGatherText__(this);
         },
         set innerText(newText){
-            this.innerHTML = newText;  // a paranoid would HTML-escape, but...
+			while(this.firstChild != null){
+			    this.removeChild( this.firstChild );
+			}
+            var text = this.ownerDocument.createTextNode(newText);
+            this.appendChild(text);
         },
 		get lang() { 
 		    return this.getAttribute("lang"); 
@@ -5532,6 +5553,12 @@ var __blur__ = function(element){
 };
 
 $w.HTMLElement = HTMLElement;
+
+// Local Variables:
+// espresso-indent-level:4
+// c-basic-offset:4
+// tab-width:4
+// End:
 $debug("Defining HTMLCollection");
 /*
 * HTMLCollection - DOM Level 2
