@@ -41,8 +41,9 @@ __extend__(HTMLElement.prototype, {
 		set innerHTML(html){
 		    //Should be replaced with HTMLPARSER usage
             //$debug('SETTING INNER HTML ('+this+'+'+html.substring(0,64));
-		    var doc = new DOMParser().
-			  parseFromString(html);
+            var doc = new HTMLDocument($implementation,null,"");
+            $w.parseHtmlDocument(html,doc,null,null);
+            $env.wait(-1);
             var parent = doc.body;
 			while(this.firstChild != null){
 			    this.removeChild( this.firstChild );
@@ -60,7 +61,11 @@ __extend__(HTMLElement.prototype, {
             return __recursivelyGatherText__(this);
         },
         set innerText(newText){
-            this.innerHTML = newText;  // a paranoid would HTML-escape, but...
+			while(this.firstChild != null){
+			    this.removeChild( this.firstChild );
+			}
+            var text = this.ownerDocument.createTextNode(newText);
+            this.appendChild(text);
         },
 		get lang() { 
 		    return this.getAttribute("lang"); 
@@ -197,7 +202,7 @@ var __eval__ = function(script, startingNode){
         var listOfScopes = [];
         for (var node = startingNode; node != null; node = node.parentNode)
             listOfScopes.push(node);
-        listOfScopes.push(window);
+        listOfScopes.push($w);
 
 
         var oldScopesArray = $env.configureScope(
@@ -289,3 +294,9 @@ var __blur__ = function(element){
 };
 
 $w.HTMLElement = HTMLElement;
+
+// Local Variables:
+// espresso-indent-level:4
+// c-basic-offset:4
+// tab-width:4
+// End:

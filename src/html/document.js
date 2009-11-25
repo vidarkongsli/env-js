@@ -145,7 +145,7 @@ __extend__(HTMLDocument.prototype, {
 
     //set/get cookie see cookie.js
     get domain(){
-        return this._domain||window.location.domain;
+        return this._domain||$w.location.domain;
         
     },
     set domain(){
@@ -206,7 +206,7 @@ __extend__(HTMLDocument.prototype, {
 	    this.write(htmlstring+'\n'); 
     },
 	toString: function(){ 
-	    return "Document" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "HTMLDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
     },
 	get innerHTML(){ 
 	    return this.documentElement.outerHTML; 
