@@ -62,8 +62,7 @@ __extend__(DOMDocument.prototype, {
     loadXML : function(xmlString) {
         // create DOM Document
         if(this === $document){
-    
-            $info("Setting internal window.document ");
+            $debug("Setting internal window.document");
             $document = this;
         }
         // populate Document with Parsed Nodes
