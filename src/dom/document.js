@@ -35,14 +35,11 @@ var DOMDocument = function(implementation, docParentWindow) {
 };
 DOMDocument.prototype = new DOMNode;
 __extend__(DOMDocument.prototype, {	
-    toString : function(){
-        return '[object HTMLDocument]';
-    },
-    addEventListener        : function(){ window.addEventListener.apply(this, arguments); },
-	removeEventListener     : function(){ window.removeEventListener.apply(this, arguments); },
-	attachEvent             : function(){ window.addEventListener.apply(this, arguments); },
-	detachEvent             : function(){ window.removeEventListener.apply(this, arguments); },
-	dispatchEvent           : function(){ window.dispatchEvent.apply(this, arguments); },
+    addEventListener        : function(type, fn){ __addEventListener__(this, type, fn); },
+	removeEventListener     : function(type){ __removeEventListener__(this, type); },
+	attachEvent             : function(type, fn){ __addEventListener__(this, type, fn); },
+	detachEvent             : function(type){ __removeEventListener__(this, type); },
+	dispatchEvent           : function(event, bubbles){ __dispatchEvent__(this, event, bubbles); },
 
     get styleSheets(){ 
         return [];/*TODO*/ 
@@ -65,7 +62,8 @@ __extend__(DOMDocument.prototype, {
     loadXML : function(xmlString) {
         // create DOM Document
         if(this === $document){
-            $debug("Setting internal window.document");
+    
+            $info("Setting internal window.document ");
             $document = this;
         }
         // populate Document with Parsed Nodes
@@ -109,23 +107,30 @@ __extend__(DOMDocument.prototype, {
             
         	$info("Sucessfully loaded document at "+url);
 
-                // first fire body-onload event
-            var event = document.createEvent();
-            event.initEvent("load");
+            // first fire body-onload event
+            var bodyLoad = _this.createEvent();
+            bodyLoad.initEvent("load");
             try {  // assume <body> element, but just in case....
-                $w.document.getElementsByTagName('body')[0].
-                  dispatchEvent( event, false );
+                _this.getElementsByTagName('body')[0].
+                  dispatchEvent( bodyLoad, false );
             } catch (e){;}
 
-                // then fire window-onload event
-            event = document.createEvent();
-            event.initEvent("load");
-            $w.dispatchEvent( event, false );
+            // then fire this onload event
+            //event = _this.createEvent();
+            //event.initEvent("load");
+            //_this.dispatchEvent( event, false );
 			
 			//also use DOMContentLoaded event
-            var domContentLoaded = document.createEvent();
+            var domContentLoaded = _this.createEvent();
             domContentLoaded.initEvent("DOMContentLoaded");
-            $w.dispatchEvent( domContentLoaded, false );
+            _this.dispatchEvent( domContentLoaded, false );
+            
+            //finally fire the window.onload event
+            if(_this === document){
+                var windowLoad = _this.createEvent();
+                windowLoad.initEvent("load", false, false);
+                $w.dispatchEvent( windowLoad, false );
+            }
             
         };
         xhr.send();

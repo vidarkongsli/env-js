@@ -19,9 +19,6 @@ var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
 };
 HTMLDocument.prototype = new DOMDocument;
 __extend__(HTMLDocument.prototype, {
-    toString : function(){
-        return '[object HTMLDocument]';
-    },
     createElement: function(tagName){
           //print('createElement :'+tagName);
           // throw Exception if the tagName string contains an illegal character
@@ -244,7 +241,7 @@ var __elementPopped__ = function(ns, name, node){
                 // only fire event if we actually had something to load
                 if (node.src && node.src.length > 0){
                     var event = doc.createEvent();
-                    event.initEvent( okay ? "load" : "error" );
+                    event.initEvent( okay ? "load" : "error", false, false );
                     node.dispatchEvent( event, false );
                   }
             }
@@ -259,7 +256,7 @@ var __elementPopped__ = function(ns, name, node){
                 $env.loadFrame(node, $env.location(node.src));
     
                 var event = doc.createEvent();
-                event.initEvent("load");
+                event.initEvent("load", false, false);
                 node.dispatchEvent( event, false );
             }
         }
@@ -268,7 +265,7 @@ var __elementPopped__ = function(ns, name, node){
             if (node.href && node.href.length > 0){
                 // don't actually load anything, so we're "done" immediately:
                 var event = doc.createEvent();
-                event.initEvent("load");
+                event.initEvent("load", false, false);
                 node.dispatchEvent( event, false );
             }
         }
@@ -277,7 +274,7 @@ var __elementPopped__ = function(ns, name, node){
             if (node.src && node.src.length > 0){
                 // don't actually load anything, so we're "done" immediately:
                 var event = doc.createEvent();
-                event.initEvent("load");
+                event.initEvent("load", false, false);
                 node.dispatchEvent( event, false );
             }
         }
