@@ -8,7 +8,7 @@
 
 var SETTINGS = {
 
-    BASE_URI : 'file://mnt/repos/thatcher',
+    BASE_URI : 'file://mnt/repos/thatcher/env-js/',
     
     AJAX_BASE: 'http://localhost:8080/env-js/'
     
