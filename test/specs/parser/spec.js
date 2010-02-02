@@ -17,7 +17,6 @@ try{
     _load = _start = function(){};
 }
 
-
 QUnit.log = function(result, message){
     if(console)console.log('(' + (_count++) + ')[' + 
         ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);

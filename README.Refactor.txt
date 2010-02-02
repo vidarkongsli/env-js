@@ -69,13 +69,7 @@
  port is also being widely used, and we hope to integrate into the main branch 
  or as a github plugin.
  
- If your platform isn't supported:
-  
- * try to use the same command with a different platform
-     > ant ...
-     > make ....
-     > rake ...
- * If your platform isn't supported please volunteer to provide one if you can!
+
      
     
     
