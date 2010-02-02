@@ -38,7 +38,6 @@ _load('dist/platform/rhino.js');
 _load('dist/console.js');
 _load('src/common/__extend__.js');
 _load('settings.js');
-_load('local_settings.js');
 
 module('rhino');
 
@@ -54,14 +53,6 @@ test('Envjs Platform Interfaces Available', function(){
 var document = null;
 
 test('Envjs.location', function(){
-    
-    var path = 'specs/env/spec.html',
-        base = SETTINGS.BASE_URI;
-    
-    location = Envjs.location('specs/env/spec.html');
-    ok(location, 'Able to create Location');
-    equals(location, SETTINGS.BASE_URI+path, 'location');
-    equals(location.toString(), SETTINGS.BASE_URI+path, 'location');
     
     location = Envjs.location('specs/env/spec.html', 'http://envjs.com/abc123/');
     ok(location, 'Able to create Location');
