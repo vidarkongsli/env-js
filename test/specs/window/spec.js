@@ -24,12 +24,8 @@ try{
     _load('dist/parser.js');
     _load('dist/xhr.js');
     _load('dist/window.js');
-    
-    try{
-        _load('local_settings.js');
-    }catch(e){
-        _load('settings.js');
-    }
+    _load('settings.js');
+    _load('local_settings.js');
     
     //mock the window and document in envjs
     new Window(__this__, __this__);

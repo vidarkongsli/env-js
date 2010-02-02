@@ -37,11 +37,8 @@ _load('dist/platform/core.js');
 _load('dist/platform/rhino.js');
 _load('dist/console.js');
 _load('src/common/__extend__.js');
-try{
-    _load('local_settings.js');
-}catch(e){
-    _load('settings.js');
-}
+_load('settings.js');
+_load('local_settings.js');
 
 module('rhino');
 

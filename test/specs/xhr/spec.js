@@ -42,11 +42,8 @@ _load('dist/html.js');
 _load('dist/timer.js');
 _load('dist/parser.js');
 _load('dist/xhr.js');
-try{
-    _load('local_settings.js');
-}catch(e){
-    _load('settings.js');
-}
+_load('settings.js');
+_load('local_settings.js');
 
 module('xhr');
 
