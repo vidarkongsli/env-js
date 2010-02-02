@@ -1,7 +1,8 @@
+
 /* 
 * CSSStyleSheet - DOM Level 2
 */
-var CSSStyleSheet = function(options){
+CSSStyleSheet = function(options){
     var $cssRules, 
         $disabled = options.disabled?options.disabled:false,
         $href = options.href?options.href:null,
@@ -10,7 +11,7 @@ var CSSStyleSheet = function(options){
         $type = "text/css";
         
     function parseStyleSheet(text){
-        $debug("parsing css");
+        //$debug("parsing css");
         //this is pretty ugly, but text is the entire text of a stylesheet
         var cssRules = [];
     	if (!text) text = "";
@@ -23,30 +24,45 @@ var CSSStyleSheet = function(options){
     	for (i=0; i<len; i++){
     		definition_block = blocks[i].split("{");
     		if(definition_block.length === 2){
-      		selectors = definition_block[0].split(",");
-      		for(var j=0;j<selectors.length;j++){
-      		  cssRules.push(new CSSRule({
-      		    selectorText:selectors[j],
-      		    cssText:definition_block[1]
-      		  }));
-      		}
-      		__setArray__($cssRules, cssRules);
+          		selectors = definition_block[0].split(",");
+          		for(var j=0;j<selectors.length;j++){
+          		    cssRules.push(new CSSRule({
+          		        selectorText:selectors[j],
+          		        cssText:definition_block[1]
+          		    }));
+          		}
+          		__setArray__($cssRules, cssRules);
     		}
     	}
     };
     parseStyleSheet(options.text);
     return __extend__(this, {
-      get cssRules(){return $cssRules;},
-      get rule(){return $cssRules;},//IE - may be deprecated
-      get href(){return $href;},
-      get parentStyleSheet(){return $parentStyleSheet;},
-      get title(){return $title;},
-      get type(){return $type;},
-      addRule: function(selector, style, index){/*TODO*/},
-      deleteRule: function(index){/*TODO*/},
-      insertRule: function(rule, index){/*TODO*/},
-      removeRule: function(index){this.deleteRule(index);}//IE - may be deprecated
+        get cssRules(){
+            return $cssRules;
+        },
+        get rule(){
+            return $cssRules;
+        },//IE - may be deprecated
+        get href(){
+            return $href;
+        },
+        get parentStyleSheet(){
+            return $parentStyleSheet;
+        },
+        get title(){
+            return $title;
+        },
+        get type(){
+            return $type;
+        },
+        addRule: function(selector, style, index){/*TODO*/},
+        deleteRule: function(index){/*TODO*/},
+        insertRule: function(rule, index){/*TODO*/},
+        //IE - may be deprecated
+        removeRule: function(index){
+            this.deleteRule(index);
+        }
     });
 };
 
-$w.CSSStyleSheet = CSSStyleSheet;
+

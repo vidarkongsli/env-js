@@ -1,8 +1,8 @@
-$debug("Defining HTMLAreaElement");
+
 /* 
-* HTMLAreaElement - DOM Level 2
-*/
-var HTMLAreaElement = function(ownerDocument) {
+ * HTMLAreaElement - DOM Level 2
+ */
+HTMLAreaElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -53,5 +53,4 @@ __extend__(HTMLAreaElement.prototype, {
     }
 });
 
-$w.HTMLAreaElement = HTMLAreaElement;
 			

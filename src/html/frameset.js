@@ -1,8 +1,7 @@
-$debug("Defining HTMLFrameSetElement");
-/* 
-* HTMLFrameSetElement - DOM Level 2
-*/
-var HTMLFrameSetElement = function(ownerDocument) {
+/** 
+ * HTMLFrameSetElement - DOM Level 2
+ */
+HTMLFrameSetElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -21,5 +20,3 @@ __extend__(HTMLFrameSetElement.prototype, {
         this.setAttribute('rows', value);
     }
 });
-
-$w.HTMLFrameSetElement = HTMLFrameSetElement;	

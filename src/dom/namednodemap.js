@@ -1,21 +1,21 @@
 /**
- * @class  DOMNamedNodeMap - used to represent collections of nodes that can be accessed by name
- *  typically a set of Element attributes
+ * @class  NamedNodeMap - 
+ *      used to represent collections of nodes that can be accessed by name
+ *      typically a set of Element attributes
  *
- * @extends DOMNodeList - note W3C spec says that this is not the case,
- *   but we need an item() method identicle to DOMNodeList's, so why not?
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNamedNodeMap is attached to (or null)
+ * @extends NodeList - 
+ *      note W3C spec says that this is not the case, but we need an item() 
+ *      method identical to NodeList's, so why not?
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NamedNodeMap is attached to (or null)
  */
-var DOMNamedNodeMap = function(ownerDocument, parentNode) {
-    //$log("\t\tcreating dom namednodemap");
-    this.DOMNodeList = DOMNodeList;
-    this.DOMNodeList(ownerDocument, parentNode);
+NamedNodeMap = function(ownerDocument, parentNode) {
+    this.NodeList = NodeList;
+    this.NodeList(ownerDocument, parentNode);
     __setArray__(this, []);
 };
-DOMNamedNodeMap.prototype = new DOMNodeList;
-__extend__(DOMNamedNodeMap.prototype, {
+NamedNodeMap.prototype = new NodeList;
+__extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
     },
@@ -25,11 +25,12 @@ __extend__(DOMNamedNodeMap.prototype, {
         // test that Named Node exists
         var itemIndex = __findNamedItemIndex__(this, name);
         
-        if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // return NamedNode
+        if (itemIndex > -1) { 
+            // found it!                         
+            ret = this[itemIndex];                
         }
-        
-        return ret;                                    // if node is not found, default value null is returned
+        // if node is not found, default value null is returned
+        return ret;                                    
     },
     setNamedItem : function(arg) {
       // test for exceptions
@@ -77,7 +78,7 @@ __extend__(DOMNamedNodeMap.prototype, {
     removeNamedItem : function(name) {
           var ret = null;
           // test for exceptions
-          // throw Exception if DOMNamedNodeMap is readonly
+          // throw Exception if NamedNodeMap is readonly
           if (__ownerDocument__(this).implementation.errorChecking && 
                 (this._readonly || (this.parentNode && this.parentNode._readonly))) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -104,62 +105,68 @@ __extend__(DOMNamedNodeMap.prototype, {
           return __removeChild__(this, itemIndex);
     },
     getNamedItemNS : function(namespaceURI, localName) {
-          var ret = null;
+        var ret = null;
         
-          // test that Named Node exists
-          var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
+        // test that Named Node exists
+        var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
-          if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // return NamedNode
-          }
-        
-          return ret;                                    // if node is not found, default value null is returned
+        if (itemIndex > -1) {
+            // found it! return NamedNode
+            ret = this[itemIndex];
+        }
+        // if node is not found, default value null is returned
+        return ret;                                    
     },
     setNamedItemNS : function(arg) {
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNamedNodeMap is readonly
+        //console.log('setNamedItemNS %s', arg);
+        // test for exceptions
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if NamedNodeMap is readonly
             if (this._readonly || (this.parentNode && this.parentNode._readonly)) {
-              throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
-        
+            
             // throw Exception if arg was not created by this Document
             if (__ownerDocument__(this) != __ownerDocument__(arg)) {
-              throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+                throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
-        
+            
             // throw Exception if arg is already an attribute of another Element object
             if (arg.ownerElement && (arg.ownerElement != this.parentNode)) {
-              throw(new DOMException(DOMException.INUSE_ATTRIBUTE_ERR));
+                throw(new DOMException(DOMException.INUSE_ATTRIBUTE_ERR));
             }
-          }
+        }
         
-          // get item index
-          var itemIndex = __findNamedItemNSIndex__(this, arg.namespaceURI, arg.localName);
-          var ret = null;
+        // get item index
+        var itemIndex = __findNamedItemNSIndex__(this, arg.namespaceURI, arg.localName);
+        var ret = null;
         
-          if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // use existing Attribute
-            // throw Exception if DOMAttr is readonly
+        if (itemIndex > -1) {
+            // found it!
+            // use existing Attribute
+            ret = this[itemIndex];
+            // throw Exception if Attr is readonly
             if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
-              throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
-              this[itemIndex] = arg;                // over-write existing NamedNode
+                // over-write existing NamedNode
+                this[itemIndex] = arg;
             }
-          }else {
+        }else {
             // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
-          }
-          arg.ownerElement = this.parentNode;
+        }
+        arg.ownerElement = this.parentNode;
         
-        
-          return ret;                                    // return old node or null
+        // return old node or null
+        return ret;
+        console.log('finished setNamedItemNS %s', arg);
     },
     removeNamedItemNS : function(namespaceURI, localName) {
           var ret = null;
         
           // test for exceptions
-          // throw Exception if DOMNamedNodeMap is readonly
+          // throw Exception if NamedNodeMap is readonly
           if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
@@ -201,166 +208,164 @@ __extend__(DOMNamedNodeMap.prototype, {
 });
 
 /**
- * @method DOMNamedNodeMap._findNamedItemIndex - find the item index of the node with the specified name
+ * @method __findNamedItemIndex__ 
+ *      find the item index of the node with the specified name
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  name : string - the name of the required node
- * @param  isnsmap : if its a DOMNamespaceNodeMap
+ * @param  isnsmap : if its a NamespaceNodeMap
  * @return : int
  */
 var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
-  var ret = -1;
-
-  // loop through all nodes
-  for (var i=0; i<namednodemap.length; i++) {
-    // compare name to each node's nodeName
-    if(isnsmap){
-        if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {         // found it!
-          ret = i;
-          break;
-        }
-    }else{
-        if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         // found it!
-          ret = i;
-          break;
+    var ret = -1;
+    // loop through all nodes
+    for (var i=0; i<namednodemap.length; i++) {
+        // compare name to each node's nodeName
+        if(isnsmap){
+            if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {
+                // found it!         
+                ret = i;
+                break;
+            }
+        }else{
+            if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
+                // found it!
+                ret = i;
+                break;
+            }
         }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;                                    
 };
 
 /**
- * @method DOMNamedNodeMap._findNamedItemNSIndex - find the item index of the node with the specified namespaceURI and localName
+ * @method __findNamedItemNSIndex__ 
+ *      find the item index of the node with the specified 
+ *      namespaceURI and localName
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
  * @return : int
  */
 var __findNamedItemNSIndex__ = function(namednodemap, namespaceURI, localName) {
-  var ret = -1;
-
-  // test that localName is not null
-  if (localName) {
-    // loop through all nodes
-    for (var i=0; i<namednodemap.length; i++) {
-      // compare name to each node's namespaceURI and localName
-      if ((namednodemap[i].namespaceURI.toLowerCase() == namespaceURI.toLowerCase()) && 
-          (namednodemap[i].localName.toLowerCase() == localName.toLowerCase())) {
-        ret = i;                                 // found it!
-        break;
-      }
+    var ret = -1;
+    // test that localName is not null
+    if (localName) {
+        // loop through all nodes
+        for (var i=0; i<namednodemap.length; i++) {
+            if(namednodemap[i].namespaceURI && namednodemap[i].localName){
+                // compare name to each node's namespaceURI and localName
+                if ((namednodemap[i].namespaceURI.toLowerCase() == namespaceURI.toLowerCase()) && 
+                    (namednodemap[i].localName.toLowerCase() == localName.toLowerCase())) {
+                    // found it!
+                    ret = i;                                 
+                    break;
+                }
+            }
+        }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;                                    
 };
 
 /**
- * @method DOMNamedNodeMap._hasAttribute - Returns true if specified node exists
+ * @method __hasAttribute__ 
+ *      Returns true if specified node exists
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  name : string - the name of the required node
  * @return : boolean
  */
 var __hasAttribute__ = function(namednodemap, name) {
-  var ret = false;
-
-  // test that Named Node exists
-  var itemIndex = __findNamedItemIndex__(namednodemap, name);
-
-  if (itemIndex > -1) {                          // found it!
-    ret = true;                                  // return true
-  }
-
-  return ret;                                    // if node is not found, default value false is returned
+    var ret = false;
+    // test that Named Node exists
+    var itemIndex = __findNamedItemIndex__(namednodemap, name);
+        if (itemIndex > -1) {                          
+        // found it!
+        ret = true;                                  
+    }
+    // if node is not found, default value false is returned
+    return ret;                                    
 }
 
 /**
- * @method DOMNamedNodeMap._hasAttributeNS - Returns true if specified node exists
+ * @method __hasAttributeNS__ 
+ *      Returns true if specified node exists
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
  * @return : boolean
  */
 var __hasAttributeNS__ = function(namednodemap, namespaceURI, localName) {
-  var ret = false;
-
-  // test that Named Node exists
-  var itemIndex = __findNamedItemNSIndex__(namednodemap, namespaceURI, localName);
-
-  if (itemIndex > -1) {                          // found it!
-    ret = true;                                  // return true
-  }
-
-  return ret;                                    // if node is not found, default value false is returned
+    var ret = false;
+    // test that Named Node exists
+    var itemIndex = __findNamedItemNSIndex__(namednodemap, namespaceURI, localName);
+    if (itemIndex > -1) {
+        // found it!
+        ret = true;
+    }
+    // if node is not found, default value false is returned
+    return ret;                                    
 }
 
 /**
- * @method DOMNamedNodeMap._cloneNodes - Returns a NamedNodeMap containing clones of the Nodes in this NamedNodeMap
+ * @method __cloneNamedNodes__ 
+ *      Returns a NamedNodeMap containing clones of the Nodes in this NamedNodeMap
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  parentNode : DOMNode - the new parent of the cloned NodeList
- * @param  isnsmap : bool - is this a DOMNamespaceNodeMap
- * @return : DOMNamedNodeMap - NamedNodeMap containing clones of the Nodes in this DOMNamedNodeMap
+ * @param  parentNode : Node - the new parent of the cloned NodeList
+ * @param  isnsmap : bool - is this a NamespaceNodeMap
+ * @return NamedNodeMap containing clones of the Nodes in this NamedNodeMap
  */
 var __cloneNamedNodes__ = function(namednodemap, parentNode, isnsmap) {
-  var cloneNamedNodeMap = isnsmap?
-    new DOMNamespaceNodeMap(namednodemap.ownerDocument, parentNode):
-    new DOMNamedNodeMap(namednodemap.ownerDocument, parentNode);
+    var cloneNamedNodeMap = isnsmap?
+        new NamespaceNodeMap(namednodemap.ownerDocument, parentNode):
+        new NamedNodeMap(namednodemap.ownerDocument, parentNode);
 
-  // create list containing clones of all children
-  for (var i=0; i < namednodemap.length; i++) {
-      $debug("cloning node in named node map :" + namednodemap[i]);
-    __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
-  }
-
-  return cloneNamedNodeMap;
+    // create list containing clones of all children
+    for (var i=0; i < namednodemap.length; i++) {
+        __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
+    }
+    
+    return cloneNamedNodeMap;
 };
 
 
 /**
- * @class  DOMNamespaceNodeMap - used to represent collections of namespace nodes that can be accessed by name
- *  typically a set of Element attributes
+ * @class  NamespaceNodeMap - 
+ *      used to represent collections of namespace nodes that can be 
+ *      accessed by name typically a set of Element attributes
  *
- * @extends DOMNamedNodeMap
+ * @extends NamedNodeMap
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- *
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNamespaceNodeMap is attached to (or null)
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NamespaceNodeMap is attached to (or null)
  */
-var DOMNamespaceNodeMap = function(ownerDocument, parentNode) {
-    //$log("\t\t\tcreating dom namespacednodemap");
-    this.DOMNamedNodeMap = DOMNamedNodeMap;
-    this.DOMNamedNodeMap(ownerDocument, parentNode);
+var NamespaceNodeMap = function(ownerDocument, parentNode) {
+    this.NamedNodeMap = NamedNodeMap;
+    this.NamedNodeMap(ownerDocument, parentNode);
     __setArray__(this, []);
 };
-DOMNamespaceNodeMap.prototype = new DOMNamedNodeMap;
-__extend__(DOMNamespaceNodeMap.prototype, {
+NamespaceNodeMap.prototype = new NamedNodeMap;
+__extend__(NamespaceNodeMap.prototype, {
     get xml() {
-          var ret = "";
-        
-          // identify namespaces declared local to this Element (ie, not inherited)
-          for (var ind = 0; ind < this.length; ind++) {
+        var ret = "",
+            ns,
+            ind;
+        // identify namespaces declared local to this Element (ie, not inherited)
+        for (ind = 0; ind < this.length; ind++) {
             // if namespace declaration does not exist in the containing node's, parentNode's namespaces
-            var ns = null;
+            ns = null;
             try {
                 var ns = this.parentNode.parentNode._namespaces.
                     getNamedItem(this[ind].localName);
-            }
-            catch (e) {
+            }catch (e) {
                 //breaking to prevent default namespace being inserted into return value
                 break;
             }
             if (!(ns && (""+ ns.nodeValue == ""+ this[ind].nodeValue))) {
-              // display the namespace declaration
-              ret += this[ind].xml +" ";
+                // display the namespace declaration
+                ret += this[ind].xml +" ";
             }
-          }
-        
-          return ret;
+        }
+        return ret;
     }
 });

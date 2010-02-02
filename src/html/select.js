@@ -1,8 +1,8 @@
-$debug("Defining HTMLSelectElement");
-/*
-* HTMLSelectElement - DOM Level 2
-*/
-var HTMLSelectElement = function(ownerDocument) {
+
+/**
+ * HTMLSelectElement - DOM Level 2
+ */
+HTMLSelectElement = function(ownerDocument) {
     this.HTMLTypeValueInputs = HTMLTypeValueInputs;
     this.HTMLTypeValueInputs(ownerDocument);
 
@@ -82,5 +82,4 @@ __extend__(HTMLSelectElement.prototype, {
     }
 });
 
-$w.HTMLSelectElement = HTMLSelectElement;
 

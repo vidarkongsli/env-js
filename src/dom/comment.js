@@ -1,30 +1,29 @@
-$debug("Defining Comment");
-/* 
-* Comment - DOM Level 2
-*/
 /**
- * @class  DOMComment - This represents the content of a comment, i.e., all the characters between the starting '<!--' and ending '-->'
- * @extends DOMCharacterData
+ * @class  Comment 
+ *      This represents the content of a comment, i.e., all the 
+ *      characters between the starting '<!--' and ending '-->'
+ * @extends CharacterData
  * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @param  ownerDocument :  The Document object associated with this node.
  */
-var DOMComment = function(ownerDocument) {
-  this.DOMCharacterData  = DOMCharacterData;
-  this.DOMCharacterData(ownerDocument);
-
+Comment = function(ownerDocument) {
+  this.CharacterData  = CharacterData;
+  this.CharacterData(ownerDocument);
   this.nodeName  = "#comment";
 };
-DOMComment.prototype = new DOMCharacterData;
-__extend__(DOMComment.prototype, {
+Comment.prototype = new CharacterData;
+__extend__(Comment.prototype, {
+    get localName(){
+        return null;
+    },
     get nodeType(){
-        return DOMNode.COMMENT_NODE;
+        return Node.COMMENT_NODE;
     },
     get xml(){
         return "<!--" + this.nodeValue + "-->";
     },
     toString : function(){
-        return "Comment #"+this._id;
+        return "[object Comment]";
     }
 });
 
-$w.Comment = DOMComment;

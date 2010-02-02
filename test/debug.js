@@ -46,7 +46,7 @@ window.onload = function(){
 		};
 	} })(method);
 
-	jQuery.prototype.toString = DOMNodeList.prototype.toString;
+	jQuery.prototype.toString = NodeList.prototype.toString;
 	Function.prototype.toString = function(){ return "function()"; };
 
 	print("Ready.");

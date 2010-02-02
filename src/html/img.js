@@ -1,8 +1,8 @@
-$debug("Defining HTMLImageElement");
-/* 
-* HTMLImageElement - DOM Level 2
-*/
-var HTMLImageElement = function(ownerDocument) {
+
+/** 
+ * HTMLImageElement - DOM Level 2
+ */
+HTMLImageElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -58,5 +58,3 @@ __extend__(HTMLImageElement.prototype, {
         __eval__(this.getAttribute('onload')||'', this)
     }
 });
-
-$w.HTMLImageElement = HTMLImageElement;

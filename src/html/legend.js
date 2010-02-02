@@ -1,8 +1,8 @@
-$debug("Defining HTMLLegendElement");
-/*
-* HTMLLegendElement - DOM Level 2
-*/
-var HTMLLegendElement = function(ownerDocument) {
+
+/**
+ * HTMLLegendElement - DOM Level 2
+ */
+HTMLLegendElement = function(ownerDocument) {
     this.HTMLInputCommon = HTMLInputCommon;
     this.HTMLInputCommon(ownerDocument);
 };
@@ -16,4 +16,3 @@ __extend__(HTMLLegendElement.prototype, {
     }
 });
 
-$w.HTMLLegendElement = HTMLLegendElement;

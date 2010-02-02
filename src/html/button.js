@@ -1,8 +1,8 @@
-$debug("Defining HTMLButtonElement");
+
 /*
-* HTMLButtonElement - DOM Level 2
-*/
-var HTMLButtonElement = function(ownerDocument) {
+ * HTMLButtonElement - DOM Level 2
+ */
+HTMLButtonElement = function(ownerDocument) {
     this.HTMLTypeValueInputs = HTMLTypeValueInputs;
     this.HTMLTypeValueInputs(ownerDocument);
 };
@@ -16,6 +16,4 @@ __extend__(HTMLButtonElement.prototype, {
         this.setAttribute('dataFormatAs',value);
     }
 });
-
-$w.HTMLButtonElement = HTMLButtonElement;
 

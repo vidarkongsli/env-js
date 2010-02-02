@@ -1,30 +1,36 @@
-$debug("Defining Element");
+
 /**
- * @class  DOMElement - By far the vast majority of objects (apart from text) that authors encounter
- *   when traversing a document are Element nodes.
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Element - 
+ *      By far the vast majority of objects (apart from text) 
+ *      that authors encounter when traversing a document are 
+ *      Element nodes.
+ * @extends Node
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMElement = function(ownerDocument) {
-    this.DOMNode  = DOMNode;
-    this.DOMNode(ownerDocument);                   
-    //this.id = null;                                  // the ID of the element
+Element = function(ownerDocument) {
+    this.Node  = Node;
+    this.Node(ownerDocument);
+    
+    this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
-DOMElement.prototype = new DOMNode;
-__extend__(DOMElement.prototype, {	
+Element.prototype = new Node;
+
+__extend__(Element.prototype, {	
     // The name of the element.
     get tagName(){
         return this.nodeName;  
     },
-    set tagName(name){
-        this.nodeName = name;  
-    },
     
-    addEventListener        : function(type, fn, phase){ __addEventListener__(this, type, fn); },
-    removeEventListener     : function(type){ __removeEventListener__(this, type); },
-    dispatchEvent           : function(event, bubbles){ __dispatchEvent__(this, event, bubbles); },
-   
+    get textContent(){
+        return __recursivelyGatherText__(this);
+    },
+    set textContent(newText){
+        while(this.firstChild != null){
+            this.removeChild( this.firstChild );
+        }
+        var text = this.ownerDocument.createTextNode(newText);
+        this.appendChild(text);
+    },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
@@ -32,18 +38,20 @@ __extend__(DOMElement.prototype, {
         if (attr) {
             ret = attr.value;
         }
-        return ret; // if Attribute exists, return its value, otherwise, return null
+        // if Attribute exists, return its value, otherwise, return null
+        return ret; 
     },
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
         
-        //I had to add this check becuase as the script initializes
+        //I had to add this check because as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
         if(__ownerDocument__(this)){
             if (attr===null||attr===undefined) {
-                attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
+                // otherwise create it
+                attr = __ownerDocument__(this).createAttribute(name);  
             }
             
             
@@ -60,25 +68,22 @@ __extend__(DOMElement.prototype, {
                 }
             }
             
-            /*if (__isIdDeclaration__(name)) {
-                this.id = value;  // cache ID for getElementById()
-            }*/
-            
             // assign values to properties (and aliases)
             attr.value     = value + '';
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
         }else{
-            $warn('Element has no owner document '+this.tagName+'\n\t cant set attribute ' + name + ' = '+value );
+            console.warn('Element has no owner document '+this.tagName+
+                '\n\t cant set attribute ' + name + ' = '+value );
         }
     },
     removeAttribute : function removeAttribute(name) {
-        // delegate to DOMNamedNodeMap.removeNamedItem
+        // delegate to NamedNodeMap.removeNamedItem
         return this.attributes.removeNamedItem(name);
     },
     getAttributeNode : function getAttributeNode(name) {
-        // delegate to DOMNamedNodeMap.getNamedItem
+        // delegate to NamedNodeMap.getNamedItem
         return this.attributes.getNamedItem(name);
     },
     setAttributeNode: function(newAttr) {
@@ -86,7 +91,7 @@ __extend__(DOMElement.prototype, {
         if (__isIdDeclaration__(newAttr.name)) {
             this.id = newAttr.value;  // cache ID for getElementById()
         }
-        // delegate to DOMNamedNodeMap.setNamedItem
+        // delegate to NamedNodeMap.setNamedItem
         return this.attributes.setNamedItem(newAttr);
     },
     removeAttributeNode: function(oldAttr) {
@@ -107,7 +112,7 @@ __extend__(DOMElement.prototype, {
     },
     getAttributeNS : function(namespaceURI, localName) {
         var ret = "";
-        // delegate to DOMNAmedNodeMap.getNamedItemNS
+        // delegate to NAmedNodeMap.getNamedItemNS
         var attr = this.attributes.getNamedItemNS(namespaceURI, localName);
         if (attr) {
             ret = attr.value;
@@ -115,7 +120,8 @@ __extend__(DOMElement.prototype, {
         return ret;  // if Attribute exists, return its value, otherwise return ""
     },
     setAttributeNS : function(namespaceURI, qualifiedName, value) {
-        // call DOMNamedNodeMap.getNamedItem
+        // call NamedNodeMap.getNamedItem
+        //console.log('setAttributeNS %s %s %s', namespaceURI, qualifiedName, value);
         var attr = this.attributes.getNamedItem(namespaceURI, qualifiedName);
         
         if (!attr) {  // if Attribute exists, use it
@@ -133,7 +139,7 @@ __extend__(DOMElement.prototype, {
             }
             
             // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(namespaceURI, qualifiedName)) {
+            if (!__isValidNamespace__(this.ownerDocument, namespaceURI, qualifiedName, true)) {
                 throw(new DOMException(DOMException.NAMESPACE_ERR));
             }
             
@@ -144,23 +150,23 @@ __extend__(DOMElement.prototype, {
         }
         
         // if this Attribute is an ID
-        if (__isIdDeclaration__(name)) {
-            this.id = value;  // cache ID for getElementById()
-        }
+        //if (__isIdDeclaration__(name)) {
+        //    this.id = value;
+        //}
         
         // assign values to properties (and aliases)
         attr.value     = value;
         attr.nodeValue = value;
         
-        // delegate to DOMNamedNodeMap.setNamedItem
+        // delegate to NamedNodeMap.setNamedItem
         this.attributes.setNamedItemNS(attr);
     },
     removeAttributeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap.removeNamedItemNS
+        // delegate to NamedNodeMap.removeNamedItemNS
         return this.attributes.removeNamedItemNS(namespaceURI, localName);
     },
     getAttributeNodeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap.getNamedItemNS
+        // delegate to NamedNodeMap.getNamedItemNS
         return this.attributes.getNamedItemNS(namespaceURI, localName);
     },
     setAttributeNodeNS : function(newAttr) {
@@ -169,40 +175,69 @@ __extend__(DOMElement.prototype, {
             this.id = newAttr.value+'';  // cache ID for getElementById()
         }
         
-        // delegate to DOMNamedNodeMap.setNamedItemNS
+        // delegate to NamedNodeMap.setNamedItemNS
         return this.attributes.setNamedItemNS(newAttr);
     },
     hasAttribute : function(name) {
-        // delegate to DOMNamedNodeMap._hasAttribute
+        // delegate to NamedNodeMap._hasAttribute
         return __hasAttribute__(this.attributes,name);
     },
     hasAttributeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap._hasAttributeNS
+        // delegate to NamedNodeMap._hasAttributeNS
         return __hasAttributeNS__(this.attributes, namespaceURI, localName);
     },
     get nodeType(){
-        return DOMNode.ELEMENT_NODE;
+        return Node.ELEMENT_NODE;
     },
     get xml() {
-        var ret = "";
+        var ret = "",
+            ns = "",
+            attrs,
+            attrstring,
+            i;
         
         // serialize namespace declarations
-        var ns = this._namespaces.xml;
-        if (ns.length > 0) ns = " "+ ns;
+        if (this.namespaceURI ){
+            if((this === this.ownerDocument.documentElement) ||
+                (!this.parentNode)||
+                (this.parentNode && (this.parentNode.namespaceURI !== this.namespaceURI)))
+                ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
+                    '="'+this.namespaceURI+'"';
+        }
         
         // serialize Attribute declarations
-        var attrs = this.attributes.xml;
+        attrs = this.attributes;
+        attrstring = "";
+        for(i=0;i< attrs.length;i++){
+            attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
         
-        // serialize this Element
-        ret += "<" + this.nodeName.toLowerCase() + ns + attrs +">";
-        ret += this.childNodes.xml;
-        ret += "</" + this.nodeName.toLowerCase() + ">";
+        if(this.hasChildNodes()){
+            // serialize this Element
+            ret += "<" + this.tagName + ns + attrstring +">";
+            ret += this.childNodes.xml;
+            ret += "</" + this.tagName + ">";
+        }else{
+            ret += "<" + this.tagName +ns+"/>";
+        }
         
         return ret;
     },
     toString : function(){
-        return "Element #"+this._id + " "+ this.tagName + (this.id?" => "+this.id:'');
+        return '[object Element]';
     }
 });
 
-$w.Element = DOMElement;
+var __recursivelyGatherText__ = function(aNode) {
+    var accumulateText = "";
+    var idx; var n;
+    for (idx=0;idx < aNode.childNodes.length;idx++){
+        n = aNode.childNodes.item(idx);
+        if(n.nodeType == Node.TEXT_NODE)
+            accumulateText += n.data;
+        else
+            accumulateText += __recursivelyGatherText__(n);
+    }
+    return accumulateText;
+};
+

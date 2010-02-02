@@ -1,8 +1,8 @@
-$debug("Defining HTMLTableColElement");
+
 /* 
 * HTMLTableColElement - DOM Level 2
 */
-var HTMLTableColElement = function(ownerDocument) {
+HTMLTableColElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -46,4 +46,3 @@ __extend__(HTMLTableColElement.prototype, {
     }
 });
 
-$w.HTMLTableColElement = HTMLTableColElement;

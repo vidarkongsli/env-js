@@ -1,13 +1,7 @@
 /**
- * @author thatcher
+ * @class   XPathResult
+ * @author  thatcher
  */
-$debug("Defining XPathResult");
-/*
-* XPathResult 
-*/
-$w.__defineGetter__("XPathResult", function(){
-    return XPathResult;
-});
 
 var XPathResult = function() {
     this.snapshotLength = 0;

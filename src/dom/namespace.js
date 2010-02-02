@@ -1,25 +1,26 @@
 
 /**
- * @class  DOMNamespace - The Namespace interface represents an namespace in an Element object
+ * @class  Namespace - 
+ *      The Namespace interface represents an namespace in an Element object
  *
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMNamespace = function(ownerDocument) {
-  this.DOMNode = DOMNode;
-  this.DOMNode(ownerDocument);
+Namespace = function(ownerDocument) {
+  this.Node = Node;
+  this.Node(ownerDocument);
+  // the name of this attribute
+  this.name      = "";                           
 
-  this.name      = "";                           // the name of this attribute
-
-  // If this attribute was explicitly given a value in the original document, this is true; otherwise, it is false.
+  // If this attribute was explicitly given a value in the original document, 
+  // this is true; otherwise, it is false.
   // Note that the implementation is in charge of this attribute, not the user.
-  // If the user changes the value of the attribute (even if it ends up having the same value as the default value)
-  // then the specified flag is automatically flipped to true
+  // If the user changes the value of the attribute (even if it ends up having 
+  // the same value as the default value) then the specified flag is 
+  // automatically flipped to true
   this.specified = false;
 };
-DOMNamespace.prototype = new DOMNode;
-__extend__(DOMNamespace.prototype, {
+Namespace.prototype = new Node;
+__extend__(Namespace.prototype, {
     get value(){
         // the value of the attribute is returned as a string
         return this.nodeValue;
@@ -28,7 +29,7 @@ __extend__(DOMNamespace.prototype, {
         this.nodeValue = value+'';
     },
     get nodeType(){
-        return DOMNode.NAMESPACE_NODE;
+        return Node.NAMESPACE_NODE;
     },
     get xml(){
         var ret = "";

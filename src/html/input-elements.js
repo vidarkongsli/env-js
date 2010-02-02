@@ -119,8 +119,6 @@
 
 
 
-
-$debug("Defining input element 'mix in' objects");
 var inputElements_dataProperties = {};
 var inputElements_status = {};
 
@@ -155,8 +153,6 @@ var inputElements_focusEvents = {
     }
 };
 
-
-$debug("Defining HTMLInputCommon");
 
 /*
 * HTMLInputCommon - convenience class, not DOM
@@ -194,10 +190,8 @@ __extend__(HTMLInputCommon.prototype, {
     }
 });
 
-$w.HTMLInputCommon = HTMLInputCommon;
 
 
-$debug("Defining HTMLTypeValueInputs");
 
 /*
 * HTMLTypeValueInputs - convenience class, not DOM
@@ -245,11 +239,6 @@ __extend__(HTMLTypeValueInputs.prototype, {
     }
 });
 
-$w.HTMLTypeValueInputs = HTMLTypeValueInputs;
-
-
-
-$debug("Defining HTMLInputAreaCommon");
 
 /*
 * HTMLInputAreaCommon - convenience class, not DOM
@@ -274,4 +263,3 @@ __extend__(HTMLInputAreaCommon.prototype, {
     }
 });
 
-$w.HTMLInputAreaCommon = HTMLInputAreaCommon;

@@ -1,39 +1,59 @@
-$debug("Defining Event");
-/*
-* event.js
-*/
-var Event = function(options){
-      options={};
-  __extend__(this,{
+/**
+ * @class Event
+ */
+Event = function(options){
+    // event state is kept read-only by forcing
+    // a new object for each event.  This may not
+    // be appropriate in the long run and we'll
+    // have to decide if we simply dont adhere to
+    // the read-only restriction of the specification
+    var state = __extend__({
+        bubbles : true,
+        cancelable : true,
+        cancelled: false,
+        currentTarget : null,
+        target : null,
+        eventPhase : Event.AT_TARGET,
+        timeStamp : new Date().getTime(),
+        preventDefault : false,
+        stopPropogation : false
+    }, options||{} );
+        
+    return {
+        get bubbles(){return state.bubbles;},
+        get cancelable(){return state.cancelable;},
+        get currentTarget(){return state.currentTarget;},
+        set currentTarget(currentTarget){ state.currentTarget = currentTarget; },
+        get eventPhase(){return state.eventPhase;},
+        set eventPhase(eventPhase){state.eventPhase = eventPhase;},
+        get target(){return state.target;},
+        set target(target){ state.target = target;},
+        get timeStamp(){return state.timeStamp;},
+        get type(){return state.type;},
+        initEvent: function(type, bubbles, cancelable){
+            state.type=type?type:'';
+            state.bubbles=!!bubbles;
+            state.cancelable=!!cancelable;
+        },
+        preventDefault: function(){
+            state.preventDefault = true;
+        },
+        stopPropagation: function(){
+            if(state.cancelable){
+                state.cancelled = true;
+                state.bubbles = false;
+            }
+        },
+        get cancelled(){
+            return state.cancelled;
+        }
+    };
+};
+
+__extend__(Event,{
     CAPTURING_PHASE : 1,
     AT_TARGET       : 2,
     BUBBLING_PHASE  : 3
-  });
-  $debug("Creating new Event");
-  var $bubbles = options.bubbles?options.bubbles:true,
-      $cancelable = options.cancelable?options.cancelable:true,
-      $currentTarget = options.currentTarget?options.currentTarget:null,
-      $eventPhase = options.eventPhase?options.eventPhase:Event.CAPTURING_PHASE,
-      $target = options.target?options.target:null,
-      $timestamp = options.timestamp?options.timestamp:new Date().getTime().toString(),
-      $type = options.type?options.type:"";
-  return __extend__(this,{
-    get bubbles(){return $bubbles;},
-    get cancelable(){return $cancelable;},
-    get currentTarget(){return $currentTarget;},
-    get eventPhase(){return $eventPhase;},
-    get target(){return $target;},
-    set target(target){ $target = target;},
-    get timestamp(){return $timestamp;},
-    get type(){return $type;},
-    initEvent: function(type,bubbles,cancelable){
-      $type=type?type:$type;
-      $bubbles=bubbles?bubbles:$bubbles;
-      $cancelable=cancelable?cancelable:$cancelable;
-    },
-    preventDefault: function(){return;/* TODO */},
-    stopPropagation: function(){return;/* TODO */}
-  });
-};
+});
 
-$w.Event = Event;
+

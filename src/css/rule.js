@@ -1,7 +1,8 @@
+
 /* 
 * CSSRule - DOM Level 2
 */
-var CSSRule = function(options){
+CSSRule = function(options){
   var $style, 
       $selectorText = options.selectorText?options.selectorText:"";
       $style = new CSS2Properties({
@@ -19,4 +20,4 @@ var CSSRule = function(options){
       }
     });
 };
-$w.CSSRule = CSSRule;
+

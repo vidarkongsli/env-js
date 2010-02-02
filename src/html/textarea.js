@@ -1,8 +1,8 @@
-$debug("Defining HTMLTextAreaElement");
-/*
-* HTMLTextAreaElement - DOM Level 2
-*/
-var HTMLTextAreaElement = function(ownerDocument) {
+
+/**
+ * HTMLTextAreaElement - DOM Level 2
+ */
+HTMLTextAreaElement = function(ownerDocument) {
     this.HTMLInputAreaCommon = HTMLInputAreaCommon;
     this.HTMLInputAreaCommon(ownerDocument);
 };
@@ -22,4 +22,3 @@ __extend__(HTMLTextAreaElement.prototype, {
     }
 });
 
-$w.HTMLTextAreaElement = HTMLTextAreaElement;

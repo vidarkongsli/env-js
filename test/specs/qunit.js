@@ -176,7 +176,7 @@ var QUnit = {
 				var b = document.createElement("strong");
 				b.innerHTML = name + " <b style='color:black;'>(<b class='fail'>" + bad + "</b>, <b class='pass'>" + good + "</b>, " + config.assertions.length + ")</b>";
 				
-				addEvent(b, "click", function() {
+				addEvent(b, "click", function(event) {
 					var next = b.nextSibling, display = next.style.display;
 					next.style.display = display === "none" ? "block" : "none";
 				});
@@ -617,7 +617,6 @@ function extend(a, b) {
 	for ( var prop in b ) {
 		a[prop] = b[prop];
 	}
-
 	return a;
 }
 

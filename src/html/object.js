@@ -1,8 +1,8 @@
-$debug("Defining HTMLObjectElement");
-/* 
-* HTMLObjectElement - DOM Level 2
-*/
-var HTMLObjectElement = function(ownerDocument) {
+
+/**
+ * HTMLObjectElement - DOM Level 2
+ */
+HTMLObjectElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -85,5 +85,4 @@ __extend__(HTMLObjectElement.prototype, {
     }
 });
 
-$w.HTMLObjectElement = HTMLObjectElement;
 			

@@ -1,8 +1,8 @@
-$debug("Defining HTMLFieldSetElement");
+
 /*
-* HTMLFieldSetElement - DOM Level 2
-*/
-var HTMLFieldSetElement = function(ownerDocument) {
+ * HTMLFieldSetElement - DOM Level 2
+ */
+HTMLFieldSetElement = function(ownerDocument) {
     this.HTMLLegendElement = HTMLLegendElement;
     this.HTMLLegendElement(ownerDocument);
 };
@@ -15,5 +15,3 @@ __extend__(HTMLFieldSetElement.prototype, {
         this.setAttribute('margin',value);
     }
 });
-
-$w.HTMLFieldSetElement = HTMLFieldSetElement;

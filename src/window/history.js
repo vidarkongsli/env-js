@@ -1,55 +1,75 @@
+
 /*
 *	history.js
+*
 */
 
-	$currentHistoryIndex = 0;
-	$history = [];
+History = function(owner){
+	var $current = 0,
+        $history = [null],
+        $owner = owner;
 	
-	// Browser History
-	$w.__defineGetter__("history", function(){	
-		return {
-			get length(){ return $history.length; },
-			back : function(count){
-				if(count){
-					go(-count);
-				}else{go(-1);}
-			},
-			forward : function(count){
-				if(count){
-					go(count);
-				}else{go(1);}
-			},
-			go : function(target){
-				if(typeof target == "number"){
-					target = $currentHistoryIndex+target;
-					if(target > -1 && target < $history.length){
-						if($history[target].location == "hash"){
-							$w.location.hash = $history[target].value;
-						}else{
-							$w.location = $history[target].value;
-						}
-						$currentHistoryIndex = target;
-						//remove the last item added to the history
-						//since we are moving inside the history
-						$history.pop();
+    return {
+		get length(){ 
+            return $history.length;
+        },
+		back : function(count){
+			if(count){
+				go(-count);
+			}else{
+                go(-1);
+            }
+		},
+        get current(){
+            return this.item($current);
+        },
+        get previous(){
+            return this.item($current-1);
+        },
+		forward : function(count){
+			if(count){
+				go(count);
+			}else{go(1);}
+		},
+		go : function(target){
+			if(typeof target == "number"){
+				target = $current + target;
+				if(target > -1 && target < $history.length){
+					if($history[target].type == "hash"){
+                        if($owner.location){
+						    $owner.location.hash = $history[target].value;
+                        }
+					}else{
+                        if($owner.location){
+						    $owner.location = $history[target].value;
+                        }
 					}
-				}else{
-					//TODO: walk throu the history and find the 'best match'
+					$current = target;
 				}
+			}else{
+				//TODO: walk through the history and find the 'best match'?
 			}
-		};
-	});
-
-	//Here locationPart is the particutlar method/attribute 
-	// of the location object that was modified.  This allows us
-	// to modify the correct portion of the location object
-	// when we navigate the history
-	var __setHistory__ = function( value, locationPart){
-	    $info("adding value to history: " +value);
-		$currentHistoryIndex++;
-		$history.push({
-			location: locationPart||"href",
-			value: value
-		});
+		},
+        item: function(index){
+            if(index < history.length)
+                return $history[index];
+            else
+                return null;
+        },
+        
+        add: function(newLocation, type){
+            //not a standard interface, we expose it to simplify 
+            //history state modifications
+            if(newLocation !== $history[$current]){
+                $history.slice(0, $current);
+                $history.push({
+                    type: type||"href",
+                    value: value
+                });
+            }
+        }
 	};
+};
+
+
 	

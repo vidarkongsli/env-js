@@ -1,8 +1,8 @@
-$debug("Defining HTMLParamElement");
-/* 
-* HTMLParamElement - DOM Level 2
-*/
-var HTMLParamElement = function(ownerDocument) {
+
+/** 
+ * HTMLParamElement - DOM Level 2
+ */
+HTMLParamElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -34,5 +34,4 @@ __extend__(HTMLParamElement.prototype, {
     },
 });
 
-$w.HTMLParamElement = HTMLParamElement;
 		

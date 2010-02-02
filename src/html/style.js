@@ -1,8 +1,8 @@
-$debug("Defining HTMLStyleElement");
-/* 
-* HTMLStyleElement - DOM Level 2
-*/
-var HTMLStyleElement = function(ownerDocument) {
+
+/** 
+ * HTMLStyleElement - DOM Level 2
+ */
+HTMLStyleElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -27,5 +27,3 @@ __extend__(HTMLStyleElement.prototype, {
         this.setAttribute('type',value);
     }
 });
-
-$w.HTMLStyleElement = HTMLStyleElement;

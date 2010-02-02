@@ -1,28 +1,31 @@
-$debug("Defining CharacterData");
-/*
-* CharacterData - DOM Level 2
-*/
+
 /**
- * @class  DOMCharacterData - parent abstract class for DOMText and DOMComment
- * @extends DOMNode
+ * @class  CharacterData - parent abstract class for Text and Comment
+ * @extends Node
  * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMCharacterData = function(ownerDocument) {
-  this.DOMNode  = DOMNode;
-  this.DOMNode(ownerDocument);
+CharacterData = function(ownerDocument) {
+  this.Node  = Node;
+  this.Node(ownerDocument);
 };
-DOMCharacterData.prototype = new DOMNode;
-__extend__(DOMCharacterData.prototype,{
+CharacterData.prototype = new Node;
+__extend__(CharacterData.prototype,{
     get data(){
         return this.nodeValue;
     },
     set data(data){
         this.nodeValue = data;
     },
+    get textContent(){
+        return this.nodeValue;
+    },
+    set textContent(newText){
+        this.nodeValue = newText;
+    },
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -30,7 +33,7 @@ __extend__(DOMCharacterData.prototype,{
         this.data = "" + this.data + arg;
     },
     deleteData: function(offset, count){ 
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -51,7 +54,7 @@ __extend__(DOMCharacterData.prototype,{
         }
     },
     insertData: function(offset, arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if(__ownerDocument__(this).implementation.errorChecking && this._readonly){
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -76,7 +79,7 @@ __extend__(DOMCharacterData.prototype,{
         }
     },
     replaceData: function(offset, count, arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -115,5 +118,3 @@ __extend__(DOMCharacterData.prototype,{
         return ret;
     }
 });
-
-$w.CharacterData = DOMCharacterData;

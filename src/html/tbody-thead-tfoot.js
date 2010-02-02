@@ -1,9 +1,9 @@
-$debug("Defining HTMLTableSectionElement");
+
 /* 
 * HTMLxElement - DOM Level 2
 * - Contributed by Steven Wood
 */
-var HTMLTableSectionElement = function(ownerDocument) {
+HTMLTableSectionElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -16,7 +16,7 @@ __extend__(HTMLTableSectionElement.prototype, {
         if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
             return this.parentNode.appendChild(child);
         } else {
-            return DOMNode.prototype.appendChild.apply(this, arguments);
+            return Node.prototype.appendChild.apply(this, arguments);
         }
 
     },
@@ -88,4 +88,3 @@ __extend__(HTMLTableSectionElement.prototype, {
 
 });
 
-$w.HTMLTableSectionElement = HTMLTableSectionElement;

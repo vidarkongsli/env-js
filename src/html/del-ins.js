@@ -1,8 +1,8 @@
-$debug("Defining HTMLModElement");
+
 /* 
 * HTMLModElement - DOM Level 2
 */
-var HTMLModElement = function(ownerDocument) {
+HTMLModElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -21,5 +21,3 @@ __extend__(HTMLModElement.prototype, {
         this.setAttribute('datetime', value);
     }
 });
-
-$w.HTMLModElement = HTMLModElement;	

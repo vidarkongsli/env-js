@@ -1,8 +1,8 @@
-$debug("Defining HTMLLabelElement");
-/* 
-* HTMLLabelElement - DOM Level 2
-*/
-var HTMLLabelElement = function(ownerDocument) {
+
+/** 
+ * HTMLLabelElement - DOM Level 2
+ */
+HTMLLabelElement = function(ownerDocument) {
     this.HTMLInputCommon = HTMLInputCommon;
     this.HTMLInputCommon(ownerDocument);
 };
@@ -23,4 +23,3 @@ __extend__(HTMLLabelElement.prototype, {
     }
 });
 
-$w.HTMLLabelElement = HTMLLabelElement;

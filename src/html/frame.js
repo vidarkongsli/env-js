@@ -1,13 +1,20 @@
-$debug("Defining HTMLFrameElement");
-/* 
-* HTMLFrameElement - DOM Level 2
-*/
-var HTMLFrameElement = function(ownerDocument) {
+
+/** 
+ * HTMLFrameElement - DOM Level 2
+ */
+HTMLFrameElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+    // this is normally a getter but we need to be
+    // able to set it to correctly emulate behavior
+    this.contentWindow = null;
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
+    
+    get contentDocument(){
+        return null;
+    },
     get frameBorder(){
         return this.getAttribute('border')||"";
     },
@@ -39,7 +46,7 @@ __extend__(HTMLFrameElement.prototype, {
         this.setAttribute('name', value);
     },
     get noResize(){
-        return this.getAttribute('noresize')||"";
+        return this.getAttribute('noresize')||false;
     },
     set noResize(value){
         this.setAttribute('noresize', value);
@@ -55,26 +62,7 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
-
-        if (value && value.length > 0){
-            $env.loadFrame(this, $env.location(value));
-            
-            var event = document.createEvent();
-            event.initEvent("load");
-            this.dispatchEvent( event, false );
-        }
     },
-    get contentDocument(){
-        if (!this._content)
-            return null;
-        return this._content.document;
-    },
-    get contentWindow(){
-        return this._content;
-    },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
-    }
+    onload: HTMLEvents.prototype.onload
 });
 
-$w.HTMLFrameElement = HTMLFrameElement;

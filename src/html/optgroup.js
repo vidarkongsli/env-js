@@ -1,8 +1,8 @@
-$debug("Defining HTMLOptGroupElement");
-/* 
-* HTMLOptGroupElement - DOM Level 2
-*/
-var HTMLOptGroupElement = function(ownerDocument) {
+
+/**
+ * HTMLOptGroupElement - DOM Level 2
+ */
+HTMLOptGroupElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -21,5 +21,4 @@ __extend__(HTMLOptGroupElement.prototype, {
         this.setAttribute('label',value);
     },
 });
-
-$w.HTMLOptGroupElement = HTMLOptGroupElement;		
+	

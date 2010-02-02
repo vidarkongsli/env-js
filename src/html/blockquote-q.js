@@ -1,8 +1,8 @@
-$debug("Defining HTMLQuoteElement");
+
 /* 
 * HTMLQuoteElement - DOM Level 2
 */
-var HTMLQuoteElement = function(ownerDocument) {
+HTMLQuoteElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -15,5 +15,3 @@ __extend__(HTMLQuoteElement.prototype, {
         this.setAttribute('cite',value);
     }
 });
-
-$w.HTMLQuoteElement = HTMLQuoteElement;		

@@ -1,69 +1,94 @@
-$debug("Defining Node");
-/*
-* Node - DOM Level 2
-*/	
+
 /**
- * @class  DOMNode - The Node interface is the primary datatype for the entire Document Object Model.
- *   It represents a single node in the document tree.
- * @author Jon van Noort (jon@webarcana.com.au), David Joham (djoham@yahoo.com) and Scott Severtson
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Node - 
+ *      The Node interface is the primary datatype for the entire 
+ *      Document Object Model. It represents a single node in the 
+ *      document tree.
+ * @param  ownerDocument : Document - The Document object associated with this node.
  */
-var DOMNode = function(ownerDocument) {
-  if (ownerDocument) {
-    this._id = ownerDocument._genId();           // generate unique internal id
-  }
-  
-  this.namespaceURI = "";                        // The namespace URI of this node (Level 2)
-  this.prefix       = "";                        // The namespace prefix of this node (Level 2)
-  this.localName    = "";                        // The localName of this node (Level 2)
 
-  this.nodeName = "";                            // The name of this node
-  this.nodeValue = null;                           // The value of this node
-  //this.className = "";                           // The CSS class name of this node.
-  
-  // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
-  // However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null
-  this.parentNode      = null;
-
-  // A NodeList that contains all children of this node. If there are no children, this is a NodeList containing no nodes.
-  // The content of the returned NodeList is "live" in the sense that, for instance, changes to the children of the node object
-  // that it was created from are immediately reflected in the nodes returned by the NodeList accessors;
-  // it is not a static snapshot of the content of the node. This is true for every NodeList, including the ones returned by the getElementsByTagName method.
-  this.childNodes      = new DOMNodeList(ownerDocument, this);
-
-  this.firstChild      = null;                   // The first child of this node. If there is no such node, this is null
-  this.lastChild       = null;                   // The last child of this node. If there is no such node, this is null.
-  this.previousSibling = null;                   // The node immediately preceding this node. If there is no such node, this is null.
-  this.nextSibling     = null;                   // The node immediately following this node. If there is no such node, this is null.
-
-  this.ownerDocument   = ownerDocument;          // The Document object associated with this node
-  this.attributes = new DOMNamedNodeMap(this.ownerDocument, this);
-  this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
-  this._readonly = false;
+Node = function(ownerDocument) {
+    this.baseURI = 'about:blank';
+    this.namespaceURI = null;
+    this.nodeName = "";
+    this.nodeValue = null;
+    
+    // The parent of this node. All nodes, except Document, DocumentFragment, 
+    // and Attr may have a parent.  However, if a node has just been created 
+    // and not yet added to the tree, or if it has been removed from the tree, 
+    // this is null
+    this.parentNode      = null;
+    
+    // A NodeList that contains all children of this node. If there are no 
+    // children, this is a NodeList containing no nodes.  The content of the 
+    // returned NodeList is "live" in the sense that, for instance, changes to 
+    // the children of the node object that it was created from are immediately 
+    // reflected in the nodes returned by the NodeList accessors; it is not a 
+    // static snapshot of the content of the node. This is true for every 
+    // NodeList, including the ones returned by the getElementsByTagName method.
+    this.childNodes      = new NodeList(ownerDocument, this);
+    
+    // The first child of this node. If there is no such node, this is null
+    this.firstChild      = null;
+    // The last child of this node. If there is no such node, this is null.
+    this.lastChild       = null;
+    // The node immediately preceding this node. If there is no such node, 
+    // this is null.
+    this.previousSibling = null;
+    // The node immediately following this node. If there is no such node, 
+    // this is null.
+    this.nextSibling     = null;
+    // The Document object associated with this node
+    this.ownerDocument = ownerDocument;
+    this.attributes = null;
+    // The namespaces in scope for this node
+    this._namespaces = new NamespaceNodeMap(ownerDocument, this);  
+    this._readonly = false;
+    
 };
 
 // nodeType constants
-DOMNode.ELEMENT_NODE                = 1;
-DOMNode.ATTRIBUTE_NODE              = 2;
-DOMNode.TEXT_NODE                   = 3;
-DOMNode.CDATA_SECTION_NODE          = 4;
-DOMNode.ENTITY_REFERENCE_NODE       = 5;
-DOMNode.ENTITY_NODE                 = 6;
-DOMNode.PROCESSING_INSTRUCTION_NODE = 7;
-DOMNode.COMMENT_NODE                = 8;
-DOMNode.DOCUMENT_NODE               = 9;
-DOMNode.DOCUMENT_TYPE_NODE          = 10;
-DOMNode.DOCUMENT_FRAGMENT_NODE      = 11;
-DOMNode.NOTATION_NODE               = 12;
-DOMNode.NAMESPACE_NODE              = 13;
+Node.ELEMENT_NODE                = 1;
+Node.ATTRIBUTE_NODE              = 2;
+Node.TEXT_NODE                   = 3;
+Node.CDATA_SECTION_NODE          = 4;
+Node.ENTITY_REFERENCE_NODE       = 5;
+Node.ENTITY_NODE                 = 6;
+Node.PROCESSING_INSTRUCTION_NODE = 7;
+Node.COMMENT_NODE                = 8;
+Node.DOCUMENT_NODE               = 9;
+Node.DOCUMENT_TYPE_NODE          = 10;
+Node.DOCUMENT_FRAGMENT_NODE      = 11;
+Node.NOTATION_NODE               = 12;
+Node.NAMESPACE_NODE              = 13;
 
-__extend__(DOMNode.prototype, {
+__extend__(Node.prototype, {
+    get localName(){
+        return this.prefix?
+            this.nodeName.substring(this.prefix.length+1, this.nodeName.length):
+            this.nodeName;
+    },
+    get prefix(){
+        return this.nodeName.split(':').length>1?
+            this.nodeName.split(':')[0]:
+            null;
+    },
+    set prefix(value){
+        if(value === null){
+            this.nodeName = this.localName;
+        }else{
+            this.nodeName = value+':'+this.localName;
+        }
+    },
     hasAttributes : function() {
         if (this.attributes.length == 0) {
             return false;
         }else{
             return true;
         }
+    },
+    get textContent(){
+        return this.nodeValue;
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
@@ -78,7 +103,7 @@ __extend__(DOMNode.prototype, {
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNode is readonly
+            // throw Exception if Node is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
@@ -94,19 +119,20 @@ __extend__(DOMNode.prototype, {
             }
         }
         
-        if (refChild) {                                // if refChild is specified, insert before it
+        // if refChild is specified, insert before it
+        if (refChild) {                                
             // find index of refChild
-            var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
+            var itemIndex = __findItemIndex__(this.childNodes, refChild);
             // throw Exception if there is no child node with this id
             if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
-              throw(new DOMException(DOMException.NOT_FOUND_ERR));
+                throw(new DOMException(DOMException.NOT_FOUND_ERR));
             }
             
             // if the newChild is already in the tree,
             var newChildParent = newChild.parentNode;
             if (newChildParent) {
-              // remove it
-              newChildParent.removeChild(newChild);
+                // remove it
+                newChildParent.removeChild(newChild);
             }
             
             // insert newChild into childNodes
@@ -116,46 +142,49 @@ __extend__(DOMNode.prototype, {
             prevNode = refChild.previousSibling;
             
             // handle DocumentFragment
-            if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-              if (newChild.childNodes.length > 0) {
-                // set the parentNode of DocumentFragment's children
-                for (var ind = 0; ind < newChild.childNodes.length; ind++) {
-                  newChild.childNodes[ind].parentNode = this;
+            if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+                if (newChild.childNodes.length > 0) {
+                    // set the parentNode of DocumentFragment's children
+                    for (var ind = 0; ind < newChild.childNodes.length; ind++) {
+                        newChild.childNodes[ind].parentNode = this;
+                    }
+                    
+                    // link refChild to last child of DocumentFragment
+                    refChild.previousSibling = newChild.childNodes[newChild.childNodes.length-1];
                 }
-            
-                // link refChild to last child of DocumentFragment
-                refChild.previousSibling = newChild.childNodes[newChild.childNodes.length-1];
-              }
             }else {
-                newChild.parentNode = this;                // set the parentNode of the newChild
-                refChild.previousSibling = newChild;       // link refChild to newChild
+                // set the parentNode of the newChild
+                newChild.parentNode = this;
+                // link refChild to newChild
+                refChild.previousSibling = newChild;
             }
             
-        }else {                                         // otherwise, append to end
+        }else {                                         
+            // otherwise, append to end
             prevNode = this.lastChild;
             this.appendChild(newChild);
         }
         
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // do node pointer surgery for DocumentFragment
             if (newChild.childNodes.length > 0) {
                 if (prevNode) {  
                     prevNode.nextSibling = newChild.childNodes[0];
-                }else {                                         // this is the first child in the list
+                }else {                                         
+                    // this is the first child in the list
                     this.firstChild = newChild.childNodes[0];
                 }
-            
                 newChild.childNodes[0].previousSibling = prevNode;
                 newChild.childNodes[newChild.childNodes.length-1].nextSibling = refChild;
             }
         }else {
             // do node pointer surgery for newChild
             if (prevNode) {
-              prevNode.nextSibling = newChild;
-            }else {                                         // this is the first child in the list
-              this.firstChild = newChild;
+                prevNode.nextSibling = newChild;
+            }else {                                         
+                // this is the first child in the list
+                this.firstChild = newChild;
             }
-            
             newChild.previousSibling = prevNode;
             newChild.nextSibling     = refChild;
         }
@@ -171,7 +200,7 @@ __extend__(DOMNode.prototype, {
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNode is readonly
+            // throw Exception if Node is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
@@ -188,7 +217,7 @@ __extend__(DOMNode.prototype, {
         }
         
         // get index of oldChild
-        var index = __findItemIndex__(this.childNodes, oldChild._id);
+        var index = __findItemIndex__(this.childNodes, oldChild);
         
         // throw Exception if there is no child node with this id
         if (__ownerDocument__(this).implementation.errorChecking && (index < 0)) {
@@ -206,7 +235,7 @@ __extend__(DOMNode.prototype, {
         ret = __replaceChild__(this.childNodes,newChild, index);
         
         
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // do node pointer surgery for Document Fragment
             if (newChild.childNodes.length > 0) {
                 for (var ind = 0; ind < newChild.childNodes.length; ind++) {
@@ -252,13 +281,14 @@ __extend__(DOMNode.prototype, {
         if(!oldChild){
             return null;
         }
-        // throw Exception if DOMNamedNodeMap is readonly
-        if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
+        // throw Exception if NamedNodeMap is readonly
+        if (__ownerDocument__(this).implementation.errorChecking && 
+            (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         // get index of oldChild
-        var itemIndex = __findItemIndex__(this.childNodes, oldChild._id);
+        var itemIndex = __findItemIndex__(this.childNodes, oldChild);
         
         // throw Exception if there is no child node with this id
         if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
@@ -291,66 +321,64 @@ __extend__(DOMNode.prototype, {
         if(!newChild){
             return null;
         }
-      // test for exceptions
-      if (__ownerDocument__(this).implementation.errorChecking) {
-        // throw Exception if Node is readonly
-        if (this._readonly) {
-          throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+        // test for exceptions
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if Node is readonly
+            if (this._readonly) {
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+            }
+            
+            // throw Exception if arg was not created by this Document
+            if (__ownerDocument__(this) != __ownerDocument__(this)) {
+                throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+            }
+            
+            // throw Exception if the node is an ancestor
+            if (__isAncestor__(this, newChild)) {
+              throw(new DOMException(DOMException.HIERARCHY_REQUEST_ERR));
+            }
         }
     
-        // throw Exception if arg was not created by this Document
-        if (__ownerDocument__(this) != __ownerDocument__(this)) {
-          throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+        // if the newChild is already in the tree,
+        var newChildParent = newChild.parentNode;
+        if (newChildParent) {
+            // remove it
+            console.debug('removing node %s', newChild);
+            newChildParent.removeChild(newChild);
         }
     
-        // throw Exception if the node is an ancestor
-        if (__isAncestor__(this, newChild)) {
-          throw(new DOMException(DOMException.HIERARCHY_REQUEST_ERR));
-        }
-      }
+        // add newChild to childNodes
+        __appendChild__(this.childNodes, newChild);
     
-      // if the newChild is already in the tree,
-      var newChildParent = newChild.parentNode;
-      if (newChildParent) {
-        // remove it
-        newChildParent.removeChild(newChild);
-      }
-    
-      // add newChild to childNodes
-      __appendChild__(this.childNodes, newChild);
-    
-      if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-        // do node pointer surgery for DocumentFragment
-        if (newChild.childNodes.length > 0) {
-          for (var ind = 0; ind < newChild.childNodes.length; ind++) {
-            newChild.childNodes[ind].parentNode = this;
-          }
-    
-          if (this.lastChild) {
-            this.lastChild.nextSibling = newChild.childNodes[0];
-            newChild.childNodes[0].previousSibling = this.lastChild;
-            this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
-          }
-          else {
-            this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
-            this.firstChild = newChild.childNodes[0];
-          }
-        }
-      }
-      else {
-        // do node pointer surgery for newChild
-        newChild.parentNode = this;
-        if (this.lastChild) {
-          this.lastChild.nextSibling = newChild;
-          newChild.previousSibling = this.lastChild;
-          this.lastChild = newChild;
-        }
-        else {
-          this.lastChild = newChild;
-          this.firstChild = newChild;
-        }
-      }
-      return newChild;
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+            // do node pointer surgery for DocumentFragment
+            if (newChild.childNodes.length > 0) {
+                for (var ind = 0; ind < newChild.childNodes.length; ind++) {
+                    newChild.childNodes[ind].parentNode = this;
+                }
+                
+                if (this.lastChild) {
+                    this.lastChild.nextSibling = newChild.childNodes[0];
+                    newChild.childNodes[0].previousSibling = this.lastChild;
+                    this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
+                } else {
+                    this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
+                    this.firstChild = newChild.childNodes[0];
+                }
+            }
+        } else {
+            // do node pointer surgery for newChild
+            newChild.parentNode = this;
+            if (this.lastChild) {
+                this.lastChild.nextSibling = newChild;
+                newChild.previousSibling = this.lastChild;
+                this.lastChild = newChild;
+            } else {
+                this.lastChild = newChild;
+                this.firstChild = newChild;
+            }
+       }
+       return newChild;
     },
     hasChildNodes : function() {
         return (this.childNodes.length > 0);
@@ -368,29 +396,38 @@ __extend__(DOMNode.prototype, {
     },
     normalize : function() {
         var inode;
-        var nodesToRemove = new DOMNodeList();
+        var nodesToRemove = new NodeList();
         
-        if (this.nodeType == DOMNode.ELEMENT_NODE || this.nodeType == DOMNode.DOCUMENT_NODE) {
+        if (this.nodeType == Node.ELEMENT_NODE || this.nodeType == Node.DOCUMENT_NODE) {
             var adjacentTextNode = null;
         
             // loop through all childNodes
             for(var i = 0; i < this.childNodes.length; i++) {
                 inode = this.childNodes.item(i);
             
-                if (inode.nodeType == DOMNode.TEXT_NODE) { // this node is a text node
-                    if (inode.length < 1) {                  // this text node is empty
-                        __appendChild__(nodesToRemove, inode);      // add this node to the list of nodes to be remove
+                if (inode.nodeType == Node.TEXT_NODE) { 
+                    // this node is a text node
+                    if (inode.length < 1) {                  
+                        // this text node is empty
+                        // add this node to the list of nodes to be remove
+                        __appendChild__(nodesToRemove, inode);      
                     }else {
-                        if (adjacentTextNode) {                // if previous node was also text
-                            adjacentTextNode.appendData(inode.data);     // merge the data in adjacent text nodes
-                            __appendChild__(nodesToRemove, inode);    // add this node to the list of nodes to be removed
-                        }else {
-                            adjacentTextNode = inode;              // remember this node for next cycle
+                        if (adjacentTextNode) {                
+                            // previous node was also text
+                            adjacentTextNode.appendData(inode.data);
+                            // merge the data in adjacent text nodes
+                            // add this node to the list of nodes to be removed
+                            __appendChild__(nodesToRemove, inode);
+                        } else {
+                            // remember this node for next cycle
+                            adjacentTextNode = inode;              
                         }
                     }
                 } else {
-                    adjacentTextNode = null;                 // (soon to be) previous node is not a text node
-                    inode.normalize();                       // normalise non Text childNodes
+                    // (soon to be) previous node is not a text node
+                    adjacentTextNode = null;
+                    // normalize non Text childNodes
+                    inode.normalize();                       
                 }
             }
                 
@@ -402,13 +439,13 @@ __extend__(DOMNode.prototype, {
         }
     },
     isSupported : function(feature, version) {
-        // use Implementation.hasFeature to determin if this feature is supported
+        // use Implementation.hasFeature to determine if this feature is supported
         return __ownerDocument__(this).implementation.hasFeature(feature, version);
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
         // recurse childNodes
-        var nodelist = new DOMNodeList(__ownerDocument__(this));
+        var nodelist = new NodeList(__ownerDocument__(this));
         for(var i = 0; i < this.childNodes.length; i++) {
             nodeList = __getElementsByTagNameRecursive__(this.childNodes.item(i), tagname, nodelist);
         }
@@ -417,101 +454,100 @@ __extend__(DOMNode.prototype, {
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
         return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, 
-            new DOMNodeList(__ownerDocument__(this)));
+            new NodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         
         var importNode;
-
-        // debug("importing node " + importedNode.nodeName + "(" + importedNode.nodeType + ")" + "(?deep = "+deep+")");
 
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
         __ownerDocument__(this)._performingImportNodeOperation = true;
         
-            if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
-                if (!__ownerDocument__(this).implementation.namespaceAware) {
-                    // create a local Element (with the name of the importedNode)
-                    importNode = __ownerDocument__(this).createElement(importedNode.tagName);
-                
-                    // create attributes matching those of the importedNode
-                    for(var i = 0; i < importedNode.attributes.length; i++) {
-                        importNode.setAttribute(importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
-                    }
-                }else {
-                    // create a local Element (with the name & namespaceURI of the importedNode)
-                    importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
-                
-                    // create attributes matching those of the importedNode
-                    for(var i = 0; i < importedNode.attributes.length; i++) {
-                        importNode.setAttributeNS(importedNode.attributes.item(i).namespaceURI, 
-                            importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
-                    }
-                
-                    // create namespace definitions matching those of the importedNode
-                    for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
-                        importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
-                    }
+        if (importedNode.nodeType == Node.ELEMENT_NODE) {
+            if (!__ownerDocument__(this).implementation.namespaceAware) {
+                // create a local Element (with the name of the importedNode)
+                importNode = __ownerDocument__(this).createElement(importedNode.tagName);
+            
+                // create attributes matching those of the importedNode
+                for(var i = 0; i < importedNode.attributes.length; i++) {
+                    importNode.setAttribute(importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
                 }
-            } else if (importedNode.nodeType == DOMNode.ATTRIBUTE_NODE) {
-                if (!__ownerDocument__(this).implementation.namespaceAware) {
-                    // create a local Attribute (with the name of the importedAttribute)
-                    importNode = __ownerDocument__(this).createAttribute(importedNode.name);
-                } else {
-                    // create a local Attribute (with the name & namespaceURI of the importedAttribute)
-                    importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
-                
-                    // create namespace definitions matching those of the importedAttribute
-                    for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
-                        importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
-                    }
+            }else {
+                // create a local Element (with the name & namespaceURI of the importedNode)
+                importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
+            
+                // create attributes matching those of the importedNode
+                for(var i = 0; i < importedNode.attributes.length; i++) {
+                    importNode.setAttributeNS(importedNode.attributes.item(i).namespaceURI, 
+                        importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
                 }
             
-                // set the value of the local Attribute to match that of the importedAttribute
-                importNode.value = importedNode.value;
-                
-            } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-                // create a local DocumentFragment
-                importNode = __ownerDocument__(this).createDocumentFragment();
-            } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
-                // create a local NamespaceNode (with the same name & value as the importedNode)
-                importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
-                importNode.value = importedNode.value;
-            } else if (importedNode.nodeType == DOMNode.TEXT_NODE) {
-                // create a local TextNode (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createTextNode(importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.CDATA_SECTION_NODE) {
-                // create a local CDATANode (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.PROCESSING_INSTRUCTION_NODE) {
-                // create a local ProcessingInstruction (with the same target & data as the importedNode)
-                importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.COMMENT_NODE) {
-                // create a local Comment (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createComment(importedNode.data);
-            } else {  // throw Exception if nodeType is not supported
-                throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
-            }
-            
-            if (deep) {                                    // recurse childNodes
-                for(var i = 0; i < importedNode.childNodes.length; i++) {
-                    importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
+                // create namespace definitions matching those of the importedNode
+                for(var i = 0; i < importedNode._namespaces.length; i++) {
+                    importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
+                    importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                 }
             }
+        } else if (importedNode.nodeType == Node.ATTRIBUTE_NODE) {
+            if (!__ownerDocument__(this).implementation.namespaceAware) {
+                // create a local Attribute (with the name of the importedAttribute)
+                importNode = __ownerDocument__(this).createAttribute(importedNode.name);
+            } else {
+                // create a local Attribute (with the name & namespaceURI of the importedAttribute)
+                importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
             
-            //reset _performingImportNodeOperation
-            __ownerDocument__(this)._performingImportNodeOperation = false;
-            return importNode;
+                // create namespace definitions matching those of the importedAttribute
+                for(var i = 0; i < importedNode._namespaces.length; i++) {
+                    importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
+                    importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
+                }
+            }
+        
+            // set the value of the local Attribute to match that of the importedAttribute
+            importNode.value = importedNode.value;
+            
+        } else if (importedNode.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+            // create a local DocumentFragment
+            importNode = __ownerDocument__(this).createDocumentFragment();
+        } else if (importedNode.nodeType == Node.NAMESPACE_NODE) {
+            // create a local NamespaceNode (with the same name & value as the importedNode)
+            importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
+            importNode.value = importedNode.value;
+        } else if (importedNode.nodeType == Node.TEXT_NODE) {
+            // create a local TextNode (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createTextNode(importedNode.data);
+        } else if (importedNode.nodeType == Node.CDATA_SECTION_NODE) {
+            // create a local CDATANode (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
+        } else if (importedNode.nodeType == Node.PROCESSING_INSTRUCTION_NODE) {
+            // create a local ProcessingInstruction (with the same target & data as the importedNode)
+            importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
+        } else if (importedNode.nodeType == Node.COMMENT_NODE) {
+            // create a local Comment (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createComment(importedNode.data);
+        } else {  // throw Exception if nodeType is not supported
+            throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
+        }
+        
+        if (deep) {                                    
+            // recurse childNodes
+            for(var i = 0; i < importedNode.childNodes.length; i++) {
+                importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
+            }
+        }
+        
+        //reset _performingImportNodeOperation
+        __ownerDocument__(this)._performingImportNodeOperation = false;
+        return importNode;
         
     },
     contains : function(node){
-            while(node && node != this ){
-                node = node.parentNode;
-            }
-            return !!node;
+        while(node && node != this ){
+            node = node.parentNode;
+        }
+        return !!node;
     },
     compareDocumentPosition : function(b){
         var a = this;
@@ -534,21 +570,22 @@ __extend__(DOMNode.prototype, {
 
 
 /**
- * @method DOMNode._getElementsByTagNameRecursive - implements getElementsByTagName()
- * @param  elem     : DOMElement  - The element which are checking and then recursing into
+ * @method __getElementsByTagNameRecursive__ - implements getElementsByTagName()
+ * @param  elem     : Element  - The element which are checking and then recursing into
  * @param  tagname  : string      - The name of the tag to match on. The special value "*" matches all tags
- * @param  nodeList : DOMNodeList - The accumulating list of matching nodes
+ * @param  nodeList : NodeList - The accumulating list of matching nodes
  *
- * @return : DOMNodeList
+ * @return : NodeList
  */
 var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     
-    if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
+    if (elem.nodeType == Node.ELEMENT_NODE || elem.nodeType == Node.DOCUMENT_NODE) {
     
-        if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
+        if(elem.nodeType !== Node.DOCUMENT_NODE && 
             ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
                 (tagname == "*")) ){
-            __appendChild__(nodeList, elem);               // add matching node to nodeList
+            // add matching node to nodeList
+            __appendChild__(nodeList, elem);               
         }
     
         // recurse childNodes
@@ -561,45 +598,112 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
 };
 
 /**
- * @method DOMNode._getElementsByTagNameNSRecursive - implements getElementsByTagName()
+ * @method __getElementsByTagNameNSRecursive__  
+ *      implements getElementsByTagName()
  *
- * @param  elem     : DOMElement  - The element which are checking and then recursing into
+ * @param  elem     : Element  - The element which are checking and then recursing into
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
- * @param  nodeList     : DOMNodeList - The accumulating list of matching nodes
+ * @param  nodeList     : NodeList - The accumulating list of matching nodes
  *
- * @return : DOMNodeList
+ * @return : NodeList
  */
 var __getElementsByTagNameNSRecursive__ = function(elem, namespaceURI, localName, nodeList) {
-  if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
-
-    if (((elem.namespaceURI == namespaceURI) || (namespaceURI == "*")) && ((elem.localName == localName) || (localName == "*"))) {
-      __appendChild__(nodeList, elem);               // add matching node to nodeList
+    if (elem.nodeType == Node.ELEMENT_NODE || elem.nodeType == Node.DOCUMENT_NODE) {
+    
+        if (((elem.namespaceURI == namespaceURI) || (namespaceURI == "*")) && 
+            ((elem.localName == localName) || (localName == "*"))) {
+            // add matching node to nodeList
+            __appendChild__(nodeList, elem);               
+        }
+        
+        // recurse childNodes
+        for(var i = 0; i < elem.childNodes.length; i++) {
+            nodeList = __getElementsByTagNameNSRecursive__(
+                elem.childNodes.item(i), namespaceURI, localName, nodeList);
+        }
     }
-
-    // recurse childNodes
-    for(var i = 0; i < elem.childNodes.length; i++) {
-      nodeList = __getElementsByTagNameNSRecursive__(elem.childNodes.item(i), namespaceURI, localName, nodeList);
-    }
-  }
-
-  return nodeList;
+    
+    return nodeList;
 };
 
 /**
- * @method DOMNode._isAncestor - returns true if node is ancestor of target
- * @param  target         : DOMNode - The node we are using as context
- * @param  node         : DOMNode - The candidate ancestor node
+ * @method __isAncestor__ - returns true if node is ancestor of target
+ * @param  target         : Node - The node we are using as context
+ * @param  node         : Node - The candidate ancestor node
  * @return : boolean
  */
 var __isAncestor__ = function(target, node) {
-  // if this node matches, return true,
-  // otherwise recurse up (if there is a parentNode)
-  return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
+    // if this node matches, return true,
+    // otherwise recurse up (if there is a parentNode)
+    return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
 };
 
 var __ownerDocument__ = function(node){
-    return (node.nodeType == DOMNode.DOCUMENT_NODE)?node:node.ownerDocument;
+    return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
 };
 
-$w.Node = DOMNode;
+/**
+ * @author envjs team
+ */
+
+/**
+ * function __escapeXML__
+ * @param  str : string - The string to be escaped
+ * @return : string - The escaped string
+ */
+var escAmpRegEx = /&(?!(amp;|lt;|gt;|quot|apos;))/g;
+var escLtRegEx = /</g;
+var escGtRegEx = />/g;
+var quotRegEx = /"/g;
+var aposRegEx = /'/g;
+
+function __escapeXML__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;").
+            replace(quotRegEx, "&quot;").
+            replace(aposRegEx, "&apos;");
+
+    return str;
+};
+
+/*
+function __escapeHTML5__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;");
+
+    return str;
+};
+function __escapeHTML5Atribute__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;").
+            replace(quotRegEx, "&quot;").
+            replace(aposRegEx, "&apos;");
+
+    return str;
+};
+*/
+
+/**
+ * function __unescapeXML__
+ * @param  str : string - The string to be unescaped
+ * @return : string - The unescaped string
+ */
+var unescAmpRegEx = /&amp;/g;
+var unescLtRegEx = /&lt;/g;
+var unescGtRegEx = /&gt;/g;
+var unquotRegEx = /&quot;/g;
+var unaposRegEx = /&apos;/g;
+function __unescapeXML__(str) {
+    str = str.replace(unescAmpRegEx, "&").
+            replace(unescLtRegEx, "<").
+            replace(unescGtRegEx, ">").
+            replace(unquotRegEx, "\"").
+            replace(unaposRegEx, "'");
+
+    return str;
+};
+

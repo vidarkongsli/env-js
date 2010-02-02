@@ -1,5 +1,5 @@
 /**
- * @author thatcher
+ * @todo: refactor
  */
 $debug("Defining XPathExpression");
 /*

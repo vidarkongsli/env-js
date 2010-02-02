@@ -1,8 +1,8 @@
-$debug("Defining HTMLIFrameElement");
+
 /* 
-* HTMLIFrameElement - DOM Level 2
-*/
-var HTMLIFrameElement = function(ownerDocument) {
+ * HTMLIFrameElement - DOM Level 2
+ */
+HTMLIFrameElement = function(ownerDocument) {
     this.HTMLFrameElement = HTMLFrameElement;
     this.HTMLFrameElement(ownerDocument);
 };
@@ -21,6 +21,4 @@ __extend__(HTMLIFrameElement.prototype, {
 	    return this.setAttribute("width",val); 
     }
 });
-
-$w.HTMLIFrameElement = HTMLIFrameElement;
-			
+	

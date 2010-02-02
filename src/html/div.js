@@ -1,17 +1,8 @@
-/*
- * This file is a component of env.js,
- *     http://github.com/gleneivey/env-js/commits/master/README
- * a Pure JavaScript Browser Environment
- * Copyright 2009 John Resig, licensed under the MIT License
- *     http://www.opensource.org/licenses/mit-license.php
- */
 
-
-$debug("Defining HTMLDivElement");
 /*
 * HTMLDivElement - DOM Level 2
 */
-var HTMLDivElement = function(ownerDocument) {
+HTMLDivElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -25,4 +16,3 @@ __extend__(HTMLDivElement.prototype, {
     }
 });
 
-$w.HTMLDivElement = HTMLDivElement;

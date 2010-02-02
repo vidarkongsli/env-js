@@ -1,19 +1,18 @@
-$debug("Defining HTMLTableRowElement");
-/* 
-* HTMLRowElement - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLTableRowElement = function(ownerDocument) {
+
+/** 
+ * HTMLRowElement - DOM Level 2
+ * Implementation Provided by Steven Wood
+ */
+HTMLTableRowElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
-
 };
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
     
     appendChild : function (child) {
     
-       var retVal = DOMNode.prototype.appendChild.apply(this, arguments);
+       var retVal = Node.prototype.appendChild.apply(this, arguments);
        retVal.cellIndex = this.cells.length -1;
              
        return retVal;
@@ -111,4 +110,3 @@ __extend__(HTMLTableRowElement.prototype, {
 
 });
 
-$w.HTMLTableRowElement = HTMLTableRowElement;

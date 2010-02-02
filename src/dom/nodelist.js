@@ -1,41 +1,37 @@
-$debug("Defining NodeList");
-/*
-* NodeList - DOM Level 2
-*/
+
 /**
- * @class  DOMNodeList - provides the abstraction of an ordered collection of nodes
+ * @class  NodeList - 
+ *      provides the abstraction of an ordered collection of nodes
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- *
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNodeList is attached to (or null)
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NodeList is attached to (or null)
  */
-var DOMNodeList = function(ownerDocument, parentNode) {
+NodeList = function(ownerDocument, parentNode) {
     this.length = 0;
     this.parentNode = parentNode;
     this.ownerDocument = ownerDocument;
-    
     this._readonly = false;
-    
     __setArray__(this, []);
 };
-__extend__(DOMNodeList.prototype, {
+__extend__(NodeList.prototype, {
     item : function(index) {
         var ret = null;
-        //$log("NodeList item("+index+") = " + this[index]);
-        if ((index >= 0) && (index < this.length)) { // bounds check
-            ret = this[index];                    // return selected Node
+        if ((index >= 0) && (index < this.length)) {
+            // bounds check 
+            ret = this[index];                    
         }
-        
-        return ret;                                    // if the index is out of bounds, default value null is returned
+        // if the index is out of bounds, default value null is returned
+        return ret;
     },
     get xml() {
-        var ret = "";
+        var ret = "",
+            i;
         
         // create string containing the concatenation of the string values of each child
-        for (var i=0; i < this.length; i++) {
+        for (i=0; i < this.length; i++) {
             if(this[i]){
-                if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                if(this[i].nodeType == Node.TEXT_NODE && i>0 && 
+                   this[i-1].nodeType == Node.TEXT_NODE){
                     //add a single space between adjacent text nodes
                     ret += " "+this[i].xml;
                 }else{
@@ -43,59 +39,60 @@ __extend__(DOMNodeList.prototype, {
                 }
             }
         }
-        
         return ret;
     },
     toArray: function () {
-        var children = [];
-        for ( var i=0; i < this.length; i++) {
-                children.push (this[i]);
+        var children = [],
+            i;
+        for ( i=0; i < this.length; i++) {
+            children.push (this[i]);
         }
         return children;
     },
     toString: function(){
-      return "[ "+(this.length > 0?Array.prototype.join.apply(this, [", "]):"Empty NodeList")+" ]";
+        return "[object NodeList]";
     }
 });
 
 
 /**
- * @method DOMNodeList._findItemIndex - find the item index of the node with the specified internal id
+ * @method __findItemIndex__ 
+ *      find the item index of the node
  * @author Jon van Noort (jon@webarcana.com.au)
- * @param  id : int - unique internal id
+ * @param  node : Node 
  * @return : int
  */
-var __findItemIndex__ = function (nodelist, id) {
-  var ret = -1;
-
-  // test that id is valid
-  if (id > -1) {
-    for (var i=0; i<nodelist.length; i++) {
-      // compare id to each node's _id
-      if (nodelist[i]._id == id) {            // found it!
-        ret = i;
-        break;
-      }
+var __findItemIndex__ = function (nodelist, node) {
+    var ret = -1, i;
+    for (i=0; i<nodelist.length; i++) {
+        // compare id to each node's _id
+        if (nodelist[i] === node) {            
+            // found it!
+            ret = i;
+            break;
+        }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;
 };
 
 /**
- * @method DOMNodeList._insertBefore - insert the specified Node into the NodeList before the specified index
- *   Used by DOMNode.insertBefore(). Note: DOMNode.insertBefore() is responsible for Node Pointer surgery
- *   DOMNodeList._insertBefore() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @method __insertBefore__ 
+ *      insert the specified Node into the NodeList before the specified index
+ *      Used by Node.insertBefore(). Note: Node.insertBefore() is responsible 
+ *      for Node Pointer surgery __insertBefore__ simply modifies the internal 
+ *      data structure (Array).
+ * @param  newChild      : Node - the Node to be inserted
  * @param  refChildIndex : int     - the array index to insert the Node before
  */
 var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
-    if ((refChildIndex >= 0) && (refChildIndex <= nodelist.length)) { // bounds check
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+    if ((refChildIndex >= 0) && (refChildIndex <= nodelist.length)) { 
+        // bounds check
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+            // node is a DocumentFragment
             // append the children of DocumentFragment
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes.toArray()));
+            Array.prototype.splice.apply(nodelist,
+                [refChildIndex, 0].concat(newChild.childNodes.toArray()));
         }
         else {
             // append the newChild
@@ -105,66 +102,74 @@ var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
 };
 
 /**
- * @method DOMNodeList._replaceChild - replace the specified Node in the NodeList at the specified index
- *   Used by DOMNode.replaceChild(). Note: DOMNode.replaceChild() is responsible for Node Pointer surgery
- *   DOMNodeList._replaceChild() simply modifies the internal data structure (Array).
+ * @method __replaceChild__
+ *      replace the specified Node in the NodeList at the specified index
+ *      Used by Node.replaceChild(). Note: Node.replaceChild() is responsible 
+ *      for Node Pointer surgery __replaceChild__ simply modifies the internal 
+ *      data structure (Array).
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @param  newChild      : Node - the Node to be inserted
  * @param  refChildIndex : int     - the array index to hold the Node
  */
 var __replaceChild__ = function(nodelist, newChild, refChildIndex) {
     var ret = null;
     
-    if ((refChildIndex >= 0) && (refChildIndex < nodelist.length)) { // bounds check
-        ret = nodelist[refChildIndex];            // preserve old child for return
+    // bounds check
+    if ((refChildIndex >= 0) && (refChildIndex < nodelist.length)) { 
+        // preserve old child for return
+        ret = nodelist[refChildIndex];            
     
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+            // node is a DocumentFragment
             // get array containing children prior to refChild
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes.toArray()));
+            Array.prototype.splice.apply(nodelist,
+                [refChildIndex, 1].concat(newChild.childNodes.toArray()));
         }
         else {
-            // simply replace node in array (links between Nodes are made at higher level)
+            // simply replace node in array (links between Nodes are 
+            // made at higher level)
             nodelist[refChildIndex] = newChild;
         }
     }
-    
-    return ret;                                   // return replaced node
+    // return replaced node
+    return ret;                                   
 };
 
 /**
- * @method DOMNodeList._removeChild - remove the specified Node in the NodeList at the specified index
- *   Used by DOMNode.removeChild(). Note: DOMNode.removeChild() is responsible for Node Pointer surgery
- *   DOMNodeList._replaceChild() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
+ * @method __removeChild__ 
+ *      remove the specified Node in the NodeList at the specified index
+ *      Used by Node.removeChild(). Note: Node.removeChild() is responsible 
+ *      for Node Pointer surgery __removeChild__ simply modifies the internal 
+ *      data structure (Array).
  * @param  refChildIndex : int - the array index holding the Node to be removed
  */
 var __removeChild__ = function(nodelist, refChildIndex) {
     var ret = null;
     
-    if (refChildIndex > -1) {                              // found it!
-        ret = nodelist[refChildIndex];                    // return removed node
+    if (refChildIndex > -1) {                              
+        // found it!
+        // return removed node
+        ret = nodelist[refChildIndex];                    
         
         // rebuild array without removed child
         Array.prototype.splice.apply(nodelist,[refChildIndex, 1]);
     }
-    
-    return ret;                                   // return removed node
+    // return removed node
+    return ret;                                   
 };
 
 /**
- * @method DOMNodeList._appendChild - append the specified Node to the NodeList
- *   Used by DOMNode.appendChild(). Note: DOMNode.appendChild() is responsible for Node Pointer surgery
- *   DOMNodeList._appendChild() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @method __appendChild__ 
+ *      append the specified Node to the NodeList. Used by Node.appendChild(). 
+ *      Note: Node.appendChild() is responsible for Node Pointer surgery
+ *      __appendChild__ simply modifies the internal data structure (Array).
+ * @param  newChild      : Node - the Node to be inserted
  */
 var __appendChild__ = function(nodelist, newChild) {
-    if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+    if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+        // node is a DocumentFragment
         // append the children of DocumentFragment
-         Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
+        Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
@@ -173,16 +178,17 @@ var __appendChild__ = function(nodelist, newChild) {
 };
 
 /**
- * @method DOMNodeList._cloneNodes - Returns a NodeList containing clones of the Nodes in this NodeList
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  deep : boolean - If true, recursively clone the subtree under each of the nodes;
- *   if false, clone only the nodes themselves (and their attributes, if it is an Element).
- * @param  parentNode : DOMNode - the new parent of the cloned NodeList
- * @return : DOMNodeList - NodeList containing clones of the Nodes in this NodeList
+ * @method __cloneNodes__ - 
+ *      Returns a NodeList containing clones of the Nodes in this NodeList
+ * @param  deep : boolean - 
+ *      If true, recursively clone the subtree under each of the nodes;
+ *      if false, clone only the nodes themselves (and their attributes, 
+ *      if it is an Element).
+ * @param  parentNode : Node - the new parent of the cloned NodeList
+ * @return : NodeList - NodeList containing clones of the Nodes in this NodeList
  */
 var __cloneNodes__ = function(nodelist, deep, parentNode) {
-    var cloneNodeList = new DOMNodeList(nodelist.ownerDocument, parentNode);
+    var cloneNodeList = new NodeList(nodelist.ownerDocument, parentNode);
     
     // create list containing clones of each child
     for (var i=0; i < nodelist.length; i++) {
@@ -192,4 +198,3 @@ var __cloneNodes__ = function(nodelist, deep, parentNode) {
     return cloneNodeList;
 };
 
-$w.NodeList = DOMNodeList;

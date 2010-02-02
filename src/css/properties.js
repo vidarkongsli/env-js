@@ -1,7 +1,8 @@
+
 /*
 * CSS2Properties - DOM Level 2 CSS
 */
-var CSS2Properties = function(element){
+CSS2Properties = function(element){
     //this.onSetCallback = options.onSet?options.onSet:(function(){});
     this.styleIndex = __supportedStyles__();
     this.nameMap = {};
@@ -289,5 +290,3 @@ for(var style in __supportedStyles__()){
     })(style);
 };
 
-
-$w.CSS2Properties = CSS2Properties;

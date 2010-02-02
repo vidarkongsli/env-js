@@ -1,8 +1,8 @@
-$debug("Defining HTMLMetaElement");
-/* 
-* HTMLMetaElement - DOM Level 2
-*/
-var HTMLMetaElement = function(ownerDocument) {
+
+/** 
+ * HTMLMetaElement - DOM Level 2
+ */
+HTMLMetaElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -34,4 +34,3 @@ __extend__(HTMLMetaElement.prototype, {
     }
 });
 
-$w.HTMLMetaElement = HTMLMetaElement;

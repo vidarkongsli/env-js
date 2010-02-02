@@ -1,31 +1,27 @@
-$debug("Defining Attr");
-/*
-* Attr - DOM Level 2
-*/
+
 /**
- * @class  DOMAttr - The Attr interface represents an attribute in an Element object
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Attr 
+ *      The Attr interface represents an attribute in an Element object
+ * @extends Node
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMAttr = function(ownerDocument) {
-    this.DOMNode = DOMNode;
-    this.DOMNode(ownerDocument);
-                   
-    this.ownerElement = null;               // set when Attr is added to NamedNodeMap
+Attr = function(ownerDocument) {
+    this.Node = Node;
+    this.Node(ownerDocument);
+    // set when Attr is added to NamedNodeMap
+    this.ownerElement = null;
+    //TODO: our implementation of Attr is incorrect because we don't
+    //      treat the value of the attribute as a child text node.
 };
-DOMAttr.prototype = new DOMNode; 
-__extend__(DOMAttr.prototype, {
+Attr.prototype = new Node; 
+__extend__(Attr.prototype, {
     // the name of this attribute
     get name(){
         return this.nodeName;
     },
-    set name(name){
-        this.nodeName = name;
-    },
     // the value of the attribute is returned as a string
     get value(){
-        return this.nodeValue;
+        return this.nodeValue||'';
     },
     set value(value){
         // throw Exception if Attribute is readonly
@@ -35,21 +31,26 @@ __extend__(DOMAttr.prototype, {
         // delegate to node
         this.nodeValue = value;
     },
+    get textContent(){
+        return this.nodeValue;
+    },
+    set textContent(newText){
+        this.nodeValue = newText;
+    },
     get specified(){
         return (this!==null&&this!=undefined);
     },
     get nodeType(){
-        return DOMNode.ATTRIBUTE_NODE;
+        return Node.ATTRIBUTE_NODE;
     },
     get xml(){
         if(this.nodeValue)
-            return ' '+this.nodeName + '="' + __escapeXML__(this.nodeValue+"") + '"';
+            return  __escapeXML__(this.nodeValue+"");
         else
             return '';
     },
     toString : function(){
-        return "Attr #" + this._id + " " + this.name;
+        return "[object Attr]";
     }
 });
 
-$w.Attr = DOMAttr;

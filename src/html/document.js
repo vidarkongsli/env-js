@@ -1,87 +1,142 @@
-$debug("Defining HTMLDocument");
-/*
-* HTMLDocument - DOM Level 2
-*/
-/**
- * @class  HTMLDocument - The Document interface represents the entire HTML or XML document.
- *   Conceptually, it is the root of the document tree, and provides the primary access to the document's data.
- *
- * @extends DOMDocument
- */
-var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
-  this.DOMDocument = DOMDocument;
-  this.DOMDocument(implementation, docParentWindow);
 
+/**
+ * @class  HTMLDocument
+ *      The Document interface represents the entire HTML or XML document.
+ *      Conceptually, it is the root of the document tree, and provides 
+ *      the primary access to the document's data.
+ *
+ * @extends Document
+ */
+HTMLDocument = function(implementation, docParentWindow, docReferrer) {
+  this.Document = Document;
+  this.Document(implementation, docParentWindow);
   this._referrer = docReferrer;
-  this._domain;
-  this._open = false;
-  this.$async = false;
+  this.async = false;
+  this.baseURI = "about:blank";
 };
-HTMLDocument.prototype = new DOMDocument;
+
+HTMLDocument.prototype = new Document;
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
-          //print('createElement :'+tagName);
-          // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking && 
-                (!__isValidName__(tagName))) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
-          tagName = tagName.toUpperCase();
-          // create DOMElement specifying 'this' as ownerDocument
-          //This is an html document so we need to use explicit interfaces per the 
-          if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/^AREA$/))              {node = new HTMLAreaElement(this);}
-          else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
-          else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
-          else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
-          else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
-          else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
-          else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
-          else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
-          else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
-          else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
-          else if(tagName.match(/^FRAME$/))             {node = new HTMLFrameElement(this);}
-          else if(tagName.match(/FRAMESET/))            {node = new HTMLFrameSetElement(this);}
-          else if(tagName.match(/H1|H2|H3|H4|H5|H6/))   {node = new HTMLElement(this);}
-          else if(tagName.match(/HEAD/))                {node = new HTMLHeadElement(this);}
-          else if(tagName.match(/HR/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/HTML/))                {node = new HTMLElement(this);}
-          else if(tagName.match(/IFRAME/))              {node = new HTMLIFrameElement(this);}
-          else if(tagName.match(/IMG/))                 {node = new HTMLImageElement(this);}
-          else if(tagName.match(/INPUT/))               {node = new HTMLInputElement(this);}
-          else if(tagName.match(/LABEL/))               {node = new HTMLLabelElement(this);}
-          else if(tagName.match(/LEGEND/))              {node = new HTMLLegendElement(this);}
-          else if(tagName.match(/^LI$/))                {node = new HTMLElement(this);}
-          else if(tagName.match(/LINK/))                {node = new HTMLLinkElement(this);}
-          else if(tagName.match(/MAP/))                 {node = new HTMLMapElement(this);}
-          else if(tagName.match(/META/))                {node = new HTMLMetaElement(this);}
-          else if(tagName.match(/OBJECT/))              {node = new HTMLObjectElement(this);}
-          else if(tagName.match(/OL/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/OPTGROUP/))            {node = new HTMLOptGroupElement(this);}
-          else if(tagName.match(/OPTION/))              {node = new HTMLOptionElement(this);;}
-          else if(tagName.match(/^P$/))                 {node = new HTMLElement(this);}
-          else if(tagName.match(/PARAM/))               {node = new HTMLParamElement(this);}
-          else if(tagName.match(/PRE/))                 {node = new HTMLElement(this);}
-          else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
-          else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
-          else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
-          else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLTableSectionElement(this);}
-          else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
-          else if(tagName.match(/TEXTAREA/))            {node = new HTMLTextAreaElement(this);}
-          else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
-          else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
-          else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
-          else{
-            node = new HTMLElement(this);
-          }
-        
-          // assign values to properties (and aliases)
-          node.tagName  = tagName;
-          return node;
+        tagName = tagName.toUpperCase();
+        // create Element specifying 'this' as ownerDocument
+        // This is an html document so we need to use explicit interfaces per the 
+        //TODO: would be much faster as a big switch
+        switch(tagName){
+            case "A":
+                node = new HTMLAnchorElement(this);break;
+            case "AREA":
+                node = new HTMLAreaElement(this);break;
+            case "BASE":
+                node = new HTMLBaseElement(this);break;
+            case "BLOCKQUOTE":
+                node = new HTMLQuoteElement(this);break;
+            case "Q":
+                node = new HTMLQuoteElement(this);break;
+            case "BODY":
+                node = new HTMLBodyElement(this);break;
+            case "BR":
+                node = new HTMLElement(this);break;
+            case "BUTTON":
+                node = new HTMLButtonElement(this);break;
+            case "CAPTION":
+                node = new HTMLElement(this);break;
+            case "COL":
+                node = new HTMLTableColElement(this);break;
+            case "COLGROUP":
+                node = new HTMLTableColElement(this);break;
+            case "DEL":
+                node = new HTMLModElement(this);break;
+            case "INS":
+                node = new HTMLModElement(this);break;
+            case "DIV":
+                node = new HTMLDivElement(this);break;
+            case "DL":
+                node = new HTMLElement(this);break;
+            case "FIELDSET":
+                node = new HTMLFieldSetElement(this);break;
+            case "FORM":
+                node = new HTMLFormElement(this);break;
+            case "FRAME":
+                node = new HTMLFrameElement(this);break;
+            case "H1":
+                node = new HTMLHeadElement(this);break;
+            case "H2":
+                node = new HTMLHeadElement(this);break;
+            case "H3":
+                node = new HTMLHeadElement(this);break;
+            case "H4":
+                node = new HTMLHeadElement(this);break;
+            case "H5":
+                node = new HTMLHeadElement(this);break;
+            case "H6":
+                node = new HTMLHeadElement(this);break;
+            case "HR":
+                node = new HTMLElement(this);break;
+            case "HTML":
+                node = new HTMLElement(this);break;
+            case "IFRAME":
+                node = new HTMLIFrameElement(this);break;
+            case "IMG":
+                node = new HTMLImageElement(this);break;
+            case "INPUT":
+                node = new HTMLInputElement(this);break;
+            case "LABEL":
+                node = new HTMLLabelElement(this);break;
+            case "LEGEND":
+                node = new HTMLLegendElement(this);break;
+            case "LI":
+                node = new HTMLElement(this);break;
+            case "LINK":
+                node = new HTMLLinkElement(this);break;
+            case "MAP":
+                node = new HTMLMapElement(this);break;
+            case "META":
+                node = new HTMLObjectElement(this);break;
+            case "OBJECT":
+                node = new HTMLMapElement(this);break;
+            case "OPTGROUP":
+                node = new HTMLOptGroupElement(this);break;
+            case "OPTION":
+                node = new HTMLOptionElement(this);break;
+            case "P":
+                node = new HTMLParagraphElement(this);break;
+            case "PARAM":
+                node = new HTMLParamElement(this);break;
+            case "PRE":
+                node = new HTMLElement(this);break;
+            case "SCRIPT":
+                node = new HTMLScriptElement(this);break;
+            case "SELECT":
+                node = new HTMLSelectElement(this);break;
+            case "STYLE":
+                node = new HTMLStyleElement(this);break;
+            case "TABLE":
+                node = new HTMLTableElement(this);break;
+            case "TBODY":
+                node = new HTMLTableSectionElement(this);break;
+            case "TFOOT":
+                node = new HTMLTableSectionElement(this);break;
+            case "THEAD":
+                node = new HTMLTableSectionElement(this);break;
+            case "TD":
+                node = new HTMLTableCellElement(this);break;
+            case "TH":
+                node = new HTMLTableCellElement(this);break;
+            case "TEXTAREA":
+                node = new HTMLTextAreaElement(this);break;
+            case "TITLE":
+                node = new HTMLTitleElement(this);break;
+            case "TR":
+                node = new HTMLTableRowElement(this);break;
+            case "UL":
+                node = new HTMLElement(this);break;
+            default:
+                node = new HTMLUnknownElement(this);
+        }
+        // assign values to properties (and aliases)
+        node.nodeName  = tagName;
+        return node;
     },
     createElementNS : function (uri, local) {
         //print('createElementNS :'+uri+" "+local);
@@ -100,15 +155,15 @@ __extend__(HTMLDocument.prototype, {
           }
           return this.createElement("m:" + local);
         } else {
-            return DOMDocument.prototype.createElementNS.apply(this,[uri, local]);
+            return Document.prototype.createElementNS.apply(this,[uri, local]);
         }
     },
     get anchors(){
-        return new HTMLCollection(this.getElementsByTagName('a'), 'Anchor');
+        return new HTMLCollection(this.getElementsByTagName('a'));
         
     },
     get applets(){
-        return new HTMLCollection(this.getElementsByTagName('applet'), 'Applet');
+        return new HTMLCollection(this.getElementsByTagName('applet'));
         
     },
     get body(){ 
@@ -125,162 +180,96 @@ __extend__(HTMLDocument.prototype, {
         var titleArray = this.getElementsByTagName('title');
         if (titleArray.length < 1)
             return "";
-        return titleArray[0].text;
+        return titleArray[0].textContent;
     },
     set title(titleStr){
-        titleArray = this.getElementsByTagName('title');
+        var titleArray = this.getElementsByTagName('title'),
+            titleElem,
+            headArray;
         if (titleArray.length < 1){
             // need to make a new element and add it to "head"
-            var titleElem = new HTMLTitleElement(this);
+            titleElem = new HTMLTitleElement(this);
             titleElem.text = titleStr;
-            var headArray = this.getElementsByTagName('head');
-	    if (headArray.length < 1)
+            headArray = this.getElementsByTagName('head');
+    	    if (headArray.length < 1)
                 return;  // ill-formed, just give up.....
             headArray[0].appendChild(titleElem);
-        }
-        else {
-            titleArray[0].text = titleStr;
+        } else {
+            titleArray[0].textContent = titleStr;
         }
     },
 
-    //set/get cookie see cookie.js
-    get domain(){
-        return this._domain||$w.location.domain;
-        
+    get cookie(){
+        return Cookies.get(this);
     },
-    set domain(){
-        /* TODO - requires a bit of thought to enforce domain restrictions */ 
-        return; 
-        
+    set cookie(cookie){
+        return Cookies.set(this, cookie);
+    },
+    get location(){
+        return this.baseURI;
+    },
+    set location(url){
+        this.baseURI = url;
+    },
+    get domain(){
+        var HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
+            matches = HOSTNAME.exec(this.baseURI);
+        return matches&&matches.length>1?matches[1]:"";
+    },
+    set domain(value){
+        var i,
+            domainParts = this.domain.splt('.').reverse(),
+            newDomainParts = value.split('.').reverse();
+        if(newDomainParts.length > 1){
+            for(i=0;i<newDomainParts.length;i++){
+                if(!(newDomainParts[i] == domainParts[i])){
+                    return;
+                }
+            }
+            this.baseURI = this.baseURI.replace(domainParts.join('.'), value);
+        }
     },
     get forms(){
-      return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
+      return new HTMLCollection(this.getElementsByTagName('form'));
     },
     get images(){
-        return new HTMLCollection(this.getElementsByTagName('img'), 'Image');
-        
+        return new HTMLCollection(this.getElementsByTagName('img'));
     },
     get lastModified(){ 
         /* TODO */
         return this._lastModified; 
-    
     },
     get links(){
-        return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
-        
-    },
-    get location(){
-        return $w.location
+        return new HTMLCollection(this.getElementsByTagName('a'));
     },
     get referrer(){
         return this._referrer;
     },
-	close : function(){ 
-	    /* TODO */ 
-	    this._open = false;
-    },
 	getElementsByName : function(name){
-        //returns a real Array + the DOMNodeList
-        var retNodes = __extend__([],new DOMNodeList(this, this.documentElement)),
+        //returns a real Array + the NodeList
+        var retNodes = __extend__([],new NodeList(this, this.documentElement)),
           node;
         // loop through all Elements in the 'all' collection
         var all = this.all;
         for (var i=0; i < all.length; i++) {
             node = all[i];
-            if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
+            if (node.nodeType == Node.ELEMENT_NODE && node.getAttribute('name') == name) {
                 retNodes.push(node);
             }
         }
         return retNodes;
 	},
-	open : function(){ 
-	    /* TODO */
-	    this._open = true;  
-    },
-	write: function(htmlstring){ 
-	    /* TODO */
-	    return; 
-	
-    },
-	writeln: function(htmlstring){ 
-	    this.write(htmlstring+'\n'); 
-    },
 	toString: function(){ 
-	    return "HTMLDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "[object HTMLDocument]"; 
     },
 	get innerHTML(){ 
 	    return this.documentElement.outerHTML; 
-	    
     },
-	get __html__(){
-	    return true;
-	    
+    get URL(){ 
+        return this.location;  
     },
-    get async(){ return this.$async;},
-    set async(async){ this.$async = async; },
-    get baseURI(){ return $env.location('./'); },
-    get URL(){ return $w.location.href;  },
-    set URL(url){ $w.location.href = url;  }
+    set URL(url){
+        this.location = url;  
+    }
 });
 
-var __elementPopped__ = function(ns, name, node){
-    // print('Element Popped: '+ns+" "+name+ " "+ node+" " +node.type+" "+node.nodeName);
-    var doc = __ownerDocument__(node);
-    // SMP: subtle issue here: we're currently getting two kinds of script nodes from the html5 parser.
-    // The "fake" nodes come with a type of undefined. The "real" nodes come with the type that's given,
-    // or null if not given. So the following check has the side-effect of ignoring the "fake" nodes. So
-    // something to watch for if this code changes.
-    var type = ( node.type === null ) ? "text/javascript" : node.type;
-    try{
-        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript"){
-            //$env.debug("element popped: script\n"+node.xml);
-            // unless we're parsing in a window context, don't execute scripts
-            if (doc.parentWindow){
-                //p.replaceEntities = true;
-                var okay = $env.loadLocalScript(node, null);
-                // only fire event if we actually had something to load
-                if (node.src && node.src.length > 0){
-                    var event = doc.createEvent();
-                    event.initEvent( okay ? "load" : "error", false, false );
-                    node.dispatchEvent( event, false );
-                  }
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'frame' ||
-                 node.nodeName.toLowerCase() == 'iframe'   ){
-            
-            //$env.debug("element popped: iframe\n"+node.xml);
-            if (node.src && node.src.length > 0){
-                $debug("getting content document for (i)frame from " + node.src);
-    
-                $env.loadFrame(node, $env.location(node.src));
-    
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'link'){
-            //$env.debug("element popped: link\n"+node.xml);
-            if (node.href && node.href.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'img'){
-            //$env.debug("element popped: img \n"+node.xml);
-            if (node.src && node.src.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-    }catch(e){
-        $env.error('error loading html element', e);
-    }
-};
-
-$w.HTMLDocument = HTMLDocument;

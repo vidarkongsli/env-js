@@ -1,8 +1,8 @@
-$debug("Defining HTMLMapElement");
-/* 
-* HTMLMapElement - DOM Level 2
-*/
-var HTMLMapElement = function(ownerDocument) {
+
+/** 
+ * HTMLMapElement - DOM Level 2
+ */
+HTMLMapElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -18,5 +18,3 @@ __extend__(HTMLMapElement.prototype, {
         this.setAttribute('name',value);
     }
 });
-
-$w.HTMLMapElement = HTMLMapElement;

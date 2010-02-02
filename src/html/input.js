@@ -1,8 +1,7 @@
-$debug("Defining HTMLInputElement");
-/*
-* HTMLInputElement - DOM Level 2
-*/
-var HTMLInputElement = function(ownerDocument) {
+/**
+ * HTMLInputElement - DOM Level 2
+ */
+HTMLInputElement = function(ownerDocument) {
     this.HTMLInputAreaCommon = HTMLInputAreaCommon;
     this.HTMLInputAreaCommon(ownerDocument);
 };
@@ -55,5 +54,4 @@ __extend__(HTMLInputElement.prototype, {
     }
 });
 
-$w.HTMLInputElement = HTMLInputElement;
 

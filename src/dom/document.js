@@ -1,22 +1,26 @@
-$debug("Defining Document");
+
 /**
- * @class  DOMDocument - The Document interface represents the entire HTML 
+ * @class  Document - The Document interface represents the entire HTML 
  *      or XML document. Conceptually, it is the root of the document tree, 
  *      and provides the primary access to the document's data.
  *
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
+ * @extends Node
  * @param  implementation : DOMImplementation - the creator Implementation
  */
-var DOMDocument = function(implementation, docParentWindow) {
-    //$log("\tcreating dom document");
-    this.DOMNode = DOMNode;
-    this.DOMNode(this);
+Document = function(implementation, docParentWindow) {
+    this.Node = Node;
+    this.Node(this);
     
-    this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
-    this.implementation = implementation; // The DOMImplementation object that handles this document.
+    this.async = true;
+    // The Document Type Declaration (see DocumentType) associated with this document
+    this.doctype = null;
+    // The DOMImplementation object that handles this document.
+    this.implementation = implementation
     
     // "private" variable providing the read-only document.parentWindow property
+    // TODO: I dont think this is a good place to store this info,
+    //       rather some internal function like __parentWindow__(doc)
+    //       would be better.
     this._parentWindow = docParentWindow;
     try {
         if (docParentWindow.$thisWindowsProxyObject)
@@ -24,35 +28,19 @@ var DOMDocument = function(implementation, docParentWindow) {
     } catch(e){}
 
     this.nodeName  = "#document";
-    this._id = 0;
-    this._lastId = 0;
-    this._parseComplete = false;                   // initially false, set to true by parser
-    this._url = "";
+    // initially false, set to true by parser
+    this._parseComplete = false;
+    this.baseURI = 'about:blank';
     
     this.ownerDocument = null;
     
     this._performingImportNodeOperation = false;
+    
 };
-DOMDocument.prototype = new DOMNode;
-__extend__(DOMDocument.prototype, {	
-
-    addEventListener        : function(type, fn){ __addEventListener__(this, type, fn); },
-	removeEventListener     : function(type){ __removeEventListener__(this, type); },
-	attachEvent             : function(type, fn){ __addEventListener__(this, type, fn); },
-	detachEvent             : function(type){ __removeEventListener__(this, type); },
-	dispatchEvent           : function(event, bubbles){ __dispatchEvent__(this, event, bubbles); },
-
-    toString : function(){
-        return '[object DOMDocument]';
-    },
-    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
-	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
-	attachEvent             : function(){ $w.addEventListener.apply(this, arguments); },
-	detachEvent             : function(){ $w.removeEventListener.apply(this, arguments); },
-	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
-
-    get styleSheets(){ 
-        return [];/*TODO*/ 
+Document.prototype = new Node;
+__extend__(Document.prototype,{
+    get localName(){
+        return null;
     },
     get all(){
         return this.getElementsByTagName("*");
@@ -60,7 +48,7 @@ __extend__(DOMDocument.prototype, {
     get documentElement(){
         var i, length = this.childNodes?this.childNodes.length:0;
         for(i=0;i<length;i++){
-           if(this.childNodes[i].nodeType == DOMNode.ELEMENT_NODE){
+           if(this.childNodes[i].nodeType == Node.ELEMENT_NODE){
                 return this.childNodes[i];
             }
         }
@@ -69,360 +57,229 @@ __extend__(DOMDocument.prototype, {
     get parentWindow(){
         return this._parentWindow;
     },
-    loadXML : function(xmlString) {
-        // create DOM Document
-        if(this === $document){
-            $debug("Setting internal window.document");
-            $document = this;
-        }
-        // populate Document with Parsed Nodes
-        try {
-            // make sure thid document object is empty before we try to load ...
-            this.childNodes      = new DOMNodeList(this, this);
-            this.firstChild      = null;
-            this.lastChild       = null;
-            this.attributes      = new DOMNamedNodeMap(this, this);
-            this._namespaces     = new DOMNamespaceNodeMap(this, this);
-            this._readonly = false;
-
-            $w.parseHtmlDocument(xmlString, this, null, null);
-            
-            $env.wait(-1);
-        } catch (e) {
-            $error(e);
-        }
-
-        // set parseComplete flag, (Some validation Rules are relaxed if this is false)
-        this._parseComplete = true;
-        return this;
+    get documentURI(){
+        return this.baseURI;
     },
-    load: function(url){
-		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var scripts, _this = this;
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, $w.document.async);
-        xhr.onreadystatechange = function(){
-            try{
-        	    _this.loadXML(xhr.responseText);
-            }catch(e){
-                $error("Error Parsing XML - ",e);
-                _this.loadXML(
-                "<html><head></head><body>"+
-                    "<h1>Parse Error</h1>"+
-                    "<p>"+e.toString()+"</p>"+  
-                "</body></html>");
-            }
-            _this._url = url;
-            
-        	$info("Sucessfully loaded document at "+url);
-
-            // first fire body-onload event
-            var bodyLoad = _this.createEvent();
-            bodyLoad.initEvent("load");
-            try {  // assume <body> element, but just in case....
-                _this.getElementsByTagName('body')[0].
-                  dispatchEvent( bodyLoad, false );
-            } catch (e){;}
-
-            // then fire this onload event
-            //event = _this.createEvent();
-            //event.initEvent("load");
-            //_this.dispatchEvent( event, false );
-			
-			//also use DOMContentLoaded event
-            var domContentLoaded = _this.createEvent();
-            domContentLoaded.initEvent("DOMContentLoaded");
-            _this.dispatchEvent( domContentLoaded, false );
-            
-            //finally fire the window.onload event
-            if(_this === document){
-                var windowLoad = _this.createEvent();
-                windowLoad.initEvent("load", false, false);
-                $w.dispatchEvent( windowLoad, false );
-            }
-            
-        };
-        xhr.send();
+    get location(){
+        return this._location?this._location:null;
     },
-	createEvent             : function(eventType){ 
-        var event;
-        if(eventType === "UIEvents"){ event = new UIEvent();}
-        else if(eventType === "MouseEvents"){ event = new MouseEvent();}
-        else{ event = new Event(); } 
-        return event;
+    set location(url){
+        this._location = url;
     },
-    createExpression        : function(xpath, nsuriMap){ 
+    createExpression: function(xpath, nsuriMap){ 
         return new XPathExpression(xpath, nsuriMap);
     },
-    createElement : function(tagName) {
-          //$debug("DOMDocument.createElement( "+tagName+" )");
-          // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking 
-            && (!__isValidName__(tagName))) {
-            throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
-        
-          // create DOMElement specifying 'this' as ownerDocument
-          var node = new DOMElement(this);
-        
-          // assign values to properties (and aliases)
-          node.tagName  = tagName;
-        
-          return node;
-    },
-    createDocumentFragment : function() {
-          // create DOMDocumentFragment specifying 'this' as ownerDocument
-          var node = new DOMDocumentFragment(this);
-          return node;
+    createDocumentFragment: function() {
+        var node = new DocumentFragment(this);
+        return node;
     },
     createTextNode: function(data) {
-          // create DOMText specifying 'this' as ownerDocument
-          var node = new DOMText(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+        var node = new Text(this);
+        node.data = data;
+        return node;
     },
-    createComment : function(data) {
-          // create DOMComment specifying 'this' as ownerDocument
-          var node = new DOMComment(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+    createComment: function(data) {
+        var node = new Comment(this);
+        node.data = data;
+        return node;
     },
     createCDATASection : function(data) {
-          // create DOMCDATASection specifying 'this' as ownerDocument
-          var node = new DOMCDATASection(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+        var node = new CDATASection(this);
+        node.data = data;
+        return node;
     },
-    createProcessingInstruction : function(target, data) {
-          // throw Exception if the target string contains an illegal character
-          //$log("DOMDocument.createProcessingInstruction( "+target+" )");
-          if (__ownerDocument__(this).implementation.errorChecking 
+    createProcessingInstruction: function(target, data) {
+        // throw Exception if the target string contains an illegal character
+        if (__ownerDocument__(this).implementation.errorChecking 
             && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
+        }
         
-          // create DOMProcessingInstruction specifying 'this' as ownerDocument
-          var node = new DOMProcessingInstruction(this);
+        var node = new ProcessingInstruction(this);
+        node.target = target;
+        node.data = data;
+        return node;
+    },
+    createElement: function(tagName) {
+        // throw Exception if the tagName string contains an illegal character
+        if (__ownerDocument__(this).implementation.errorChecking 
+                && (!__isValidName__(tagName))) {
+            throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+        }
+        var node = new Element(this);
+        node.nodeName = tagName;
+        return node;
+    },
+    createElementNS : function(namespaceURI, qualifiedName) {
+        //we use this as a parser flag to ignore the xhtml
+        //namespace assumed by the parser
+        if(this.baseURI === 'http://envjs.com/xml' && 
+            namespaceURI === 'http://www.w3.org/1999/xhtml'){
+            return this.createElement(qualifiedName);
+        }
+        //console.log('createElementNS %s %s', namespaceURI, qualifiedName);
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if the Namespace is invalid
+            if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
+                throw(new DOMException(DOMException.NAMESPACE_ERR));
+            }
+            
+            // throw Exception if the qualifiedName string contains an illegal character
+            if (!__isValidName__(qualifiedName)) {
+                throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+            }
+        }
         
-          // assign values to properties (and aliases)
-          node.target    = target;
-          node.data      = data;
+        var node  = new Element(this);
+        var qname = __parseQName__(qualifiedName);
+        node.namespaceURI = namespaceURI;
+        node.prefix       = qname.prefix;
+        node.nodeName     = qualifiedName;
         
-          return node;
+        return node;
     },
     createAttribute : function(name) {
+        //console.log('createAttribute %s ', name);
         // throw Exception if the name string contains an illegal character
-        //$log("DOMDocument.createAttribute( "+target+" )");
         if (__ownerDocument__(this).implementation.errorChecking 
             && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
-        
-        // create DOMAttr specifying 'this' as ownerDocument
-        var node = new DOMAttr(this);
-        
-        // assign values to properties (and aliases)
-        node.name     = name;
+        var node = new Attr(this);
+        node.nodeName = name;
+        return node;
+    },
+    createAttributeNS : function(namespaceURI, qualifiedName) {
+        //we use this as a parser flag to ignore the xhtml
+        //namespace assumed by the parser
+        if(this.baseURI === 'http://envjs.com/xml' && 
+            namespaceURI === 'http://www.w3.org/1999/xhtml'){
+            return this.createAttribute(qualifiedName);
+        }
+        //console.log('createAttributeNS %s %s', namespaceURI, qualifiedName);
+        // test for exceptions
+        if (this.implementation.errorChecking) {
+            // throw Exception if the Namespace is invalid
+            if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
+                throw(new DOMException(DOMException.NAMESPACE_ERR));
+            }
+            
+            // throw Exception if the qualifiedName string contains an illegal character
+            if (!__isValidName__(qualifiedName)) {
+                throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+            }
+        }
+        var node  = new Attr(this);
+        var qname = __parseQName__(qualifiedName);
+        node.namespaceURI = namespaceURI===''?null:namespaceURI;
+        node.prefix       = qname.prefix;
+        node.nodeName     = qualifiedName;
+        node.nodeValue    = "";
         
         return node;
     },
-    createElementNS : function(namespaceURI, qualifiedName) {
-        //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
-              throw(new DOMException(DOMException.NAMESPACE_ERR));
-            }
-        
-            // throw Exception if the qualifiedName string contains an illegal character
-            if (!__isValidName__(qualifiedName)) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-            }
-          }
-        
-          // create DOMElement specifying 'this' as ownerDocument
-          var node  = new DOMElement(this);
-          var qname = __parseQName__(qualifiedName);
-        
-          // assign values to properties (and aliases)
-          node.namespaceURI = namespaceURI;
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.tagName      = qualifiedName;
-        
-          return node;
-    },
-    createAttributeNS : function(namespaceURI, qualifiedName) {
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
-              throw(new DOMException(DOMException.NAMESPACE_ERR));
-            }
-        
-            // throw Exception if the qualifiedName string contains an illegal character
-            if (!__isValidName__(qualifiedName)) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-            }
-          }
-        
-          // create DOMAttr specifying 'this' as ownerDocument
-          var node  = new DOMAttr(this);
-          var qname = __parseQName__(qualifiedName);
-        
-          // assign values to properties (and aliases)
-          node.namespaceURI = namespaceURI;
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.name         = qualifiedName;
-          node.nodeValue    = "";
-        
-          return node;
-    },
     createNamespace : function(qualifiedName) {
-          // create DOMNamespace specifying 'this' as ownerDocument
-          var node  = new DOMNamespace(this);
-          var qname = __parseQName__(qualifiedName);
+        //console.log('createNamespace %s', qualifiedName);
+        // create Namespace specifying 'this' as ownerDocument
+        var node  = new Namespace(this);
+        var qname = __parseQName__(qualifiedName);
         
-          // assign values to properties (and aliases)
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.name         = qualifiedName;
-          node.nodeValue    = "";
+        // assign values to properties (and aliases)
+        node.prefix       = qname.prefix;
+        node.localName    = qname.localName;
+        node.name         = qualifiedName;
+        node.nodeValue    = "";
         
-          return node;
+        return node;
     },
-    /** from David Flanagan's JavaScript - The Definitive Guide
-     * 
-     * @param {String} xpathText
-     *     The string representing the XPath expression to evaluate.
-     * @param {Node} contextNode 
-     *     The node in this document against which the expression is to
-     *     be evaluated.
-     * @param {Function} nsuriMapper 
-     *     A function that will map from namespace prefix to to a full 
-     *     namespace URL or null if no such mapping is required.
-     * @param {Number} resultType 
-     *     Specifies the type of object expected as a result, using
-     *     XPath conversions to coerce the result. Possible values for
-     *     type are the constrainsts defined by the XPathResult object.
-     *     (null if not required)
-     * @param {XPathResult} result 
-     *     An XPathResult object to be reused or null
-     *     if you want a new XPathResult object to be created.
-     * @returns {XPathResult} result
-     *     A XPathResult object representing the evaluation of the 
-     *     expression against the given context node.
-     * @throws {Exception} e
-     *     This method may throw an exception if the xpathText contains 
-     *     a syntax error, if the expression cannot be converted to the
-     *     desired resultType, if the expression contains namespaces 
-     *     that nsuriMapper cannot resolve, or if contextNode is of the 
-     *     wrong type or is not assosciated with this document.
-     * @seealso
-     *     Document.evaluate
-     */
-    /*evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
-        return new XPathExpression().evaluate();
-    },*/
+    
+    evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
+        //return new XPathExpression().evaluate();
+        throw Error('Document.evaluate not supported yet!');
+    },
+    
     getElementById : function(elementId) {
-          var retNode = null,
-              node;
-          // loop through all Elements in the 'all' collection
-          var all = this.all;
-          for (var i=0; i < all.length; i++) {
+        var retNode = null,
+            node;
+        // loop through all Elements in the 'all' collection
+        var all = this.all;
+        for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
-                    retNode = node;
-                    //$log("Found node with id = " + node.id);
-                    break;
-                }
+                //found the node
+                retNode = node;
+                break;
             }
-          }
-          
-          //if(retNode == null){$log("Couldn't find id " + elementId);}
-          return retNode;
+        }
+        return retNode;
     },
     normalizeDocument: function(){
 	    this.documentElement.normalize();
     },
     get nodeType(){
-        return DOMNode.DOCUMENT_NODE;
+        return Node.DOCUMENT_NODE;
     },
     get xml(){
-        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 
-	    return "DOMDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "[object XMLDocument]"; 
     },
 	get defaultView(){ 
 		return { getComputedStyle: function(elem){
-			return $w.getComputedStyle(elem);
+			return window.getComputedStyle(elem);
 		}};
 	},
-    _genId : function() {
-          this._lastId += 1;                             // increment lastId (to generate unique id)
-          return this._lastId;
+    get styleSheets(){
+        /*TODO*/  
+        return [];
     }
 });
 
 
 var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribute) {
 
-      if (doc._performingImportNodeOperation == true) {
+    if (doc._performingImportNodeOperation == true) {
         //we're doing an importNode operation (or a cloneNode) - in both cases, there
         //is no need to perform any namespace checking since the nodes have to have been valid
         //to have gotten into the DOM in the first place
         return true;
-      }
+    }
     
-      var valid = true;
-      // parse QName
-      var qName = __parseQName__(qualifiedName);
+    var valid = true;
+    // parse QName
+    var qName = __parseQName__(qualifiedName);
     
     
-      //only check for namespaces if we're finished parsing
-      if (this._parseComplete == true) {
+    //only check for namespaces if we're finished parsing
+    if (this._parseComplete == true) {
     
         // if the qualifiedName is malformed
         if (qName.localName.indexOf(":") > -1 ){
             valid = false;
         }
-    
+        
         if ((valid) && (!isAttribute)) {
             // if the namespaceURI is not null
             if (!namespaceURI) {
-            valid = false;
+                valid = false;
             }
         }
-    
+        
         // if the qualifiedName has a prefix
         if ((valid) && (qName.prefix == "")) {
             valid = false;
         }
     
-      }
+    }
     
-      // if the qualifiedName has a prefix that is "xml" and the namespaceURI is
-      //  different from "http://www.w3.org/XML/1998/namespace" [Namespaces].
-      if ((valid) && (qName.prefix == "xml") && (namespaceURI != "http://www.w3.org/XML/1998/namespace")) {
+    // if the qualifiedName has a prefix that is "xml" and the namespaceURI is
+    //  different from "http://www.w3.org/XML/1998/namespace" [Namespaces].
+    if ((valid) && (qName.prefix == "xml") && (namespaceURI != "http://www.w3.org/XML/1998/namespace")) {
         valid = false;
-      }
+    }
     
-      return valid;
+    return valid;
 };
 
-$w.Document = DOMDocument;

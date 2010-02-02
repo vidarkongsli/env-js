@@ -1,9 +1,8 @@
-$debug("Defining HTMLBaseElement");
+
 /* 
 * HTMLBaseElement - DOM Level 2
 */
-var HTMLBaseElement = function(ownerDocument) {
-    //$log("creating anchor element");
+HTMLBaseElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -23,4 +22,4 @@ __extend__(HTMLBaseElement.prototype, {
     }
 });
 
-$w.HTMLBaseElement = HTMLBaseElement;		
+	

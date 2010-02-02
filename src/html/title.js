@@ -1,8 +1,8 @@
-$debug("Defining HTMLTitleElement");
-/* 
-* HTMLTitleElement - DOM Level 2
-*/
-var HTMLTitleElement = function(ownerDocument) {
+
+/** 
+ * HTMLTitleElement - DOM Level 2
+ */
+HTMLTitleElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -13,8 +13,8 @@ __extend__(HTMLTitleElement.prototype, {
     },
 
     set text(titleStr) {
-        this.innerHTML = titleStr; // if paranoid, would error on embedded HTML
+        this.textContent = titleStr; 
     }
 });
 
-$w.HTMLTitleElement = HTMLTitleElement;
+

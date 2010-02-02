@@ -1,12 +1,11 @@
-$debug("Defining HTMLTableElement");
-/* 
-* HTMLTableElement - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLTableElement = function(ownerDocument) {
+
+/** 
+ * HTMLTableElement - DOM Level 2
+ * Implementation Provided by Steven Wood
+ */
+HTMLTableElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
-
 };
 
 HTMLTableElement.prototype = new HTMLElement;
@@ -61,28 +60,28 @@ __extend__(HTMLTableElement.prototype, {
     appendChild : function (child) {
         
         var tagName;
-        if(child&&child.nodeType==DOMNode.ELEMENT_NODE){
+        if(child&&child.nodeType==Node.ELEMENT_NODE){
             tagName = child.tagName.toLowerCase();
             if (tagName === "tr") {
                 // need an implcit <tbody> to contain this...
                 if (!this.currentBody) {
                     this.currentBody = document.createElement("tbody");
                 
-                    DOMNode.prototype.appendChild.apply(this, [this.currentBody]);
+                    Node.prototype.appendChild.apply(this, [this.currentBody]);
                 }
               
                 return this.currentBody.appendChild(child); 
        
             } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
                 this.currentBody = child;
-                return DOMNode.prototype.appendChild.apply(this, arguments);  
+                return Node.prototype.appendChild.apply(this, arguments);  
                 
             } else {
-                return DOMNode.prototype.appendChild.apply(this, arguments);
+                return Node.prototype.appendChild.apply(this, arguments);
             }
         }else{
             //tables can still have text node from white space
-            return DOMNode.prototype.appendChild.apply(this, arguments);
+            return Node.prototype.appendChild.apply(this, arguments);
         }
     },
      
@@ -195,5 +194,4 @@ __extend__(HTMLTableElement.prototype, {
     }
     
 });
-
-$w.HTMLTableElement = HTMLTableElement;		
+	

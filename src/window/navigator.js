@@ -1,28 +1,25 @@
+
+
 /*
-*	navigator.js
-*   - requires env
-*/
-$debug("Initializing Window Navigator.");
+ *	navigator.js
+ *  Browser Navigator    
+ */
+Navigator = function(){
 
-var $appCodeName  = $env.appCodeName;//eg "Mozilla"
-var $appName      = $env.appName;//eg "Gecko/20070309 Firefox/2.0.0.3"
-
-// Browser Navigator
-$w.__defineGetter__("navigator", function(){	
 	return {
 		get appCodeName(){
-			return $appCodeName;
+			return Envjs.appCodeName;
 		},
 		get appName(){
-			return $appName;
+			return Envjs.appName;
 		},
 		get appVersion(){
-			return $version +" ("+ 
-			    $w.navigator.platform +"; "+
+			return Envjs.version +" ("+ 
+			    this.platform +"; "+
 			    "U; "+//?
-			    $env.os_name+" "+$env.os_arch+" "+$env.os_version+"; "+
-			    $env.lang+"; "+
-			    "rv:"+$revision+
+			    Envjs.os_name+" "+Envjs.os_arch+" "+Envjs.os_version+"; "+
+			    Envjs.lang+"; "+
+			    "rv:"+Envjs.revision+
 			  ")";
 		},
 		get cookieEnabled(){
@@ -32,17 +29,17 @@ $w.__defineGetter__("navigator", function(){
 			return [];
 		},
 		get platform(){
-			return $env.platform;
+			return Envjs.platform;
 		},
 		get plugins(){
 			return [];
 		},
 		get userAgent(){
-			return $w.navigator.appCodeName + "/" + $w.navigator.appVersion + " " + $w.navigator.appName;
+			return this.appCodeName + "/" + this.appVersion + " " + this.appName;
 		},
 		javaEnabled : function(){
-			return $env.javaEnabled;	
+			return Envjs.javaEnabled;	
 		}
 	};
-});
+};
 

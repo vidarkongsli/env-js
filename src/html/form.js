@@ -1,16 +1,18 @@
-$debug("Defining HTMLFormElement");
+
 /* 
-* HTMLFormElement - DOM Level 2
-*/
-var HTMLFormElement = function(ownerDocument){
+ * HTMLFormElement - DOM Level 2
+ */
+HTMLFormElement = function(ownerDocument){
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
+    //TODO: on __elementPopped__ from the parser
+    //      we need to determine all the forms default 
+    //      values
 };
 HTMLFormElement.prototype = new HTMLElement;
 __extend__(HTMLFormElement.prototype,{
     get acceptCharset(){ 
         return this.getAttribute('accept-charset');
-        
     },
     set acceptCharset(acceptCharset){
         this.setAttribute('accept-charset', acceptCharset);
@@ -65,23 +67,18 @@ __extend__(HTMLFormElement.prototype,{
 	    
     },
 	submit:function(){
-	    __submit__(this);
+        //TODO: this needs to perform the form inputs serialization
+        //      and submission
+        //  DONE: see xhr/form.js
+	    var event = __submit__(this);
 	    
     },
 	reset:function(){
+        //TODO: this needs to reset all values specified in the form
+        //      to those which where set as defaults
 	    __reset__(this);
 	    
     },
-    onsubmit:function(){
-        if (__eval__(this.getAttribute('onsubmit')||'', this)) {
-            this.submit();
-        }
-    },
-    onreset:function(){
-        if (__eval__(this.getAttribute('onreset')||'', this)) {
-            this.reset();
-        }
-    }
+    onsubmit:HTMLEvents.prototype.onsubmit,
+    onreset: HTMLEvents.prototype.onreset
 });
-
-$w.HTMLFormElement	= HTMLFormElement;

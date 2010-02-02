@@ -1,8 +1,8 @@
-$debug("Defining HTMLBodyElement");
+
 /*
-* HTMLBodyElement - DOM Level 2
-*/
-var HTMLBodyElement = function(ownerDocument) {
+ * HTMLBodyElement - DOM Level 2
+ */
+HTMLBodyElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -16,4 +16,3 @@ __extend__(HTMLBodyElement.prototype, {
     }
 });
 
-$w.HTMLBodyElement = HTMLBodyElement;

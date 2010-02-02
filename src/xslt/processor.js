@@ -1,7 +1,7 @@
-/**
- * @author thatcher
- */
 
+/**
+ * @todo: document
+ */
 $w.__defineGetter__("XSLTProcessor", function(){
     return new XSLTProcessor(arguments);
 });

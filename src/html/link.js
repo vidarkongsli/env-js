@@ -1,18 +1,8 @@
-/**
-* Link - HTMLElement 
-*/
-$w.__defineGetter__("Link", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
-});
 
-
-$debug("Defining HTMLLinkElement");
 /* 
 * HTMLLinkElement - DOM Level 2
 */
-var HTMLLinkElement = function(ownerDocument) {
+HTMLLinkElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -77,4 +67,3 @@ __extend__(HTMLLinkElement.prototype, {
     }
 });
 
-$w.HTMLLinkElement = HTMLLinkElement;

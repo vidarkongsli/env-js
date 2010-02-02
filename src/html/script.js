@@ -1,8 +1,8 @@
-$debug("Defining HTMLScriptElement");
-/* 
-* HTMLScriptElement - DOM Level 2
-*/
-var HTMLScriptElement = function(ownerDocument) {
+
+/** 
+ * HTMLScriptElement - DOM Level 2
+ */
+HTMLScriptElement = function(ownerDocument) {
     this.HTMLElement = HTMLElement;
     this.HTMLElement(ownerDocument);
 };
@@ -12,12 +12,12 @@ __extend__(HTMLScriptElement.prototype, {
         // text of script is in a child node of the element
         // scripts with < operator must be in a CDATA node
         for (var i=0; i<this.childNodes.length; i++) {
-            if (this.childNodes[i].nodeType == DOMNode.CDATA_SECTION_NODE) {
+            if (this.childNodes[i].nodeType == Node.CDATA_SECTION_NODE) {
                 return this.childNodes[i].nodeValue;
             }
         } 
         // otherwise there will be a text node containing the script
-        if (this.childNodes[0] && this.childNodes[0].nodeType == DOMNode.TEXT_NODE) {
+        if (this.childNodes[0] && this.childNodes[0].nodeType == Node.TEXT_NODE) {
             return this.childNodes[0].nodeValue;
  		}
         return this.nodeValue;
@@ -25,7 +25,7 @@ __extend__(HTMLScriptElement.prototype, {
     },
     set text(value){
         this.nodeValue = value;
-        $env.loadInlineScript(this);
+        Envjs.loadInlineScript(this);
     },
     get htmlFor(){
         return this.getAttribute('for');
@@ -63,12 +63,7 @@ __extend__(HTMLScriptElement.prototype, {
     set type(value){
         this.setAttribute('type',value);
     },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this);
-    },
-    onerror: function(event){
-        __eval__(this.getAttribute('onerror')||'', this);
-    }
+    onload: HTMLEvents.prototype.onload,
+    onerror: HTMLEvents.prototype.onerror
 });
 
-$w.HTMLScriptElement = HTMLScriptElement;

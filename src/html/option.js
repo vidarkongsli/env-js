@@ -1,8 +1,8 @@
-$debug("Defining HTMLOptionElement");
-/*
-* HTMLOptionElement - DOM Level 2
-*/
-var HTMLOptionElement = function(ownerDocument) {
+
+/**
+ * HTMLOptionElement - DOM Level 2
+ */
+HTMLOptionElement = function(ownerDocument) {
     this.HTMLInputCommon = HTMLInputCommon;
     this.HTMLInputCommon(ownerDocument);
 };
@@ -76,4 +76,3 @@ __extend__(HTMLOptionElement.prototype, {
     }
 });
 
-$w.HTMLOptionElement = HTMLOptionElement;
