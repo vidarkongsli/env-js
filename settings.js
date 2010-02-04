@@ -6,9 +6,7 @@
  *  as not to commit your local settings back to the repo.
  */
 
-var SETTINGS = {
-
+var SETTINGS = { 
     BASE_URI : 'file:///mnt/repos/thatcher/env-js/',
     AJAX_BASE: 'http://github.com/thatcher/env-js/raw/master/'
-    
 }; 

@@ -4,7 +4,7 @@
     <description>Builds, tests, and runs the project Env.</description>
     <tstamp/>
     <property file="build.properties"/>
-    
+                
     <echo message="{"/>
     <echo message="     'BUILD_PROPERTIES': {"/> 
     <echo message="         'PROJECT':      '${PROJECT}',"/>
@@ -41,7 +41,10 @@
     <property name="DIST_DIR"       
             location="${PREFIX}/"             
             description="Folder for concatenated, min, lite and packed target" />
-            
+    
+    <available property='HAS_LOCAL'
+               file='${BASEDIR}/local_settings.js' />
+                       
     <echo message="     'ENVIRONMENT':{"/> 
     <echo message="         'BASEDIR':      '${BASEDIR}',"/>
     <echo message="         'SRC_DIR':      '${SRC_DIR}',"/>
@@ -50,7 +53,8 @@
     <echo message="         'PREFIX':       '${PREFIX}',"/>
     <echo message="         'DOCS_DIR':     '${DOCS_DIR}',"/>
     <echo message="         'TEST_DIR':     '${TEST_DIR}',"/>
-    <echo message="         'DIST_DIR':     '${DIST_DIR}'"/>
+    <echo message="         'DIST_DIR':     '${DIST_DIR}',"/>
+    <echo message="         'HAS_LOCAL':    '${HAS_LOCAL}'"/>
     <echo message="     },"/> 
     
     
@@ -85,14 +89,20 @@
     <echo message="     }"/> 
     <echo message=" }"/> 
     
-    
+ 
     <!-- BUILD TARGETS -->
     <target name="all" depends="concat"/>
     
     <target name="rhino">
         <ant antfile="rhino/build.xml" target="all" inheritAll="false"/>
     </target>
-    
+ 
+ 
+    <target name='local-settings' unless='${HAS_LOCAL}'>
+        <copy file="${BASEDIR}/settings.js" 
+              tofile="${BASEDIR}/local_settings.js"
+              overwrite='false'/>
+    </target>   
 
     <!-- BUILD ENV PLATFORM BINDINGS -->
     <target name="env-platforms" depends='core-env, rhino-env-spec'/>
@@ -501,7 +511,7 @@
     
     <!-- TEST XHR SPECIFICATION -->
     <target name='xhr-spec'
-            depends='xhr'
+            depends='xhr, local-settings'
             description='Test XMLHttpRequest Specs'>
         <echo message=""/>
         <echo message="Executing XMLHttpRequest Spec"/>
@@ -586,7 +596,7 @@
     
     <!-- TEST WINDOW SPECIFICATION -->
     <target name='window-spec'
-            depends='window'
+            depends='window, local-settings'
             description='Test Window Specs'>
         <echo message=""/>
         <echo message="Executing Window Spec"/>

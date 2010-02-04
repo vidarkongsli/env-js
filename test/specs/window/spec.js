@@ -23,7 +23,7 @@ try{
     _load('dist/parser.js');
     _load('dist/xhr.js');
     _load('dist/window.js');
-    _load('settings.js');
+    _load('local_settings.js');
     
     document.async = false;
     
