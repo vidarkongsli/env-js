@@ -7,7 +7,8 @@ var _load,
     _count = 1,
     _starttime = new Date().getTime(),
     _endtime,
-    Envjs;
+    Envjs,
+    __this__ = this;
     
 var expected_path = 'test/specs/window/spec.html';
 

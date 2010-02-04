@@ -478,7 +478,21 @@ test('Document.createDocumentFragment', function(){
     doc = document.implementation.createDocument('', '', null);
     fragment = doc.createDocumentFragment();
     
-    ok(fragment, 'created node');
+    ok(fragment, 'fragment');
+    equals(fragment.attributes, null, '.attributes');
+});
+
+
+test('Document.createComment', function(){
+
+    var doc, 
+        comment;
+    
+    doc = document.implementation.createDocument('', '', null);
+    comment = doc.createComment("This is a pig, 'oink, oink'");
+    
+    ok(comment, 'comment');
+    equals(xmlserializer.serializeToString(comment), "<!--This is a pig, 'oink, oink-->", 'serializeToString');
 });
 
 test('Element.setAttributeNS', function(){
