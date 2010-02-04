@@ -492,7 +492,32 @@ test('Document.createComment', function(){
     comment = doc.createComment("This is a pig, 'oink, oink'");
     
     ok(comment, 'comment');
-    equals(xmlserializer.serializeToString(comment), "<!--This is a pig, 'oink, oink-->", 'serializeToString');
+    equals(comment.data, "This is a pig, 'oink, oink'", '.data');
+    equals(comment.length, 27, '.length');
+    ok(comment.appendData,  '.appendData');
+    ok(comment.deleteData,  '.deleteData');
+    ok(comment.insertData,  '.insertData');
+    ok(comment.replaceData,  '.replaceData');
+    ok(comment.substringData,  '.substringData');
+    equals(comment.attributes, null, '.attributes');
+    equals(comment.baseURI, 'about:blank', '.baseURI');
+    ok(comment.childNodes,  '.childNodes');
+    equals(comment.childNodes.length, 0, '.childNodes.length');
+    equals(comment.firstChild, null, '.firstChild');
+    equals(comment.lastChild, null, '.lastChild');
+    equals(comment.localName, null, '.localName');
+    equals(comment.namespaceURI, null, '.namespaceURI');
+    equals(comment.nextSibling, null, '.nextSibling');
+    equals(comment.nodeName, '#comment', '.nodeName');
+    equals(comment.nodeType, 8, '.nodeType');
+    equals(comment.nodeValue, "This is a pig, 'oink, oink'", '.nodeValue');
+    equals(comment.ownerDocument, doc, '.ownerDocument');
+    equals(comment.parentNode, null, '.parentNode');
+    equals(comment.prefix, null, '.prefix');
+    equals(comment.previousSibling, null, '.previousSibling');
+    equals(comment.textContent, "This is a pig, 'oink, oink'", '.textContent');
+    equals(xmlserializer.serializeToString(comment), 
+        "<!--This is a pig, 'oink, oink'-->", 'serializeToString');
 });
 
 test('Element.setAttributeNS', function(){
