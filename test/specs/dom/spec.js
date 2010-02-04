@@ -479,7 +479,25 @@ test('Document.createDocumentFragment', function(){
     fragment = doc.createDocumentFragment();
     
     ok(fragment, 'fragment');
+    ok(fragment.querySelector, '.querySelector');
+    ok(fragment.querySelectorAll, '.querySelectorAll');
     equals(fragment.attributes, null, '.attributes');
+    equals(fragment.baseURI, 'about:blank', '.baseURI');
+    ok(fragment.childNodes,  '.childNodes');
+    equals(fragment.childNodes.length, 0, '.childNodes.length');
+    equals(fragment.firstChild, null, '.firstChild');
+    equals(fragment.lastChild, null, '.lastChild');
+    equals(fragment.localName, null, '.localName');
+    equals(fragment.namespaceURI, null, '.namespaceURI');
+    equals(fragment.nextSibling, null, '.nextSibling');
+    equals(fragment.nodeName, '#document-fragment', '.nodeName');
+    equals(fragment.nodeType, 11, '.nodeType');
+    equals(fragment.nodeValue, null, '.nodeValue');
+    equals(fragment.ownerDocument, doc, '.ownerDocument');
+    equals(fragment.parentNode, null, '.parentNode');
+    equals(fragment.prefix, null, '.prefix');
+    equals(fragment.previousSibling, null, '.previousSibling');
+    equals(fragment.textContent, "", '.textContent');
 });
 
 
