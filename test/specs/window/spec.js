@@ -9,8 +9,7 @@ var _load,
     _endtime,
     Envjs;
     
-var __this__ = this,
-    expected_path = 'test/specs/window/spec.html';
+var expected_path = 'test/specs/window/spec.html';
 
 try{
     _load = load;
@@ -27,11 +26,10 @@ try{
     _load('settings.js');
     _load('local_settings.js');
     
-    //mock the window and document in envjs
-    new Window(__this__, __this__);
     document.async = false;
     
     _load('test/specs/qunit.js');
+    
     location = SETTINGS.AJAX_BASE + expected_path;
     
 }catch(e){

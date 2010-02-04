@@ -108,7 +108,7 @@
                     <token key="VERSION" value="core-env.${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
-            <fileset dir="${SRC_DIR}" includes="env/__global__.js" />
+            <fileset dir="${SRC_DIR}" includes="env/core/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="env/core/console.js" />
             <fileset dir="${SRC_DIR}" includes="env/core/dom.js" />
@@ -134,6 +134,7 @@
                     <token key="VERSION" value="rhino-env.${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
+            <fileset dir="${SRC_DIR}" includes="env/rhino/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/console.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/dom.js" />

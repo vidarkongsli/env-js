@@ -50,7 +50,8 @@ test('Envjs Platform Interfaces Available', function(){
 });
 
 
-var document = null;
+var document = null,
+    path = 'specs/env/spec.html';
 
 test('Envjs.location', function(){
     
@@ -118,6 +119,10 @@ test('Envjs.proxy', function(){
     equals(subframe.top, abcdefghi, '.top');
         
 
+});
+
+Envjs.onExit(function(){
+    console.log('onExit!');
 });
 
 _start();

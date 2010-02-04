@@ -5,5 +5,6 @@
 var Window,
     Screen,
     History,
-    Navigator;
+    Navigator,
+    __this__ = this;
 

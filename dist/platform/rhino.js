@@ -1,3 +1,11 @@
+/*
+ * Envjs rhino-env.1.2.0.0 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
 /*
  * Envjs rhino-env.1.2.0.0 
@@ -38,6 +46,25 @@ Envjs.sync = sync;
 Envjs.sleep = function(millseconds){
     java.lang.Thread.currentThread().sleep(millseconds);
 };
+
+/**
+ * provides callback hook for when the system exits
+ */
+Envjs.onExit = function(callback){
+    var rhino = Packages.org.mozilla.javascript,
+        contextFactory =  __context__.getFactory(),
+        listener = new rhino.ContextFactory.Listener({
+            contextReleased: function(context){
+                if(context === __context__)
+                    console.log('context released', context);
+                contextFactory.removeListener(this);
+                if(callback)
+                    callback();
+            }
+        });
+    contextFactory.addListener(listener);
+};
+
 
 /**
  * resolves location relative to doc location

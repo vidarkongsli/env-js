@@ -5,7 +5,8 @@
 var Window,
     Screen,
     History,
-    Navigator;
+    Navigator,
+    __this__ = this;
 
 
 /*
@@ -546,6 +547,11 @@ Window = function(scope, parent, opener){
 };
 
 var __windows__ = {};
+
+//finally pre-supply the window with the window-like environment
+new Window(__this__, __this__);
+
+
 
 /**
  * @author john resig & the envjs team

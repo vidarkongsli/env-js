@@ -25,3 +25,4 @@ var Envjs = function(){
 Envjs.appCodeName  = "Envjs";
 //eg "Gecko/20070309 Firefox/2.0.0.3"
 Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
+
