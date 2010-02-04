@@ -43,7 +43,6 @@ _load('dist/timer.js');
 _load('dist/parser.js');
 _load('dist/xhr.js');
 _load('settings.js');
-_load('local_settings.js');
 
 module('xhr');
 
