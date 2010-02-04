@@ -30,6 +30,9 @@ __extend__(DocumentFragment.prototype,{
     },
     toString : function(){
         return "[object DocumentFragment]";
+    },
+    get localName(){
+        return null;
     }
 });
 

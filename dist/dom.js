@@ -734,7 +734,7 @@ __extend__(Node.prototype, {
         }
     },
     get textContent(){
-        return this.nodeValue;
+        return this.nodeValue||"";
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
@@ -2033,6 +2033,9 @@ __extend__(DocumentFragment.prototype,{
     },
     toString : function(){
         return "[object DocumentFragment]";
+    },
+    get localName(){
+        return null;
     }
 });
 

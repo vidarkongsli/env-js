@@ -88,7 +88,7 @@ __extend__(Node.prototype, {
         }
     },
     get textContent(){
-        return this.nodeValue;
+        return this.nodeValue||"";
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
