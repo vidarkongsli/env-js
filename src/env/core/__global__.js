@@ -7,18 +7,29 @@
 
 var Envjs = function(){
     var i,
-        name;
-    for(i=0;i<arguments.length;i++){
-        for ( name in arguments[i] ) {
-            var g = arguments[i].__lookupGetter__(name), 
-                s = arguments[i].__lookupSetter__(name);
-            if ( g || s ) {
-                if ( g ) Envjs.__defineGetter__(name, g);
-                if ( s ) Envjs.__defineSetter__(name, s);
-            } else
-                Envjs[name] = arguments[i][name];
-        }
+        name
+        override = function(){
+            for(i=0;i<arguments.length;i++){
+                for ( name in arguments[i] ) {
+                    var g = arguments[i].__lookupGetter__(name), 
+                        s = arguments[i].__lookupSetter__(name);
+                    if ( g || s ) {
+                        if ( g ) Envjs.__defineGetter__(name, g);
+                        if ( s ) Envjs.__defineSetter__(name, s);
+                    } else
+                        Envjs[name] = arguments[i][name];
+                }
+            }
+        };
+    if(arguments.length === 1 && typeof(arguments[0]) == 'string'){
+        window.location = arguments[0];
+    }else if (arguments.length === 1 && typeof(arguments[0]) == "object"){
+        override(arguments[0])
+    }else if(arguments.length === 2){
+        override(arguments[1]);
+        window.location = arguments[0];
     }
+    return;
 };
 
 //eg "Mozilla"
