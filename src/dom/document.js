@@ -29,17 +29,20 @@ Document = function(implementation, docParentWindow) {
 
     this.nodeName  = "#document";
     // initially false, set to true by parser
-    this._parseComplete = false;
+    this.parsing = false;
     this.baseURI = 'about:blank';
     
     this.ownerDocument = null;
     
-    this._performingImportNodeOperation = false;
+    this.importing = false;
     
 };
 Document.prototype = new Node;
 __extend__(Document.prototype,{
     get localName(){
+        return null;
+    },
+    get textContent(){
         return null;
     },
     get all(){
@@ -48,7 +51,7 @@ __extend__(Document.prototype,{
     get documentElement(){
         var i, length = this.childNodes?this.childNodes.length:0;
         for(i=0;i<length;i++){
-           if(this.childNodes[i].nodeType == Node.ELEMENT_NODE){
+            if(this.childNodes[i].nodeType == Node.ELEMENT_NODE){
                 return this.childNodes[i];
             }
         }
@@ -240,7 +243,7 @@ __extend__(Document.prototype,{
 
 var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribute) {
 
-    if (doc._performingImportNodeOperation == true) {
+    if (doc.importing == true) {
         //we're doing an importNode operation (or a cloneNode) - in both cases, there
         //is no need to perform any namespace checking since the nodes have to have been valid
         //to have gotten into the DOM in the first place
@@ -253,7 +256,7 @@ var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribut
     
     
     //only check for namespaces if we're finished parsing
-    if (this._parseComplete == true) {
+    if (this.parsing == false) {
     
         // if the qualifiedName is malformed
         if (qName.localName.indexOf(":") > -1 ){

@@ -463,7 +463,7 @@ __extend__(Node.prototype, {
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
-        __ownerDocument__(this)._performingImportNodeOperation = true;
+        __ownerDocument__(this).importing = true;
         
         if (importedNode.nodeType == Node.ELEMENT_NODE) {
             if (!__ownerDocument__(this).implementation.namespaceAware) {
@@ -538,8 +538,8 @@ __extend__(Node.prototype, {
             }
         }
         
-        //reset _performingImportNodeOperation
-        __ownerDocument__(this)._performingImportNodeOperation = false;
+        //reset importing
+        __ownerDocument__(this).importing = false;
         return importNode;
         
     },
