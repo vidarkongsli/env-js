@@ -44,10 +44,10 @@ __extend__(ProcessingInstruction.prototype, {
         return Node.PROCESSING_INSTRUCTION_NODE;
     },
     get xml(){
-        return "<?" + this.nodeName +" "+ this.nodeValue + " ?>";
+        return "<?" + this.nodeName +" "+ this.nodeValue + "?>";
     },
     toString : function(){
-        return "ProcessingInstruction #"+this._id;
+        return "[object ProcessingInstruction]";
     }
 });
 

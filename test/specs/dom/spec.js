@@ -439,6 +439,8 @@ test('Document.createCDATASection', function(){
     equals(cdata.parentNode, null, '.parentNode');
     equals(cdata.prefix, null, '.prefix');
     equals(cdata.textContent, keyboardish, '.textContent');
+    equals(xmlserializer.serializeToString(cdata), 
+        "<![CDATA["+keyboardish+"]]>", 'serializeToString');
     
 });
 
@@ -447,7 +449,7 @@ test('Document.createProcessingInstruction', function(){
     var doc, 
         pi,
         target = 'foo',
-        data = 'bar';
+        data = 'bar="pooh"';
         //seriously i never use pi's--is there a better example
     
     doc = document.implementation.createDocument('', '', null);
@@ -467,7 +469,8 @@ test('Document.createProcessingInstruction', function(){
     equals(pi.parentNode, null, '.parentNode');
     equals(pi.prefix, null, '.prefix');
     equals(pi.textContent, data, '.textContent');
-    
+    equals(xmlserializer.serializeToString(pi), 
+        '<?foo bar="pooh"?>', '.serializeToString');
 });
 
 test('Document.createDocumentFragment', function(){
@@ -499,6 +502,8 @@ test('Document.createDocumentFragment', function(){
     equals(fragment.prefix, null, '.prefix');
     equals(fragment.previousSibling, null, '.previousSibling');
     equals(fragment.textContent, "", '.textContent');
+    equals(xmlserializer.serializeToString(fragment), 
+        "", 'serializeToString');
 });
 
 
