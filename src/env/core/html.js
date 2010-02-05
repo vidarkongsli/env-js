@@ -48,6 +48,7 @@ Envjs.loadLocalScript = function(script){
         src, 
         i, 
         base,
+        filename,
         // SMP: see also the note in html/document.js about script.type
         script_type = script.type === null ? 
             "text/javascript" : script.type;
@@ -88,7 +89,8 @@ Envjs.loadLocalScript = function(script){
             }
         }
         base = "" + script.ownerDocument.location;
-        var filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
+        //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
+        filename = Envjs.location(script.src, base );
         try {                      
             load(filename);
             console.log('loaded %s', filename);
