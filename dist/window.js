@@ -282,16 +282,7 @@ Window = function(scope, parent, opener){
     });
 
     
-    var __Array__;
-    if(!scope.Array){
-        __Array__ = function(){
-            return new parent.top.Array();
-        };
-        __extend__(__Array__.prototype, parent.top.Array.prototype);
-        scope.__defineGetter__('Array', function(){
-            return  __Array__;
-        });
-    }
+    __initStandardObjects__(scope, parent);
     
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
@@ -564,6 +555,55 @@ var __top__ = function(_scope){
 }
 
 var __windows__ = {};
+
+var __initStandardObjects__ = function(scope, parent){
+
+    var __Array__;
+    if(!scope.Array){
+        __Array__ = function(){
+            return new parent.top.Array();
+        };
+        __extend__(__Array__.prototype, parent.top.Array.prototype);
+        scope.__defineGetter__('Array', function(){
+            return  __Array__;
+        });
+    }
+    
+    var __Object__;
+    if(!scope.Object){
+        __Object__ = function(){
+            return new parent.top.Object();
+        };
+        __extend__(__Object__.prototype, parent.top.Object.prototype);
+        scope.__defineGetter__('Object', function(){
+            return  __Object__;
+        });
+    }
+    
+
+    var __Date__;
+    if(!scope.Date){
+        __Date__ = function(){
+            return new parent.top.Date();
+        };
+        __extend__(__Date__.prototype, parent.top.Date.prototype);
+        scope.__defineGetter__('Date', function(){
+            return  __Date__;
+        });
+    }
+    
+    var __Number__;
+    if(!scope.Number){
+        __Number__ = function(){
+            return new parent.top.Number();
+        };
+        __extend__(__Number__.prototype, parent.top.Number.prototype);
+        scope.__defineGetter__('Number', function(){
+            return  __Number__;
+        });
+    }
+    
+};
 
 //finally pre-supply the window with the window-like environment
 new Window(__this__, __this__);
