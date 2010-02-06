@@ -281,6 +281,7 @@ Window = function(scope, parent, opener){
         return proxy;
     });
 
+    
     var __Array__;
     if(!scope.Array){
         __Array__ = function(){
