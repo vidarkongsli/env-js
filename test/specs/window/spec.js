@@ -264,15 +264,19 @@ test('frame proxy', function(){
     var frame,
         doc;
     
-    expect(4);
+    expect(7);
     frame = document.createElement('iframe');
     frame.width = '100%';
     frame.height = '300px';
     frame.frameBorder = '0';
     frame.addEventListener('load', function(){
 
-        equals(frame.contentWindow.parent, window, '.contentWindow.parent')
-        equals(frame.contentWindow.top, window, '.contentWindow.top')
+        equals(frame.contentWindow.parent, window, '.contentWindow.parent');
+        equals(frame.contentWindow.top, window, '.contentWindow.top');
+        
+        ok(frame.contentWindow.Array !== window.Array, '.Array');
+        ok(new window.Array(), 'new Array');
+        ok(new frame.contentWindow.Array(), 'new Array');
         
         doc = frame.contentDocument;
         equals(doc.title, 'Envjs Proxy Spec', '.contentDocument.title');

@@ -136,6 +136,7 @@ test('window properties', function(){
     parent.ABC1234567890 = 'QWERTYUIOP{}|';
     equals(parent.ABC1234567890, 'QWERTYUIOP{}|', 'parent scope can be modified');
     
+    equals(parent.Array, Array, 'Array');
 });
 
 

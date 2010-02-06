@@ -146,6 +146,7 @@
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="env/rhino/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
+            <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/console.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/dom.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/event.js" />

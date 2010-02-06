@@ -258,7 +258,7 @@ Envjs.connection = function(xhr, responseHandler, data){};
  * @param {Object} scope
  * @param {Object} parent
  */
-Envjs.proxy = function(scope, parent){};
+Envjs.proxy = function(scope, parent, aliasList){};
 
 Envjs.javaEnabled = false;   
 
@@ -280,8 +280,10 @@ Envjs.loadFrame = function(frame, url){
             //mark for garbage collection
             frame.contentWindow = null; 
         }
+        
         frame.contentWindow = {};
         new Window(frame.contentWindow, window);
+       
         frame.contentDocument.async = false;
         frame.contentWindow.location = url;
     } catch(e) {

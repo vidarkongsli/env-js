@@ -17,7 +17,7 @@ Envjs.platform       = "Rhino ";//how do we get the version
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent){
-
+    
     var _scope = scope;
         _parent = parent||null,
         _this = this,

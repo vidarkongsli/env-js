@@ -9,13 +9,26 @@
  * @param {Object} opener
  */
 Window = function(scope, parent, opener){
-
+    
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
         return proxy;
     });
+
+    
+    var __Array__;
+    if(!scope.Array){
+        __Array__ = function(){
+            return new parent.top.Array();
+        };
+        __extend__(__Array__.prototype, parent.top.Array.prototype);
+        scope.__defineGetter__('Array', function(){
+            return  __Array__;
+        });
+    }
+    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;
@@ -225,13 +238,7 @@ Window = function(scope, parent, opener){
         // If this window is a frame, the top property refers to the top-level 
         // window that contains the frame.
         get top(){
-            var _parent = $parent;
-            while(scope && _parent && scope !== _parent){
-                if(_parent === _parent.parent)break;
-                _parent = _parent.parent;
-                //console.log('scope %s _parent %s', scope, _parent);
-            }
-            return _parent || null;
+            return __top__(scope)
         },
         get window(){
             return proxy;
@@ -281,6 +288,16 @@ Window = function(scope, parent, opener){
     });
 
 };
+
+var __top__ = function(_scope){
+    var _parent = _scope.parent;
+    while(_scope && _parent && _scope !== _parent){
+        if(_parent === _parent.parent)break;
+        _parent = _parent.parent;
+        //console.log('scope %s _parent %s', scope, _parent);
+    }
+    return _parent || null;
+}
 
 var __windows__ = {};
 

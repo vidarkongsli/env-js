@@ -258,7 +258,7 @@ Envjs.connection = function(xhr, responseHandler, data){};
  * @param {Object} scope
  * @param {Object} parent
  */
-Envjs.proxy = function(scope, parent){};
+Envjs.proxy = function(scope, parent, aliasList){};
 
 Envjs.javaEnabled = false;   
 
@@ -280,8 +280,10 @@ Envjs.loadFrame = function(frame, url){
             //mark for garbage collection
             frame.contentWindow = null; 
         }
+        
         frame.contentWindow = {};
         new Window(frame.contentWindow, window);
+       
         frame.contentDocument.async = false;
         frame.contentWindow.location = url;
     } catch(e) {
@@ -8724,6 +8726,20 @@ var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
 
 /**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
  * Writes message to system out
  * @param {Object} message
  */
@@ -9027,7 +9043,7 @@ Envjs.platform       = "Rhino ";//how do we get the version
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent){
-
+    
     var _scope = scope;
         _parent = parent||null,
         _this = this,
