@@ -8842,6 +8842,10 @@ Envjs.lineSource = function(e){
     return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
 };
 
+//Temporary patch for parser module
+Packages.org.mozilla.javascript.Context.
+    getCurrentContext().setOptimizationLevel(-1);
+    
 /**
  * Rhino provides a very succinct 'sync'
  * @param {Function} fn

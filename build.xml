@@ -151,6 +151,7 @@
             <fileset dir="${SRC_DIR}" includes="env/rhino/dom.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/event.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/html.js" />
+            <fileset dir="${SRC_DIR}" includes="env/rhino/parser.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/timer.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/xhr.js" />
             <fileset dir="${SRC_DIR}" includes="env/rhino/window.js" />
@@ -476,8 +477,6 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="-opt"/>
-            <arg value="-1"/>
             <arg value="test/specs/parser/spec.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
@@ -520,8 +519,6 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="-opt"/>
-            <arg value="-1"/>
             <arg value="test/specs/xhr/spec.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
@@ -605,8 +602,6 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="-opt"/>
-            <arg value="-1"/>
             <arg value="test/specs/window/spec.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
