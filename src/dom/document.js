@@ -196,6 +196,10 @@ __extend__(Document.prototype,{
         return node;
     },
     
+    createRange: function(){
+        return new Range();
+    },
+    
     evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
         //return new XPathExpression().evaluate();
         throw Error('Document.evaluate not supported yet!');

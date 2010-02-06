@@ -246,6 +246,7 @@
             <fileset dir="${SRC_DIR}" includes="dom/entityreference.js" />
             <fileset dir="${SRC_DIR}" includes="dom/domimplementation.js" />
             <fileset dir="${SRC_DIR}" includes="dom/notation.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/range.js" />
             <fileset dir="${SRC_DIR}" includes="dom/document.js" />
             <fileset dir="${SRC_DIR}" includes="dom/domparser.js" />
             <fileset dir="${SRC_DIR}" includes="dom/xmlserializer.js" />

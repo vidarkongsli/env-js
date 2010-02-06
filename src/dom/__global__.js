@@ -32,7 +32,7 @@ var Attr,
     Notation,
     ProcessingInstruction,
     Text,
-    XMLSerializer,
-    Location;
+    Range,
+    XMLSerializer;
 
 
