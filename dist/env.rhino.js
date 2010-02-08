@@ -300,6 +300,699 @@ Envjs.loadFrame = function(frame, url){
 
 })();
 /*
+ * Envjs rhino-env.1.2.0.0 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+
+/*
+ * Envjs rhino-env.1.2.0.0 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * Writes message to system out
+ * @param {Object} message
+ */
+Envjs.log = function(message){
+    print(message);
+};
+
+Envjs.lineSource = function(e){
+    return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
+};
+
+//Temporary patch for parser module
+Packages.org.mozilla.javascript.Context.
+    getCurrentContext().setOptimizationLevel(-1);
+    
+/**
+ * Rhino provides a very succinct 'sync'
+ * @param {Function} fn
+ */
+Envjs.sync = sync;
+
+
+/**
+ * sleep thread for specified duration
+ * @param {Object} millseconds
+ */
+Envjs.sleep = function(millseconds){
+    java.lang.Thread.currentThread().sleep(millseconds);
+};
+
+/**
+ * provides callback hook for when the system exits
+ */
+Envjs.onExit = function(callback){
+    var rhino = Packages.org.mozilla.javascript,
+        contextFactory =  __context__.getFactory(),
+        listener = new rhino.ContextFactory.Listener({
+            contextReleased: function(context){
+                if(context === __context__)
+                    console.log('context released', context);
+                contextFactory.removeListener(this);
+                if(callback)
+                    callback();
+            }
+        });
+    contextFactory.addListener(listener);
+};
+
+
+/**
+ * resolves location relative to doc location
+ * @param {Object} path
+ * @param {Object} path
+ * @param {Object} base
+ */
+Envjs.location = function(path, base){
+    var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
+        m = protocol.exec(path),
+        baseURI;
+    if(m&&m.length>1){
+        return (new java.net.URL(path).toString()+'')
+            .replace('file:/', 'file:///');;
+    }else if(base){
+        return (new java.net.URL(new java.net.URL(base), path)+'')
+            .replace('file:/', 'file:///');;
+    }else{
+        //return an absolute url from a url relative to the window location
+        //TODO: window should not be inlined here. this should be passed as a 
+        //      parameter to Envjs.location :DONE
+        if(document){
+            baseURI = document.baseURI;
+            if(baseURI == 'about:blank'){
+                baseURI = (java.io.File(path).toURL().toString()+'')
+                        .replace('file:/', 'file:///');
+                //console.log('baseURI %s', baseURI);
+                return baseURI;
+            }else{
+                base = baseURI.substring(0, baseURI.lastIndexOf('/'));
+                if(base.length > 0){
+                    return base + '/' + path;
+                }else{
+                    return (new java.io.File(path).toURL().toString()+'')
+                        .replace('file:/', 'file:///');
+                }
+            }
+        }else{
+            return (new java.io.File(path).toURL().toString()+'')
+                        .replace('file:/', 'file:///');
+        }
+    }
+};
+
+/**
+ * 
+ * @param {Object} fn
+ * @param {Object} onInterupt
+ */
+Envjs.runAsync = function(fn, onInterupt){
+    ////Envjs.debug("running async");
+    var running = true,
+        run = sync(function(){ 
+        //while happening only thing in this timer    
+        ////Envjs.debug("running timed function");
+        fn();
+    });
+    
+    try{
+        spawn(run);
+    }catch(e){
+        //Envjs.error("error while running async", e);
+        if(onInterrupt)
+            onInterrupt(e);
+    }
+};
+
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} url
+ */
+Envjs.writeToFile = function(text, url){
+    //Envjs.debug("writing text to url : " + url);
+    var out = new java.io.FileWriter( 
+        new java.io.File( 
+            new java.net.URI(url.toString()))); 
+    out.write( text, 0, text.length );
+    out.flush();
+    out.close();
+};
+    
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} suffix
+ */
+Envjs.writeToTempFile = function(text, suffix){
+    //Envjs.debug("writing text to temp url : " + suffix);
+    // Create temp file.
+    var temp = java.io.File.createTempFile("envjs-tmp", suffix);
+
+    // Delete temp file when program exits.
+    temp.deleteOnExit();
+
+    // Write to temp file
+    var out = new java.io.FileWriter(temp);
+    out.write(text, 0, text.length);
+    out.close();
+    return temp.getAbsolutePath().toString()+'';
+};
+    
+
+/**
+ * Used to delete a local file
+ * @param {Object} url
+ */
+Envjs.deleteFile = function(url){
+    var file = new java.io.File( new java.net.URI( url ) );
+    file["delete"]();
+};
+    
+/**
+ * establishes connection and calls responsehandler
+ * @param {Object} xhr
+ * @param {Object} responseHandler
+ * @param {Object} data
+ */
+Envjs.connection = function(xhr, responseHandler, data){
+    var url = java.net.URL(xhr.url),
+        connection;
+    if ( /^file\:/.test(url) ) {
+        try{
+            if ( xhr.method == "PUT" ) {
+                var text =  data || "" ;
+                Envjs.writeToFile(text, url);
+            } else if ( xhr.method == "DELETE" ) {
+                Envjs.deleteFile(url);
+            } else {
+                connection = url.openConnection();
+                connection.connect();
+                //try to add some canned headers that make sense
+                
+                try{
+                    if(xhr.url.match(/html$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/html';
+                    }else if(xhr.url.match(/.xml$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/xml';
+                    }else if(xhr.url.match(/.js$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/javascript';
+                    }else if(xhr.url.match(/.json$/)){
+                        xhr.responseHeaders["Content-Type"] = 'application/json';
+                    }else{
+                        xhr.responseHeaders["Content-Type"] = 'text/plain';
+                    }
+                //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
+                //xhr.responseHeaders['Content-Length'] = headerValue+'';
+                //xhr.responseHeaders['Date'] = new Date()+'';*/
+                }catch(e){
+                    console.log('failed to load response headers',e);
+                }
+            }
+        }catch(e){
+            console.log('failed to open file %s %s', url, e);
+            connection = null;
+            xhr.readyState = 4;
+            xhr.statusText = "Local File Protocol Error";
+            xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
+        }
+    } else { 
+        connection = url.openConnection();
+        connection.setRequestMethod( xhr.method );
+        
+        // Add headers to Java connection
+        for (var header in xhr.headers){
+            connection.addRequestProperty(header+'', xhr.headers[header]+'');
+        }
+        
+        //write data to output stream if required
+        if(data&&data.length&&data.length>0){
+             if ( xhr.method == "PUT" || xhr.method == "POST" ) {
+                connection.setDoOutput(true);
+                var outstream = connection.getOutputStream(),
+                    outbuffer = new java.lang.String(data).getBytes('UTF-8');
+                
+                outstream.write(outbuffer, 0, outbuffer.length);
+                outstream.close();
+            }
+        }else{
+            connection.connect();
+        }
+    }
+    
+    if(connection){
+        try{
+            var respheadlength = connection.getHeaderFields().size();
+            // Stick the response headers into responseHeaders
+            for (var i = 0; i < respheadlength; i++) { 
+                var headerName = connection.getHeaderFieldKey(i); 
+                var headerValue = connection.getHeaderField(i); 
+                if (headerName)
+                    xhr.responseHeaders[headerName+''] = headerValue+'';
+            }
+        }catch(e){
+            Envjs.error('failed to load response headers',e);
+        }
+        
+        xhr.readyState = 4;
+        xhr.status = parseInt(connection.responseCode,10) || undefined;
+        xhr.statusText = connection.responseMessage || "";
+        
+        var contentEncoding = connection.getContentEncoding() || "utf-8",
+            baos = new java.io.ByteArrayOutputStream(),
+            buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+            length,
+            stream = null,
+            responseXML = null;
+
+        try{
+            stream = (contentEncoding.equalsIgnoreCase("gzip") || 
+                      contentEncoding.equalsIgnoreCase("decompress") )?
+                new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+                connection.getInputStream();
+        }catch(e){
+            if (connection.getResponseCode() == 404){
+                console.log('failed to open connection stream \n %s %s',
+                          e.toString(), e);
+            }else{
+                console.log('failed to open connection stream \n %s %s',
+                           e.toString(), e);
+            }
+            stream = connection.getErrorStream();
+        }
+        
+        while ((length = stream.read(buffer)) != -1) {
+            baos.write(buffer, 0, length);
+        }
+
+        baos.close();
+        stream.close();
+
+        xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
+            decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
+            
+    }
+    if(responseHandler){
+        //Envjs.debug('calling ajax response handler');
+        responseHandler();
+    }
+};
+
+//Since we're running in rhino I guess we can safely assume
+//java is 'enabled'.  I'm sure this requires more thought
+//than I've given it here
+Envjs.javaEnabled = true;   
+
+Envjs.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
+Envjs.os_name        = java.lang.System.getProperty("os.name"); 
+Envjs.os_arch        = java.lang.System.getProperty("os.arch"); 
+Envjs.os_version     = java.lang.System.getProperty("os.version"); 
+Envjs.lang           = java.lang.System.getProperty("user.lang"); 
+Envjs.platform       = "Rhino ";//how do we get the version
+    
+/**
+ * Makes an object window-like by proxying object accessors
+ * @param {Object} scope
+ * @param {Object} parent
+ */
+Envjs.proxy = function(scope, parent){
+    
+    
+    var _scope = scope;
+        _parent = parent||null,
+        _this = this,
+        _undefined = undefined,
+        _proxy = new Packages.org.mozilla.javascript.ScriptableObject({
+            getClassName: function(){
+                return 'envjs.platform.rhino.Proxy';
+            },
+            has: function(nameOrIndex, start){
+                var has;
+                //print('proxy has '+nameOrIndex+" ("+nameOrIndex['class']+")");
+                if(nameOrIndex['class'] == java.lang.String){
+                    switch(nameOrIndex+''){
+                        case '__iterator__':
+                            return _proxy.__iterator__;
+                            break;
+                        default:
+                            has = (nameOrIndex+'') in _scope;
+                            //print('has as string :'+has);
+                            return has;
+                    }
+                }else if(nameOrIndex['class'] == java.lang.Integer){
+                    has = Number(nameOrIndex+'') in _scope;
+                    //print('has as index :'+has);
+                    return has;
+                }else{
+                    //print('has not');
+                    return false;
+                }
+            },
+            put: function(nameOrIndex,  start,  value){
+                //print('proxy put '+nameOrIndex+" = "+value+" ("+nameOrIndex['class']+")");
+                if(nameOrIndex['class'] == java.lang.String){
+                    //print("put as string");
+                    _scope[nameOrIndex+''] = value;
+                }else if(nameOrIndex['class'] == java.lang.Integer){
+                    //print("put as index");
+                    _scope[Number(nameOrIndex+'')] = value;
+                }else{
+                    //print('put not');
+                    return _undefined;
+                }
+            },
+            get: function(nameOrIndex, start){
+                //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
+                if(nameOrIndex['class'] == java.lang.String){
+                    //print("get as string");
+                    return  _scope[nameOrIndex+''];
+                }else if(nameOrIndex['class'] == java.lang.Integer){
+                    //print("get as index");
+                    return _scope[Number(nameOrIndex+'')];
+                }else{
+                    //print('get not');
+                    return _undefined;
+                }
+            },
+            'delete': function(nameOrIndex){
+                _scope['delete'](nameOrIndex);
+            },
+            get parentScope(){
+                return _parent;
+            },
+            set parentScope(parent){
+                _parent = parent;
+            },
+            get topLevelScope(){
+                return _scope;
+            },
+            equivalentValues: function(value){
+                return (value == _scope || value == this );
+            },
+            equals: function(value){
+                return (value === _scope || value === this );
+            }
+        });
+        
+    return _proxy;
+};
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+/**
+ * @author thatcher
+ */
+var Console,
+    console;
+/*
+ * Envjs console.1.1.rc3 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+/**
+ * @author thatcher
+ * 
+ * borrowed-ish with love from firebug-lite
+ */
+Console = function(module){
+    var $level,
+        $logger,
+        $null = function(){};
+    
+    
+    if(Envjs[module] && Envjs[module].loglevel){
+        $level = Envjs.module.loglevel;
+        $logger = {
+            log: function(level){
+                logFormatted(arguments, (module)+" ");
+            },
+            debug: $level>1 ? $null: function() {
+                logFormatted(arguments, (module)+" debug");
+            },
+            info: $level>2 ? $null:function(){
+                logFormatted(arguments, (module)+" info");
+            },
+            warn: $level>3 ? $null:function(){
+                logFormatted(arguments, (module)+" warning");
+            },
+            error: $level>4 ? $null:function(){
+                logFormatted(arguments, (module)+" error");
+            }
+        };
+    }else{
+        $logger = {
+            log: function(level){
+                logFormatted(arguments, "");
+            },
+            debug: $null,
+            info: $null,
+            warn: $null,
+            error: $null
+        };
+    }
+   
+    return $logger;
+};       
+
+console = new Console("console",1);
+    
+function logFormatted(objects, className)
+{
+    var html = [];
+
+    var format = objects[0];
+    var objIndex = 0;
+
+    if (typeof(format) != "string")
+    {
+        format = "";
+        objIndex = -1;
+    }
+
+    var parts = parseFormat(format);
+    for (var i = 0; i < parts.length; ++i)
+    {
+        var part = parts[i];
+        if (part && typeof(part) == "object")
+        {
+            var object = objects[++objIndex];
+            part.appender(object, html);
+        }
+        else
+            appendText(part, html);
+    }
+
+    for (var i = objIndex+1; i < objects.length; ++i)
+    {
+        appendText(" ", html);
+        
+        var object = objects[i];
+        if (typeof(object) == "string")
+            appendText(object, html);
+        else
+            appendObject(object, html);
+    }
+    
+    Envjs.log(html.join(' '));
+}
+
+function parseFormat(format)
+{
+    var parts = [];
+
+    var reg = /((^%|[^\\]%)(\d+)?(\.)([a-zA-Z]))|((^%|[^\\]%)([a-zA-Z]))/;    
+    var appenderMap = {s: appendText, d: appendInteger, i: appendInteger, f: appendFloat};
+
+    for (var m = reg.exec(format); m; m = reg.exec(format))
+    {
+        var type = m[8] ? m[8] : m[5];
+        var appender = type in appenderMap ? appenderMap[type] : appendObject;
+        var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
+
+        parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
+        parts.push({appender: appender, precision: precision});
+
+        format = format.substr(m.index+m[0].length);
+    }
+
+    parts.push(format);
+
+    return parts;
+}
+
+function escapeHTML(value)
+{
+   return value;
+}
+
+function objectToString(object)
+{
+    try
+    {
+        return object+"";
+    }
+    catch (exc)
+    {
+        return null;
+    }
+}
+
+// ********************************************************************************************
+
+function appendText(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendNull(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendString(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendInteger(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendFloat(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendFunction(object, html)
+{
+    var reName = /function ?(.*?)\(/;
+    var m = reName.exec(objectToString(object));
+    var name = m ? m[1] : "function";
+    html.push(escapeHTML(name));
+}
+
+function appendObject(object, html)
+{
+    try
+    {
+        if (object == undefined)
+            appendNull("undefined", html);
+        else if (object == null)
+            appendNull("null", html);
+        else if (typeof object == "string")
+            appendString(object, html);
+        else if (typeof object == "number")
+            appendInteger(object, html);
+        else if (typeof object == "function")
+            appendFunction(object, html);
+        else if (object.nodeType == 1)
+            appendSelector(object, html);
+        else if (typeof object == "object")
+            appendObjectFormatted(object, html);
+        else
+            appendText(object, html);
+    }
+    catch (exc)
+    {
+    }
+}
+    
+function appendObjectFormatted(object, html)
+{
+    var text = objectToString(object);
+    var reObject = /\[object (.*?)\]/;
+
+    var m = reObject.exec(text);
+    html.push( m ? m[1] : text)
+}
+
+function appendSelector(object, html)
+{
+
+    html.push(escapeHTML(object.nodeName.toLowerCase()));
+    if (object.id)
+        html.push(escapeHTML(object.id));
+    if (object.className)
+        html.push(escapeHTML(object.className));
+
+}
+
+function appendNode(node, html)
+{
+    if (node.nodeType == 1)
+    {
+        html.push( node.nodeName.toLowerCase());
+
+        for (var i = 0; i < node.attributes.length; ++i)
+        {
+            var attr = node.attributes[i];
+            if (!attr.specified)
+                continue;
+            
+            html.push( attr.nodeName.toLowerCase(),escapeHTML(attr.nodeValue))
+        }
+
+        if (node.firstChild)
+        {
+            for (var child = node.firstChild; child; child = child.nextSibling)
+                appendNode(child, html);
+                
+            html.push( node.nodeName.toLowerCase());
+        }
+    }
+    else if (node.nodeType == 3)
+    {
+        html.push(escapeHTML(node.nodeValue));
+    }
+};
+
+/**
+ * @author thatcher
+ */
+
+ })();/*
  * Envjs dom.1.2.0.0 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
@@ -9135,699 +9828,6 @@ var __initStandardObjects__ = function(scope, parent){
 new Window(__this__, __this__);
 
 
-
-/**
- * @author john resig & the envjs team
- * @uri http://www.envjs.com/
- * @copyright 2008-2010
- * @license MIT
- */
-
-})();
-
-/**
- * @author thatcher
- */
-var Console,
-    console;
-/*
- * Envjs console.1.1.rc3 
- * Pure JavaScript Browser Environment
- * By John Resig <http://ejohn.org/> and the Envjs Team
- * Copyright 2008-2010 John Resig, under the MIT License
- */
-
-(function(){
-
-
-
-
-/**
- * @author thatcher
- * 
- * borrowed-ish with love from firebug-lite
- */
-Console = function(module){
-    var $level,
-        $logger,
-        $null = function(){};
-    
-    
-    if(Envjs[module] && Envjs[module].loglevel){
-        $level = Envjs.module.loglevel;
-        $logger = {
-            log: function(level){
-                logFormatted(arguments, (module)+" ");
-            },
-            debug: $level>1 ? $null: function() {
-                logFormatted(arguments, (module)+" debug");
-            },
-            info: $level>2 ? $null:function(){
-                logFormatted(arguments, (module)+" info");
-            },
-            warn: $level>3 ? $null:function(){
-                logFormatted(arguments, (module)+" warning");
-            },
-            error: $level>4 ? $null:function(){
-                logFormatted(arguments, (module)+" error");
-            }
-        };
-    }else{
-        $logger = {
-            log: function(level){
-                logFormatted(arguments, "");
-            },
-            debug: $null,
-            info: $null,
-            warn: $null,
-            error: $null
-        };
-    }
-   
-    return $logger;
-};       
-
-console = new Console("console",1);
-    
-function logFormatted(objects, className)
-{
-    var html = [];
-
-    var format = objects[0];
-    var objIndex = 0;
-
-    if (typeof(format) != "string")
-    {
-        format = "";
-        objIndex = -1;
-    }
-
-    var parts = parseFormat(format);
-    for (var i = 0; i < parts.length; ++i)
-    {
-        var part = parts[i];
-        if (part && typeof(part) == "object")
-        {
-            var object = objects[++objIndex];
-            part.appender(object, html);
-        }
-        else
-            appendText(part, html);
-    }
-
-    for (var i = objIndex+1; i < objects.length; ++i)
-    {
-        appendText(" ", html);
-        
-        var object = objects[i];
-        if (typeof(object) == "string")
-            appendText(object, html);
-        else
-            appendObject(object, html);
-    }
-    
-    Envjs.log(html.join(' '));
-}
-
-function parseFormat(format)
-{
-    var parts = [];
-
-    var reg = /((^%|[^\\]%)(\d+)?(\.)([a-zA-Z]))|((^%|[^\\]%)([a-zA-Z]))/;    
-    var appenderMap = {s: appendText, d: appendInteger, i: appendInteger, f: appendFloat};
-
-    for (var m = reg.exec(format); m; m = reg.exec(format))
-    {
-        var type = m[8] ? m[8] : m[5];
-        var appender = type in appenderMap ? appenderMap[type] : appendObject;
-        var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
-
-        parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
-        parts.push({appender: appender, precision: precision});
-
-        format = format.substr(m.index+m[0].length);
-    }
-
-    parts.push(format);
-
-    return parts;
-}
-
-function escapeHTML(value)
-{
-   return value;
-}
-
-function objectToString(object)
-{
-    try
-    {
-        return object+"";
-    }
-    catch (exc)
-    {
-        return null;
-    }
-}
-
-// ********************************************************************************************
-
-function appendText(object, html)
-{
-    html.push(escapeHTML(objectToString(object)));
-}
-
-function appendNull(object, html)
-{
-    html.push(escapeHTML(objectToString(object)));
-}
-
-function appendString(object, html)
-{
-    html.push(escapeHTML(objectToString(object)));
-}
-
-function appendInteger(object, html)
-{
-    html.push(escapeHTML(objectToString(object)));
-}
-
-function appendFloat(object, html)
-{
-    html.push(escapeHTML(objectToString(object)));
-}
-
-function appendFunction(object, html)
-{
-    var reName = /function ?(.*?)\(/;
-    var m = reName.exec(objectToString(object));
-    var name = m ? m[1] : "function";
-    html.push(escapeHTML(name));
-}
-
-function appendObject(object, html)
-{
-    try
-    {
-        if (object == undefined)
-            appendNull("undefined", html);
-        else if (object == null)
-            appendNull("null", html);
-        else if (typeof object == "string")
-            appendString(object, html);
-        else if (typeof object == "number")
-            appendInteger(object, html);
-        else if (typeof object == "function")
-            appendFunction(object, html);
-        else if (object.nodeType == 1)
-            appendSelector(object, html);
-        else if (typeof object == "object")
-            appendObjectFormatted(object, html);
-        else
-            appendText(object, html);
-    }
-    catch (exc)
-    {
-    }
-}
-    
-function appendObjectFormatted(object, html)
-{
-    var text = objectToString(object);
-    var reObject = /\[object (.*?)\]/;
-
-    var m = reObject.exec(text);
-    html.push( m ? m[1] : text)
-}
-
-function appendSelector(object, html)
-{
-
-    html.push(escapeHTML(object.nodeName.toLowerCase()));
-    if (object.id)
-        html.push(escapeHTML(object.id));
-    if (object.className)
-        html.push(escapeHTML(object.className));
-
-}
-
-function appendNode(node, html)
-{
-    if (node.nodeType == 1)
-    {
-        html.push( node.nodeName.toLowerCase());
-
-        for (var i = 0; i < node.attributes.length; ++i)
-        {
-            var attr = node.attributes[i];
-            if (!attr.specified)
-                continue;
-            
-            html.push( attr.nodeName.toLowerCase(),escapeHTML(attr.nodeValue))
-        }
-
-        if (node.firstChild)
-        {
-            for (var child = node.firstChild; child; child = child.nextSibling)
-                appendNode(child, html);
-                
-            html.push( node.nodeName.toLowerCase());
-        }
-    }
-    else if (node.nodeType == 3)
-    {
-        html.push(escapeHTML(node.nodeValue));
-    }
-};
-
-/**
- * @author thatcher
- */
-
- })();/*
- * Envjs rhino-env.1.2.0.0 
- * Pure JavaScript Browser Environment
- * By John Resig <http://ejohn.org/> and the Envjs Team
- * Copyright 2008-2010 John Resig, under the MIT License
- */
-
-var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
-
-/*
- * Envjs rhino-env.1.2.0.0 
- * Pure JavaScript Browser Environment
- * By John Resig <http://ejohn.org/> and the Envjs Team
- * Copyright 2008-2010 John Resig, under the MIT License
- */
-
-(function(){
-
-
-
-
-
-/**
- * @author john resig
- */
-// Helper method for extending one object with another.  
-function __extend__(a,b) {
-    for ( var i in b ) {
-        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
-        if ( g || s ) {
-            if ( g ) a.__defineGetter__(i, g);
-            if ( s ) a.__defineSetter__(i, s);
-        } else
-            a[i] = b[i];
-    } return a;
-};
-/**
- * Writes message to system out
- * @param {Object} message
- */
-Envjs.log = function(message){
-    print(message);
-};
-
-Envjs.lineSource = function(e){
-    return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
-};
-
-//Temporary patch for parser module
-Packages.org.mozilla.javascript.Context.
-    getCurrentContext().setOptimizationLevel(-1);
-    
-/**
- * Rhino provides a very succinct 'sync'
- * @param {Function} fn
- */
-Envjs.sync = sync;
-
-
-/**
- * sleep thread for specified duration
- * @param {Object} millseconds
- */
-Envjs.sleep = function(millseconds){
-    java.lang.Thread.currentThread().sleep(millseconds);
-};
-
-/**
- * provides callback hook for when the system exits
- */
-Envjs.onExit = function(callback){
-    var rhino = Packages.org.mozilla.javascript,
-        contextFactory =  __context__.getFactory(),
-        listener = new rhino.ContextFactory.Listener({
-            contextReleased: function(context){
-                if(context === __context__)
-                    console.log('context released', context);
-                contextFactory.removeListener(this);
-                if(callback)
-                    callback();
-            }
-        });
-    contextFactory.addListener(listener);
-};
-
-
-/**
- * resolves location relative to doc location
- * @param {Object} path
- * @param {Object} path
- * @param {Object} base
- */
-Envjs.location = function(path, base){
-    var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
-        m = protocol.exec(path),
-        baseURI;
-    if(m&&m.length>1){
-        return (new java.net.URL(path).toString()+'')
-            .replace('file:/', 'file:///');;
-    }else if(base){
-        return (new java.net.URL(new java.net.URL(base), path)+'')
-            .replace('file:/', 'file:///');;
-    }else{
-        //return an absolute url from a url relative to the window location
-        //TODO: window should not be inlined here. this should be passed as a 
-        //      parameter to Envjs.location :DONE
-        if(document){
-            baseURI = document.baseURI;
-            if(baseURI == 'about:blank'){
-                baseURI = (java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
-                //console.log('baseURI %s', baseURI);
-                return baseURI;
-            }else{
-                base = baseURI.substring(0, baseURI.lastIndexOf('/'));
-                if(base.length > 0){
-                    return base + '/' + path;
-                }else{
-                    return (new java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
-                }
-            }
-        }else{
-            return (new java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
-        }
-    }
-};
-
-/**
- * 
- * @param {Object} fn
- * @param {Object} onInterupt
- */
-Envjs.runAsync = function(fn, onInterupt){
-    ////Envjs.debug("running async");
-    var running = true,
-        run = sync(function(){ 
-        //while happening only thing in this timer    
-        ////Envjs.debug("running timed function");
-        fn();
-    });
-    
-    try{
-        spawn(run);
-    }catch(e){
-        //Envjs.error("error while running async", e);
-        if(onInterrupt)
-            onInterrupt(e);
-    }
-};
-
-/**
- * Used to write to a local file
- * @param {Object} text
- * @param {Object} url
- */
-Envjs.writeToFile = function(text, url){
-    //Envjs.debug("writing text to url : " + url);
-    var out = new java.io.FileWriter( 
-        new java.io.File( 
-            new java.net.URI(url.toString()))); 
-    out.write( text, 0, text.length );
-    out.flush();
-    out.close();
-};
-    
-/**
- * Used to write to a local file
- * @param {Object} text
- * @param {Object} suffix
- */
-Envjs.writeToTempFile = function(text, suffix){
-    //Envjs.debug("writing text to temp url : " + suffix);
-    // Create temp file.
-    var temp = java.io.File.createTempFile("envjs-tmp", suffix);
-
-    // Delete temp file when program exits.
-    temp.deleteOnExit();
-
-    // Write to temp file
-    var out = new java.io.FileWriter(temp);
-    out.write(text, 0, text.length);
-    out.close();
-    return temp.getAbsolutePath().toString()+'';
-};
-    
-
-/**
- * Used to delete a local file
- * @param {Object} url
- */
-Envjs.deleteFile = function(url){
-    var file = new java.io.File( new java.net.URI( url ) );
-    file["delete"]();
-};
-    
-/**
- * establishes connection and calls responsehandler
- * @param {Object} xhr
- * @param {Object} responseHandler
- * @param {Object} data
- */
-Envjs.connection = function(xhr, responseHandler, data){
-    var url = java.net.URL(xhr.url),
-        connection;
-    if ( /^file\:/.test(url) ) {
-        try{
-            if ( xhr.method == "PUT" ) {
-                var text =  data || "" ;
-                Envjs.writeToFile(text, url);
-            } else if ( xhr.method == "DELETE" ) {
-                Envjs.deleteFile(url);
-            } else {
-                connection = url.openConnection();
-                connection.connect();
-                //try to add some canned headers that make sense
-                
-                try{
-                    if(xhr.url.match(/html$/)){
-                        xhr.responseHeaders["Content-Type"] = 'text/html';
-                    }else if(xhr.url.match(/.xml$/)){
-                        xhr.responseHeaders["Content-Type"] = 'text/xml';
-                    }else if(xhr.url.match(/.js$/)){
-                        xhr.responseHeaders["Content-Type"] = 'text/javascript';
-                    }else if(xhr.url.match(/.json$/)){
-                        xhr.responseHeaders["Content-Type"] = 'application/json';
-                    }else{
-                        xhr.responseHeaders["Content-Type"] = 'text/plain';
-                    }
-                //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
-                //xhr.responseHeaders['Content-Length'] = headerValue+'';
-                //xhr.responseHeaders['Date'] = new Date()+'';*/
-                }catch(e){
-                    console.log('failed to load response headers',e);
-                }
-            }
-        }catch(e){
-            console.log('failed to open file %s %s', url, e);
-            connection = null;
-            xhr.readyState = 4;
-            xhr.statusText = "Local File Protocol Error";
-            xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
-        }
-    } else { 
-        connection = url.openConnection();
-        connection.setRequestMethod( xhr.method );
-        
-        // Add headers to Java connection
-        for (var header in xhr.headers){
-            connection.addRequestProperty(header+'', xhr.headers[header]+'');
-        }
-        
-        //write data to output stream if required
-        if(data&&data.length&&data.length>0){
-             if ( xhr.method == "PUT" || xhr.method == "POST" ) {
-                connection.setDoOutput(true);
-                var outstream = connection.getOutputStream(),
-                    outbuffer = new java.lang.String(data).getBytes('UTF-8');
-                
-                outstream.write(outbuffer, 0, outbuffer.length);
-                outstream.close();
-            }
-        }else{
-            connection.connect();
-        }
-    }
-    
-    if(connection){
-        try{
-            var respheadlength = connection.getHeaderFields().size();
-            // Stick the response headers into responseHeaders
-            for (var i = 0; i < respheadlength; i++) { 
-                var headerName = connection.getHeaderFieldKey(i); 
-                var headerValue = connection.getHeaderField(i); 
-                if (headerName)
-                    xhr.responseHeaders[headerName+''] = headerValue+'';
-            }
-        }catch(e){
-            Envjs.error('failed to load response headers',e);
-        }
-        
-        xhr.readyState = 4;
-        xhr.status = parseInt(connection.responseCode,10) || undefined;
-        xhr.statusText = connection.responseMessage || "";
-        
-        var contentEncoding = connection.getContentEncoding() || "utf-8",
-            baos = new java.io.ByteArrayOutputStream(),
-            buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
-            length,
-            stream = null,
-            responseXML = null;
-
-        try{
-            stream = (contentEncoding.equalsIgnoreCase("gzip") || 
-                      contentEncoding.equalsIgnoreCase("decompress") )?
-                new java.util.zip.GZIPInputStream(connection.getInputStream()) :
-                connection.getInputStream();
-        }catch(e){
-            if (connection.getResponseCode() == 404){
-                console.log('failed to open connection stream \n %s %s',
-                          e.toString(), e);
-            }else{
-                console.log('failed to open connection stream \n %s %s',
-                           e.toString(), e);
-            }
-            stream = connection.getErrorStream();
-        }
-        
-        while ((length = stream.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-
-        baos.close();
-        stream.close();
-
-        xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
-            decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-            
-    }
-    if(responseHandler){
-        //Envjs.debug('calling ajax response handler');
-        responseHandler();
-    }
-};
-
-//Since we're running in rhino I guess we can safely assume
-//java is 'enabled'.  I'm sure this requires more thought
-//than I've given it here
-Envjs.javaEnabled = true;   
-
-Envjs.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
-Envjs.os_name        = java.lang.System.getProperty("os.name"); 
-Envjs.os_arch        = java.lang.System.getProperty("os.arch"); 
-Envjs.os_version     = java.lang.System.getProperty("os.version"); 
-Envjs.lang           = java.lang.System.getProperty("user.lang"); 
-Envjs.platform       = "Rhino ";//how do we get the version
-    
-/**
- * Makes an object window-like by proxying object accessors
- * @param {Object} scope
- * @param {Object} parent
- */
-Envjs.proxy = function(scope, parent){
-    
-    
-    var _scope = scope;
-        _parent = parent||null,
-        _this = this,
-        _undefined = undefined,
-        _proxy = new Packages.org.mozilla.javascript.ScriptableObject({
-            getClassName: function(){
-                return 'envjs.platform.rhino.Proxy';
-            },
-            has: function(nameOrIndex, start){
-                var has;
-                //print('proxy has '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    switch(nameOrIndex+''){
-                        case '__iterator__':
-                            return _proxy.__iterator__;
-                            break;
-                        default:
-                            has = (nameOrIndex+'') in _scope;
-                            //print('has as string :'+has);
-                            return has;
-                    }
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    has = Number(nameOrIndex+'') in _scope;
-                    //print('has as index :'+has);
-                    return has;
-                }else{
-                    //print('has not');
-                    return false;
-                }
-            },
-            put: function(nameOrIndex,  start,  value){
-                //print('proxy put '+nameOrIndex+" = "+value+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("put as string");
-                    _scope[nameOrIndex+''] = value;
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("put as index");
-                    _scope[Number(nameOrIndex+'')] = value;
-                }else{
-                    //print('put not');
-                    return _undefined;
-                }
-            },
-            get: function(nameOrIndex, start){
-                //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("get as string");
-                    return  _scope[nameOrIndex+''];
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("get as index");
-                    return _scope[Number(nameOrIndex+'')];
-                }else{
-                    //print('get not');
-                    return _undefined;
-                }
-            },
-            'delete': function(nameOrIndex){
-                _scope['delete'](nameOrIndex);
-            },
-            get parentScope(){
-                return _parent;
-            },
-            set parentScope(parent){
-                _parent = parent;
-            },
-            get topLevelScope(){
-                return _scope;
-            },
-            equivalentValues: function(value){
-                return (value == _scope || value == this );
-            },
-            equals: function(value){
-                return (value === _scope || value === this );
-            }
-        });
-        
-    return _proxy;
-};
 
 /**
  * @author john resig & the envjs team

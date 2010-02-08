@@ -623,6 +623,7 @@
                 </replacetokens>
             </filterchain>
             <fileset dir="${DIST_DIR}" includes="platform/core.js" />
+            <fileset dir="${DIST_DIR}" includes="console.js" />
             <fileset dir="${DIST_DIR}" includes="dom.js" />
             <fileset dir="${DIST_DIR}" includes="event.js" />
             <fileset dir="${DIST_DIR}" includes="timer.js" />
@@ -630,7 +631,6 @@
             <fileset dir="${DIST_DIR}" includes="xhr.js" />
             <fileset dir="${DIST_DIR}" includes="parser.js" />
             <fileset dir="${DIST_DIR}" includes="window.js" />
-            <fileset dir="${DIST_DIR}" includes="console.js" />
         </concat>
         <echo message="${ENV_DIST} built." />
         
@@ -642,8 +642,16 @@
                     <token key="VERSION" value="env-${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
-            <fileset dir="${DIST_DIR}" includes="env.js" />
+            <fileset dir="${DIST_DIR}" includes="platform/core.js" />
             <fileset dir="${DIST_DIR}" includes="platform/rhino.js" />
+            <fileset dir="${DIST_DIR}" includes="console.js" />
+            <fileset dir="${DIST_DIR}" includes="dom.js" />
+            <fileset dir="${DIST_DIR}" includes="event.js" />
+            <fileset dir="${DIST_DIR}" includes="timer.js" />
+            <fileset dir="${DIST_DIR}" includes="html.js" />
+            <fileset dir="${DIST_DIR}" includes="xhr.js" />
+            <fileset dir="${DIST_DIR}" includes="parser.js" />
+            <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />
     </target>
