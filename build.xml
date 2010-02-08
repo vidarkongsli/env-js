@@ -629,7 +629,7 @@
             <fileset dir="${DIST_DIR}" includes="html.js" />
             <fileset dir="${DIST_DIR}" includes="xhr.js" />
             <fileset dir="${DIST_DIR}" includes="parser.js" />
-            <fileset dir="${DIST_DIR}" includes="window" />
+            <fileset dir="${DIST_DIR}" includes="window.js" />
             <fileset dir="${DIST_DIR}" includes="console.js" />
         </concat>
         <echo message="${ENV_DIST} built." />

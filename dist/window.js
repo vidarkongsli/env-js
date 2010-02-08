@@ -281,9 +281,7 @@ Window = function(scope, parent, opener){
         return proxy;
     });
 
-    
     __initStandardObjects__(scope, parent);
-    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;

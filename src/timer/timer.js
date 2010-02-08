@@ -7,9 +7,9 @@
 var $timers = [],
     EVENT_LOOP_RUNNING = false;
     
-$timers.lock = Envjs.sync(function(fn){
-    fn();
-});
+$timers.lock = function(fn){
+    Envjs.sync(fn)();
+};
 
 //private internal class
 var Timer = function(fn, interval){

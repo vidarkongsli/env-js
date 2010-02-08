@@ -191,7 +191,7 @@ Envjs.loadLocalScript = function(script){
  * synchronizes thread modifications
  * @param {Function} fn
  */
-Envjs.sync = function(fn){}
+Envjs.sync = function(fn){};
 
 /**
  * sleep thread for specified duration
