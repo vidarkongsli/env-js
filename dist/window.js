@@ -273,7 +273,7 @@ Screen = function(__window__){
  * @param {Object} opener
  */
 Window = function(scope, parent, opener){
-    
+    // console.log('new window %s', scope);
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
@@ -429,6 +429,7 @@ Window = function(scope, parent, opener){
             return $location;
         },
         set location(uri){
+            new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
             }else if($location.href == 'about:blank'){

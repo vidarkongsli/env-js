@@ -1,4 +1,4 @@
-
+ 
 /**
  * @class  ProcessingInstruction - 
  *      The ProcessingInstruction interface represents a 
@@ -24,6 +24,9 @@ __extend__(ProcessingInstruction.prototype, {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;
+    },
+    get textContent(){
+        return this.data;
     },
     get localName(){
         return null;

@@ -88,7 +88,14 @@ __extend__(Node.prototype, {
         }
     },
     get textContent(){
-        return this.nodeValue||"";
+        return __recursivelyGatherText__(this);
+    },
+    set textContent(newText){
+        while(this.firstChild != null){
+            this.removeChild( this.firstChild );
+        }
+        var text = this.ownerDocument.createTextNode(newText);
+        this.appendChild(text);
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
@@ -643,9 +650,20 @@ var __ownerDocument__ = function(node){
     return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
 };
 
-/**
- * @author envjs team
- */
+
+var __recursivelyGatherText__ = function(aNode) {
+    var accumulateText = "",
+        idx,
+        node;
+    for (idx=0;idx < aNode.childNodes.length;idx++){
+        node = aNode.childNodes.item(idx);
+        if(node.nodeType == Node.TEXT_NODE)
+            accumulateText += node.data;
+        else
+            accumulateText += __recursivelyGatherText__(node);
+    }
+    return accumulateText;
+};
 
 /**
  * function __escapeXML__

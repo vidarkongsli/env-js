@@ -239,17 +239,9 @@ __extend__(HTMLDocument.prototype, {
         if(!uri){
             return this.createElement(local);
         }else if ("http://www.w3.org/1999/xhtml" == uri) {
-             return this.createElement(local);
+            return this.createElement(local);
         } else if ("http://www.w3.org/1998/Math/MathML" == uri) {
-          if (!this.mathplayerinitialized) {
-              var obj = this.createElement("object");
-              obj.setAttribute("id", "mathplayer");
-              obj.setAttribute("classid", "clsid:32F66A20-7614-11D4-BD11-00104BD3F987");
-              this.getElementsByTagName("head")[0].appendChild(obj);
-              this.namespaces.add("m", "http://www.w3.org/1998/Math/MathML", "#mathplayer");  
-              this.mathplayerinitialized = true;
-          }
-          return this.createElement("m:" + local);
+            return this.createElement(local);
         } else {
             return Document.prototype.createElementNS.apply(this,[uri, local]);
         }
@@ -1026,8 +1018,8 @@ var inputElements_focusEvents = {
         __blur__(this);
 
         if (this._oldValue != this.value){
-            var event = document.createEvent();
-            event.initEvent("change");
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("change", true, true);
             this.dispatchEvent( event );
         }
     },

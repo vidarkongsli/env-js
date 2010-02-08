@@ -142,8 +142,8 @@ var inputElements_focusEvents = {
         __blur__(this);
 
         if (this._oldValue != this.value){
-            var event = document.createEvent();
-            event.initEvent("change");
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("change", true, true);
             this.dispatchEvent( event );
         }
     },

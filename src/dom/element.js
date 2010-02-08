@@ -21,16 +21,6 @@ __extend__(Element.prototype, {
         return this.nodeName;  
     },
     
-    get textContent(){
-        return __recursivelyGatherText__(this);
-    },
-    set textContent(newText){
-        while(this.firstChild != null){
-            this.removeChild( this.firstChild );
-        }
-        var text = this.ownerDocument.createTextNode(newText);
-        this.appendChild(text);
-    },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
@@ -228,16 +218,4 @@ __extend__(Element.prototype, {
     }
 });
 
-var __recursivelyGatherText__ = function(aNode) {
-    var accumulateText = "";
-    var idx; var n;
-    for (idx=0;idx < aNode.childNodes.length;idx++){
-        n = aNode.childNodes.item(idx);
-        if(n.nodeType == Node.TEXT_NODE)
-            accumulateText += n.data;
-        else
-            accumulateText += __recursivelyGatherText__(n);
-    }
-    return accumulateText;
-};
 

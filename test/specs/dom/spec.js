@@ -504,6 +504,8 @@ test('Document.createDocumentFragment', function(){
     equals(fragment.textContent, "", '.textContent');
     equals(xmlserializer.serializeToString(fragment), 
         "", 'serializeToString');
+        
+    
 });
 
 
@@ -558,6 +560,84 @@ test('Element.setAttributeNS', function(){
     
 });
 
+test('DocumentFragment.cloneNode', function(){
+
+    var doc, 
+        fragment,
+        elementA,
+        elementB;
+    
+    doc = document.implementation.createDocument('', '', null);
+    fragment = doc.createDocumentFragment();
+    elementA = doc.createElement('elementA');
+    elementB = doc.createElement('elementB');
+    elementA.textContent = "abc";
+    elementB.textContent = "def";
+    fragment.appendChild(elementA);
+    fragment.appendChild(elementB);
+     
+    ok(fragment.childNodes,  '.childNodes');
+    equals(fragment.childNodes.length, 2, '.childNodes.length');
+    equals(fragment.firstChild, elementA, '.firstChild');
+    equals(fragment.lastChild, elementB, '.lastChild');
+    equals(fragment.localName, null, '.localName');
+    equals(fragment.namespaceURI, null, '.namespaceURI');
+    equals(fragment.nextSibling, null, '.nextSibling');
+    equals(fragment.nodeName, '#document-fragment', '.nodeName');
+    equals(fragment.nodeType, 11, '.nodeType');
+    equals(fragment.nodeValue, null, '.nodeValue');
+    equals(fragment.ownerDocument, doc, '.ownerDocument');
+    equals(fragment.parentNode, null, '.parentNode');
+    equals(fragment.prefix, null, '.prefix');
+    equals(fragment.previousSibling, null, '.previousSibling');
+    equals(fragment.textContent, "abcdef", '.textContent');
+    equals(xmlserializer.serializeToString(fragment), 
+        "<elementA>abc</elementA><elementB>def</elementB>", 'serializeToString');
+     
+    var clone = fragment.cloneNode(false);//shallow
+     
+    ok(clone, 'clone');
+    ok(clone.childNodes,  '.childNodes');
+    equals(clone.childNodes.length, 0, '.childNodes.length');
+    equals(clone.localName, null, '.localName');
+    equals(clone.namespaceURI, null, '.namespaceURI');
+    equals(clone.nextSibling, null, '.nextSibling');
+    equals(clone.nodeName, '#document-fragment', '.nodeName');
+    equals(clone.nodeType, 11, '.nodeType');
+    equals(clone.nodeValue, null, '.nodeValue');
+    equals(clone.ownerDocument, doc, '.ownerDocument');
+    equals(clone.parentNode, null, '.parentNode');
+    equals(clone.prefix, null, '.prefix');
+    equals(clone.previousSibling, null, '.previousSibling');
+    equals(clone.textContent, "", '.textContent');
+    equals(xmlserializer.serializeToString(clone), 
+        "", 'serializeToString');
+        
+    
+    clone = fragment.cloneNode(true);//deep
+     
+    ok(clone, 'clone');
+    ok(clone.childNodes,  '.childNodes');
+    equals(clone.childNodes.length, 2, '.childNodes.length');
+    equals(clone.firstChild.tagName, 'elementA', '.firstChild');
+    equals(clone.lastChild.tagName, 'elementB', '.lastChild');
+    ok(clone.firstChild !== elementA, 'clone.firstChild !== elementA');
+    ok(clone.lastChild !== elementB, 'clone.lastChild !== elementB');
+    equals(clone.localName, null, '.localName');
+    equals(clone.namespaceURI, null, '.namespaceURI');
+    equals(clone.nextSibling, null, '.nextSibling');
+    equals(clone.nodeName, '#document-fragment', '.nodeName');
+    equals(clone.nodeType, 11, '.nodeType');
+    equals(clone.nodeValue, null, '.nodeValue');
+    equals(clone.ownerDocument, doc, '.ownerDocument');
+    equals(clone.parentNode, null, '.parentNode');
+    equals(clone.prefix, null, '.prefix');
+    equals(clone.previousSibling, null, '.previousSibling');
+    equals(clone.textContent, "abcdef", '.textContent');
+    equals(xmlserializer.serializeToString(clone), 
+        "<elementA>abc</elementA><elementB>def</elementB>", 'serializeToString');
+        
+});
 
 _start();
 

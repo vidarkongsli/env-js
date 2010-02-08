@@ -1035,7 +1035,14 @@ __extend__(Node.prototype, {
         }
     },
     get textContent(){
-        return this.nodeValue||"";
+        return __recursivelyGatherText__(this);
+    },
+    set textContent(newText){
+        while(this.firstChild != null){
+            this.removeChild( this.firstChild );
+        }
+        var text = this.ownerDocument.createTextNode(newText);
+        this.appendChild(text);
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
@@ -1590,9 +1597,20 @@ var __ownerDocument__ = function(node){
     return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
 };
 
-/**
- * @author envjs team
- */
+
+var __recursivelyGatherText__ = function(aNode) {
+    var accumulateText = "",
+        idx,
+        node;
+    for (idx=0;idx < aNode.childNodes.length;idx++){
+        node = aNode.childNodes.item(idx);
+        if(node.nodeType == Node.TEXT_NODE)
+            accumulateText += node.data;
+        else
+            accumulateText += __recursivelyGatherText__(node);
+    }
+    return accumulateText;
+};
 
 /**
  * function __escapeXML__
@@ -2054,16 +2072,6 @@ __extend__(Element.prototype, {
         return this.nodeName;  
     },
     
-    get textContent(){
-        return __recursivelyGatherText__(this);
-    },
-    set textContent(newText){
-        while(this.firstChild != null){
-            this.removeChild( this.firstChild );
-        }
-        var text = this.ownerDocument.createTextNode(newText);
-        this.appendChild(text);
-    },
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
@@ -2261,18 +2269,6 @@ __extend__(Element.prototype, {
     }
 });
 
-var __recursivelyGatherText__ = function(aNode) {
-    var accumulateText = "";
-    var idx; var n;
-    for (idx=0;idx < aNode.childNodes.length;idx++){
-        n = aNode.childNodes.item(idx);
-        if(n.nodeType == Node.TEXT_NODE)
-            accumulateText += n.data;
-        else
-            accumulateText += __recursivelyGatherText__(n);
-    }
-    return accumulateText;
-};
 
 /**
  * @class  DOMException - raised when an operation is impossible to perform
@@ -2340,7 +2336,7 @@ __extend__(DocumentFragment.prototype,{
     }
 });
 
-
+ 
 /**
  * @class  ProcessingInstruction - 
  *      The ProcessingInstruction interface represents a 
@@ -2366,6 +2362,9 @@ __extend__(ProcessingInstruction.prototype, {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;
+    },
+    get textContent(){
+        return this.data;
     },
     get localName(){
         return null;
@@ -4365,17 +4364,9 @@ __extend__(HTMLDocument.prototype, {
         if(!uri){
             return this.createElement(local);
         }else if ("http://www.w3.org/1999/xhtml" == uri) {
-             return this.createElement(local);
+            return this.createElement(local);
         } else if ("http://www.w3.org/1998/Math/MathML" == uri) {
-          if (!this.mathplayerinitialized) {
-              var obj = this.createElement("object");
-              obj.setAttribute("id", "mathplayer");
-              obj.setAttribute("classid", "clsid:32F66A20-7614-11D4-BD11-00104BD3F987");
-              this.getElementsByTagName("head")[0].appendChild(obj);
-              this.namespaces.add("m", "http://www.w3.org/1998/Math/MathML", "#mathplayer");  
-              this.mathplayerinitialized = true;
-          }
-          return this.createElement("m:" + local);
+            return this.createElement(local);
         } else {
             return Document.prototype.createElementNS.apply(this,[uri, local]);
         }
@@ -5152,8 +5143,8 @@ var inputElements_focusEvents = {
         __blur__(this);
 
         if (this._oldValue != this.value){
-            var event = document.createEvent();
-            event.initEvent("change");
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("change", true, true);
             this.dispatchEvent( event );
         }
     },
