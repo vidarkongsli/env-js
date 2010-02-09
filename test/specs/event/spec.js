@@ -210,7 +210,7 @@ test('document.createEvent("FooEvents")', function(){
 });
 
 
-test('element.addEventHandler / element.dispatchEvent', function(){
+test('element.addEventListener / element.dispatchEvent', function(){
     expect(20);
     // <div id="thediv"><a href="/" id="thelink">test</a></div>
     
@@ -272,5 +272,32 @@ test('element.addEventHandler / element.dispatchEvent', function(){
     link.dispatchEvent(event);
 });
 
+test('element.addEventListener / element.dispatchEvent multiple listeners', function(){
+    expect(6);
+    // <div id="thediv"></div>
+    
+    var doc,
+        event,
+        div;
+    
+    doc = document.implementation.createDocument(null,'div', null);
+    div = doc.documentElement;
+    div.setAttribute('id', 'thediv');
+    
+    div.addEventListener('click', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, div, '.currentTarget is div');
+        equals(event.target, div, '.target is div');
+    }, false);
+    div.addEventListener('click', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, div, '.currentTarget is div');
+        equals(event.target, div, '.target is div');
+    }, false);
+    
+    event = doc.createEvent('HTMLEvents');
+    event.initEvent('click', true, true);
+    div.dispatchEvent(event);
+});
 _start();
 

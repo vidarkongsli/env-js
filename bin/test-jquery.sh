@@ -47,7 +47,7 @@ case "$VERSION" in
             cd -
         fi
         echo 'running jquery 1.4.1 tests'
-        java -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
+        java -Xmx512M -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
         echo 'completed jquery 1.4.1 tests'
         ;;
 esac

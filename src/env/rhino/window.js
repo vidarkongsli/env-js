@@ -40,27 +40,14 @@ Envjs.proxy = function(scope, parent){
                             //print('has as string :'+has);
                             return has;
                     }
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    has = Number(nameOrIndex+'') in _scope;
-                    //print('has as index :'+has);
-                    return has;
                 }else{
                     //print('has not');
                     return false;
                 }
             },
             put: function(nameOrIndex,  start,  value){
-                //print('proxy put '+nameOrIndex+" = "+value+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("put as string");
-                    _scope[nameOrIndex+''] = value;
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("put as index");
-                    _scope[Number(nameOrIndex+'')] = value;
-                }else{
-                    //print('put not');
-                    return _undefined;
-                }
+                //print('put '+ value);
+                _scope[nameOrIndex+''] = value;
             },
             get: function(nameOrIndex, start){
                 //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
@@ -73,14 +60,7 @@ Envjs.proxy = function(scope, parent){
                     }else{
                         return value;
                     }
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("get as index");
-                    value = _scope[Number(nameOrIndex+'')];
-                    if(value == 'undefined')
-                        return  _undefined;
-                    else
-                        return value;
-                }else{
+                } else {
                     //print('get not');
                     return _undefined;
                 }

@@ -3704,7 +3704,8 @@ var $events = [{}];
 function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length;
+        target.uuid = $events.length+'';
+        //console.log('event uuid %s %s', target, target.uuid);
     }
     if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
@@ -3716,8 +3717,11 @@ function __addEventListener__(target, type, fn, phase){
         };
     }
     if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
-        
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
         $events[target.uuid][type][phase].push( fn );
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
     }
 };
 
@@ -3726,7 +3730,7 @@ function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length;
+        target.uuid = $events.length+'';
     }
     if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
@@ -3739,8 +3743,9 @@ function __removeEventListener__(target, type, fn, phase){
     }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
-            return f != fn;
-        });
+        //console.log('removing event listener %s %s %s %s', target, type, phase, fn);
+        return f != fn;
+    });
 };
 
 
@@ -3755,25 +3760,30 @@ function __dispatchEvent__(target, event, bubbles){
     if (!event.target) {
         event.target = target;
     }
+    
+    //console.log('dispatching? %s %s %s', target, event.type, bubbles);
+    if ( event.type && (target.nodeType || target === window )) {
 
-    if ( event.type && (target.nodeType             ||
-                        target === window           ||
-                        target.__proto__ === window ||
-                        target.$thisWindowsProxyObject === window)) {
-
+        //console.log('dispatching event %s %s %s', target, event.type, bubbles);
         __captureEvent__(target, event);
         
         event.eventPhase = Event.AT_TARGET;
         if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
+            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['CAPTURING'].length);
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                //console.log('AT_TARGET (CAPTURING) event %s', fn);
                 var returnValue = fn( event );
+                //console.log('AT_TARGET (CAPTURING) return value %s', returnValue);
                 if(returnValue === false){
                     event.stopPropagation();
                 }
             });
+            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['BUBBLING'].length);
             $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
+                //console.log('AT_TARGET (BUBBLING) event %s', fn);
                 var returnValue = fn( event );
+                //console.log('AT_TARGET (BUBBLING) return value %s', returnValue);
                 if(returnValue === false){
                     event.stopPropagation();
                 }
@@ -7905,6 +7915,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         
         try{
             if(doc === window.document){
+                console.log('triggering window.load')
                 event = doc.createEvent('HTMLEvents');
                 event.initEvent("load", false, false);
                 window.dispatchEvent( event, false );

@@ -611,6 +611,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         
         try{
             if(doc === window.document){
+                console.log('triggering window.load')
                 event = doc.createEvent('HTMLEvents');
                 event.initEvent("load", false, false);
                 window.dispatchEvent( event, false );

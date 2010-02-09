@@ -667,27 +667,14 @@ Envjs.proxy = function(scope, parent){
                             //print('has as string :'+has);
                             return has;
                     }
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    has = Number(nameOrIndex+'') in _scope;
-                    //print('has as index :'+has);
-                    return has;
                 }else{
                     //print('has not');
                     return false;
                 }
             },
             put: function(nameOrIndex,  start,  value){
-                //print('proxy put '+nameOrIndex+" = "+value+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("put as string");
-                    _scope[nameOrIndex+''] = value;
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("put as index");
-                    _scope[Number(nameOrIndex+'')] = value;
-                }else{
-                    //print('put not');
-                    return _undefined;
-                }
+                //print('put '+ value);
+                _scope[nameOrIndex+''] = value;
             },
             get: function(nameOrIndex, start){
                 //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
@@ -700,14 +687,7 @@ Envjs.proxy = function(scope, parent){
                     }else{
                         return value;
                     }
-                }else if(nameOrIndex['class'] == java.lang.Integer){
-                    //print("get as index");
-                    value = _scope[Number(nameOrIndex+'')];
-                    if(value == 'undefined')
-                        return  _undefined;
-                    else
-                        return value;
-                }else{
+                } else {
                     //print('get not');
                     return _undefined;
                 }
@@ -4147,7 +4127,8 @@ var $events = [{}];
 function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length;
+        target.uuid = $events.length+'';
+        //console.log('event uuid %s %s', target, target.uuid);
     }
     if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
@@ -4159,8 +4140,11 @@ function __addEventListener__(target, type, fn, phase){
         };
     }
     if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
-        
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
         $events[target.uuid][type][phase].push( fn );
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
     }
 };
 
@@ -4169,7 +4153,7 @@ function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length;
+        target.uuid = $events.length+'';
     }
     if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
@@ -4182,8 +4166,9 @@ function __removeEventListener__(target, type, fn, phase){
     }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
-            return f != fn;
-        });
+        //console.log('removing event listener %s %s %s %s', target, type, phase, fn);
+        return f != fn;
+    });
 };
 
 
@@ -4198,25 +4183,30 @@ function __dispatchEvent__(target, event, bubbles){
     if (!event.target) {
         event.target = target;
     }
+    
+    //console.log('dispatching? %s %s %s', target, event.type, bubbles);
+    if ( event.type && (target.nodeType || target === window )) {
 
-    if ( event.type && (target.nodeType             ||
-                        target === window           ||
-                        target.__proto__ === window ||
-                        target.$thisWindowsProxyObject === window)) {
-
+        //console.log('dispatching event %s %s %s', target, event.type, bubbles);
         __captureEvent__(target, event);
         
         event.eventPhase = Event.AT_TARGET;
         if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
+            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['CAPTURING'].length);
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                //console.log('AT_TARGET (CAPTURING) event %s', fn);
                 var returnValue = fn( event );
+                //console.log('AT_TARGET (CAPTURING) return value %s', returnValue);
                 if(returnValue === false){
                     event.stopPropagation();
                 }
             });
+            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['BUBBLING'].length);
             $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
+                //console.log('AT_TARGET (BUBBLING) event %s', fn);
                 var returnValue = fn( event );
+                //console.log('AT_TARGET (BUBBLING) return value %s', returnValue);
                 if(returnValue === false){
                     event.stopPropagation();
                 }
@@ -8348,6 +8338,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         
         try{
             if(doc === window.document){
+                console.log('triggering window.load')
                 event = doc.createEvent('HTMLEvents');
                 event.initEvent("load", false, false);
                 window.dispatchEvent( event, false );

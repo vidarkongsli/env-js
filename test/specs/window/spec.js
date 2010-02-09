@@ -294,5 +294,69 @@ test('frame proxy', function(){
     stop();
 });
 
+test('window.addEventListener / window.dispatchEvent multiple listeners', function(){
+    expect(36);
+    
+    var event;
+    
+    window.addEventListener('foo', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, false);
+    window.addEventListener('foo', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, false);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('foo', true, true);
+    window.dispatchEvent(event);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('foo', false, true);
+    window.dispatchEvent(event);
+    
+    
+    window.addEventListener('bar', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, true);
+    window.addEventListener('bar', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, true);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('bar', true, true);
+    window.dispatchEvent(event);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('bar', false, true);
+    window.dispatchEvent(event);
+    
+    window.addEventListener('goop', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, true);
+    window.addEventListener('goop', function(event){
+        equals(event.eventPhase, Event.AT_TARGET, '.eventPhase is AT_TARGET');
+        equals(event.currentTarget, window, '.currentTarget is window');
+        equals(event.target, window, '.target is window');
+    }, false);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('goop', true, true);
+    window.dispatchEvent(event);
+    
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('goop', false, true);
+    window.dispatchEvent(event);
+});
+
 start();
 Envjs.wait();

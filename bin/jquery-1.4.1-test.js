@@ -7,7 +7,8 @@ Envjs({
         "text/javascript"   :true
     },
     afterScriptLoad:{
-        'qunit/testrunner.js': function(){
+        'data/testrunner.js': function(){
+            console.log('loaded test runner');
             //hook into qunit.log
             var count = 0;
             QUnit.log = function(result, message){
@@ -41,12 +42,8 @@ Envjs({
                     isStopped = true;
                     unsafeStop.call(this);
                     timeout = ( timeout && timeout > 0 ) ? timeout : 10000;
-                /*if (timeout)
-                  config_timeout = setTimeout(function() {
-    			    QUnit.ok( false, "Test timed out" );
-    			    start();
-    		      }, timeout);*/
-                  Envjs.wait()
+                    start();
+                    Envjs.wait()
                 }
             };
             start = function(){
@@ -68,7 +65,9 @@ Envjs({
                 ok(false, 'Ajax may have failed while running locally');
                 try{
                     handleError(arguments);
-                }catch(e){}
+                }catch(e){
+                    console.log(e);
+                }
                 //allow tests to gracefully continue
                 start();
             };
