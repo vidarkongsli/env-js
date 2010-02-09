@@ -163,6 +163,7 @@ Window = function(scope, parent, opener){
             return $location;
         },
         set location(uri){
+            uri = Envjs.location(uri);
             new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
@@ -258,7 +259,7 @@ Window = function(scope, parent, opener){
             if(name)
                 _window.name = name;
             _window.document.async = false;
-            _window.location.assign(url);
+            _window.location.assign(Envjs.location(url));
             return _window;
         },
         close: function(){

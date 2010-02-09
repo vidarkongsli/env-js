@@ -24,6 +24,8 @@ function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
         target.uuid = $events.length;
+    }
+    if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
@@ -39,11 +41,13 @@ function __addEventListener__(target, type, fn, phase){
 };
 
 
-function __removeEventListener__(target, type, fn, _phase){
+function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
         target.uuid = $events.length;
+    }
+    if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
@@ -51,7 +55,7 @@ function __removeEventListener__(target, type, fn, _phase){
             CAPTURING:[],
             BUBBLING:[]
         };
-    }   
+    }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
             return f != fn;
@@ -79,7 +83,7 @@ function __dispatchEvent__(target, event, bubbles){
         __captureEvent__(target, event);
         
         event.eventPhase = Event.AT_TARGET;
-        if ( target.uuid && $events[target.uuid][event.type] ) {
+        if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
                 var returnValue = fn( event );
@@ -111,19 +115,21 @@ function __captureEvent__(target, event){
         
     event.eventPhase = Event.CAPTURING_PHASE;
     while(parent){
-        if(parent.uuid && $events[parent.uuid][event.type]['CAPTURING']){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type]){
             ancestorStack.push(parent);
         }
         parent = parent.parentNode;
     }
     while(ancestorStack.length && !event.cancelled){
         event.currentTarget = ancestorStack.pop();
-        $events[event.currentTarget.uuid][event.type]['CAPTURING'].forEach(function(fn){
-            var returnValue = fn( event );
-            if(returnValue === false){
-                event.stopPropagation();
-            }
-        });
+        if($events[event.currentTarget.uuid] && $events[event.currentTarget.uuid][event.type]){
+            $events[event.currentTarget.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                var returnValue = fn( event );
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
+        }
     }
 };
 
@@ -131,7 +137,7 @@ function __bubbleEvent__(target, event){
     var parent = target.parentNode;
     event.eventPhase = Event.BUBBLING_PHASE;
     while(parent){
-        if(parent.uuid && $events[parent.uuid][event.type]['BUBBLING']){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type] ){
             event.currentTarget = parent;
             $events[event.currentTarget.uuid][event.type]['BUBBLING'].forEach(function(fn){
                 var returnValue = fn( event );

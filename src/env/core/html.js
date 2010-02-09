@@ -90,7 +90,8 @@ Envjs.loadLocalScript = function(script){
         }
         base = "" + script.ownerDocument.location;
         //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
-        filename = Envjs.location(script.src, base );
+        //console.log('base %s', base);
+        filename = Envjs.location(script.src, base);
         try {                      
             load(filename);
             console.log('loaded %s', filename);

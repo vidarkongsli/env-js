@@ -32,12 +32,14 @@ var __elementPopped__ = function(ns, name, node){
     // something to watch for if this code changes.
     var type = ( node.type === null ) ? "text/javascript" : node.type;
     try{
-        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript"){
+        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript" 
+            && (node.src || node.childNodes.length > 0)){
             //$env.debug("element popped: script\n"+node.xml);
             // unless we're parsing in a window context, don't execute scripts
             if (doc.toString() === '[object HTMLDocument]'){
+                
                 okay = Envjs.loadLocalScript(node, null);
-                //console.log('loaded script? %s', okay);
+                //console.log('loaded script? %s %s', node.uuid, okay);
                 // only fire event if we actually had something to load
                 if (node.src && node.src.length > 0){
                     event = doc.createEvent('HTMLEvents');

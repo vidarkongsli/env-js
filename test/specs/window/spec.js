@@ -75,6 +75,7 @@ test('Window Interfaces Available', function(){
 });
     
 test('window proxy', function(){
+    equals(window.THISISNOTDEFINED, undefined, 'window.undefined');
     equals(window.document, document, 'window.document('+window.document+') is document('+document+')');
     equals(document.nodeType, Node.DOCUMENT_NODE, 'document.nodeType is correct');
     

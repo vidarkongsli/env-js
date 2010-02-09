@@ -64,8 +64,14 @@ test('Envjs.location', function(){
     
     location = Envjs.location('specs/env/spec.html');
     ok(location, 'Able to create Location');
-    equals(location, document.baseURI+path, 'location');
-    equals(location.toString(), document.baseURI+path, 'location');
+    equals(location, 'http://envjs.com/specs/env/spec.html', 'location');
+    equals(location.toString(), 'http://envjs.com/specs/env/spec.html', 'location');
+    
+    
+    location = Envjs.location('specs/env/spec.html', 'http://envjs.com/');
+    ok(location, 'Able to create Location');
+    equals(location, 'http://envjs.com/specs/env/spec.html', 'location');
+    equals(location.toString(), 'http://envjs.com/specs/env/spec.html', 'location');
     
     document = null;
     

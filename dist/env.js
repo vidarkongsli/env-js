@@ -165,7 +165,8 @@ Envjs.loadLocalScript = function(script){
         }
         base = "" + script.ownerDocument.location;
         //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
-        filename = Envjs.location(script.src, base );
+        //console.log('base %s', base);
+        filename = Envjs.location(script.src, base);
         try {                      
             load(filename);
             console.log('loaded %s', filename);
@@ -1056,17 +1057,19 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
     // loop through all nodes
     for (var i=0; i<namednodemap.length; i++) {
         // compare name to each node's nodeName
-        if(isnsmap){
+        if(namednodemap[i].localName && name && isnsmap){
             if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {
                 // found it!         
                 ret = i;
                 break;
             }
         }else{
-            if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
-                // found it!
-                ret = i;
-                break;
+            if(namednodemap[i].name && name){
+                if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
+                    // found it!
+                    ret = i;
+                    break;
+                }
             }
         }
     }
@@ -3702,6 +3705,8 @@ function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
         target.uuid = $events.length;
+    }
+    if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
@@ -3717,11 +3722,13 @@ function __addEventListener__(target, type, fn, phase){
 };
 
 
-function __removeEventListener__(target, type, fn, _phase){
+function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
         target.uuid = $events.length;
+    }
+    if ( !$events[target.uuid] ) {
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
@@ -3729,7 +3736,7 @@ function __removeEventListener__(target, type, fn, _phase){
             CAPTURING:[],
             BUBBLING:[]
         };
-    }   
+    }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
             return f != fn;
@@ -3757,7 +3764,7 @@ function __dispatchEvent__(target, event, bubbles){
         __captureEvent__(target, event);
         
         event.eventPhase = Event.AT_TARGET;
-        if ( target.uuid && $events[target.uuid][event.type] ) {
+        if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
                 var returnValue = fn( event );
@@ -3789,19 +3796,21 @@ function __captureEvent__(target, event){
         
     event.eventPhase = Event.CAPTURING_PHASE;
     while(parent){
-        if(parent.uuid && $events[parent.uuid][event.type]['CAPTURING']){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type]){
             ancestorStack.push(parent);
         }
         parent = parent.parentNode;
     }
     while(ancestorStack.length && !event.cancelled){
         event.currentTarget = ancestorStack.pop();
-        $events[event.currentTarget.uuid][event.type]['CAPTURING'].forEach(function(fn){
-            var returnValue = fn( event );
-            if(returnValue === false){
-                event.stopPropagation();
-            }
-        });
+        if($events[event.currentTarget.uuid] && $events[event.currentTarget.uuid][event.type]){
+            $events[event.currentTarget.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                var returnValue = fn( event );
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
+        }
     }
 };
 
@@ -3809,7 +3818,7 @@ function __bubbleEvent__(target, event){
     var parent = target.parentNode;
     event.eventPhase = Event.BUBBLING_PHASE;
     while(parent){
-        if(parent.uuid && $events[parent.uuid][event.type]['BUBBLING']){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type] ){
             event.currentTarget = parent;
             $events[event.currentTarget.uuid][event.type]['BUBBLING'].forEach(function(fn){
                 var returnValue = fn( event );
@@ -5115,10 +5124,10 @@ __extend__(HTMLElement.prototype, {
 	    return this.setAttribute("lang",val); 
     },
 	get offsetHeight(){
-	    return Number(this.style["height"].replace("px",""));
+	    return Number((this.style["height"]||'').replace("px",""));
 	},
 	get offsetWidth(){
-	    return Number(this.style["width"].replace("px",""));
+	    return Number((this.style["width"]||'').replace("px",""));
 	},
 	offsetLeft: 0,
 	offsetRight: 0,
@@ -8721,12 +8730,14 @@ var __elementPopped__ = function(ns, name, node){
     // something to watch for if this code changes.
     var type = ( node.type === null ) ? "text/javascript" : node.type;
     try{
-        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript"){
+        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript" 
+            && (node.src || node.childNodes.length > 0)){
             //$env.debug("element popped: script\n"+node.xml);
             // unless we're parsing in a window context, don't execute scripts
             if (doc.toString() === '[object HTMLDocument]'){
+                
                 okay = Envjs.loadLocalScript(node, null);
-                //console.log('loaded script? %s', okay);
+                //console.log('loaded script? %s %s', node.uuid, okay);
                 // only fire event if we actually had something to load
                 if (node.src && node.src.length > 0){
                     event = doc.createEvent('HTMLEvents');
@@ -9214,6 +9225,7 @@ Window = function(scope, parent, opener){
             return $location;
         },
         set location(uri){
+            uri = Envjs.location(uri);
             new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
@@ -9309,7 +9321,7 @@ Window = function(scope, parent, opener){
             if(name)
                 _window.name = name;
             _window.document.async = false;
-            _window.location.assign(url);
+            _window.location.assign(Envjs.location(url));
             return _window;
         },
         close: function(){

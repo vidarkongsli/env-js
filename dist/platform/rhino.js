@@ -347,7 +347,7 @@ Envjs.proxy = function(scope, parent){
     var _scope = scope;
         _parent = parent||null,
         _this = this,
-        _undefined = undefined,
+        _undefined = Packages.org.mozilla.javascript.Scriptable.NOT_FOUND,
         _proxy = new Packages.org.mozilla.javascript.ScriptableObject({
             getClassName: function(){
                 return 'envjs.platform.rhino.Proxy';
@@ -389,12 +389,22 @@ Envjs.proxy = function(scope, parent){
             },
             get: function(nameOrIndex, start){
                 //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
+                var value;
                 if(nameOrIndex['class'] == java.lang.String){
                     //print("get as string");
-                    return  _scope[nameOrIndex+''];
+                    value = _scope[nameOrIndex+''];
+                    if(value+'' === "undefined"){
+                        return _undefined;
+                    }else{
+                        return value;
+                    }
                 }else if(nameOrIndex['class'] == java.lang.Integer){
                     //print("get as index");
-                    return _scope[Number(nameOrIndex+'')];
+                    value = _scope[Number(nameOrIndex+'')];
+                    if(value == 'undefined')
+                        return  _undefined;
+                    else
+                        return value;
                 }else{
                     //print('get not');
                     return _undefined;

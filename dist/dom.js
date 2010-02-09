@@ -495,17 +495,19 @@ var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
     // loop through all nodes
     for (var i=0; i<namednodemap.length; i++) {
         // compare name to each node's nodeName
-        if(isnsmap){
+        if(namednodemap[i].localName && name && isnsmap){
             if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {
                 // found it!         
                 ret = i;
                 break;
             }
         }else{
-            if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
-                // found it!
-                ret = i;
-                break;
+            if(namednodemap[i].name && name){
+                if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
+                    // found it!
+                    ret = i;
+                    break;
+                }
             }
         }
     }
