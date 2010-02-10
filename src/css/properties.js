@@ -4,17 +4,19 @@
 */
 CSS2Properties = function(element){
     //this.onSetCallback = options.onSet?options.onSet:(function(){});
-    this.styleIndex = __supportedStyles__();
-    this.nameMap = {};
-    this.__previous__ = {};
-    this.__element__ = element;
+    this.styleIndex = __supportedStyles__();//non-standard
+    this.type = element.tagName;//non-standard
+    __setArray__(this,[]);
     __cssTextToStyles__(this, element.getAttribute('style')||'');
 };
 __extend__(CSS2Properties.prototype, {
     get cssText(){
-        var css = '';
-        for(var i=0;i<this.length;i++){
-            css+=this[i]+":"+this.getPropertyValue(this[i])+';'
+        var css = '',
+            i;
+        for(i=0;i<this.length;i++){
+            css+=this[i]+": "+this.getPropertyValue(this[i])+';';
+            if(i+1<this.length)
+                css+=" ";
         }
         return css;
     },
@@ -28,11 +30,14 @@ __extend__(CSS2Properties.prototype, {
         
     },
     getPropertyValue : function(name){
+        var index;
         if(name in this.styleIndex){
             //$info(name +' in style index');
             return this[name];
-        }else if(name in this.nameMap){
-            return this[__toCamelCase__(name)];
+        }else{
+            index = Array.prototype.indexOf.apply(this, name)
+            if(index > -1)
+                return this[index];
         }
         //$info(name +' not found');
         return null;
@@ -42,40 +47,36 @@ __extend__(CSS2Properties.prototype, {
     },
     removeProperty: function(name){
         this.styleIndex[name] = null;
+        name = __toDashed__(name);
+        var index = Array.prototype.indexOf.apply(this, [name]);
+        if(index > -1){
+            Array.prototype.splice.apply(this, [1,index]);
+        }
     },
-    setProperty: function(name, value){
+    setProperty: function(name, value, priority){
         //$info('setting css property '+name+' : '+value);
         name = __toCamelCase__(name);
-        if(name in this.styleIndex){
+        if(name in this.styleIndex  && value !== undefined){
             //$info('setting camel case css property ');
-            if (value!==undefined){
-                this.styleIndex[name] = value;
-            }
-            if(name!==__toDashed__(name)){
-                //$info('setting dashed name css property ');
-                name = __toDashed__(name);
-                this[name] = value;
-                if(!(name in this.nameMap)){
-                    Array.prototype.push.apply(this, [name]);
-                    this.nameMap[name] = this.length;
-                }
-                
+            this.styleIndex[name] = value;
+            //$info('setting dashed name css property ');
+            name = __toDashed__(name);
+            if( Array.prototype.indexOf.apply(this, [name]) === -1 ){
+                Array.prototype.push.apply(this,[name]);
             }
         }
         //$info('finished setting css property '+name+' : '+value);
     },
     toString:function(){
-        if (this.length >0){
-            return "{\n\t"+Array.prototype.join.apply(this,[';\n\t'])+"}\n";
-        }else{
-            return '';
-        }
+        return '[object CSS2Properties]';
     }
 });
 
 
 
 var __cssTextToStyles__ = function(css2props, cssText){
+    
+    //console.log('__cssTextToStyles__ %s %s', css2props, cssText);
     //var styleArray=[];
     var style, styles = cssText.split(';');
     for ( var i = 0; i < styles.length; i++ ) {
@@ -167,7 +168,7 @@ var __supportedStyles__ = function(){
         fontStyle:	null,
         fontVariant:	null,
         fontWeight:	null,
-        height:	'1px',
+        height:	'',
         left:	null,
         letterSpacing:	null,
         lineHeight:	null,
@@ -273,7 +274,7 @@ for(var style in __supportedStyles__()){
             //display will be set to a tagName specific value if ""
             CSS2Properties.prototype.__defineGetter__(name, function(){
                 var val = this.styleIndex[name];
-                val = val?val:__displayMap__[this.__element__.tagName];
+                val = val?val:__displayMap__[this.type];
                 //$log(" css2properties.get  " + name + "="+val+" for("+this.__element__.tagName+")");
                 return val;
             });

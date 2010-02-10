@@ -29,6 +29,7 @@ Envjs({
             
             //allow jquery to run ajax
             isLocal = false;
+            jQuery.ajaxSetup({async : false});
             
             
             var unsafeStop = stop,

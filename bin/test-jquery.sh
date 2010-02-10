@@ -47,7 +47,13 @@ case "$VERSION" in
             cd -
         fi
         echo 'running jquery 1.4.1 tests'
-        java -Xmx512M -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
+        if [ $DEBUG -eq 1 ]; then
+            echo 'enabling rhino debugger'
+            java -cp rhino/js.jar org.mozilla.javascript.tools.debugger.Main bin/jquery-1.4.1-test.js
+        else
+            echo 'running with rhino'
+            java -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
+        fi
         echo 'completed jquery 1.4.1 tests'
         ;;
 esac

@@ -540,10 +540,11 @@
             <fileset dir="${SRC_DIR}" includes="css/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
-            <fileset dir="${SRC_DIR}" includes="common/__toArray__.js" />
+            <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
             <fileset dir="${SRC_DIR}" includes="css/properties.js" />
             <fileset dir="${SRC_DIR}" includes="css/rule.js" />
             <fileset dir="${SRC_DIR}" includes="css/stylesheet.js" />
+            <fileset dir="${SRC_DIR}" includes="css/htmlelement.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>
         <echo message="Finished Building ${CSS_DIST}"/>
@@ -628,8 +629,9 @@
             <fileset dir="${DIST_DIR}" includes="event.js" />
             <fileset dir="${DIST_DIR}" includes="timer.js" />
             <fileset dir="${DIST_DIR}" includes="html.js" />
-            <fileset dir="${DIST_DIR}" includes="xhr.js" />
+            <fileset dir="${DIST_DIR}" includes="css.js" />
             <fileset dir="${DIST_DIR}" includes="parser.js" />
+            <fileset dir="${DIST_DIR}" includes="xhr.js" />
             <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_DIST} built." />
@@ -649,8 +651,9 @@
             <fileset dir="${DIST_DIR}" includes="event.js" />
             <fileset dir="${DIST_DIR}" includes="timer.js" />
             <fileset dir="${DIST_DIR}" includes="html.js" />
-            <fileset dir="${DIST_DIR}" includes="xhr.js" />
+            <fileset dir="${DIST_DIR}" includes="css.js" />
             <fileset dir="${DIST_DIR}" includes="parser.js" />
+            <fileset dir="${DIST_DIR}" includes="xhr.js" />
             <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />

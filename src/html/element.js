@@ -80,9 +80,6 @@ __extend__(HTMLElement.prototype, {
 	get style(){
         return this.getAttribute('style')||'';
 	},
-    set style(values){
-	    this.setAttribute('style') = values;
-    },
 	get title() { 
 	    return this.getAttribute("title"); 
     },
