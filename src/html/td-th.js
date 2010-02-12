@@ -4,8 +4,7 @@
  * Implementation Provided by Steven Wood
  */
 HTMLTableCellElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableCellElement.prototype = new HTMLElement;
 __extend__(HTMLTableCellElement.prototype, {

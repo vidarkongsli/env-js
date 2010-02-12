@@ -3,9 +3,7 @@
  * HTMLUnknownElement DOM Level 2
  */
 HTMLUnknownElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-
+    HTMLElement.apply(this, arguments);
 };
 HTMLUnknownElement.prototype = new HTMLElement;
 __extend__(HTMLUnknownElement.prototype,{

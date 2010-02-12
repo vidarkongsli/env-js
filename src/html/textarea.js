@@ -3,8 +3,7 @@
  * HTMLTextAreaElement - DOM Level 2
  */
 HTMLTextAreaElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLTextAreaElement.prototype, {

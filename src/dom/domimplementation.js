@@ -140,6 +140,9 @@ __extend__(DOMImplementation.prototype,{
       }
 
       return msg;
+    },
+    toString : function(){
+        return "[object DOMImplementation]";
     }
 });
 

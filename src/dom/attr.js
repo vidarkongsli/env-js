@@ -6,14 +6,13 @@
  * @param  ownerDocument : The Document object associated with this node.
  */
 Attr = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     // set when Attr is added to NamedNodeMap
     this.ownerElement = null;
     //TODO: our implementation of Attr is incorrect because we don't
     //      treat the value of the attribute as a child text node.
-};
-Attr.prototype = new Node; 
+};Attr.prototype = new Node;
+
 __extend__(Attr.prototype, {
     // the name of this attribute
     get name(){

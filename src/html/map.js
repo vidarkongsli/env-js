@@ -3,8 +3,7 @@
  * HTMLMapElement - DOM Level 2
  */
 HTMLMapElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMapElement.prototype = new HTMLElement;
 __extend__(HTMLMapElement.prototype, {

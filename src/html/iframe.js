@@ -3,8 +3,7 @@
  * HTMLIFrameElement - DOM Level 2
  */
 HTMLIFrameElement = function(ownerDocument) {
-    this.HTMLFrameElement = HTMLFrameElement;
-    this.HTMLFrameElement(ownerDocument);
+    HTMLFrameElement.apply(this, arguments);
 };
 HTMLIFrameElement.prototype = new HTMLFrameElement;
 __extend__(HTMLIFrameElement.prototype, {
@@ -19,6 +18,9 @@ __extend__(HTMLIFrameElement.prototype, {
     },
 	set width(val) { 
 	    return this.setAttribute("width",val); 
+    },
+    toString: function(){
+        return '[object HTMLIFrameElement]';
     }
 });
 	

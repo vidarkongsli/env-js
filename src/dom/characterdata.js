@@ -6,8 +6,7 @@
  * @param  ownerDocument : The Document object associated with this node.
  */
 CharacterData = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 CharacterData.prototype = new Node;
 __extend__(CharacterData.prototype,{
@@ -116,5 +115,8 @@ __extend__(CharacterData.prototype,{
             }
         }
         return ret;
+    },
+    toString : function(){
+        return "[object CharacterData]";
     }
 });

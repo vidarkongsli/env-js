@@ -4,7 +4,7 @@
  * @param  code : int - the exception code (one of the DOMException constants)
  */
 DOMException = function(code) {
-  this.code = code;
+    this.code = code;
 };
 
 // DOMException constants

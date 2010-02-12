@@ -3,8 +3,7 @@
 * HTMLModElement - DOM Level 2
 */
 HTMLModElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLModElement.prototype = new HTMLElement;
 __extend__(HTMLModElement.prototype, {

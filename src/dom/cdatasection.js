@@ -9,9 +9,8 @@
  * @param  ownerDocument : The Document object associated with this node.
  */
 CDATASection = function(ownerDocument) {
-  this.Text  = Text;
-  this.Text(ownerDocument);
-  this.nodeName = '#cdata-section';
+    Text.apply(this, arguments);
+    this.nodeName = '#cdata-section';
 };
 CDATASection.prototype = new Text;
 __extend__(CDATASection.prototype,{

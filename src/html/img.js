@@ -3,10 +3,10 @@
  * HTMLImageElement - DOM Level 2
  */
 HTMLImageElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLImageElement.prototype = new HTMLElement;
+
 __extend__(HTMLImageElement.prototype, {
     get alt(){
         return this.getAttribute('alt');

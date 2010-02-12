@@ -9,7 +9,7 @@
  * @param {Object} opener
  */
 Window = function(scope, parent, opener){
-    // console.log('new window %s', scope);
+    
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
@@ -246,7 +246,6 @@ Window = function(scope, parent, opener){
         open: function(url, name, features, replace){
             if (features)
                 console.log("'features argument not yet implemented");
-            
             var _window = {},
                 open;
             if(replace && name){
@@ -342,6 +341,7 @@ var __initStandardObjects__ = function(scope, parent){
 };
 
 //finally pre-supply the window with the window-like environment
+console.log('Default Window');
 new Window(__this__, __this__);
 
 

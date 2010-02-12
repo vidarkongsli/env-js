@@ -8,24 +8,14 @@
  * @param  implementation : DOMImplementation - the creator Implementation
  */
 Document = function(implementation, docParentWindow) {
-    this.Node = Node;
-    this.Node(this);
+    Node.apply(this, arguments);
     
-    this.async = true;
+    //TODO: Temporary!!! Cnage back to true!!!
+    this.async = false;
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.
     this.implementation = implementation
-    
-    // "private" variable providing the read-only document.parentWindow property
-    // TODO: I dont think this is a good place to store this info,
-    //       rather some internal function like __parentWindow__(doc)
-    //       would be better.
-    this._parentWindow = docParentWindow;
-    try {
-        if (docParentWindow.$thisWindowsProxyObject)
-            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
-    } catch(e){}
 
     this.nodeName  = "#document";
     // initially false, set to true by parser
@@ -35,7 +25,7 @@ Document = function(implementation, docParentWindow) {
     this.ownerDocument = null;
     
     this.importing = false;
-    
+    this.location = null;
 };
 Document.prototype = new Node;
 __extend__(Document.prototype,{
@@ -57,17 +47,8 @@ __extend__(Document.prototype,{
         }
         return null;
     },
-    get parentWindow(){
-        return this._parentWindow;
-    },
     get documentURI(){
         return this.baseURI;
-    },
-    get location(){
-        return this._location?this._location:null;
-    },
-    set location(url){
-        this._location = url;
     },
     createExpression: function(xpath, nsuriMap){ 
         return new XPathExpression(xpath, nsuriMap);
@@ -222,7 +203,7 @@ __extend__(Document.prototype,{
         return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this.normalize();
     },
     get nodeType(){
         return Node.DOCUMENT_NODE;

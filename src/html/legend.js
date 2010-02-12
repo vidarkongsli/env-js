@@ -3,8 +3,7 @@
  * HTMLLegendElement - DOM Level 2
  */
 HTMLLegendElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLegendElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLegendElement.prototype, {

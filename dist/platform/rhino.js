@@ -342,8 +342,6 @@ Envjs.platform       = "Rhino ";//how do we get the version
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent){
-    
-    
     var _scope = scope;
         _parent = parent||null,
         _this = this,
@@ -391,7 +389,8 @@ Envjs.proxy = function(scope, parent){
                 }
             },
             'delete': function(nameOrIndex){
-                _scope['delete'](nameOrIndex);
+                console.log('deleting %s', nameOrIndex);
+                delete _scope[nameOrIndex+''];
             },
             get parentScope(){
                 return _parent;

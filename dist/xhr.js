@@ -422,8 +422,8 @@ var HASH     = new RegExp('(\\#.*)'),
     PROTOCOL = new RegExp('(^\\w*\:)'),
     SEARCH   = new RegExp('(\\?[^\\#]*)');
         
+
 Location = function(url, doc, history){
-    
     //console.log('Location url %s', url);
     var $url = url
         $document = doc?doc:null,
@@ -580,12 +580,11 @@ Location = function(url, doc, history){
 
 var __exchangeHTMLDocument__ = function(doc, text, url){
 
-    //console.log('fetched text %s', text);
     try{
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
     }catch(e){
-        console.log('parseerror %s',e);
+        console.log('parsererror %s', e);
         doc = new HTMLDocument(new DOMImplementation());
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -678,6 +677,7 @@ XMLHttpRequest.prototype = {
                             doc = domparser.parseFromString(_this.responseText+"");
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
+                            console.log('parseerror \n%s', e);
                             doc = document.implementation.createDocument('','error',null);
                             doc.appendChild(doc.createTextNode(e+''));
                         } 

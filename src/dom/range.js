@@ -4,6 +4,7 @@
 Range = function(){
 
 };
+
 __extend__(Range.prototype, {
     get startContainer(){
 
@@ -72,7 +73,7 @@ __extend__(Range.prototype, {
 
     },
     toString: function(){
-
+        return '[object Range]';
     },
     detach: function(){
 

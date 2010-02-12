@@ -12,10 +12,10 @@
  * @param  ownerDocument The Document object associated with this node.
  */
 Text = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#text";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#text";
 };
+
 Text.prototype = new CharacterData;
 __extend__(Text.prototype,{
     get localName(){

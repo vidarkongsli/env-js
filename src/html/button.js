@@ -3,10 +3,10 @@
  * HTMLButtonElement - DOM Level 2
  */
 HTMLButtonElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLButtonElement.prototype = new HTMLTypeValueInputs;
+
 __extend__(HTMLButtonElement.prototype, inputElements_status);
 __extend__(HTMLButtonElement.prototype, {
     get dataFormatAs(){

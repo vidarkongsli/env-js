@@ -6,18 +6,17 @@
  * @param  ownerDocument : The Document object associated with this node.
  */
 Namespace = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  // the name of this attribute
-  this.name      = "";                           
-
-  // If this attribute was explicitly given a value in the original document, 
-  // this is true; otherwise, it is false.
-  // Note that the implementation is in charge of this attribute, not the user.
-  // If the user changes the value of the attribute (even if it ends up having 
-  // the same value as the default value) then the specified flag is 
-  // automatically flipped to true
-  this.specified = false;
+    Node.apply(this, arguments);
+    // the name of this attribute
+    this.name      = "";                           
+    
+    // If this attribute was explicitly given a value in the original document, 
+    // this is true; otherwise, it is false.
+    // Note that the implementation is in charge of this attribute, not the user.
+    // If the user changes the value of the attribute (even if it ends up having 
+    // the same value as the default value) then the specified flag is 
+    // automatically flipped to true
+    this.specified = false;
 };
 Namespace.prototype = new Node;
 __extend__(Namespace.prototype, {
@@ -45,7 +44,7 @@ __extend__(Namespace.prototype, {
           return ret;
     },
     toString: function(){
-        return "Namespace #" + this.id;
+        return '[object Namespace]';
     }
 });
 

@@ -3,8 +3,7 @@
  * HTMLLabelElement - DOM Level 2
  */
 HTMLLabelElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLabelElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLabelElement.prototype, inputElements_dataProperties);

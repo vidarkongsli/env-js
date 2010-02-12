@@ -3,8 +3,7 @@
  * HTMLParamElement - DOM Level 2
  */
 HTMLParamElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParamElement.prototype = new HTMLElement;
 __extend__(HTMLParamElement.prototype, {

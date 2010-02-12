@@ -3,8 +3,7 @@
 * HTMLBaseElement - DOM Level 2
 */
 HTMLBaseElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLBaseElement.prototype = new HTMLElement;
 __extend__(HTMLBaseElement.prototype, {

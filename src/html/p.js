@@ -3,8 +3,7 @@
 * HTMLParagraphElement - DOM Level 2
 */
 HTMLParagraphElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParagraphElement.prototype = new HTMLElement;
 __extend__(HTMLParagraphElement.prototype, {

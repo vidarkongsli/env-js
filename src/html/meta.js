@@ -3,8 +3,7 @@
  * HTMLMetaElement - DOM Level 2
  */
 HTMLMetaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMetaElement.prototype = new HTMLElement;
 __extend__(HTMLMetaElement.prototype, {

@@ -3,8 +3,7 @@
 * HTMLQuoteElement - DOM Level 2
 */
 HTMLQuoteElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLQuoteElement.prototype = new HTMLElement;
 __extend__(HTMLQuoteElement.prototype, {

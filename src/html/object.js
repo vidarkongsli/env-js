@@ -3,8 +3,7 @@
  * HTMLObjectElement - DOM Level 2
  */
 HTMLObjectElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLObjectElement.prototype = new HTMLElement;
 __extend__(HTMLObjectElement.prototype, {

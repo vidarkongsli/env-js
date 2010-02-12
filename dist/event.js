@@ -300,6 +300,9 @@ Event = function(options){
         },
         get cancelled(){
             return state.cancelled;
+        },
+        toString: function(){
+            return '[object Event]';
         }
     };
 };

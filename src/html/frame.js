@@ -3,11 +3,16 @@
  * HTMLFrameElement - DOM Level 2
  */
 HTMLFrameElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    this.contentWindow = null;
+    var contentDocument;
+    this.contentWindow = {
+        get document(){
+            return contentDocument;
+        }
+    };
+    contentDocument = new HTMLDocument(new DOMImplementation(), this.contentWindow);
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
@@ -62,6 +67,9 @@ __extend__(HTMLFrameElement.prototype, {
     },
     set src(value){
         this.setAttribute('src', value);
+    },
+    toString: function(){
+        return '[object HTMLFrameElement]';
     },
     onload: HTMLEvents.prototype.onload
 });

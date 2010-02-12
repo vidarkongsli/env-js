@@ -7,12 +7,12 @@
  *
  * @extends Document
  */
-HTMLDocument = function(implementation, docParentWindow, docReferrer) {
-  this.Document = Document;
-  this.Document(implementation, docParentWindow);
-  this._referrer = docReferrer;
-  this.async = false;
-  this.baseURI = "about:blank";
+HTMLDocument = function(implementation, parentWindow, referrer) {
+    Document.apply(this, arguments);
+    this.referrer = referrer;
+    this.async = false;
+    this.baseURI = "about:blank";
+    this.parentWindow = parentWindow;
 };
 
 HTMLDocument.prototype = new Document;
@@ -233,9 +233,6 @@ __extend__(HTMLDocument.prototype, {
     },
     get links(){
         return new HTMLCollection(this.getElementsByTagName('a'));
-    },
-    get referrer(){
-        return this._referrer;
     },
 	getElementsByName : function(name){
         //returns a real Array + the NodeList

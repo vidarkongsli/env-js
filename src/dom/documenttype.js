@@ -4,8 +4,7 @@
  * @param {Document} onwnerDocument
  */
 DocumentType = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     this.systemId = null;
     this.publicId = null;
 };
@@ -22,5 +21,8 @@ __extend__({
     },
     get notations(){
         return null;
+    },
+    toString : function(){
+        return "[object DocumentType]";
     }
 });

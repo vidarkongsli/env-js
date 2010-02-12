@@ -8,9 +8,7 @@
  * @param  ownerDocument : The Document object associated with this node.
  */
 Element = function(ownerDocument) {
-    this.Node  = Node;
-    this.Node(ownerDocument);
-    
+    Node.apply(this, arguments);
     this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
 Element.prototype = new Node;
@@ -208,7 +206,7 @@ __extend__(Element.prototype, {
             ret += this.childNodes.xml;
             ret += "</" + this.tagName + ">";
         }else{
-            ret += "<" + this.tagName +ns+"/>";
+            ret += "<" + this.tagName + ns + attrstring +"/>";
         }
         
         return ret;

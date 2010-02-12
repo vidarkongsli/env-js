@@ -3,8 +3,7 @@
  * HTMLOptionElement - DOM Level 2
  */
 HTMLOptionElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLOptionElement.prototype = new HTMLInputCommon;
 __extend__(HTMLOptionElement.prototype, {

@@ -2,8 +2,7 @@
  * HTMLFrameSetElement - DOM Level 2
  */
 HTMLFrameSetElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLFrameSetElement.prototype = new HTMLElement;
 __extend__(HTMLFrameSetElement.prototype, {

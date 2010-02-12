@@ -2,8 +2,7 @@
  * HTMLInputElement - DOM Level 2
  */
 HTMLInputElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLInputElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLInputElement.prototype, {

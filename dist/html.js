@@ -103,12 +103,12 @@ function __setArray__( target, array ) {
  *
  * @extends Document
  */
-HTMLDocument = function(implementation, docParentWindow, docReferrer) {
-  this.Document = Document;
-  this.Document(implementation, docParentWindow);
-  this._referrer = docReferrer;
-  this.async = false;
-  this.baseURI = "about:blank";
+HTMLDocument = function(implementation, parentWindow, referrer) {
+    Document.apply(this, arguments);
+    this.referrer = referrer;
+    this.async = false;
+    this.baseURI = "about:blank";
+    this.parentWindow = parentWindow;
 };
 
 HTMLDocument.prototype = new Document;
@@ -329,9 +329,6 @@ __extend__(HTMLDocument.prototype, {
     },
     get links(){
         return new HTMLCollection(this.getElementsByTagName('a'));
-    },
-    get referrer(){
-        return this._referrer;
     },
 	getElementsByName : function(name){
         //returns a real Array + the NodeList
@@ -675,10 +672,10 @@ var  __mouseout__ = function(element){
 * HTMLElement - DOM Level 2
 */
 HTMLElement = function(ownerDocument) {
-    this.Element = Element;
-    this.Element(ownerDocument);
+    Element.apply(this, arguments);
 };
 HTMLElement.prototype = new Element;
+
 //TODO: Not sure where HTMLEvents belongs in the chain
 //      but putting it here satisfies a lowest common 
 //      denominator.
@@ -823,7 +820,7 @@ __extend__(HTMLElement.prototype, {
             }
             ret += "</" + this.tagName.toLowerCase() + ">";
         }else{
-            ret += "<" + this.tagName.toLowerCase() +ns+"/>";
+            ret += "<" + this.tagName.toLowerCase() + ns + attrstring +"/>";
         }
         
         return ret;
@@ -1031,8 +1028,8 @@ var inputElements_focusEvents = {
 * HTMLInputCommon - convenience class, not DOM
 */
 var HTMLInputCommon = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    
+    HTMLElement.apply(this, arguments);
 };
 HTMLInputCommon.prototype = new HTMLElement;
 __extend__(HTMLInputCommon.prototype, {
@@ -1070,8 +1067,8 @@ __extend__(HTMLInputCommon.prototype, {
 * HTMLTypeValueInputs - convenience class, not DOM
 */
 var HTMLTypeValueInputs = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    
+    HTMLInputCommon.apply(this, arguments);
 
     this._oldValue = "";
 };
@@ -1117,8 +1114,8 @@ __extend__(HTMLTypeValueInputs.prototype, {
 * HTMLInputAreaCommon - convenience class, not DOM
 */
 var HTMLInputAreaCommon = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
 __extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);
@@ -1141,8 +1138,7 @@ __extend__(HTMLInputAreaCommon.prototype, {
  * HTMLAnchorElement - DOM Level 2
  */
 HTMLAnchorElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLAnchorElement.prototype = new HTMLElement;
 __extend__(HTMLAnchorElement.prototype, {
@@ -1229,8 +1225,7 @@ __extend__(HTMLAnchorElement.prototype, {
  * HTMLAreaElement - DOM Level 2
  */
 HTMLAreaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLAreaElement.prototype = new HTMLElement;
 __extend__(HTMLAreaElement.prototype, {
@@ -1276,6 +1271,9 @@ __extend__(HTMLAreaElement.prototype, {
     },
     set target(value){
         this.setAttribute('target',value);
+    },
+    toString: function(){
+        return '[object HTMLAreaElement]';
     }
 });
 
@@ -1284,8 +1282,7 @@ __extend__(HTMLAreaElement.prototype, {
 * HTMLBaseElement - DOM Level 2
 */
 HTMLBaseElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLBaseElement.prototype = new HTMLElement;
 __extend__(HTMLBaseElement.prototype, {
@@ -1308,8 +1305,7 @@ __extend__(HTMLBaseElement.prototype, {
 * HTMLQuoteElement - DOM Level 2
 */
 HTMLQuoteElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLQuoteElement.prototype = new HTMLElement;
 __extend__(HTMLQuoteElement.prototype, {
@@ -1325,8 +1321,7 @@ __extend__(HTMLQuoteElement.prototype, {
  * HTMLBodyElement - DOM Level 2
  */
 HTMLBodyElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLBodyElement.prototype = new HTMLElement;
 __extend__(HTMLBodyElement.prototype, {
@@ -1343,10 +1338,10 @@ __extend__(HTMLBodyElement.prototype, {
  * HTMLButtonElement - DOM Level 2
  */
 HTMLButtonElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLButtonElement.prototype = new HTMLTypeValueInputs;
+
 __extend__(HTMLButtonElement.prototype, inputElements_status);
 __extend__(HTMLButtonElement.prototype, {
     get dataFormatAs(){
@@ -1362,8 +1357,7 @@ __extend__(HTMLButtonElement.prototype, {
 * HTMLCanvasElement - DOM Level 2
 */
 HTMLCanvasElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLCanvasElement.prototype = new HTMLElement;
 __extend__(HTMLCanvasElement.prototype, {
@@ -1377,10 +1371,10 @@ __extend__(HTMLCanvasElement.prototype, {
 * HTMLTableColElement - DOM Level 2
 */
 HTMLTableColElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableColElement.prototype = new HTMLElement;
+
 __extend__(HTMLTableColElement.prototype, {
     get align(){
         return this.getAttribute('align');
@@ -1425,8 +1419,7 @@ __extend__(HTMLTableColElement.prototype, {
 * HTMLModElement - DOM Level 2
 */
 HTMLModElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLModElement.prototype = new HTMLElement;
 __extend__(HTMLModElement.prototype, {
@@ -1448,10 +1441,10 @@ __extend__(HTMLModElement.prototype, {
 * HTMLDivElement - DOM Level 2
 */
 HTMLDivElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLDivElement.prototype = new HTMLElement;
+
 __extend__(HTMLDivElement.prototype, {
     get align(){
         return this.getAttribute('align') || 'left';
@@ -1466,8 +1459,7 @@ __extend__(HTMLDivElement.prototype, {
  * HTMLLegendElement - DOM Level 2
  */
 HTMLLegendElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLegendElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLegendElement.prototype, {
@@ -1484,10 +1476,10 @@ __extend__(HTMLLegendElement.prototype, {
  * HTMLFieldSetElement - DOM Level 2
  */
 HTMLFieldSetElement = function(ownerDocument) {
-    this.HTMLLegendElement = HTMLLegendElement;
-    this.HTMLLegendElement(ownerDocument);
+    HTMLLegendElement.apply(this, arguments);
 };
 HTMLFieldSetElement.prototype = new HTMLLegendElement;
+
 __extend__(HTMLFieldSetElement.prototype, {
     get margin(){
         return this.getAttribute('margin');
@@ -1501,8 +1493,7 @@ __extend__(HTMLFieldSetElement.prototype, {
  * HTMLFormElement - DOM Level 2
  */
 HTMLFormElement = function(ownerDocument){
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     //TODO: on __elementPopped__ from the parser
     //      we need to determine all the forms default 
     //      values
@@ -1564,6 +1555,9 @@ __extend__(HTMLFormElement.prototype,{
 	    return this.setAttribute("target",val); 
 	    
     },
+    toString: function(){
+        return '[object HTMLFormElement]';
+    },
 	submit:function(){
         //TODO: this needs to perform the form inputs serialization
         //      and submission
@@ -1585,11 +1579,16 @@ __extend__(HTMLFormElement.prototype,{
  * HTMLFrameElement - DOM Level 2
  */
 HTMLFrameElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    this.contentWindow = null;
+    var contentDocument;
+    this.contentWindow = {
+        get document(){
+            return contentDocument;
+        }
+    };
+    contentDocument = new HTMLDocument(new DOMImplementation(), this.contentWindow);
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
@@ -1645,6 +1644,9 @@ __extend__(HTMLFrameElement.prototype, {
     set src(value){
         this.setAttribute('src', value);
     },
+    toString: function(){
+        return '[object HTMLFrameElement]';
+    },
     onload: HTMLEvents.prototype.onload
 });
 
@@ -1652,8 +1654,7 @@ __extend__(HTMLFrameElement.prototype, {
  * HTMLFrameSetElement - DOM Level 2
  */
 HTMLFrameSetElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLFrameSetElement.prototype = new HTMLElement;
 __extend__(HTMLFrameSetElement.prototype, {
@@ -1675,8 +1676,7 @@ __extend__(HTMLFrameSetElement.prototype, {
  * HTMLHeadElement - DOM Level 2
  */
 HTMLHeadElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLHeadElement.prototype = new HTMLElement;
 __extend__(HTMLHeadElement.prototype, {
@@ -1699,7 +1699,10 @@ __extend__(HTMLHeadElement.prototype, {
         //TODO: evaluate scripts which are appended to the head
         //__evalScript__(newChild);
         return newChild;
-    }
+    },
+    toString: function(){
+        return '[object HTMLHeadElement]';
+    },
 });
 
 
@@ -1707,8 +1710,7 @@ __extend__(HTMLHeadElement.prototype, {
  * HTMLIFrameElement - DOM Level 2
  */
 HTMLIFrameElement = function(ownerDocument) {
-    this.HTMLFrameElement = HTMLFrameElement;
-    this.HTMLFrameElement(ownerDocument);
+    HTMLFrameElement.apply(this, arguments);
 };
 HTMLIFrameElement.prototype = new HTMLFrameElement;
 __extend__(HTMLIFrameElement.prototype, {
@@ -1723,6 +1725,9 @@ __extend__(HTMLIFrameElement.prototype, {
     },
 	set width(val) { 
 	    return this.setAttribute("width",val); 
+    },
+    toString: function(){
+        return '[object HTMLIFrameElement]';
     }
 });
 	
@@ -1730,10 +1735,10 @@ __extend__(HTMLIFrameElement.prototype, {
  * HTMLImageElement - DOM Level 2
  */
 HTMLImageElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLImageElement.prototype = new HTMLElement;
+
 __extend__(HTMLImageElement.prototype, {
     get alt(){
         return this.getAttribute('alt');
@@ -1789,8 +1794,7 @@ __extend__(HTMLImageElement.prototype, {
  * HTMLInputElement - DOM Level 2
  */
 HTMLInputElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLInputElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLInputElement.prototype, {
@@ -1847,8 +1851,7 @@ __extend__(HTMLInputElement.prototype, {
  * HTMLLabelElement - DOM Level 2
  */
 HTMLLabelElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLabelElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLabelElement.prototype, inputElements_dataProperties);
@@ -1872,8 +1875,7 @@ __extend__(HTMLLabelElement.prototype, {
 * HTMLLinkElement - DOM Level 2
 */
 HTMLLinkElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLLinkElement.prototype = new HTMLElement;
 __extend__(HTMLLinkElement.prototype, {
@@ -1941,8 +1943,7 @@ __extend__(HTMLLinkElement.prototype, {
  * HTMLMapElement - DOM Level 2
  */
 HTMLMapElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMapElement.prototype = new HTMLElement;
 __extend__(HTMLMapElement.prototype, {
@@ -1961,8 +1962,7 @@ __extend__(HTMLMapElement.prototype, {
  * HTMLMetaElement - DOM Level 2
  */
 HTMLMetaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMetaElement.prototype = new HTMLElement;
 __extend__(HTMLMetaElement.prototype, {
@@ -1997,8 +1997,7 @@ __extend__(HTMLMetaElement.prototype, {
  * HTMLObjectElement - DOM Level 2
  */
 HTMLObjectElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLObjectElement.prototype = new HTMLElement;
 __extend__(HTMLObjectElement.prototype, {
@@ -2084,8 +2083,7 @@ __extend__(HTMLObjectElement.prototype, {
  * HTMLOptGroupElement - DOM Level 2
  */
 HTMLOptGroupElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLOptGroupElement.prototype = new HTMLElement;
 __extend__(HTMLOptGroupElement.prototype, {
@@ -2107,8 +2105,7 @@ __extend__(HTMLOptGroupElement.prototype, {
  * HTMLOptionElement - DOM Level 2
  */
 HTMLOptionElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLOptionElement.prototype = new HTMLInputCommon;
 __extend__(HTMLOptionElement.prototype, {
@@ -2185,8 +2182,7 @@ __extend__(HTMLOptionElement.prototype, {
 * HTMLParagraphElement - DOM Level 2
 */
 HTMLParagraphElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParagraphElement.prototype = new HTMLElement;
 __extend__(HTMLParagraphElement.prototype, {
@@ -2200,8 +2196,7 @@ __extend__(HTMLParagraphElement.prototype, {
  * HTMLParamElement - DOM Level 2
  */
 HTMLParamElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParamElement.prototype = new HTMLElement;
 __extend__(HTMLParamElement.prototype, {
@@ -2236,8 +2231,7 @@ __extend__(HTMLParamElement.prototype, {
  * HTMLScriptElement - DOM Level 2
  */
 HTMLScriptElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
@@ -2305,8 +2299,7 @@ __extend__(HTMLScriptElement.prototype, {
  * HTMLSelectElement - DOM Level 2
  */
 HTMLSelectElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 
     this._oldIndex = -1;
 };
@@ -2390,8 +2383,7 @@ __extend__(HTMLSelectElement.prototype, {
  * HTMLStyleElement - DOM Level 2
  */
 HTMLStyleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLStyleElement.prototype = new HTMLElement;
 __extend__(HTMLStyleElement.prototype, {
@@ -2420,8 +2412,7 @@ __extend__(HTMLStyleElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 
 HTMLTableElement.prototype = new HTMLElement;
@@ -2616,8 +2607,7 @@ __extend__(HTMLTableElement.prototype, {
 * - Contributed by Steven Wood
 */
 HTMLTableSectionElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableSectionElement.prototype = new HTMLElement;
 __extend__(HTMLTableSectionElement.prototype, {    
@@ -2706,8 +2696,7 @@ __extend__(HTMLTableSectionElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableCellElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableCellElement.prototype = new HTMLElement;
 __extend__(HTMLTableCellElement.prototype, {
@@ -2720,8 +2709,7 @@ __extend__(HTMLTableCellElement.prototype, {
  * HTMLTextAreaElement - DOM Level 2
  */
 HTMLTextAreaElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLTextAreaElement.prototype, {
@@ -2744,8 +2732,7 @@ __extend__(HTMLTextAreaElement.prototype, {
  * HTMLTitleElement - DOM Level 2
  */
 HTMLTitleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTitleElement.prototype = new HTMLElement;
 __extend__(HTMLTitleElement.prototype, {
@@ -2765,8 +2752,7 @@ __extend__(HTMLTitleElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableRowElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
@@ -2876,9 +2862,7 @@ __extend__(HTMLTableRowElement.prototype, {
  * HTMLUnknownElement DOM Level 2
  */
 HTMLUnknownElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-
+    HTMLElement.apply(this, arguments);
 };
 HTMLUnknownElement.prototype = new HTMLElement;
 __extend__(HTMLUnknownElement.prototype,{

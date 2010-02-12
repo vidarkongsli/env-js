@@ -73,6 +73,20 @@ test('Window Interfaces Available', function(){
     ok(Screen,      'Screen available');
     
 });
+
+
+test('qunit same', function(){
+    
+    same(window, __this__.__proxy__, 'window is scope.__proxy__');
+    same(document, __this__.__proxy__.document, 'document is __proxy__.document');
+    
+    var tmp = new Date().getTime()+'';
+    window[tmp] = 'hello!';
+    same(window[tmp], 'hello!', 'setting property on window');
+    delete window[tmp];
+    same(window[tmp], undefined, 'deleting property on window');
+    
+});
     
 test('window proxy', function(){
     equals(window.THISISNOTDEFINED, undefined, 'window.undefined');

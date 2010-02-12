@@ -3,10 +3,10 @@
 * HTMLTableColElement - DOM Level 2
 */
 HTMLTableColElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableColElement.prototype = new HTMLElement;
+
 __extend__(HTMLTableColElement.prototype, {
     get align(){
         return this.getAttribute('align');

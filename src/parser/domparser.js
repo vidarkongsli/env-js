@@ -17,9 +17,11 @@ __extend__(DOMParser.prototype,{
 
 XMLParser = {};
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
+    //console.log('XMLParser.parseDocument')
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
-        importedNode;
+        importedNode,
+        tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
         tmpdoc.baseURI = 'http://envjs.com/xml';
@@ -36,41 +38,79 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     }
     
     while(xmldoc.firstChild != null){
-        xmldoc.removeChild( xmldoc.firstChild );
+        tmpNode = xmldoc.removeChild( xmldoc.firstChild );
+        delete tmpNode;
     }
     while(parent.firstChild != null){
-        importedNode = xmldoc.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        xmldoc.appendChild( importedNode );   
+        tmpNode  = parent.removeChild( parent.firstChild );
+        importedNode = xmldoc.importNode( tmpNode, true);
+        xmldoc.appendChild( importedNode );
+        delete tmpNode;
     }
+    delete tmpdoc,
+           xmlstring;
     return xmldoc;
 };
 
+var __fragmentCache__ = {};
 HTMLParser = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
+    //console.log('HTMLParser.parseDocument')
     Envjs.parseHtmlDocument(htmlstring, htmldoc, false, null, null);  
     //Envjs.wait(-1);
     return htmldoc;
 };
 HTMLParser.parseFragment = function(htmlstring, fragment){
+    //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
-    var tmpdoc = new HTMLDocument(new DOMImplementation()),
+    var tmpdoc,
         parent,
-        importedNode;
+        importedNode,
+        tmpNode,
+        i,
+        length;
     
-    Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        tmpdoc = __fragmentCache__[htmlstring];
+    }else{
+        //console.log('parsing html fragment \n%s', htmlstring);
+        tmpdoc = new HTMLDocument(new DOMImplementation());
+        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+        if(htmlstring.length > 127 ){
+            tmpdoc.normalizeDocument();
+            __fragmentCache__[htmlstring] = tmpdoc;
+            tmpdoc.cached = true;
+        }else{
+            tmpdoc.cached = false;
+        }
+    }
     
     parent = tmpdoc.body;
     while(fragment.firstChild != null){
-        fragment.removeChild( fragment.firstChild );
+        tmpNode = fragment.removeChild( fragment.firstChild );
+        delete tmpNode;
     }
-    while(parent.firstChild != null){
-        importedNode = fragment.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        fragment.appendChild( importedNode );   
+    if(tmpdoc.cached){
+        length = parent.childNodes.length;
+        for(i=0;i<length;i++){
+            importedNode = fragment.importNode( parent.childNodes[i], true );
+            fragment.appendChild( importedNode );  
+        }
+    }else{
+        while(parent.firstChild != null){
+            tmpNode  = parent.removeChild( parent.firstChild );
+            importedNode = fragment.importNode( tmpNode, true);
+            fragment.appendChild( importedNode );
+            delete tmpNode;
+        }
+        delete tmpdoc,
+               htmlstring;
     }
-    //Mark for garbage collection
-    tmpdoc = null;    
+    
     return fragment;
 };
+
+var __clearFragmentCache__ = function(){
+    __fragmentCache__ = {};
+}
 

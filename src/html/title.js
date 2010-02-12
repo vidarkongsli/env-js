@@ -3,8 +3,7 @@
  * HTMLTitleElement - DOM Level 2
  */
 HTMLTitleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTitleElement.prototype = new HTMLElement;
 __extend__(HTMLTitleElement.prototype, {

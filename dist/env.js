@@ -650,6 +650,7 @@ NodeList = function(ownerDocument, parentNode) {
     this._readonly = false;
     __setArray__(this, []);
 };
+
 __extend__(NodeList.prototype, {
     item : function(index) {
         var ret = null;
@@ -847,11 +848,11 @@ var __cloneNodes__ = function(nodelist, deep, parentNode) {
  * @param  parentNode    : Node - the node that the NamedNodeMap is attached to (or null)
  */
 NamedNodeMap = function(ownerDocument, parentNode) {
-    this.NodeList = NodeList;
-    this.NodeList(ownerDocument, parentNode);
+    NodeList.apply(this, arguments);
     __setArray__(this, []);
 };
 NamedNodeMap.prototype = new NodeList;
+
 __extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
@@ -1040,6 +1041,9 @@ __extend__(NamedNodeMap.prototype, {
           }
         
           return ret;
+    },
+    toString : function(){
+        return "[object NamedNodeMap]";
     }
 
 });
@@ -1780,7 +1784,10 @@ __extend__(Node.prototype, {
         number += (my_location < node_location && 4)
         number += (my_location > node_location && 2)
         return number;
-    } 
+    } ,
+    toString : function(){
+        return "[object Node]";
+    }
 
 });
 
@@ -1943,18 +1950,17 @@ function __unescapeXML__(str) {
  * @param  ownerDocument : The Document object associated with this node.
  */
 Namespace = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  // the name of this attribute
-  this.name      = "";                           
-
-  // If this attribute was explicitly given a value in the original document, 
-  // this is true; otherwise, it is false.
-  // Note that the implementation is in charge of this attribute, not the user.
-  // If the user changes the value of the attribute (even if it ends up having 
-  // the same value as the default value) then the specified flag is 
-  // automatically flipped to true
-  this.specified = false;
+    Node.apply(this, arguments);
+    // the name of this attribute
+    this.name      = "";                           
+    
+    // If this attribute was explicitly given a value in the original document, 
+    // this is true; otherwise, it is false.
+    // Note that the implementation is in charge of this attribute, not the user.
+    // If the user changes the value of the attribute (even if it ends up having 
+    // the same value as the default value) then the specified flag is 
+    // automatically flipped to true
+    this.specified = false;
 };
 Namespace.prototype = new Node;
 __extend__(Namespace.prototype, {
@@ -1982,7 +1988,7 @@ __extend__(Namespace.prototype, {
           return ret;
     },
     toString: function(){
-        return "Namespace #" + this.id;
+        return '[object Namespace]';
     }
 });
 
@@ -1994,8 +2000,7 @@ __extend__(Namespace.prototype, {
  * @param  ownerDocument : The Document object associated with this node.
  */
 CharacterData = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 CharacterData.prototype = new Node;
 __extend__(CharacterData.prototype,{
@@ -2104,6 +2109,9 @@ __extend__(CharacterData.prototype,{
             }
         }
         return ret;
+    },
+    toString : function(){
+        return "[object CharacterData]";
     }
 });
 
@@ -2120,10 +2128,10 @@ __extend__(CharacterData.prototype,{
  * @param  ownerDocument The Document object associated with this node.
  */
 Text = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#text";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#text";
 };
+
 Text.prototype = new CharacterData;
 __extend__(Text.prototype,{
     get localName(){
@@ -2185,9 +2193,8 @@ __extend__(Text.prototype,{
  * @param  ownerDocument : The Document object associated with this node.
  */
 CDATASection = function(ownerDocument) {
-  this.Text  = Text;
-  this.Text(ownerDocument);
-  this.nodeName = '#cdata-section';
+    Text.apply(this, arguments);
+    this.nodeName = '#cdata-section';
 };
 CDATASection.prototype = new Text;
 __extend__(CDATASection.prototype,{
@@ -2210,9 +2217,8 @@ __extend__(CDATASection.prototype,{
  * @param  ownerDocument :  The Document object associated with this node.
  */
 Comment = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#comment";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#comment";
 };
 Comment.prototype = new CharacterData;
 __extend__(Comment.prototype, {
@@ -2236,8 +2242,7 @@ __extend__(Comment.prototype, {
  * @param {Document} onwnerDocument
  */
 DocumentType = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     this.systemId = null;
     this.publicId = null;
 };
@@ -2254,6 +2259,9 @@ __extend__({
     },
     get notations(){
         return null;
+    },
+    toString : function(){
+        return "[object DocumentType]";
     }
 });
 
@@ -2264,14 +2272,13 @@ __extend__({
  * @param  ownerDocument : The Document object associated with this node.
  */
 Attr = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     // set when Attr is added to NamedNodeMap
     this.ownerElement = null;
     //TODO: our implementation of Attr is incorrect because we don't
     //      treat the value of the attribute as a child text node.
-};
-Attr.prototype = new Node; 
+};Attr.prototype = new Node;
+
 __extend__(Attr.prototype, {
     // the name of this attribute
     get name(){
@@ -2322,9 +2329,7 @@ __extend__(Attr.prototype, {
  * @param  ownerDocument : The Document object associated with this node.
  */
 Element = function(ownerDocument) {
-    this.Node  = Node;
-    this.Node(ownerDocument);
-    
+    Node.apply(this, arguments);
     this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
 Element.prototype = new Node;
@@ -2522,7 +2527,7 @@ __extend__(Element.prototype, {
             ret += this.childNodes.xml;
             ret += "</" + this.tagName + ">";
         }else{
-            ret += "<" + this.tagName +ns+"/>";
+            ret += "<" + this.tagName + ns + attrstring +"/>";
         }
         
         return ret;
@@ -2539,7 +2544,7 @@ __extend__(Element.prototype, {
  * @param  code : int - the exception code (one of the DOMException constants)
  */
 DOMException = function(code) {
-  this.code = code;
+    this.code = code;
 };
 
 // DOMException constants
@@ -2571,9 +2576,8 @@ DOMException.INVALID_ACCESS_ERR             = 15;
  * @param  ownerDocument :  The Document object associated with this node.
  */
 DocumentFragment = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  this.nodeName  = "#document-fragment";
+    Node.apply(this, arguments);
+    this.nodeName  = "#document-fragment";
 };
 DocumentFragment.prototype = new Node;
 __extend__(DocumentFragment.prototype,{
@@ -2611,10 +2615,10 @@ __extend__(DocumentFragment.prototype,{
  * @param  ownerDocument :  The Document object associated with this node.
  */
 ProcessingInstruction = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 ProcessingInstruction.prototype = new Node;
+
 __extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;
@@ -3074,6 +3078,9 @@ __extend__(DOMImplementation.prototype,{
       }
 
       return msg;
+    },
+    toString : function(){
+        return "[object DOMImplementation]";
     }
 });
 
@@ -3194,6 +3201,7 @@ Notation = function() {
 Range = function(){
 
 };
+
 __extend__(Range.prototype, {
     get startContainer(){
 
@@ -3262,7 +3270,7 @@ __extend__(Range.prototype, {
 
     },
     toString: function(){
-
+        return '[object Range]';
     },
     detach: function(){
 
@@ -3285,24 +3293,14 @@ Range.END_TO_START                   = 3;
  * @param  implementation : DOMImplementation - the creator Implementation
  */
 Document = function(implementation, docParentWindow) {
-    this.Node = Node;
-    this.Node(this);
+    Node.apply(this, arguments);
     
-    this.async = true;
+    //TODO: Temporary!!! Cnage back to true!!!
+    this.async = false;
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.
     this.implementation = implementation
-    
-    // "private" variable providing the read-only document.parentWindow property
-    // TODO: I dont think this is a good place to store this info,
-    //       rather some internal function like __parentWindow__(doc)
-    //       would be better.
-    this._parentWindow = docParentWindow;
-    try {
-        if (docParentWindow.$thisWindowsProxyObject)
-            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
-    } catch(e){}
 
     this.nodeName  = "#document";
     // initially false, set to true by parser
@@ -3312,7 +3310,7 @@ Document = function(implementation, docParentWindow) {
     this.ownerDocument = null;
     
     this.importing = false;
-    
+    this.location = null;
 };
 Document.prototype = new Node;
 __extend__(Document.prototype,{
@@ -3334,17 +3332,8 @@ __extend__(Document.prototype,{
         }
         return null;
     },
-    get parentWindow(){
-        return this._parentWindow;
-    },
     get documentURI(){
         return this.baseURI;
-    },
-    get location(){
-        return this._location?this._location:null;
-    },
-    set location(url){
-        this._location = url;
     },
     createExpression: function(xpath, nsuriMap){ 
         return new XPathExpression(xpath, nsuriMap);
@@ -3499,7 +3488,7 @@ __extend__(Document.prototype,{
         return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this.normalize();
     },
     get nodeType(){
         return Node.DOCUMENT_NODE;
@@ -3577,8 +3566,12 @@ XMLSerializer = function() {};
 __extend__(XMLSerializer.prototype, {
     serializeToString: function(node){
         return node.xml;
+    },
+    toString : function(){
+        return "[object XMLSerializer]";
     }
 });
+
 /**
  * @author john resig & the envjs team
  * @uri http://www.envjs.com/
@@ -3889,6 +3882,9 @@ Event = function(options){
         },
         get cancelled(){
             return state.cancelled;
+        },
+        toString: function(){
+            return '[object Event]';
         }
     };
 };
@@ -4507,12 +4503,12 @@ function __setArray__( target, array ) {
  *
  * @extends Document
  */
-HTMLDocument = function(implementation, docParentWindow, docReferrer) {
-  this.Document = Document;
-  this.Document(implementation, docParentWindow);
-  this._referrer = docReferrer;
-  this.async = false;
-  this.baseURI = "about:blank";
+HTMLDocument = function(implementation, parentWindow, referrer) {
+    Document.apply(this, arguments);
+    this.referrer = referrer;
+    this.async = false;
+    this.baseURI = "about:blank";
+    this.parentWindow = parentWindow;
 };
 
 HTMLDocument.prototype = new Document;
@@ -4733,9 +4729,6 @@ __extend__(HTMLDocument.prototype, {
     },
     get links(){
         return new HTMLCollection(this.getElementsByTagName('a'));
-    },
-    get referrer(){
-        return this._referrer;
     },
 	getElementsByName : function(name){
         //returns a real Array + the NodeList
@@ -5079,10 +5072,10 @@ var  __mouseout__ = function(element){
 * HTMLElement - DOM Level 2
 */
 HTMLElement = function(ownerDocument) {
-    this.Element = Element;
-    this.Element(ownerDocument);
+    Element.apply(this, arguments);
 };
 HTMLElement.prototype = new Element;
+
 //TODO: Not sure where HTMLEvents belongs in the chain
 //      but putting it here satisfies a lowest common 
 //      denominator.
@@ -5227,7 +5220,7 @@ __extend__(HTMLElement.prototype, {
             }
             ret += "</" + this.tagName.toLowerCase() + ">";
         }else{
-            ret += "<" + this.tagName.toLowerCase() +ns+"/>";
+            ret += "<" + this.tagName.toLowerCase() + ns + attrstring +"/>";
         }
         
         return ret;
@@ -5435,8 +5428,8 @@ var inputElements_focusEvents = {
 * HTMLInputCommon - convenience class, not DOM
 */
 var HTMLInputCommon = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    
+    HTMLElement.apply(this, arguments);
 };
 HTMLInputCommon.prototype = new HTMLElement;
 __extend__(HTMLInputCommon.prototype, {
@@ -5474,8 +5467,8 @@ __extend__(HTMLInputCommon.prototype, {
 * HTMLTypeValueInputs - convenience class, not DOM
 */
 var HTMLTypeValueInputs = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    
+    HTMLInputCommon.apply(this, arguments);
 
     this._oldValue = "";
 };
@@ -5521,8 +5514,8 @@ __extend__(HTMLTypeValueInputs.prototype, {
 * HTMLInputAreaCommon - convenience class, not DOM
 */
 var HTMLInputAreaCommon = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
 __extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);
@@ -5545,8 +5538,7 @@ __extend__(HTMLInputAreaCommon.prototype, {
  * HTMLAnchorElement - DOM Level 2
  */
 HTMLAnchorElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLAnchorElement.prototype = new HTMLElement;
 __extend__(HTMLAnchorElement.prototype, {
@@ -5633,8 +5625,7 @@ __extend__(HTMLAnchorElement.prototype, {
  * HTMLAreaElement - DOM Level 2
  */
 HTMLAreaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLAreaElement.prototype = new HTMLElement;
 __extend__(HTMLAreaElement.prototype, {
@@ -5680,6 +5671,9 @@ __extend__(HTMLAreaElement.prototype, {
     },
     set target(value){
         this.setAttribute('target',value);
+    },
+    toString: function(){
+        return '[object HTMLAreaElement]';
     }
 });
 
@@ -5688,8 +5682,7 @@ __extend__(HTMLAreaElement.prototype, {
 * HTMLBaseElement - DOM Level 2
 */
 HTMLBaseElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLBaseElement.prototype = new HTMLElement;
 __extend__(HTMLBaseElement.prototype, {
@@ -5712,8 +5705,7 @@ __extend__(HTMLBaseElement.prototype, {
 * HTMLQuoteElement - DOM Level 2
 */
 HTMLQuoteElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLQuoteElement.prototype = new HTMLElement;
 __extend__(HTMLQuoteElement.prototype, {
@@ -5729,8 +5721,7 @@ __extend__(HTMLQuoteElement.prototype, {
  * HTMLBodyElement - DOM Level 2
  */
 HTMLBodyElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLBodyElement.prototype = new HTMLElement;
 __extend__(HTMLBodyElement.prototype, {
@@ -5747,10 +5738,10 @@ __extend__(HTMLBodyElement.prototype, {
  * HTMLButtonElement - DOM Level 2
  */
 HTMLButtonElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLButtonElement.prototype = new HTMLTypeValueInputs;
+
 __extend__(HTMLButtonElement.prototype, inputElements_status);
 __extend__(HTMLButtonElement.prototype, {
     get dataFormatAs(){
@@ -5766,8 +5757,7 @@ __extend__(HTMLButtonElement.prototype, {
 * HTMLCanvasElement - DOM Level 2
 */
 HTMLCanvasElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLCanvasElement.prototype = new HTMLElement;
 __extend__(HTMLCanvasElement.prototype, {
@@ -5781,10 +5771,10 @@ __extend__(HTMLCanvasElement.prototype, {
 * HTMLTableColElement - DOM Level 2
 */
 HTMLTableColElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableColElement.prototype = new HTMLElement;
+
 __extend__(HTMLTableColElement.prototype, {
     get align(){
         return this.getAttribute('align');
@@ -5829,8 +5819,7 @@ __extend__(HTMLTableColElement.prototype, {
 * HTMLModElement - DOM Level 2
 */
 HTMLModElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLModElement.prototype = new HTMLElement;
 __extend__(HTMLModElement.prototype, {
@@ -5852,10 +5841,10 @@ __extend__(HTMLModElement.prototype, {
 * HTMLDivElement - DOM Level 2
 */
 HTMLDivElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLDivElement.prototype = new HTMLElement;
+
 __extend__(HTMLDivElement.prototype, {
     get align(){
         return this.getAttribute('align') || 'left';
@@ -5870,8 +5859,7 @@ __extend__(HTMLDivElement.prototype, {
  * HTMLLegendElement - DOM Level 2
  */
 HTMLLegendElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLegendElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLegendElement.prototype, {
@@ -5888,10 +5876,10 @@ __extend__(HTMLLegendElement.prototype, {
  * HTMLFieldSetElement - DOM Level 2
  */
 HTMLFieldSetElement = function(ownerDocument) {
-    this.HTMLLegendElement = HTMLLegendElement;
-    this.HTMLLegendElement(ownerDocument);
+    HTMLLegendElement.apply(this, arguments);
 };
 HTMLFieldSetElement.prototype = new HTMLLegendElement;
+
 __extend__(HTMLFieldSetElement.prototype, {
     get margin(){
         return this.getAttribute('margin');
@@ -5905,8 +5893,7 @@ __extend__(HTMLFieldSetElement.prototype, {
  * HTMLFormElement - DOM Level 2
  */
 HTMLFormElement = function(ownerDocument){
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     //TODO: on __elementPopped__ from the parser
     //      we need to determine all the forms default 
     //      values
@@ -5968,6 +5955,9 @@ __extend__(HTMLFormElement.prototype,{
 	    return this.setAttribute("target",val); 
 	    
     },
+    toString: function(){
+        return '[object HTMLFormElement]';
+    },
 	submit:function(){
         //TODO: this needs to perform the form inputs serialization
         //      and submission
@@ -5989,11 +5979,16 @@ __extend__(HTMLFormElement.prototype,{
  * HTMLFrameElement - DOM Level 2
  */
 HTMLFrameElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    this.contentWindow = null;
+    var contentDocument;
+    this.contentWindow = {
+        get document(){
+            return contentDocument;
+        }
+    };
+    contentDocument = new HTMLDocument(new DOMImplementation(), this.contentWindow);
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
@@ -6049,6 +6044,9 @@ __extend__(HTMLFrameElement.prototype, {
     set src(value){
         this.setAttribute('src', value);
     },
+    toString: function(){
+        return '[object HTMLFrameElement]';
+    },
     onload: HTMLEvents.prototype.onload
 });
 
@@ -6056,8 +6054,7 @@ __extend__(HTMLFrameElement.prototype, {
  * HTMLFrameSetElement - DOM Level 2
  */
 HTMLFrameSetElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLFrameSetElement.prototype = new HTMLElement;
 __extend__(HTMLFrameSetElement.prototype, {
@@ -6079,8 +6076,7 @@ __extend__(HTMLFrameSetElement.prototype, {
  * HTMLHeadElement - DOM Level 2
  */
 HTMLHeadElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLHeadElement.prototype = new HTMLElement;
 __extend__(HTMLHeadElement.prototype, {
@@ -6103,7 +6099,10 @@ __extend__(HTMLHeadElement.prototype, {
         //TODO: evaluate scripts which are appended to the head
         //__evalScript__(newChild);
         return newChild;
-    }
+    },
+    toString: function(){
+        return '[object HTMLHeadElement]';
+    },
 });
 
 
@@ -6111,8 +6110,7 @@ __extend__(HTMLHeadElement.prototype, {
  * HTMLIFrameElement - DOM Level 2
  */
 HTMLIFrameElement = function(ownerDocument) {
-    this.HTMLFrameElement = HTMLFrameElement;
-    this.HTMLFrameElement(ownerDocument);
+    HTMLFrameElement.apply(this, arguments);
 };
 HTMLIFrameElement.prototype = new HTMLFrameElement;
 __extend__(HTMLIFrameElement.prototype, {
@@ -6127,6 +6125,9 @@ __extend__(HTMLIFrameElement.prototype, {
     },
 	set width(val) { 
 	    return this.setAttribute("width",val); 
+    },
+    toString: function(){
+        return '[object HTMLIFrameElement]';
     }
 });
 	
@@ -6134,10 +6135,10 @@ __extend__(HTMLIFrameElement.prototype, {
  * HTMLImageElement - DOM Level 2
  */
 HTMLImageElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLImageElement.prototype = new HTMLElement;
+
 __extend__(HTMLImageElement.prototype, {
     get alt(){
         return this.getAttribute('alt');
@@ -6193,8 +6194,7 @@ __extend__(HTMLImageElement.prototype, {
  * HTMLInputElement - DOM Level 2
  */
 HTMLInputElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLInputElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLInputElement.prototype, {
@@ -6251,8 +6251,7 @@ __extend__(HTMLInputElement.prototype, {
  * HTMLLabelElement - DOM Level 2
  */
 HTMLLabelElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLLabelElement.prototype = new HTMLInputCommon;
 __extend__(HTMLLabelElement.prototype, inputElements_dataProperties);
@@ -6276,8 +6275,7 @@ __extend__(HTMLLabelElement.prototype, {
 * HTMLLinkElement - DOM Level 2
 */
 HTMLLinkElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLLinkElement.prototype = new HTMLElement;
 __extend__(HTMLLinkElement.prototype, {
@@ -6345,8 +6343,7 @@ __extend__(HTMLLinkElement.prototype, {
  * HTMLMapElement - DOM Level 2
  */
 HTMLMapElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMapElement.prototype = new HTMLElement;
 __extend__(HTMLMapElement.prototype, {
@@ -6365,8 +6362,7 @@ __extend__(HTMLMapElement.prototype, {
  * HTMLMetaElement - DOM Level 2
  */
 HTMLMetaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLMetaElement.prototype = new HTMLElement;
 __extend__(HTMLMetaElement.prototype, {
@@ -6401,8 +6397,7 @@ __extend__(HTMLMetaElement.prototype, {
  * HTMLObjectElement - DOM Level 2
  */
 HTMLObjectElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLObjectElement.prototype = new HTMLElement;
 __extend__(HTMLObjectElement.prototype, {
@@ -6488,8 +6483,7 @@ __extend__(HTMLObjectElement.prototype, {
  * HTMLOptGroupElement - DOM Level 2
  */
 HTMLOptGroupElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLOptGroupElement.prototype = new HTMLElement;
 __extend__(HTMLOptGroupElement.prototype, {
@@ -6511,8 +6505,7 @@ __extend__(HTMLOptGroupElement.prototype, {
  * HTMLOptionElement - DOM Level 2
  */
 HTMLOptionElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    HTMLInputCommon.apply(this, arguments);
 };
 HTMLOptionElement.prototype = new HTMLInputCommon;
 __extend__(HTMLOptionElement.prototype, {
@@ -6589,8 +6582,7 @@ __extend__(HTMLOptionElement.prototype, {
 * HTMLParagraphElement - DOM Level 2
 */
 HTMLParagraphElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParagraphElement.prototype = new HTMLElement;
 __extend__(HTMLParagraphElement.prototype, {
@@ -6604,8 +6596,7 @@ __extend__(HTMLParagraphElement.prototype, {
  * HTMLParamElement - DOM Level 2
  */
 HTMLParamElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLParamElement.prototype = new HTMLElement;
 __extend__(HTMLParamElement.prototype, {
@@ -6640,8 +6631,7 @@ __extend__(HTMLParamElement.prototype, {
  * HTMLScriptElement - DOM Level 2
  */
 HTMLScriptElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLScriptElement.prototype = new HTMLElement;
 __extend__(HTMLScriptElement.prototype, {
@@ -6709,8 +6699,7 @@ __extend__(HTMLScriptElement.prototype, {
  * HTMLSelectElement - DOM Level 2
  */
 HTMLSelectElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 
     this._oldIndex = -1;
 };
@@ -6794,8 +6783,7 @@ __extend__(HTMLSelectElement.prototype, {
  * HTMLStyleElement - DOM Level 2
  */
 HTMLStyleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLStyleElement.prototype = new HTMLElement;
 __extend__(HTMLStyleElement.prototype, {
@@ -6824,8 +6812,7 @@ __extend__(HTMLStyleElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 
 HTMLTableElement.prototype = new HTMLElement;
@@ -7020,8 +7007,7 @@ __extend__(HTMLTableElement.prototype, {
 * - Contributed by Steven Wood
 */
 HTMLTableSectionElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableSectionElement.prototype = new HTMLElement;
 __extend__(HTMLTableSectionElement.prototype, {    
@@ -7110,8 +7096,7 @@ __extend__(HTMLTableSectionElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableCellElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableCellElement.prototype = new HTMLElement;
 __extend__(HTMLTableCellElement.prototype, {
@@ -7124,8 +7109,7 @@ __extend__(HTMLTableCellElement.prototype, {
  * HTMLTextAreaElement - DOM Level 2
  */
 HTMLTextAreaElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
+    HTMLInputAreaCommon.apply(this, arguments);
 };
 HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
 __extend__(HTMLTextAreaElement.prototype, {
@@ -7148,8 +7132,7 @@ __extend__(HTMLTextAreaElement.prototype, {
  * HTMLTitleElement - DOM Level 2
  */
 HTMLTitleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTitleElement.prototype = new HTMLElement;
 __extend__(HTMLTitleElement.prototype, {
@@ -7169,8 +7152,7 @@ __extend__(HTMLTitleElement.prototype, {
  * Implementation Provided by Steven Wood
  */
 HTMLTableRowElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
@@ -7280,9 +7262,7 @@ __extend__(HTMLTableRowElement.prototype, {
  * HTMLUnknownElement DOM Level 2
  */
 HTMLUnknownElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-
+    HTMLElement.apply(this, arguments);
 };
 HTMLUnknownElement.prototype = new HTMLElement;
 __extend__(HTMLUnknownElement.prototype,{
@@ -7655,7 +7635,10 @@ CSSRule = function(options){
       },
       set selectorText(selectorText){
           $selectorText = selectorText;
-      }
+      },
+        toString : function(){
+            return "[object CSSRule]";
+        }
     });
 };
 
@@ -8326,9 +8309,11 @@ __extend__(DOMParser.prototype,{
 
 XMLParser = {};
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
+    //console.log('XMLParser.parseDocument')
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
-        importedNode;
+        importedNode,
+        tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
         tmpdoc.baseURI = 'http://envjs.com/xml';
@@ -8345,43 +8330,79 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     }
     
     while(xmldoc.firstChild != null){
-        xmldoc.removeChild( xmldoc.firstChild );
+        tmpNode = xmldoc.removeChild( xmldoc.firstChild );
+        delete tmpNode;
     }
     while(parent.firstChild != null){
-        importedNode = xmldoc.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        xmldoc.appendChild( importedNode );   
+        tmpNode  = parent.removeChild( parent.firstChild );
+        importedNode = xmldoc.importNode( tmpNode, true);
+        xmldoc.appendChild( importedNode );
+        delete tmpNode;
     }
+    delete tmpdoc;
     return xmldoc;
 };
 
+var __fragmentCache__ = {};
 HTMLParser = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
+    //console.log('HTMLParser.parseDocument')
     Envjs.parseHtmlDocument(htmlstring, htmldoc, false, null, null);  
     //Envjs.wait(-1);
     return htmldoc;
 };
 HTMLParser.parseFragment = function(htmlstring, fragment){
+    //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
-    var tmpdoc = new HTMLDocument(new DOMImplementation()),
+    var tmpdoc,
         parent,
-        importedNode;
+        importedNode,
+        tmpNode,
+        i,
+        length;
     
-    Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        tmpdoc = __fragmentCache__[htmlstring];
+    }else{
+        //console.log('parsing html fragment \n%s', htmlstring);
+        tmpdoc = new HTMLDocument(new DOMImplementation());
+        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+        if(htmlstring.length > 127 ){
+            tmpdoc.normalizeDocument();
+            __fragmentCache__[htmlstring] = tmpdoc;
+            tmpdoc.cached = true;
+        }else{
+            tmpdoc.cached = false;
+        }
+    }
     
     parent = tmpdoc.body;
     while(fragment.firstChild != null){
-        fragment.removeChild( fragment.firstChild );
+        tmpNode = fragment.removeChild( fragment.firstChild );
+        delete tmpNode;
     }
-    while(parent.firstChild != null){
-        importedNode = fragment.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        fragment.appendChild( importedNode );   
+    if(tmpdoc.cached){
+        length = parent.childNodes.length;
+        for(i=0;i<length;i++){
+            importedNode = fragment.importNode( parent.childNodes[i], true );
+            fragment.appendChild( importedNode );  
+        }
+    }else{
+        while(parent.firstChild != null){
+            tmpNode  = parent.removeChild( parent.firstChild );
+            importedNode = fragment.importNode( tmpNode, true);
+            fragment.appendChild( importedNode );
+            delete tmpNode;
+        }
+        delete tmpdoc;
     }
-    //Mark for garbage collection
-    tmpdoc = null;    
+    
     return fragment;
 };
+
+var __clearFragmentCache__ = function(){
+    __fragmentCache__ = {};
+}
 
 
 /**
@@ -8391,6 +8412,7 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
  */
 __extend__(Document.prototype, {
     loadXML : function(xmlString) {
+        //console.log('Parser::Document.loadXML');
         // create Document
         if(this === document){
             //$debug("Setting internal window.document");
@@ -8420,17 +8442,36 @@ __extend__(HTMLDocument.prototype,{
         this._writebuffer = [];
     },
     close : function(){ 
-        if(!!this._open){
-            new HTMLParser().parseFromString(this, this._writebuffer.join('\n'));
-            delete this._open;
-            delete this._writebuffer;
+        if(this._open){
+            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
+            this._open = false;
+            this._writebuffer = null;
+            //DOMContentLoaded event
+            if(this.createEvent){
+                event = this.createEvent('Events');
+                event.initEvent("DOMContentLoaded", false, false);
+                this.dispatchEvent( event, false );
+            }
+            
+            try{
+                if(this.parentWindow){
+                    event = this.createEvent('HTMLEvents');
+                    event.initEvent("load", false, false);
+                    this.parentWindow.dispatchEvent( event, false );
+                }
+            }catch(e){
+                //console.log('window load event failed %s', e);
+                //swallow
+            }
         }
     },
     write: function(htmlstring){ 
-         this._writebuffer = [htmlstring];
+        if(this._open)
+            this._writebuffer = [htmlstring];
     },
     writeln: function(htmlstring){ 
-        this._writebuffer.push(htmlstring); 
+        if(this.open)
+            this._writebuffer.push(htmlstring); 
     }
     
 });
@@ -8936,8 +8977,8 @@ var HASH     = new RegExp('(\\#.*)'),
     PROTOCOL = new RegExp('(^\\w*\:)'),
     SEARCH   = new RegExp('(\\?[^\\#]*)');
         
+
 Location = function(url, doc, history){
-    
     //console.log('Location url %s', url);
     var $url = url
         $document = doc?doc:null,
@@ -9094,12 +9135,11 @@ Location = function(url, doc, history){
 
 var __exchangeHTMLDocument__ = function(doc, text, url){
 
-    //console.log('fetched text %s', text);
     try{
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
     }catch(e){
-        console.log('parseerror %s',e);
+        console.log('parsererror %s', e);
         doc = new HTMLDocument(new DOMImplementation());
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -9192,6 +9232,7 @@ XMLHttpRequest.prototype = {
                             doc = domparser.parseFromString(_this.responseText+"");
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
+                            console.log('parseerror \n%s', e);
                             doc = document.implementation.createDocument('','error',null);
                             doc.appendChild(doc.createTextNode(e+''));
                         } 
@@ -9546,7 +9587,7 @@ Screen = function(__window__){
  * @param {Object} opener
  */
 Window = function(scope, parent, opener){
-    // console.log('new window %s', scope);
+    
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
@@ -9783,7 +9824,6 @@ Window = function(scope, parent, opener){
         open: function(url, name, features, replace){
             if (features)
                 console.log("'features argument not yet implemented");
-            
             var _window = {},
                 open;
             if(replace && name){
@@ -9879,6 +9919,7 @@ var __initStandardObjects__ = function(scope, parent){
 };
 
 //finally pre-supply the window with the window-like environment
+console.log('Default Window');
 new Window(__this__, __this__);
 
 

@@ -3,8 +3,7 @@
  * HTMLStyleElement - DOM Level 2
  */
 HTMLStyleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLStyleElement.prototype = new HTMLElement;
 __extend__(HTMLStyleElement.prototype, {

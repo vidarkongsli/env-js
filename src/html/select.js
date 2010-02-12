@@ -3,8 +3,7 @@
  * HTMLSelectElement - DOM Level 2
  */
 HTMLSelectElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    HTMLTypeValueInputs.apply(this, arguments);
 
     this._oldIndex = -1;
 };

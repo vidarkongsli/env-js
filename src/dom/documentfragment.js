@@ -8,9 +8,8 @@
  * @param  ownerDocument :  The Document object associated with this node.
  */
 DocumentFragment = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  this.nodeName  = "#document-fragment";
+    Node.apply(this, arguments);
+    this.nodeName  = "#document-fragment";
 };
 DocumentFragment.prototype = new Node;
 __extend__(DocumentFragment.prototype,{

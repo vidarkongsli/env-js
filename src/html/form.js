@@ -3,8 +3,7 @@
  * HTMLFormElement - DOM Level 2
  */
 HTMLFormElement = function(ownerDocument){
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
     //TODO: on __elementPopped__ from the parser
     //      we need to determine all the forms default 
     //      values
@@ -65,6 +64,9 @@ __extend__(HTMLFormElement.prototype,{
 	set target(val) { 
 	    return this.setAttribute("target",val); 
 	    
+    },
+    toString: function(){
+        return '[object HTMLFormElement]';
     },
 	submit:function(){
         //TODO: this needs to perform the form inputs serialization

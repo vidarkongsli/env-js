@@ -570,7 +570,10 @@ __extend__(Node.prototype, {
         number += (my_location < node_location && 4)
         number += (my_location > node_location && 2)
         return number;
-    } 
+    } ,
+    toString : function(){
+        return "[object Node]";
+    }
 
 });
 

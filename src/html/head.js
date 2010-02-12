@@ -3,8 +3,7 @@
  * HTMLHeadElement - DOM Level 2
  */
 HTMLHeadElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLHeadElement.prototype = new HTMLElement;
 __extend__(HTMLHeadElement.prototype, {
@@ -27,6 +26,9 @@ __extend__(HTMLHeadElement.prototype, {
         //TODO: evaluate scripts which are appended to the head
         //__evalScript__(newChild);
         return newChild;
-    }
+    },
+    toString: function(){
+        return '[object HTMLHeadElement]';
+    },
 });
 

@@ -49,6 +49,29 @@ test('Envjs Platform Interfaces Available', function(){
     
 });
 
+test('qunit same', function(){
+    
+    var top = {owner:null, parent:null, children:[], type:1};
+    var a = {owner:top, parent:top, children:[], type:2};
+    var b = {owner:top, parent:top, children:[], type:2};
+    var c = {owner:top, parent:a, children:[], type:3};
+    var d = {owner:top, parent:b, children:[], type:4};
+    
+    top.children.push(a, b);
+    a.children.push(c);
+    b.children.push(d);
+    
+    //prevent jsDump stack overflow
+    QUnit.jsDump.parse=function(thing){return thing+'';};
+    
+    //this will cause its own overflow
+    same(a, b, 'will this ever return?');
+    
+    //This will cause a stack overflow
+    //QUnit.jsDump.parse(a);
+    
+});
+
 
 var document = null,
     path = 'specs/env/spec.html';

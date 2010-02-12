@@ -10,10 +10,10 @@
  * @param  ownerDocument :  The Document object associated with this node.
  */
 ProcessingInstruction = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 ProcessingInstruction.prototype = new Node;
+
 __extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;

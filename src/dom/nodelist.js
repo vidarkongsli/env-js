@@ -13,6 +13,7 @@ NodeList = function(ownerDocument, parentNode) {
     this._readonly = false;
     __setArray__(this, []);
 };
+
 __extend__(NodeList.prototype, {
     item : function(index) {
         var ret = null;

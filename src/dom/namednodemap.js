@@ -10,11 +10,11 @@
  * @param  parentNode    : Node - the node that the NamedNodeMap is attached to (or null)
  */
 NamedNodeMap = function(ownerDocument, parentNode) {
-    this.NodeList = NodeList;
-    this.NodeList(ownerDocument, parentNode);
+    NodeList.apply(this, arguments);
     __setArray__(this, []);
 };
 NamedNodeMap.prototype = new NodeList;
+
 __extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
@@ -203,6 +203,9 @@ __extend__(NamedNodeMap.prototype, {
           }
         
           return ret;
+    },
+    toString : function(){
+        return "[object NamedNodeMap]";
     }
 
 });

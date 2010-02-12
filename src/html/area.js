@@ -3,8 +3,7 @@
  * HTMLAreaElement - DOM Level 2
  */
 HTMLAreaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLAreaElement.prototype = new HTMLElement;
 __extend__(HTMLAreaElement.prototype, {
@@ -50,6 +49,9 @@ __extend__(HTMLAreaElement.prototype, {
     },
     set target(value){
         this.setAttribute('target',value);
+    },
+    toString: function(){
+        return '[object HTMLAreaElement]';
     }
 });
 

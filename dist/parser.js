@@ -558,9 +558,11 @@ __extend__(DOMParser.prototype,{
 
 XMLParser = {};
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
+    //console.log('XMLParser.parseDocument')
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
-        importedNode;
+        importedNode,
+        tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
         tmpdoc.baseURI = 'http://envjs.com/xml';
@@ -577,43 +579,79 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     }
     
     while(xmldoc.firstChild != null){
-        xmldoc.removeChild( xmldoc.firstChild );
+        tmpNode = xmldoc.removeChild( xmldoc.firstChild );
+        delete tmpNode;
     }
     while(parent.firstChild != null){
-        importedNode = xmldoc.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        xmldoc.appendChild( importedNode );   
+        tmpNode  = parent.removeChild( parent.firstChild );
+        importedNode = xmldoc.importNode( tmpNode, true);
+        xmldoc.appendChild( importedNode );
+        delete tmpNode;
     }
+    delete tmpdoc;
     return xmldoc;
 };
 
+var __fragmentCache__ = {};
 HTMLParser = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
+    //console.log('HTMLParser.parseDocument')
     Envjs.parseHtmlDocument(htmlstring, htmldoc, false, null, null);  
     //Envjs.wait(-1);
     return htmldoc;
 };
 HTMLParser.parseFragment = function(htmlstring, fragment){
+    //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
-    var tmpdoc = new HTMLDocument(new DOMImplementation()),
+    var tmpdoc,
         parent,
-        importedNode;
+        importedNode,
+        tmpNode,
+        i,
+        length;
     
-    Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        tmpdoc = __fragmentCache__[htmlstring];
+    }else{
+        //console.log('parsing html fragment \n%s', htmlstring);
+        tmpdoc = new HTMLDocument(new DOMImplementation());
+        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
+        if(htmlstring.length > 127 ){
+            tmpdoc.normalizeDocument();
+            __fragmentCache__[htmlstring] = tmpdoc;
+            tmpdoc.cached = true;
+        }else{
+            tmpdoc.cached = false;
+        }
+    }
     
     parent = tmpdoc.body;
     while(fragment.firstChild != null){
-        fragment.removeChild( fragment.firstChild );
+        tmpNode = fragment.removeChild( fragment.firstChild );
+        delete tmpNode;
     }
-    while(parent.firstChild != null){
-        importedNode = fragment.importNode( 
-            parent.removeChild( parent.firstChild ), true);
-        fragment.appendChild( importedNode );   
+    if(tmpdoc.cached){
+        length = parent.childNodes.length;
+        for(i=0;i<length;i++){
+            importedNode = fragment.importNode( parent.childNodes[i], true );
+            fragment.appendChild( importedNode );  
+        }
+    }else{
+        while(parent.firstChild != null){
+            tmpNode  = parent.removeChild( parent.firstChild );
+            importedNode = fragment.importNode( tmpNode, true);
+            fragment.appendChild( importedNode );
+            delete tmpNode;
+        }
+        delete tmpdoc;
     }
-    //Mark for garbage collection
-    tmpdoc = null;    
+    
     return fragment;
 };
+
+var __clearFragmentCache__ = function(){
+    __fragmentCache__ = {};
+}
 
 
 /**
@@ -623,6 +661,7 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
  */
 __extend__(Document.prototype, {
     loadXML : function(xmlString) {
+        //console.log('Parser::Document.loadXML');
         // create Document
         if(this === document){
             //$debug("Setting internal window.document");
@@ -652,17 +691,36 @@ __extend__(HTMLDocument.prototype,{
         this._writebuffer = [];
     },
     close : function(){ 
-        if(!!this._open){
-            new HTMLParser().parseFromString(this, this._writebuffer.join('\n'));
-            delete this._open;
-            delete this._writebuffer;
+        if(this._open){
+            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
+            this._open = false;
+            this._writebuffer = null;
+            //DOMContentLoaded event
+            if(this.createEvent){
+                event = this.createEvent('Events');
+                event.initEvent("DOMContentLoaded", false, false);
+                this.dispatchEvent( event, false );
+            }
+            
+            try{
+                if(this.parentWindow){
+                    event = this.createEvent('HTMLEvents');
+                    event.initEvent("load", false, false);
+                    this.parentWindow.dispatchEvent( event, false );
+                }
+            }catch(e){
+                //console.log('window load event failed %s', e);
+                //swallow
+            }
         }
     },
     write: function(htmlstring){ 
-         this._writebuffer = [htmlstring];
+        if(this._open)
+            this._writebuffer = [htmlstring];
     },
     writeln: function(htmlstring){ 
-        this._writebuffer.push(htmlstring); 
+        if(this.open)
+            this._writebuffer.push(htmlstring); 
     }
     
 });

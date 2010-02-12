@@ -158,8 +158,8 @@ var inputElements_focusEvents = {
 * HTMLInputCommon - convenience class, not DOM
 */
 var HTMLInputCommon = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    
+    HTMLElement.apply(this, arguments);
 };
 HTMLInputCommon.prototype = new HTMLElement;
 __extend__(HTMLInputCommon.prototype, {
@@ -197,8 +197,8 @@ __extend__(HTMLInputCommon.prototype, {
 * HTMLTypeValueInputs - convenience class, not DOM
 */
 var HTMLTypeValueInputs = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
+    
+    HTMLInputCommon.apply(this, arguments);
 
     this._oldValue = "";
 };
@@ -244,8 +244,8 @@ __extend__(HTMLTypeValueInputs.prototype, {
 * HTMLInputAreaCommon - convenience class, not DOM
 */
 var HTMLInputAreaCommon = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
+    
+    HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
 __extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);

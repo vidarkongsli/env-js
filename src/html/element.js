@@ -3,10 +3,10 @@
 * HTMLElement - DOM Level 2
 */
 HTMLElement = function(ownerDocument) {
-    this.Element = Element;
-    this.Element(ownerDocument);
+    Element.apply(this, arguments);
 };
 HTMLElement.prototype = new Element;
+
 //TODO: Not sure where HTMLEvents belongs in the chain
 //      but putting it here satisfies a lowest common 
 //      denominator.
@@ -120,12 +120,12 @@ __extend__(HTMLElement.prototype, {
         
         var ret = "",
             ns = "",
+            name = (this.tagName+"").toLowerCase(),
             attrs,
             attrstring = "",
             i;
-        
+
         // serialize namespace declarations
-        var ns = "";
         if (this.namespaceURI){
             if((this === this.ownerDocument.documentElement) ||
                 (!this.parentNode)||
@@ -143,15 +143,20 @@ __extend__(HTMLElement.prototype, {
         
         if(this.hasChildNodes()){
             // serialize this Element
-            ret += "<" + this.tagName.toLowerCase() + ns + attrstring +">";
+            ret += "<" + name + ns + attrstring +">";
             for(i=0;i< this.childNodes.length;i++){
                 ret += this.childNodes[i].xhtml ?
                            this.childNodes[i].xhtml : 
                            this.childNodes[i].xml
             }
-            ret += "</" + this.tagName.toLowerCase() + ">";
+            ret += "</" + name + ">";
         }else{
-            ret += "<" + this.tagName.toLowerCase() +ns+"/>";
+            switch(name){
+                case 'script':
+                    ret += "<" + name + ns + attrstring +"></"+name+">";
+                default:
+                    ret += "<" + name + ns + attrstring +"/>";
+            }
         }
         
         return ret;

@@ -3,8 +3,7 @@
  * HTMLOptGroupElement - DOM Level 2
  */
 HTMLOptGroupElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    HTMLElement.apply(this, arguments);
 };
 HTMLOptGroupElement.prototype = new HTMLElement;
 __extend__(HTMLOptGroupElement.prototype, {

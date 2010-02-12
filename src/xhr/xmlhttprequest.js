@@ -53,6 +53,7 @@ XMLHttpRequest.prototype = {
                             doc = domparser.parseFromString(_this.responseText+"");
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
+                            console.log('parseerror \n%s', e);
                             doc = document.implementation.createDocument('','error',null);
                             doc.appendChild(doc.createTextNode(e+''));
                         } 

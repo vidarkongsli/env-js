@@ -6,17 +6,36 @@ __extend__(HTMLDocument.prototype,{
         this._writebuffer = [];
     },
     close : function(){ 
-        if(!!this._open){
-            new HTMLParser().parseFromString(this, this._writebuffer.join('\n'));
-            delete this._open;
-            delete this._writebuffer;
+        if(this._open){
+            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
+            this._open = false;
+            this._writebuffer = null;
+            //DOMContentLoaded event
+            if(this.createEvent){
+                event = this.createEvent('Events');
+                event.initEvent("DOMContentLoaded", false, false);
+                this.dispatchEvent( event, false );
+            }
+            
+            try{
+                if(this.parentWindow){
+                    event = this.createEvent('HTMLEvents');
+                    event.initEvent("load", false, false);
+                    this.parentWindow.dispatchEvent( event, false );
+                }
+            }catch(e){
+                //console.log('window load event failed %s', e);
+                //swallow
+            }
         }
     },
     write: function(htmlstring){ 
-         this._writebuffer = [htmlstring];
+        if(this._open)
+            this._writebuffer = [htmlstring];
     },
     writeln: function(htmlstring){ 
-        this._writebuffer.push(htmlstring); 
+        if(this.open)
+            this._writebuffer.push(htmlstring); 
     }
     
 });

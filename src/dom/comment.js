@@ -7,9 +7,8 @@
  * @param  ownerDocument :  The Document object associated with this node.
  */
 Comment = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#comment";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#comment";
 };
 Comment.prototype = new CharacterData;
 __extend__(Comment.prototype, {

@@ -354,7 +354,10 @@ CSSRule = function(options){
       },
       set selectorText(selectorText){
           $selectorText = selectorText;
-      }
+      },
+        toString : function(){
+            return "[object CSSRule]";
+        }
     });
 };
 

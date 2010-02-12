@@ -6,6 +6,7 @@
  */
 __extend__(Document.prototype, {
     loadXML : function(xmlString) {
+        //console.log('Parser::Document.loadXML');
         // create Document
         if(this === document){
             //$debug("Setting internal window.document");

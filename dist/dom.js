@@ -88,6 +88,7 @@ NodeList = function(ownerDocument, parentNode) {
     this._readonly = false;
     __setArray__(this, []);
 };
+
 __extend__(NodeList.prototype, {
     item : function(index) {
         var ret = null;
@@ -285,11 +286,11 @@ var __cloneNodes__ = function(nodelist, deep, parentNode) {
  * @param  parentNode    : Node - the node that the NamedNodeMap is attached to (or null)
  */
 NamedNodeMap = function(ownerDocument, parentNode) {
-    this.NodeList = NodeList;
-    this.NodeList(ownerDocument, parentNode);
+    NodeList.apply(this, arguments);
     __setArray__(this, []);
 };
 NamedNodeMap.prototype = new NodeList;
+
 __extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
@@ -478,6 +479,9 @@ __extend__(NamedNodeMap.prototype, {
           }
         
           return ret;
+    },
+    toString : function(){
+        return "[object NamedNodeMap]";
     }
 
 });
@@ -1218,7 +1222,10 @@ __extend__(Node.prototype, {
         number += (my_location < node_location && 4)
         number += (my_location > node_location && 2)
         return number;
-    } 
+    } ,
+    toString : function(){
+        return "[object Node]";
+    }
 
 });
 
@@ -1381,18 +1388,17 @@ function __unescapeXML__(str) {
  * @param  ownerDocument : The Document object associated with this node.
  */
 Namespace = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  // the name of this attribute
-  this.name      = "";                           
-
-  // If this attribute was explicitly given a value in the original document, 
-  // this is true; otherwise, it is false.
-  // Note that the implementation is in charge of this attribute, not the user.
-  // If the user changes the value of the attribute (even if it ends up having 
-  // the same value as the default value) then the specified flag is 
-  // automatically flipped to true
-  this.specified = false;
+    Node.apply(this, arguments);
+    // the name of this attribute
+    this.name      = "";                           
+    
+    // If this attribute was explicitly given a value in the original document, 
+    // this is true; otherwise, it is false.
+    // Note that the implementation is in charge of this attribute, not the user.
+    // If the user changes the value of the attribute (even if it ends up having 
+    // the same value as the default value) then the specified flag is 
+    // automatically flipped to true
+    this.specified = false;
 };
 Namespace.prototype = new Node;
 __extend__(Namespace.prototype, {
@@ -1420,7 +1426,7 @@ __extend__(Namespace.prototype, {
           return ret;
     },
     toString: function(){
-        return "Namespace #" + this.id;
+        return '[object Namespace]';
     }
 });
 
@@ -1432,8 +1438,7 @@ __extend__(Namespace.prototype, {
  * @param  ownerDocument : The Document object associated with this node.
  */
 CharacterData = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 CharacterData.prototype = new Node;
 __extend__(CharacterData.prototype,{
@@ -1542,6 +1547,9 @@ __extend__(CharacterData.prototype,{
             }
         }
         return ret;
+    },
+    toString : function(){
+        return "[object CharacterData]";
     }
 });
 
@@ -1558,10 +1566,10 @@ __extend__(CharacterData.prototype,{
  * @param  ownerDocument The Document object associated with this node.
  */
 Text = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#text";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#text";
 };
+
 Text.prototype = new CharacterData;
 __extend__(Text.prototype,{
     get localName(){
@@ -1623,9 +1631,8 @@ __extend__(Text.prototype,{
  * @param  ownerDocument : The Document object associated with this node.
  */
 CDATASection = function(ownerDocument) {
-  this.Text  = Text;
-  this.Text(ownerDocument);
-  this.nodeName = '#cdata-section';
+    Text.apply(this, arguments);
+    this.nodeName = '#cdata-section';
 };
 CDATASection.prototype = new Text;
 __extend__(CDATASection.prototype,{
@@ -1648,9 +1655,8 @@ __extend__(CDATASection.prototype,{
  * @param  ownerDocument :  The Document object associated with this node.
  */
 Comment = function(ownerDocument) {
-  this.CharacterData  = CharacterData;
-  this.CharacterData(ownerDocument);
-  this.nodeName  = "#comment";
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#comment";
 };
 Comment.prototype = new CharacterData;
 __extend__(Comment.prototype, {
@@ -1674,8 +1680,7 @@ __extend__(Comment.prototype, {
  * @param {Document} onwnerDocument
  */
 DocumentType = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     this.systemId = null;
     this.publicId = null;
 };
@@ -1692,6 +1697,9 @@ __extend__({
     },
     get notations(){
         return null;
+    },
+    toString : function(){
+        return "[object DocumentType]";
     }
 });
 
@@ -1702,14 +1710,13 @@ __extend__({
  * @param  ownerDocument : The Document object associated with this node.
  */
 Attr = function(ownerDocument) {
-    this.Node = Node;
-    this.Node(ownerDocument);
+    Node.apply(this, arguments);
     // set when Attr is added to NamedNodeMap
     this.ownerElement = null;
     //TODO: our implementation of Attr is incorrect because we don't
     //      treat the value of the attribute as a child text node.
-};
-Attr.prototype = new Node; 
+};Attr.prototype = new Node;
+
 __extend__(Attr.prototype, {
     // the name of this attribute
     get name(){
@@ -1760,9 +1767,7 @@ __extend__(Attr.prototype, {
  * @param  ownerDocument : The Document object associated with this node.
  */
 Element = function(ownerDocument) {
-    this.Node  = Node;
-    this.Node(ownerDocument);
-    
+    Node.apply(this, arguments);
     this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
 Element.prototype = new Node;
@@ -1960,7 +1965,7 @@ __extend__(Element.prototype, {
             ret += this.childNodes.xml;
             ret += "</" + this.tagName + ">";
         }else{
-            ret += "<" + this.tagName +ns+"/>";
+            ret += "<" + this.tagName + ns + attrstring +"/>";
         }
         
         return ret;
@@ -1977,7 +1982,7 @@ __extend__(Element.prototype, {
  * @param  code : int - the exception code (one of the DOMException constants)
  */
 DOMException = function(code) {
-  this.code = code;
+    this.code = code;
 };
 
 // DOMException constants
@@ -2009,9 +2014,8 @@ DOMException.INVALID_ACCESS_ERR             = 15;
  * @param  ownerDocument :  The Document object associated with this node.
  */
 DocumentFragment = function(ownerDocument) {
-  this.Node = Node;
-  this.Node(ownerDocument);
-  this.nodeName  = "#document-fragment";
+    Node.apply(this, arguments);
+    this.nodeName  = "#document-fragment";
 };
 DocumentFragment.prototype = new Node;
 __extend__(DocumentFragment.prototype,{
@@ -2049,10 +2053,10 @@ __extend__(DocumentFragment.prototype,{
  * @param  ownerDocument :  The Document object associated with this node.
  */
 ProcessingInstruction = function(ownerDocument) {
-  this.Node  = Node;
-  this.Node(ownerDocument);
+    Node.apply(this, arguments);
 };
 ProcessingInstruction.prototype = new Node;
+
 __extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;
@@ -2512,6 +2516,9 @@ __extend__(DOMImplementation.prototype,{
       }
 
       return msg;
+    },
+    toString : function(){
+        return "[object DOMImplementation]";
     }
 });
 
@@ -2632,6 +2639,7 @@ Notation = function() {
 Range = function(){
 
 };
+
 __extend__(Range.prototype, {
     get startContainer(){
 
@@ -2700,7 +2708,7 @@ __extend__(Range.prototype, {
 
     },
     toString: function(){
-
+        return '[object Range]';
     },
     detach: function(){
 
@@ -2723,24 +2731,14 @@ Range.END_TO_START                   = 3;
  * @param  implementation : DOMImplementation - the creator Implementation
  */
 Document = function(implementation, docParentWindow) {
-    this.Node = Node;
-    this.Node(this);
+    Node.apply(this, arguments);
     
-    this.async = true;
+    //TODO: Temporary!!! Cnage back to true!!!
+    this.async = false;
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.
     this.implementation = implementation
-    
-    // "private" variable providing the read-only document.parentWindow property
-    // TODO: I dont think this is a good place to store this info,
-    //       rather some internal function like __parentWindow__(doc)
-    //       would be better.
-    this._parentWindow = docParentWindow;
-    try {
-        if (docParentWindow.$thisWindowsProxyObject)
-            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
-    } catch(e){}
 
     this.nodeName  = "#document";
     // initially false, set to true by parser
@@ -2750,7 +2748,7 @@ Document = function(implementation, docParentWindow) {
     this.ownerDocument = null;
     
     this.importing = false;
-    
+    this.location = null;
 };
 Document.prototype = new Node;
 __extend__(Document.prototype,{
@@ -2772,17 +2770,8 @@ __extend__(Document.prototype,{
         }
         return null;
     },
-    get parentWindow(){
-        return this._parentWindow;
-    },
     get documentURI(){
         return this.baseURI;
-    },
-    get location(){
-        return this._location?this._location:null;
-    },
-    set location(url){
-        this._location = url;
     },
     createExpression: function(xpath, nsuriMap){ 
         return new XPathExpression(xpath, nsuriMap);
@@ -2937,7 +2926,7 @@ __extend__(Document.prototype,{
         return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this.normalize();
     },
     get nodeType(){
         return Node.DOCUMENT_NODE;
@@ -3015,8 +3004,12 @@ XMLSerializer = function() {};
 __extend__(XMLSerializer.prototype, {
     serializeToString: function(node){
         return node.xml;
+    },
+    toString : function(){
+        return "[object XMLSerializer]";
     }
 });
+
 /**
  * @author john resig & the envjs team
  * @uri http://www.envjs.com/
