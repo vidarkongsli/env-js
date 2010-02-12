@@ -5611,12 +5611,12 @@ __extend__(HTMLElement.prototype, {
         
         var ret = "",
             ns = "",
+            name = (this.tagName+"").toLowerCase(),
             attrs,
             attrstring = "",
             i;
-        
+
         // serialize namespace declarations
-        var ns = "";
         if (this.namespaceURI){
             if((this === this.ownerDocument.documentElement) ||
                 (!this.parentNode)||
@@ -5634,15 +5634,20 @@ __extend__(HTMLElement.prototype, {
         
         if(this.hasChildNodes()){
             // serialize this Element
-            ret += "<" + this.tagName.toLowerCase() + ns + attrstring +">";
+            ret += "<" + name + ns + attrstring +">";
             for(i=0;i< this.childNodes.length;i++){
                 ret += this.childNodes[i].xhtml ?
                            this.childNodes[i].xhtml : 
                            this.childNodes[i].xml
             }
-            ret += "</" + this.tagName.toLowerCase() + ">";
+            ret += "</" + name + ">";
         }else{
-            ret += "<" + this.tagName.toLowerCase() + ns + attrstring +"/>";
+            switch(name){
+                case 'script':
+                    ret += "<" + name + ns + attrstring +"></"+name+">";
+                default:
+                    ret += "<" + name + ns + attrstring +"/>";
+            }
         }
         
         return ret;
@@ -6404,20 +6409,17 @@ HTMLFrameElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    var contentDocument;
-    this.contentWindow = {
+    var contentDocument
+        contentWindow = {
         get document(){
             return contentDocument;
         }
     };
-    contentDocument = new HTMLDocument(new DOMImplementation(), this.contentWindow);
+    contentDocument = new HTMLDocument(new DOMImplementation(), contentWindow);
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
     
-    get contentDocument(){
-        return null;
-    },
     get frameBorder(){
         return this.getAttribute('border')||"";
     },
@@ -8761,7 +8763,8 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
         xmldoc.appendChild( importedNode );
         delete tmpNode;
     }
-    delete tmpdoc;
+    delete tmpdoc,
+           xmlstring;
     return xmldoc;
 };
 
@@ -8816,7 +8819,8 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
             fragment.appendChild( importedNode );
             delete tmpNode;
         }
-        delete tmpdoc;
+        delete tmpdoc,
+               htmlstring;
     }
     
     return fragment;

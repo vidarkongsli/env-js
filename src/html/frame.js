@@ -6,20 +6,17 @@ HTMLFrameElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    var contentDocument;
-    this.contentWindow = {
+    var contentDocument
+        contentWindow = {
         get document(){
             return contentDocument;
         }
     };
-    contentDocument = new HTMLDocument(new DOMImplementation(), this.contentWindow);
+    contentDocument = new HTMLDocument(new DOMImplementation(), contentWindow);
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
     
-    get contentDocument(){
-        return null;
-    },
     get frameBorder(){
         return this.getAttribute('border')||"";
     },

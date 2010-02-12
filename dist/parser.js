@@ -588,7 +588,8 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
         xmldoc.appendChild( importedNode );
         delete tmpNode;
     }
-    delete tmpdoc;
+    delete tmpdoc,
+           xmlstring;
     return xmldoc;
 };
 
@@ -643,7 +644,8 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
             fragment.appendChild( importedNode );
             delete tmpNode;
         }
-        delete tmpdoc;
+        delete tmpdoc,
+               htmlstring;
     }
     
     return fragment;

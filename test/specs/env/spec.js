@@ -49,7 +49,7 @@ test('Envjs Platform Interfaces Available', function(){
     
 });
 
-test('qunit same', function(){
+/*test('qunit same', function(){
     
     var top = {owner:null, parent:null, children:[], type:1};
     var a = {owner:top, parent:top, children:[], type:2};
@@ -70,7 +70,7 @@ test('qunit same', function(){
     //This will cause a stack overflow
     //QUnit.jsDump.parse(a);
     
-});
+});*/
 
 
 var document = null,
