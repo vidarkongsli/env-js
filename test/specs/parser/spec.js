@@ -1,53 +1,10 @@
-
-/**
- * @todo: document
- */
-var _load,
-    _start,
-    _count = 1,
-    _starttime = new Date().getTime(),
-    _endtime;
-
-try{
-    _load = load;
-    _load('test/specs/qunit.js');
-    _start = QUnit.start;
-
-}catch(e){
-    _load = _start = function(){};
-}
-
-QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
-};
-QUnit.done = function( fail, pass){
-    if(console){
-        _endtime = new Date().getTime();
-        console.log('\n\tRESULTS: ( of '+(pass+fail)+' total tests )');
-        console.log('\t\tPASSED: ' +pass);
-        console.log('\t\tFAILED: ' +fail);
-        console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
-    }
-};
-QUnit.init();
-
-_load('dist/platform/core.js');
-_load('dist/platform/rhino.js');
-_load('dist/console.js');
-_load('dist/dom.js');
-_load('dist/event.js');
-_load('dist/html.js');
-_load('dist/timer.js');
-_load('dist/parser.js');
-
 module('parser');
 
 test('Parser Interfaces Available', function(){
     
     expect(1);
     ok(DOMParser,             'DOMParser defined');
-    //These are non-standard
+    //These are non-standard but used internally by envjs
     //ok(XMLParser,             'XMLParser defined');
     //ok(HTMLParser,            'HTMLParser defined');
     
@@ -73,7 +30,7 @@ test('DOMParser.parseFromString', function(){
     ok(xmldoc , 'parsed xml document');
     equals(xmldoc.attributes, null, '.attributes');
     //TODO: Should be true
-    equals(xmldoc.async, false, '.async');
+    equals(xmldoc.async, true, '.async');
     //Not yet supported by Envjs
     //equals(xmldoc.characterSet, 'UTF-8', '.characterSet');
     equals(xmldoc.childNodes.length, 1, '.childNodes.length');
@@ -214,8 +171,4 @@ test('HTMLElement.innerHTML', function(){
     equals(text.textContent, 'oink, oink', '.textContent');
     
 });
-
-
-_start();
-Envjs.wait();
 

@@ -106,7 +106,7 @@ function __setArray__( target, array ) {
 HTMLDocument = function(implementation, parentWindow, referrer) {
     Document.apply(this, arguments);
     this.referrer = referrer;
-    this.async = false;
+    this.async = true;
     this.baseURI = "about:blank";
     this.parentWindow = parentWindow;
 };

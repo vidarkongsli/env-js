@@ -1,43 +1,12 @@
-
-/**
- * @todo: document
- */
-var _load,
-    _start,
-    _count = 1,
-    _starttime = new Date().getTime(),
-    _endtime;
-
-try{
-    _load = load;
-    _load('test/specs/qunit.js');
-    _start = QUnit.start;
-
-}catch(e){
-    _load = _start = function(){};
-}
-
-
-QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
-};
-QUnit.done = function( fail, pass){
-    if(console){
-        _endtime = new Date().getTime();
-        console.log('\n\tRESULTS: ( of '+(pass+fail)+' total tests )');
-        console.log('\t\tPASSED: ' +pass);
-        console.log('\t\tFAILED: ' +fail);
-        console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
-    }
-};
+load('test/specs/qunit.js');
+load('test/specs/env.qunit.js');
 QUnit.init();
 
-_load('dist/platform/core.js');
-_load('dist/platform/rhino.js');
-_load('dist/console.js');
-_load('src/common/__extend__.js');
-_load('settings.js');
+load('dist/platform/core.js');
+load('dist/platform/rhino.js');
+load('dist/console.js');
+load('src/common/__extend__.js');
+load('settings.js');
 
 module('rhino');
 
@@ -48,30 +17,6 @@ test('Envjs Platform Interfaces Available', function(){
     ok(Envjs.proxy.toString() !== 'function(){};',  'Envjs.proxy defined');
     
 });
-
-/*test('qunit same', function(){
-    
-    var top = {owner:null, parent:null, children:[], type:1};
-    var a = {owner:top, parent:top, children:[], type:2};
-    var b = {owner:top, parent:top, children:[], type:2};
-    var c = {owner:top, parent:a, children:[], type:3};
-    var d = {owner:top, parent:b, children:[], type:4};
-    
-    top.children.push(a, b);
-    a.children.push(c);
-    b.children.push(d);
-    
-    //prevent jsDump stack overflow
-    QUnit.jsDump.parse=function(thing){return thing+'';};
-    
-    //this will cause its own overflow
-    same(a, b, 'will this ever return?');
-    
-    //This will cause a stack overflow
-    //QUnit.jsDump.parse(a);
-    
-});*/
-
 
 var document = null,
     path = 'specs/env/spec.html';
@@ -150,9 +95,32 @@ test('Envjs.proxy', function(){
 
 });
 
+/*test('qunit same', function(){
+    
+    var top = {owner:null, parent:null, children:[], type:1};
+    var a = {owner:top, parent:top, children:[], type:2};
+    var b = {owner:top, parent:top, children:[], type:2};
+    var c = {owner:top, parent:a, children:[], type:3};
+    var d = {owner:top, parent:b, children:[], type:4};
+    
+    top.children.push(a, b);
+    a.children.push(c);
+    b.children.push(d);
+    
+    //prevent jsDump stack overflow
+    QUnit.jsDump.parse=function(thing){return thing+'';};
+    
+    //this will cause its own overflow
+    same(a, b, 'will this ever return?');
+    
+    //This will cause a stack overflow
+    //QUnit.jsDump.parse(a);
+    
+});*/
+
 Envjs.onExit(function(){
     console.log('onExit!');
 });
 
-_start();
 
+start();

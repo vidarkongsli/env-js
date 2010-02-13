@@ -2734,7 +2734,7 @@ Document = function(implementation, docParentWindow) {
     Node.apply(this, arguments);
     
     //TODO: Temporary!!! Cnage back to true!!!
-    this.async = false;
+    this.async = true;
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.

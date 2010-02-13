@@ -118,15 +118,15 @@
                     <token key="VERSION" value="core-env.${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
-            <fileset dir="${SRC_DIR}" includes="env/core/__global__.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/console.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/dom.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/event.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/html.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/timer.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/xhr.js" />
-            <fileset dir="${SRC_DIR}" includes="env/core/window.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/console.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/dom.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/event.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/html.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/timer.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/xhr.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/core/window.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>
         <echo message="Finished Building ${CORE_DIST}"/>
@@ -144,17 +144,17 @@
                     <token key="VERSION" value="rhino-env.${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
-            <fileset dir="${SRC_DIR}" includes="env/rhino/__global__.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/console.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/dom.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/event.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/html.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/parser.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/timer.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/xhr.js" />
-            <fileset dir="${SRC_DIR}" includes="env/rhino/window.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/console.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/dom.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/event.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/html.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/parser.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/timer.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/xhr.js" />
+            <fileset dir="${SRC_DIR}" includes="platform/rhino/window.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>
         <echo message="Finished Building ${RHINO_DIST}"/>
@@ -170,7 +170,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/env/spec.js"/>
+            <arg value="test/specs/platform/rhino.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -206,7 +206,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/console/spec.js"/>
+            <arg value="test/specs/console/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -267,7 +267,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/dom/spec.js"/>
+            <arg value="test/specs/dom/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -312,7 +312,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/event/spec.js"/>
+            <arg value="test/specs/event/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -348,7 +348,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/timer/spec.js"/>
+            <arg value="test/specs/timer/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -434,7 +434,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/html/spec.js"/>
+            <arg value="test/specs/html/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -477,7 +477,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/parser/spec.js"/>
+            <arg value="test/specs/parser/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -519,7 +519,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/xhr/spec.js"/>
+            <arg value="test/specs/xhr/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -560,7 +560,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/css/spec.js"/>
+            <arg value="test/specs/css/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -603,7 +603,7 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
-            <arg value="test/specs/window/spec.js"/>
+            <arg value="test/specs/window/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>

@@ -1,11 +1,12 @@
 
 /**
- * @author thatcher
+ * @author envjs team
  */
 var Console,
     console;
+
 /*
- * Envjs console.1.1.rc3 
+ * Envjs console.1.2.0.0 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -16,10 +17,10 @@ var Console,
 
 
 
+
 /**
- * @author thatcher
- * 
- * borrowed-ish with love from firebug-lite
+ * @author envjs team
+ * borrowed 99%-ish with love from firebug-lite
  */
 Console = function(module){
     var $level,
@@ -254,8 +255,12 @@ function appendNode(node, html)
     }
 };
 
+
 /**
- * @author thatcher
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
  */
 
- })();
+})();

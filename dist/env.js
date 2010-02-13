@@ -302,12 +302,13 @@ Envjs.loadFrame = function(frame, url){
 })();
 
 /**
- * @author thatcher
+ * @author envjs team
  */
 var Console,
     console;
+
 /*
- * Envjs console.1.1.rc3 
+ * Envjs console.1.2.0.0 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -318,10 +319,10 @@ var Console,
 
 
 
+
 /**
- * @author thatcher
- * 
- * borrowed-ish with love from firebug-lite
+ * @author envjs team
+ * borrowed 99%-ish with love from firebug-lite
  */
 Console = function(module){
     var $level,
@@ -556,11 +557,16 @@ function appendNode(node, html)
     }
 };
 
+
 /**
- * @author thatcher
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
  */
 
- })();/*
+})();
+/*
  * Envjs dom.1.2.0.0 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
@@ -3296,7 +3302,7 @@ Document = function(implementation, docParentWindow) {
     Node.apply(this, arguments);
     
     //TODO: Temporary!!! Cnage back to true!!!
-    this.async = false;
+    this.async = true;
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.
@@ -4506,7 +4512,7 @@ function __setArray__( target, array ) {
 HTMLDocument = function(implementation, parentWindow, referrer) {
     Document.apply(this, arguments);
     this.referrer = referrer;
-    this.async = false;
+    this.async = true;
     this.baseURI = "about:blank";
     this.parentWindow = parentWindow;
 };

@@ -1,60 +1,8 @@
+module('window');
 
-/**
- * @todo: document
- */
-var _load,
-    _start,
-    _count = 1,
-    _starttime = new Date().getTime(),
-    _endtime,
-    Envjs,
-    __this__ = this;
-    
-var expected_path = 'test/specs/window/spec.html';
-
-try{
-    _load = load;
-    _load('dist/platform/core.js');
-    _load('dist/platform/rhino.js');
-    _load('dist/console.js');
-    _load('dist/dom.js');
-    _load('dist/event.js');
-    _load('dist/html.js');
-    _load('dist/timer.js');
-    _load('dist/parser.js');
-    _load('dist/xhr.js');
-    _load('dist/window.js');
-    _load('local_settings.js');
-    
-    document.async = false;
-    
-    _load('test/specs/qunit.js');
-    
-    location = SETTINGS.AJAX_BASE + expected_path;
-    
-}catch(e){
-    _load = function(){};
-    Envjs = {};
-    Envjs.wait = function(){};
-}
-
-QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
-};
-QUnit.done = function( fail, pass){
-    if(console){
-        _endtime = new Date().getTime();
-        console.log('\n\tRESULTS: ( of '+(pass+fail)+' total tests )');
-        console.log('\t\tPASSED: ' +pass);
-        console.log('\t\tFAILED: ' +fail);
-        console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
-    }
-};
-
-
-// id used to check this windows id from frames
 window.ABC1234567890 = "abc!@#$%^&*()";
+
+var __this__ = this;
 
 function pollute(){
     abc = 123;
@@ -63,7 +11,6 @@ function giveAHoot(){
     var def = 456;
 }
 
-module('window');
 
 test('Window Interfaces Available', function(){
     
@@ -71,20 +18,6 @@ test('Window Interfaces Available', function(){
     ok(History,     'History available');
     ok(Navigator,   'Navigator available');
     ok(Screen,      'Screen available');
-    
-});
-
-
-test('qunit same', function(){
-    
-    same(window, __this__.__proxy__, 'window is scope.__proxy__');
-    same(document, __this__.__proxy__.document, 'document is __proxy__.document');
-    
-    var tmp = new Date().getTime()+'';
-    window[tmp] = 'hello!';
-    same(window[tmp], 'hello!', 'setting property on window');
-    delete window[tmp];
-    same(window[tmp], undefined, 'deleting property on window');
     
 });
     
@@ -106,6 +39,12 @@ test('window proxy', function(){
         ok(e.toString().match(/^ReferenceError:\s\"?def\"?\sis\snot\sdefined\.?$/), 'got ReferenceError');
         ok(true, 'scoped variables dont pollute the global scope');
     }
+    
+    var tmp = new Date().getTime()+'';
+    window[tmp] = 'hello!';
+    same(window[tmp], 'hello!', 'setting property on window');
+    delete window[tmp];
+    same(window[tmp], undefined, 'deleting property on window');
     
 });
 
@@ -282,7 +221,7 @@ test('frame proxy', function(){
     expect(7);
     frame = document.createElement('iframe');
     frame.width = '100%';
-    frame.height = '300px';
+    frame.height = '380px';
     frame.frameBorder = '0';
     frame.addEventListener('load', function(){
 
@@ -297,13 +236,12 @@ test('frame proxy', function(){
         equals(doc.title, 'Envjs Proxy Spec', '.contentDocument.title');
         equals(doc.toString(), '[object HTMLDocument]', '.contentDocument.toString()');
         start();
-        Envjs.wait();
         
     }, false);
     //This only works because we set src after the event listener is added
     //in reality the frame should use a mutation event to trigger load
     //and document.body.append would be the real trigger
-    frame.src = 'proxy.html';
+    frame.src = '../frame/proxy.html';
     document.body.appendChild(frame);
     stop();
 });
@@ -372,5 +310,3 @@ test('window.addEventListener / window.dispatchEvent multiple listeners', functi
     window.dispatchEvent(event);
 });
 
-start();
-Envjs.wait();

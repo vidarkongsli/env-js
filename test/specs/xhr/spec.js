@@ -1,49 +1,3 @@
-
-/**
- * @todo: document
- */
-var _load,
-    _start,
-    _count = 1,
-    _starttime = new Date().getTime(),
-    _endtime;
-
-try{
-    _load = load;
-    _load('test/specs/qunit.js');
-    _start = QUnit.start;
-
-}catch(e){
-    _load = _start = function(){};
-}
-
-
-QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
-};
-QUnit.done = function( fail, pass){
-    if(console){
-        _endtime = new Date().getTime();
-        console.log('\n\tRESULTS: ( of '+(pass+fail)+' total tests )');
-        console.log('\t\tPASSED: ' +pass);
-        console.log('\t\tFAILED: ' +fail);
-        console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
-    }
-};
-QUnit.init();
-
-_load('dist/platform/core.js');
-_load('dist/platform/rhino.js');
-_load('dist/console.js');
-_load('dist/dom.js');
-_load('dist/event.js');
-_load('dist/html.js');
-_load('dist/timer.js');
-_load('dist/parser.js');
-_load('dist/xhr.js');
-_load('local_settings.js');
-
 module('xhr');
 
 test('XMLHttpRequest Interfaces Available', function(){
@@ -55,7 +9,8 @@ test('XMLHttpRequest Interfaces Available', function(){
 });
 
 // mock the global document object if not available
-var expected_path = 'test/specs/xhr/spec.html';
+var expected_path = 'test/specs/xhr/index.html';
+    
 try{
     document;
 }catch(e){
@@ -73,12 +28,24 @@ test('Location', function(){
     
     var href = SETTINGS.AJAX_BASE+expected_path;
     
-    equals(location.toString(), href, '.toString()');
+    ok(//this test may run in xhr or env so we allow for both paths
+        location.toString() === href || 
+        location.toString() === href.replace('xhr','env'), 
+        '.toString()'
+    );
     equals(location.hash, '', '.hash');
     equals(location.host, 'localhost:8080', '.host');
     equals(location.hostname, 'localhost', '.hostname');
-    equals(location.href, href, '.href');
-    equals(location.pathname, '/env-js/'+expected_path, '.pathname');
+    ok(//this test may run in xhr or env so we allow for both paths
+        location.href === href || 
+        location.href === href.replace('xhr','env'), 
+        '.href'
+    );
+    ok(//this test may run in xhr or env so we allow for both paths
+        location.pathname === '/env-js/'+expected_path || 
+        location.pathname === ('/env-js/'+expected_path).replace('xhr','env'), 
+        '.href'
+    );
     equals(location.port, '8080', '.port');
     equals(location.protocol, 'http:', '.protocol');
     equals(location.search, '', '.search');
@@ -142,18 +109,13 @@ test('XMLHttpRequest async', function(){
             equals(xhr.responseXML, null, '.responseXML');
             equals(xhr.status, 200, '.status');
             equals(xhr.statusText, 'OK', '.statusText');
-            _start();
-            Envjs.wait();
+            start();
          }else {
             ok(false, 'xhr failed');
-            _start();
-            Envjs.wait();
+            start();
          }
     };
         
     xhr.send();
     stop();
 });
-
-_start();
-Envjs.wait();

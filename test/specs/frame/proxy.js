@@ -1,58 +1,6 @@
 
-/**
- * @todo: document
- */
-var _load,
-    _start,
-    _count = 1,
-    _starttime = new Date().getTime(),
-    _endtime,
-    Envjs;
-
-try{
-    _load = load;
-    _load('test/specs/qunit.js');
-    _start = QUnit.start;
-
-}catch(e){
-    _load = _start = function(){};
-    Envjs = {};
-    Envjs.wait = function(){};
-}
-
-QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
-};
-QUnit.done = function( fail, pass){
-    if(console){
-        _endtime = new Date().getTime();
-        console.log('\n\tRESULTS: ( of '+(pass+fail)+' total tests )');
-        console.log('\t\tPASSED: ' +pass);
-        console.log('\t\tFAILED: ' +fail);
-        console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
-    }
-};
-QUnit.init();
-
-_load('dist/platform/core.js');
-_load('dist/platform/rhino.js');
-_load('dist/console.js');
-_load('dist/dom.js');
-_load('dist/event.js');
-_load('dist/timer.js');
-_load('dist/html.js');
-_load('dist/xhr.js');
-_load('dist/window.js');
 
 var __this__ = this;
-try{
-    window;
-}catch(e){
-    //mock the window and document in envjs
-    new Window(__this__, __this__);
-    //document = new Document(new DOMImplementation());
-}
 
 window.ABC1234567890 = "abc!@#$%^&*()";
 
@@ -136,10 +84,10 @@ test('window properties', function(){
     parent.ABC1234567890 = 'QWERTYUIOP{}|';
     equals(parent.ABC1234567890, 'QWERTYUIOP{}|', 'parent scope can be modified');
     
-    equals(parent.Array, Array, 'Array');
 });
 
+test('Standard objects are clean proxies',function(){
+    ok(parent.Object !== Object, 'Object is not global Array');
+    ok(parent.Array !== Array, 'Array is not global Array');
+});
 
-
-_start();
-Envjs.wait();
