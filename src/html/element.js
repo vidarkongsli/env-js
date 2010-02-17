@@ -6,7 +6,6 @@ HTMLElement = function(ownerDocument) {
     Element.apply(this, arguments);
 };
 HTMLElement.prototype = new Element;
-
 //TODO: Not sure where HTMLEvents belongs in the chain
 //      but putting it here satisfies a lowest common 
 //      denominator.

@@ -6,7 +6,6 @@
 HTMLTableElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-
 HTMLTableElement.prototype = new HTMLElement;
 __extend__(HTMLTableElement.prototype, {
     

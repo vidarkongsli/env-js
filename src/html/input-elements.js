@@ -158,7 +158,6 @@ var inputElements_focusEvents = {
 * HTMLInputCommon - convenience class, not DOM
 */
 var HTMLInputCommon = function(ownerDocument) {
-    
     HTMLElement.apply(this, arguments);
 };
 HTMLInputCommon.prototype = new HTMLElement;
@@ -244,7 +243,6 @@ __extend__(HTMLTypeValueInputs.prototype, {
 * HTMLInputAreaCommon - convenience class, not DOM
 */
 var HTMLInputAreaCommon = function(ownerDocument) {
-    
     HTMLTypeValueInputs.apply(this, arguments);
 };
 HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;

@@ -12,7 +12,6 @@ Element = function(ownerDocument) {
     this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
 Element.prototype = new Node;
-
 __extend__(Element.prototype, {	
     // The name of the element.
     get tagName(){

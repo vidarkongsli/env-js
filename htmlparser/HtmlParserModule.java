@@ -26,6 +26,8 @@ import org.xml.sax.SAXException;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.GWT; 
+import com.google.gwt.core.client.RunAsyncCallback; 
 
 public class HtmlParserModule implements EntryPoint {
 

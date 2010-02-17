@@ -3,8 +3,6 @@
  * @class  DocumentFragment - 
  *      DocumentFragment is a "lightweight" or "minimal" Document object.
  * @extends Node
- * @author orignially Jon van Noort (jon@webarcana.com.au) 
- *      and David Joham (djoham@yahoo.com)
  * @param  ownerDocument :  The Document object associated with this node.
  */
 DocumentFragment = function(ownerDocument) {

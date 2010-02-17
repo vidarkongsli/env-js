@@ -12,5 +12,6 @@ load('dist/platform/rhino.js');
 load('dist/console.js');
 load('dist/timer.js');
 load('test/specs/timer/spec.js');
+
 start();
 Envjs.wait();

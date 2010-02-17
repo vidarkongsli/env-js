@@ -13,7 +13,7 @@ __extend__(HTMLFrameElement.prototype,{
     set src(value){
         var event;
         this.setAttribute('src', value);
-        if (value && value.length > 0){
+        if (this.parentNode && value && value.length > 0){
             //console.log('loading frame %s', value);
             Envjs.loadFrame(this, Envjs.location(value));
             

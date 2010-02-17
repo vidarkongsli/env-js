@@ -16,7 +16,6 @@ try{
 }catch(e){
     console.log('mocking global document object.');
     document = new HTMLDocument(new DOMImplementation());
-    document.async = false;
     
     console.log('mocking global document location.');
     location = new Location(Envjs.location(expected_path, SETTINGS.AJAX_BASE), document);

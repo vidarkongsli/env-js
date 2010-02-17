@@ -289,6 +289,7 @@
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
+            <fileset dir="${SRC_DIR}" includes="event/aspect.js" />
             <fileset dir="${SRC_DIR}" includes="event/documentevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/eventtarget.js" />
             <fileset dir="${SRC_DIR}" includes="event/event.js" />
@@ -454,9 +455,25 @@
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="parser/__global__.js" />
+            <!--fileset dir="${SRC_DIR}" includes="parser/strings_0.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/strings_1.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/strings_2.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_0.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_1.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_2.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_3.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_4.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_5.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/functions_6.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/variables_0.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/prototypes.js" /-->
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
+            <!--fileset dir="${SRC_DIR}" includes="parser/string_declarations.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/function_declarations.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/variable_declarations.js" />
+            <fileset dir="${SRC_DIR}" includes="parser/factory.js" /-->
             <fileset dir="${SRC_DIR}" includes="parser/htmlparser.js" />
             <fileset dir="${SRC_DIR}" includes="parser/domparser.js" />
             <fileset dir="${SRC_DIR}" includes="parser/document.js" />
@@ -477,6 +494,8 @@
         <java fork="true" 
               jar="${RHINO_JAR}" 
               failonerror="true">
+            <arg value="-opt"/>
+            <arg value="-1"/>
             <arg value="test/specs/parser/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>

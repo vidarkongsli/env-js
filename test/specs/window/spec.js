@@ -238,9 +238,6 @@ test('frame proxy', function(){
         start();
         
     }, false);
-    //This only works because we set src after the event listener is added
-    //in reality the frame should use a mutation event to trigger load
-    //and document.body.append would be the real trigger
     frame.src = '../frame/proxy.html';
     document.body.appendChild(frame);
     stop();

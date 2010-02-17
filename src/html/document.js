@@ -10,12 +10,11 @@
 HTMLDocument = function(implementation, parentWindow, referrer) {
     Document.apply(this, arguments);
     this.referrer = referrer;
-    this.async = true;
     this.baseURI = "about:blank";
     this.parentWindow = parentWindow;
 };
-
 HTMLDocument.prototype = new Document;
+
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
         tagName = tagName.toUpperCase();
@@ -160,12 +159,15 @@ __extend__(HTMLDocument.prototype, {
     },
     get body(){ 
         var nodelist = this.getElementsByTagName('body');
-        return nodelist.item(0);
+        if(nodelist.length === 0){
+            __stubHTMLDocument__(this);
+            nodelist = this.getElementsByTagName('body');
+        }
+        return nodelist[0];
         
     },
     set body(html){
         return this.replaceNode(this.body,html);
-        
     },
 
     get title(){
@@ -242,7 +244,8 @@ __extend__(HTMLDocument.prototype, {
         var all = this.all;
         for (var i=0; i < all.length; i++) {
             node = all[i];
-            if (node.nodeType == Node.ELEMENT_NODE && node.getAttribute('name') == name) {
+            if (node.nodeType == Node.ELEMENT_NODE && 
+                node.getAttribute('name') == name) {
                 retNodes.push(node);
             }
         }
@@ -260,5 +263,159 @@ __extend__(HTMLDocument.prototype, {
     set URL(url){
         this.location = url;  
     }
+});
+
+var __stubHTMLDocument__ = function(doc){
+    var html = doc.documentElement,
+        head,
+        body,
+        children, i;    
+    if(!html){
+        //console.log('stubbing html doc');
+        html = doc.createElement('html');
+        doc.appendChild(html);
+        head = doc.createElement('head');
+        html.appendChild(head);
+        body = doc.createElement('body');
+        html.appendChild(body);
+    }else{
+        body = doc.documentElement.getElementsByTagName('body').item(0);
+        if(!body){
+            body = doc.createElement('body');
+            html.appendChild(body);
+        }
+        head = doc.documentElement.getElementsByTagName('head').item(0);
+        if(!head){
+            head = doc.createElement('head');
+            html.appendChild(head);
+        }
+    }
+};
+
+// These two methods are enough to cover all dom 2 manipulations
+/*Aspect.around({ 
+    target: Node,  
+    method:"removeChild"
+}, function(invocation){
+    var event,
+        node = invocation.arguments[0];
+    event = node.ownerDocument.createEvent('MutationEvents');
+    event.initEvent('DOMNodeRemoved', true, false, node.parentNode, null, null, null, null);
+    node.dispatchEvent(event, false);
+    return invocation.proceed();
+    
+});*/
+Aspect.around({ 
+    target: Node,  
+    method:"appendChild"
+}, function(invocation) {
+    var event,
+        okay,
+        node = invocation.proceed(),
+        doc = node.ownerDocument;
+    if((node.nodeType !== Node.ELEMENT_NODE)){
+        //for now we are only handling element insertions.  probably we will need
+        //to handle text node changes to script tags and changes to src 
+        //attributes
+        return node;
+    }
+    //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
+    
+    switch(doc.parsing){
+        case true:
+            //handled by parser if included
+            break;
+        case false:
+            switch(node.namespaceURI){
+                case null:
+                    //fall through
+                case "":
+                    //fall through
+                case "http://www.w3.org/1999/xhtml":
+                    switch(node.tagName.toLowerCase()){
+                        case 'script':
+                            if((node.parentNode.nodeName+"".toLowerCase() == 'head')){
+                                try{
+                                    okay = Envjs.loadLocalScript(node, null);
+                                    //console.log('loaded script? %s %s', node.uuid, okay);
+                                    // only fire event if we actually had something to load
+                                    if (node.src && node.src.length > 0){
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent( okay ? "load" : "error", false, false );
+                                        node.dispatchEvent( event, false );
+                                    }
+                                }catch(e){
+                                    console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                }
+                            }
+                            break;
+                        case 'frame':
+                            node.contentDocument = new HTMLDocument(new DOMImplementation());
+                            node.contentWindow = { document: node.contentDocument };
+                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                event = node.contentDocument.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            });
+                            try{
+                                if (node.src && node.src.length > 0){
+                                    console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    event = doc.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                            }
+                            break;
+                        case 'iframe':
+                            node.contentDocument = new HTMLDocument(new DOMImplementation());
+                            node.contentWindow = { document: node.contentDocument };
+                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                event = node.contentDocument.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            });
+                            try{
+                                if (node.src && node.src.length > 0){
+                                    console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                            }
+                            break;
+                        case 'link':
+                            if (node.href && node.href.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            break;
+                        case 'img':
+                            if (node.src && node.src.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            break;
+                        default:
+                            break;
+                    }//switch on name
+                default:
+                    break;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element appended: %s %s', node+'', node.namespaceURI);
+    }//switch on doc.parsing
+    return node;
+
 });
 

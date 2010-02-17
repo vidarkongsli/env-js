@@ -164,7 +164,7 @@ Window = function(scope, parent, opener){
         },
         set location(uri){
             uri = Envjs.location(uri);
-            new Window(this, this.parent, this.opener);
+            //new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
             }else if($location.href == 'about:blank'){

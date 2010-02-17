@@ -6,7 +6,7 @@ cp BrowserTreeBuilder.java html5/gwt-src/nu/validator/htmlparser/gwt/BrowserTree
 cp HtmlParserModule.java html5/gwt-src/nu/validator/htmlparser/gwt/HtmlParserModule.java
 cp HtmlParser.java html5/gwt-src/nu/validator/htmlparser/gwt/HtmlParser.java
 
-cp gwt-1.5.1/gwt-dev-*.jar gwt-1.5.1/gwt-dev.jar
+#cp gwt-1.5.1/gwt-dev-*.jar gwt-1.5.1/gwt-dev.jar
 
 APPDIR=`dirname $0`/html5/;
 
@@ -44,8 +44,18 @@ echo $APPDIR
 # Min
 ###
 #echo "Generating Minified HTMLParser"
-#java -XstartOnFirstThread -Xmx256M -cp "$APPDIR/src:$APPDIR/gwt-src:$APPDIR/super:./gwt-1.5.1/gwt-user.jar:./gwt-1.5.1/gwt-dev.jar" com.google.gwt.dev.GWTCompiler -out "build/min" "$@" nu.validator.htmlparser.HtmlParser;
+#java -XstartOnFirstThread -Xmx256M -cp "$APPDIR/src:$APPDIR/gwt-src:$APPDIR/super:./gwt-2.0.2/gwt-user.jar:./gwt-2.0.2/gwt-dev.jar" com.google.gwt.dev.GWTCompiler -compileReport -out "build/min" "$@" nu.validator.htmlparser.HtmlParser;
 #cp ./build/min/nu.*.HtmlParser/nu.*.HtmlParser.nocache.js ./build/htmlparser.js
+
+
+## replaces local named function definitions with variable named assignments;
+#perl -p -e "s/function (\w{2}i)/\$1 = function/g" ../src/parser/htmlparser.js
+
+## creates variable declarations for varaibale named assignments
+#perl -p -e "s/.*function (\w{2}i).*/\var \$1;/g" ../src/parser/htmlparser.js
+#perl -p -e "s/([\w\\$]{2}[gh]).*,$/\$1,/g" ../src/parser/strings.js > ../src/parser/string_declarations.js
+
+## see notes at top of file
 #perl -pi~ -e "s/if\(j\.addEventListener\)(.*)50\)/\/\*envjsedit\*\//" ./build/htmlparser.js 
 #perl -pi~ -e "s/if\(j\.removeEventListener\)/if\(false\/\*envjsedit\*\/\)/" ./build/htmlparser.js
 #perl -pi~ -e "s/function kb\(\)/\/\*envjsedit\*\/var kb = Html5Parser = function\(\)/" ./build/htmlparser.js
@@ -53,11 +63,11 @@ echo $APPDIR
 ###
 # Pretty HTMLParser
 #
-echo "Generating Pretty HTMLParser"
-#java -XstartOnFirstThread -Xmx256M -cp "$APPDIR/src:$APPDIR/gwt-src:$APPDIR/super:./gwt-1.5.1/gwt-user.jar:./gwt-1.5.1/gwt-dev.jar" com.google.gwt.dev.GWTCompiler -style PRETTY -out "build/pretty" "$@" nu.validator.htmlparser.HtmlParser;
-cp ./build/pretty/nu.*.HtmlParser/nu.*.HtmlParser.nocache.js ./build/htmlparser.pretty.js
+#echo "Generating Pretty HTMLParser"
+java -XstartOnFirstThread -Xmx256M -cp "$APPDIR/src:$APPDIR/gwt-src:$APPDIR/super:./gwt-2.0.2/gwt-user.jar:./gwt-2.0.2/gwt-dev.jar" com.google.gwt.dev.GWTCompiler -compileReport -style PRETTY -out "build/pretty" "$@" nu.validator.htmlparser.HtmlParser;
+#cp ./build/pretty/nu.*.HtmlParser/nu.*.HtmlParser.nocache.js ./build/htmlparser.pretty.js
 
-perl -pi~ -e "s/\(function\s\{(.*)\}//" ./build/htmlparser.pretty.js 
+#perl -pi~ -e "s/\(function\s\{(.*)\}//" ./build/htmlparser.pretty.js 
 #perl -pi~ -e "s/,\s50\);/envjsedit\*\//s" ./build/htmlparser.pretty.js 
 #perl -pi~ -e "s/if(.*)\((.*)doc_0\.removeEventListener\)/if\(false\/\*envjsedit\*\/\)/" ./build/htmlparser.pretty.js
 #perl -pi~ -e "s/function onBodyDone\(\)/\/\*envjsedit\*\/var onBodyDone = Html5Parser = function\(\)/" ./build/htmlparser.pretty.js
@@ -77,6 +87,6 @@ perl -pi~ -e "s/\(function\s\{(.*)\}//" ./build/htmlparser.pretty.js
 #perl -pi~ -e "s/function onBodyDone\(\)/\/\*envjsedit\*\/var onBodyDone = Html5Parser = function\(\)/" ./build/html5.detailed.js
 ####
 
-rm ./build/*.js~
+#rm ./build/*.js~
 
-cp ./build/htmlparser*.js ../src/parser/
+#cp ./build/htmlparser*.js ../src/parser/

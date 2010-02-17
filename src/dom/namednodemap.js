@@ -14,7 +14,6 @@ NamedNodeMap = function(ownerDocument, parentNode) {
     __setArray__(this, []);
 };
 NamedNodeMap.prototype = new NodeList;
-
 __extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;

@@ -18,9 +18,7 @@ load('test/specs/env.qunit.js');
 
 load('local_settings.js');
 load('test/specs/window/spec.js');
-    
-document.async = false;
-location = SETTINGS.AJAX_BASE + 'test/specs/window/index.html';
 
-start();
+
+location = SETTINGS.AJAX_BASE + 'test/specs/window/index.html';
 Envjs.wait();

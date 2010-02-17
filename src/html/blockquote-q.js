@@ -5,7 +5,7 @@
 HTMLQuoteElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLQuoteElement.prototype = new HTMLElement;
+__extend__(HTMLQuoteElement.prototype, HTMLElement.prototype);
 __extend__(HTMLQuoteElement.prototype, {
     get cite(){
         return this.getAttribute('cite');

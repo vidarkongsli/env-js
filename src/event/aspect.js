@@ -1,14 +1,14 @@
 /**
-* jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
-* http://jquery-aop.googlecode.com/
-*
-* Licensed under the MIT license:
-* http://www.opensource.org/licenses/mit-license.php
-*
-* Version: 1.1
-*/
-window.$profiler;
-
+ * Borrowed with love from:
+ * 
+ * jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
+ * http://jquery-aop.googlecode.com/
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/mit-license.php
+ *
+ * Version: 1.1
+ */
 (function() {
 
 	var _after	= 1;
@@ -97,7 +97,7 @@ window.$profiler;
 
 	};
 
-	window.$profiler = 
+	Aspect = 
 	{
 		/**
 		 * Creates an advice after the defined point-cut. The advice will be executed after the point-cut method 
@@ -236,3 +236,6 @@ window.$profiler;
 	};
 
 })();
+
+
+

@@ -11,8 +11,8 @@ Attr = function(ownerDocument) {
     this.ownerElement = null;
     //TODO: our implementation of Attr is incorrect because we don't
     //      treat the value of the attribute as a child text node.
-};Attr.prototype = new Node;
-
+};
+Attr.prototype = new Node;
 __extend__(Attr.prototype, {
     // the name of this attribute
     get name(){

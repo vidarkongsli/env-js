@@ -116,20 +116,19 @@ Location = function(url, doc, history){
             var _this = this,
                 xhr;
             
-            //console.log('assigning %s',url);
+            console.log('assigning %s',url);
             $url = url;
             //we can only assign if this Location is associated with a document
             if($document){
-                //console.log("fetching %s (async? %s)", url, $document.async);
+                console.log("fetching %s (async? %s)", url, $document.async);
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", url, $document.async);
                 
                 if($document.toString()=="[object HTMLDocument]"){
                     //tell the xhr to not parse the document as XML
-                    //console.log("loading html document");
+                    console.log("loading html document");
                     xhr.onreadystatechange = function(){
-                        var html, head, title, body, event;
-                        //console.log("readyState %s", xhr.readyState);
+                        console.log("readyState %s", xhr.readyState);
                         if(xhr.readyState === 4){
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
                         }    
@@ -166,7 +165,7 @@ Location = function(url, doc, history){
 };
 
 var __exchangeHTMLDocument__ = function(doc, text, url){
-
+    var html, head, title, body, event;
     try{
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
@@ -183,11 +182,15 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(head);
         html.appendChild(body);
         doc.appendChild(html);
-    }finally{
+        
         //DOMContentLoaded event
         if(doc.createEvent){
             event = doc.createEvent('Events');
             event.initEvent("DOMContentLoaded", false, false);
+            doc.dispatchEvent( event, false );
+            
+            event = doc.createEvent('HTMLEvents');
+            event.initEvent("load", false, false);
             doc.dispatchEvent( event, false );
         }
         

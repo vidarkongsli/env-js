@@ -3,7 +3,6 @@
  *      This represents the content of a comment, i.e., all the 
  *      characters between the starting '<!--' and ending '-->'
  * @extends CharacterData
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  ownerDocument :  The Document object associated with this node.
  */
 Comment = function(ownerDocument) {

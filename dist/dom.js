@@ -290,7 +290,6 @@ NamedNodeMap = function(ownerDocument, parentNode) {
     __setArray__(this, []);
 };
 NamedNodeMap.prototype = new NodeList;
-
 __extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
@@ -1434,7 +1433,6 @@ __extend__(Namespace.prototype, {
 /**
  * @class  CharacterData - parent abstract class for Text and Comment
  * @extends Node
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  ownerDocument : The Document object associated with this node.
  */
 CharacterData = function(ownerDocument) {
@@ -1569,7 +1567,6 @@ Text = function(ownerDocument) {
     CharacterData.apply(this, arguments);
     this.nodeName  = "#text";
 };
-
 Text.prototype = new CharacterData;
 __extend__(Text.prototype,{
     get localName(){
@@ -1651,7 +1648,6 @@ __extend__(CDATASection.prototype,{
  *      This represents the content of a comment, i.e., all the 
  *      characters between the starting '<!--' and ending '-->'
  * @extends CharacterData
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  ownerDocument :  The Document object associated with this node.
  */
 Comment = function(ownerDocument) {
@@ -1684,7 +1680,7 @@ DocumentType = function(ownerDocument) {
     this.systemId = null;
     this.publicId = null;
 };
-DocumentType.prototype = new Node; 
+DocumentType.prototype = new Node;
 __extend__({
     get name(){
         return this.nodeName;
@@ -1715,8 +1711,8 @@ Attr = function(ownerDocument) {
     this.ownerElement = null;
     //TODO: our implementation of Attr is incorrect because we don't
     //      treat the value of the attribute as a child text node.
-};Attr.prototype = new Node;
-
+};
+Attr.prototype = new Node;
 __extend__(Attr.prototype, {
     // the name of this attribute
     get name(){
@@ -1771,7 +1767,6 @@ Element = function(ownerDocument) {
     this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
 Element.prototype = new Node;
-
 __extend__(Element.prototype, {	
     // The name of the element.
     get tagName(){
@@ -2009,8 +2004,6 @@ DOMException.INVALID_ACCESS_ERR             = 15;
  * @class  DocumentFragment - 
  *      DocumentFragment is a "lightweight" or "minimal" Document object.
  * @extends Node
- * @author orignially Jon van Noort (jon@webarcana.com.au) 
- *      and David Joham (djoham@yahoo.com)
  * @param  ownerDocument :  The Document object associated with this node.
  */
 DocumentFragment = function(ownerDocument) {
@@ -2056,7 +2049,6 @@ ProcessingInstruction = function(ownerDocument) {
     Node.apply(this, arguments);
 };
 ProcessingInstruction.prototype = new Node;
-
 __extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;

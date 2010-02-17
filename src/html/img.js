@@ -6,7 +6,6 @@ HTMLImageElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 HTMLImageElement.prototype = new HTMLElement;
-
 __extend__(HTMLImageElement.prototype, {
     get alt(){
         return this.getAttribute('alt');

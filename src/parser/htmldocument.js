@@ -10,23 +10,6 @@ __extend__(HTMLDocument.prototype,{
             HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
             this._open = false;
             this._writebuffer = null;
-            //DOMContentLoaded event
-            if(this.createEvent){
-                event = this.createEvent('Events');
-                event.initEvent("DOMContentLoaded", false, false);
-                this.dispatchEvent( event, false );
-            }
-            
-            try{
-                if(this.parentWindow){
-                    event = this.createEvent('HTMLEvents');
-                    event.initEvent("load", false, false);
-                    this.parentWindow.dispatchEvent( event, false );
-                }
-            }catch(e){
-                //console.log('window load event failed %s', e);
-                //swallow
-            }
         }
     },
     write: function(htmlstring){ 
@@ -41,64 +24,114 @@ __extend__(HTMLDocument.prototype,{
 });
 
 var __elementPopped__ = function(ns, name, node){
-    //console.log('error loading html element %s %s %s %e', ns, name, node);
+    //console.log('popped html element %s %s %s', ns, name, node);
     var doc = node.ownerDocument,
         okay,
         event;
-    // SMP: subtle issue here: we're currently getting two kinds of script nodes from the html5 parser.
-    // The "fake" nodes come with a type of undefined. The "real" nodes come with the type that's given,
-    // or null if not given. So the following check has the side-effect of ignoring the "fake" nodes. So
-    // something to watch for if this code changes.
-    var type = ( node.type === null ) ? "text/javascript" : node.type;
-    try{
-        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript" 
-            && (node.src || node.childNodes.length > 0)){
-            //$env.debug("element popped: script\n"+node.xml);
-            // unless we're parsing in a window context, don't execute scripts
-            if (doc.toString() === '[object HTMLDocument]'){
-                
-                okay = Envjs.loadLocalScript(node, null);
-                //console.log('loaded script? %s %s', node.uuid, okay);
-                // only fire event if we actually had something to load
-                if (node.src && node.src.length > 0){
-                    event = doc.createEvent('HTMLEvents');
-                    event.initEvent( okay ? "load" : "error", false, false );
-                    node.dispatchEvent( event, false );
-                }
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'frame' ||
-                 node.nodeName.toLowerCase() == 'iframe'   ){
-            
-            if (node.src && node.src.length > 0){
-                //console.log("getting content document for (i)frame from %s", node.src);
-    
-                Envjs.loadFrame(node, Envjs.location(node.src));
-    
-                event = doc.createEvent('HTMLEvents');
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'link'){
-            //$env.debug("element popped: link\n"+node.xml);
-            if (node.href && node.href.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                event = doc.createEvent('HTMLEvents');
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'img'){
-            //$env.debug("element popped: img \n"+node.xml);
-            if (node.src && node.src.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                event = doc.createEvent('HTMLEvents');
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-    }catch(e){
-        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-    }
+    switch(doc+''){
+        case '[object XMLDocument]':
+            return;
+        case '[object HTMLDocument]':
+            switch(ns){
+                case null:
+                case "":
+                case "http://www.w3.org/1999/xhtml":
+                    switch(name.toLowerCase()){
+                        case 'script':
+                            try{
+                                okay = Envjs.loadLocalScript(node, null);
+                                //console.log('loaded script? %s %s', node.uuid, okay);
+                                // only fire event if we actually had something to load
+                                if (node.src && node.src.length > 0){
+                                    event = doc.createEvent('HTMLEvents');
+                                    event.initEvent( okay ? "load" : "error", false, false );
+                                    node.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                            }
+                            return;
+                        case 'frame':
+                            try{
+                                if (node.src && node.src.length > 0){
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    event = doc.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                            }
+                            return;
+                        case 'iframe':
+                            try{
+                                if (node.src && node.src.length > 0){
+                                    console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    event = node.ownerDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                            }
+                            return;
+                        case 'link':
+                            if (node.href && node.href.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            return;
+                        case 'img':
+                            if (node.src && node.src.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            return;
+                        case 'html':
+                            doc.parsing = false;
+                            //DOMContentLoaded event
+                            if(doc.createEvent){
+                                event = doc.createEvent('Events');
+                                event.initEvent("DOMContentLoaded", false, false);
+                                doc.dispatchEvent( event, false );
+                            }
+                            
+                            if(doc.createEvent){
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                doc.dispatchEvent( event, false );
+                            }
+                            
+                            try{
+                                if(doc.parentWindow){
+                                    event = doc.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    doc.parentWindow.dispatchEvent( event, false );
+                                }
+                                if(doc === window.document){
+                                    //console.log('triggering window.load')
+                                    event = doc.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    window.dispatchEvent( event, false );
+                                }
+                            }catch(e){
+                                //console.log('window load event failed %s', e);
+                                //swallow
+                            }
+                        default:
+                            return;
+                    }//switch on name
+                default:
+                    return;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
+    }//switch on doc type
 };

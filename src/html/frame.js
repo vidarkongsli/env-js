@@ -6,13 +6,8 @@ HTMLFrameElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
     // this is normally a getter but we need to be
     // able to set it to correctly emulate behavior
-    var contentDocument
-        contentWindow = {
-        get document(){
-            return contentDocument;
-        }
-    };
-    contentDocument = new HTMLDocument(new DOMImplementation(), contentWindow);
+    this.contentDocument = null;
+    this.contentWindow = null;
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {

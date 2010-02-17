@@ -2,7 +2,7 @@
 var _count = 1,
     _starttime = new Date().getTime(),
     _endtime,
-    _start;
+    _start = QUnit.start;
     
 
 QUnit.log = function(result, message){

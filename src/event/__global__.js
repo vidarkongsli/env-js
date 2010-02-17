@@ -14,4 +14,7 @@ var Event,
     MutationEvent,
     DocumentEvent,
     EventTarget,
-    EventException;
+    EventException,
+    //nonstandard but very useful for implementing mutation events 
+    //among other things like general profiling
+    Aspect;

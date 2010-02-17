@@ -29,8 +29,12 @@ Envjs.loadFrame = function(frame, url){
         
         frame.contentWindow = {};
         new Window(frame.contentWindow, window);
-       
+        
+        //I dont think frames load asynchronously in firefox
+        //but I haven't verified this...
+        frame.contentDocument = frame.contentWindow.document;
         frame.contentDocument.async = false;
+        console.log('envjs.loadFrame async %s', frame.contentDocument.async);
         frame.contentWindow.location = url;
     } catch(e) {
         console.log("failed to load frame content: from %s %s", url, e);

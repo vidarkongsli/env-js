@@ -13,7 +13,6 @@ ProcessingInstruction = function(ownerDocument) {
     Node.apply(this, arguments);
 };
 ProcessingInstruction.prototype = new Node;
-
 __extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;

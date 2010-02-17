@@ -15,7 +15,6 @@ Text = function(ownerDocument) {
     CharacterData.apply(this, arguments);
     this.nodeName  = "#text";
 };
-
 Text.prototype = new CharacterData;
 __extend__(Text.prototype,{
     get localName(){

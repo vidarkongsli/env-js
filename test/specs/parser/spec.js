@@ -172,3 +172,24 @@ test('HTMLElement.innerHTML', function(){
     
 });
 
+test('HTMLParser.parseDocument', function(){
+    //one of the easiest way to test the HTMLParser is using frames and 
+    //writing the document directly
+    expect(1);
+    var iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+
+    iframe.addEventListener('load', function(){
+        ok(true, 'frame loaded');
+        document.body.removeChild( iframe );
+        start();
+    }, false);
+    
+    var doc = iframe.contentDocument;
+    doc.open();
+    doc.write("<body><p id='p1'>this is a pig</p></body>");
+    doc.close();
+    stop();
+    
+});
+

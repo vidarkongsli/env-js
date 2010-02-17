@@ -117,30 +117,33 @@ public class HtmlParser {
     public void parse(String source, boolean useSetTimeouts, ParseEndListener callback) throws SAXException {
         parseEndListener = callback;
         domTreeBuilder.setFragmentContext(null);
-        tokenize(source, useSetTimeouts, null);   
+		tokenize(source, useSetTimeouts, null);   
     }
-
     /**
      * @param is
      * @throws SAXException
      * @throws IOException
      * @throws MalformedURLException
      */
-    private void tokenize(String source, boolean useSetTimeouts, String context) throws SAXException {
-        lastWasCR = false;
-        ending = false;
-        documentWriteBuffer.setLength(0);
-        streamLength = source.length();
-        stream = new UTF16Buffer(source.toCharArray(), 0,
-                (streamLength < CHUNK_SIZE ? streamLength : CHUNK_SIZE));
-        bufferStack.clear();
-        push(stream);
-        domTreeBuilder.setFragmentContext(context == null ? null : context.intern());
-        tokenizer.start();
-        pump(useSetTimeouts);
+    private void tokenize(String source, final boolean useSetTimeouts, String context) throws SAXException {
+    	
+                lastWasCR = false;
+                ending = false;
+                documentWriteBuffer.setLength(0);
+                streamLength = source.length();
+                stream = new UTF16Buffer(source.toCharArray(), 0,
+                        (streamLength < CHUNK_SIZE ? streamLength : CHUNK_SIZE));
+                bufferStack.clear();
+                push(stream);
+                domTreeBuilder.setFragmentContext(context == null ? null : context.intern());
+                
+                tokenizer.start();
+                pump(useSetTimeouts);
     }
 
     private void pump(boolean useSetTimeouts) throws SAXException {
+
+    	
         if (ending) {
             tokenizer.end();
             domTreeBuilder.getDocument(); // drops the internal reference
@@ -238,16 +241,17 @@ public class HtmlParser {
         bufferStack.removeLast();
     }
 
-    public void documentWrite(String text) throws SAXException {
-        UTF16Buffer buffer = new UTF16Buffer(text.toCharArray(), 0, text.length());
-        while (buffer.hasMore()) {
-            buffer.adjust(lastWasCR);
-            lastWasCR = false;
-            if (buffer.hasMore()) {
-                lastWasCR = tokenizer.tokenizeBuffer(buffer);            
-                domTreeBuilder.maybeRunScript();
-            }
-        }
+    public void documentWrite(final String text) throws SAXException {
+
+      UTF16Buffer buffer = new UTF16Buffer(text.toCharArray(), 0, text.length());
+      while (buffer.hasMore()) {
+          buffer.adjust(lastWasCR);
+          lastWasCR = false;
+          if (buffer.hasMore()) {
+              lastWasCR = tokenizer.tokenizeBuffer(buffer);            
+              domTreeBuilder.maybeRunScript();
+          }
+      } 
     }
 
     /**

@@ -15,7 +15,6 @@ __extend__(DOMParser.prototype,{
     }
 });
 
-XMLParser = {};
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     //console.log('XMLParser.parseDocument')
     var tmpdoc = new Document(new DOMImplementation()),
@@ -53,10 +52,10 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
 };
 
 var __fragmentCache__ = {};
-HTMLParser = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
-    //console.log('HTMLParser.parseDocument')
-    Envjs.parseHtmlDocument(htmlstring, htmldoc, false, null, null);  
+    console.log('HTMLParser.parseDocument %s', htmldoc.async);
+    htmldoc.parsing = true;
+    Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
     //Envjs.wait(-1);
     return htmldoc;
 };
@@ -67,8 +66,8 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
         parent,
         importedNode,
         tmpNode,
-        i,
-        length;
+        length,
+        i;
     
     if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
         tmpdoc = __fragmentCache__[htmlstring];

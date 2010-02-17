@@ -50,7 +50,7 @@ __extend__(HTMLFrameElement.prototype,{
     set src(value){
         var event;
         this.setAttribute('src', value);
-        if (value && value.length > 0){
+        if (this.parentNode && value && value.length > 0){
             //console.log('loading frame %s', value);
             Envjs.loadFrame(this, Envjs.location(value));
             
@@ -428,7 +428,7 @@ Window = function(scope, parent, opener){
         },
         set location(uri){
             uri = Envjs.location(uri);
-            new Window(this, this.parent, this.opener);
+            //new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
             }else if($location.href == 'about:blank'){

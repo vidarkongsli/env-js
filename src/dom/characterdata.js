@@ -2,7 +2,6 @@
 /**
  * @class  CharacterData - parent abstract class for Text and Comment
  * @extends Node
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  ownerDocument : The Document object associated with this node.
  */
 CharacterData = function(ownerDocument) {
