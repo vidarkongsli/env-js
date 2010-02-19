@@ -11,12 +11,53 @@ Envjs.os_version     = java.lang.System.getProperty("os.version");
 Envjs.lang           = java.lang.System.getProperty("user.lang"); 
 Envjs.platform       = "Rhino ";//how do we get the version
     
+
+/**
+ * 
+ * @param {Object} frameElement
+ * @param {Object} url
+ */
+Envjs.loadFrame = function(frame, url){
+    try {
+        if(frame.contentWindow){
+            //mark for garbage collection
+            frame.contentWindow = null; 
+        }
+        
+        //create a new scope for the window proxy
+        frame.contentWindow = __context__.initStandardObjects();
+        new Window(frame.contentWindow, window);
+        
+        //I dont think frames load asynchronously in firefox
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
+        frame.contentDocument = frame.contentWindow.document;
+        frame.contentDocument.async = false;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
+    } catch(e) {
+        console.log("failed to load frame content: from %s %s", url, e);
+    }
+};
+
 /**
  * Makes an object window-like by proxying object accessors
  * @param {Object} scope
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent){
+
+    try{   
+        if(scope+'' == '[object global]'){
+            __context__.initStandardObjects(scope);
+            //console.log('succeeded to init standard objects %s %s', scope, parent);
+        }
+    }catch(e){
+        console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
+    }
+    
     var _scope = scope;
         _parent = parent||null,
         _this = this,
@@ -64,17 +105,20 @@ Envjs.proxy = function(scope, parent){
                 }
             },
             'delete': function(nameOrIndex){
-                console.log('deleting %s', nameOrIndex);
+                //console.log('deleting %s', nameOrIndex);
                 delete _scope[nameOrIndex+''];
             },
             get parentScope(){
+                //console.log('get proxy parentScope');
                 return _parent;
             },
             set parentScope(parent){
+                //console.log('set proxy parentScope');
                 _parent = parent;
             },
             get topLevelScope(){
-                return _scope;
+                //console.log('get proxy topLevelScope');
+                return _parent;
             },
             equivalentValues: function(value){
                 return (value == _scope || value == this );
@@ -84,5 +128,8 @@ Envjs.proxy = function(scope, parent){
             }
         });
         
+    
+            
     return _proxy;
+    
 };

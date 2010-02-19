@@ -172,15 +172,21 @@ test('HTMLElement.innerHTML', function(){
     
 });
 
-test('HTMLParser.parseDocument', function(){
+test('HTMLParser.parseDocument / simple content', function(){
     //one of the easiest way to test the HTMLParser is using frames and 
     //writing the document directly
-    expect(1);
+    expect(4);
     var iframe = document.createElement("iframe");
     document.body.appendChild(iframe);
 
     iframe.addEventListener('load', function(){
+        var doc;
         ok(true, 'frame loaded');
+        
+        doc = iframe.contentDocument;
+        ok(doc, 'frame has contentDocument');
+        equals(doc+'', '[object HTMLDocument]', 'doc is HTMLDocument')
+        equals(doc.body.innerHTML,'<p id="p1">this is a pig</p>', 'innerHTML');
         document.body.removeChild( iframe );
         start();
     }, false);
@@ -192,4 +198,33 @@ test('HTMLParser.parseDocument', function(){
     stop();
     
 });
+
+test('HTMLParser.parseDocument / malformed content', function(){
+    //one of the easiest way to test the HTMLParser is using frames and 
+    //writing the document directly
+    expect(4);
+    var iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+
+    iframe.addEventListener('load', function(){
+        var doc;
+        ok(true, 'frame loaded');
+        
+        doc = iframe.contentDocument;
+        ok(doc, 'frame has contentDocument');
+        equals(doc+'', '[object HTMLDocument]', 'doc is HTMLDocument')
+        equals(doc.body.innerHTML,'<p id="p1">this is a pig</p>', 'innerHTML');
+        document.body.removeChild( iframe );
+        start();
+    }, false);
+    
+    var doc = iframe.contentDocument;
+    doc.open();
+    doc.write("<body><p id='p1'>this is a pig</body>");
+    doc.close();
+    stop();
+    
+});
+
+
 

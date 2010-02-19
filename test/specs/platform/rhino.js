@@ -21,32 +21,33 @@ test('Envjs Platform Interfaces Available', function(){
 var document = null,
     path = 'specs/env/spec.html';
 
-test('Envjs.location', function(){
+test('Envjs.uri', function(){
+    var uri;
     
-    location = Envjs.location('specs/env/spec.html', 'http://envjs.com/abc123/');
-    ok(location, 'Able to create Location');
-    equals(location, 'http://envjs.com/abc123/'+path, 'location');
-    equals(location.toString(), 'http://envjs.com/abc123/'+path, 'location');
+    uri = Envjs.uri('specs/env/spec.html', 'http://envjs.com/abc123/');
+    ok(uri, 'Able to create uri');
+    equals(uri, 'http://envjs.com/abc123/'+path, 'uri');
+    equals(uri.toString(), 'http://envjs.com/abc123/'+path, 'uri');
     
     document = {baseURI:'http://envjs.com/'};
     
-    location = Envjs.location('specs/env/spec.html');
-    ok(location, 'Able to create Location');
-    equals(location, 'http://envjs.com/specs/env/spec.html', 'location');
-    equals(location.toString(), 'http://envjs.com/specs/env/spec.html', 'location');
+    uri = Envjs.uri('specs/env/spec.html');
+    ok(uri, 'Able to create uri');
+    equals(uri, 'http://envjs.com/specs/env/spec.html', 'uri');
+    equals(uri.toString(), 'http://envjs.com/specs/env/spec.html', 'uri');
     
     
-    location = Envjs.location('specs/env/spec.html', 'http://envjs.com/');
-    ok(location, 'Able to create Location');
-    equals(location, 'http://envjs.com/specs/env/spec.html', 'location');
-    equals(location.toString(), 'http://envjs.com/specs/env/spec.html', 'location');
+    uri = Envjs.uri('specs/env/spec.html', 'http://envjs.com/');
+    ok(uri, 'Able to create uri');
+    equals(uri, 'http://envjs.com/specs/env/spec.html', 'uri');
+    equals(uri.toString(), 'http://envjs.com/specs/env/spec.html', 'uri');
     
     document = null;
     
-    location = Envjs.location('http://envjs.com/specs/env/spec.html');
-    ok(location, 'Able to create Location');
-    equals(location, 'http://envjs.com/specs/env/spec.html', 'location');
-    equals(location.toString(), 'http://envjs.com/specs/env/spec.html', 'location');
+    uri = Envjs.uri('http://envjs.com/specs/env/spec.html');
+    ok(uri, 'Able to create uri');
+    equals(uri, 'http://envjs.com/specs/env/spec.html', 'uri');
+    equals(uri.toString(), 'http://envjs.com/specs/env/spec.html', 'uri');
     
 });
 

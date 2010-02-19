@@ -53,7 +53,7 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
 
 var __fragmentCache__ = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
-    console.log('HTMLParser.parseDocument %s', htmldoc.async);
+    //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
     Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
     //Envjs.wait(-1);

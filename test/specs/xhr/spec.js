@@ -18,7 +18,7 @@ try{
     document = new HTMLDocument(new DOMImplementation());
     
     console.log('mocking global document location.');
-    location = new Location(Envjs.location(expected_path, SETTINGS.AJAX_BASE), document);
+    location = new Location(Envjs.uri(expected_path, SETTINGS.AJAX_BASE), document);
     document.baseURI = location.href;
     location.reload();
 }

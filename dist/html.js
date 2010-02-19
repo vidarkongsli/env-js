@@ -103,11 +103,11 @@ function __setArray__( target, array ) {
  *
  * @extends Document
  */
-HTMLDocument = function(implementation, parentWindow, referrer) {
+HTMLDocument = function(implementation, ownerWindow, referrer) {
     Document.apply(this, arguments);
     this.referrer = referrer;
     this.baseURI = "about:blank";
-    this.parentWindow = parentWindow;
+    this.ownerWindow = ownerWindow;
 };
 HTMLDocument.prototype = new Document;
 
@@ -388,19 +388,6 @@ var __stubHTMLDocument__ = function(doc){
     }
 };
 
-// These two methods are enough to cover all dom 2 manipulations
-/*Aspect.around({ 
-    target: Node,  
-    method:"removeChild"
-}, function(invocation){
-    var event,
-        node = invocation.arguments[0];
-    event = node.ownerDocument.createEvent('MutationEvents');
-    event.initEvent('DOMNodeRemoved', true, false, node.parentNode, null, null, null, null);
-    node.dispatchEvent(event, false);
-    return invocation.proceed();
-    
-});*/
 Aspect.around({ 
     target: Node,  
     method:"appendChild"
@@ -441,33 +428,15 @@ Aspect.around({
                                         node.dispatchEvent( event, false );
                                     }
                                 }catch(e){
-                                    console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    console.log('error loading html element %s %e', node, e.toString());
                                 }
                             }
                             break;
                         case 'frame':
-                            node.contentDocument = new HTMLDocument(new DOMImplementation());
-                            node.contentWindow = { document: node.contentDocument };
-                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
-                                event = node.contentDocument.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            });
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            break;
                         case 'iframe':
-                            node.contentDocument = new HTMLDocument(new DOMImplementation());
-                            node.contentWindow = { document: node.contentDocument };
+                            node.contentWindow = { };
+                            node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
+                            node.contentWindow.document = node.contentDocument
                             node.contentDocument.addEventListener('DOMContentLoaded', function(){
                                 event = node.contentDocument.createEvent('HTMLEvents');
                                 event.initEvent("load", false, false);
@@ -475,14 +444,26 @@ Aspect.around({
                             });
                             try{
                                 if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.uri(node.src));
                                     event = node.contentDocument.createEvent('HTMLEvents');
                                     event.initEvent("load", false, false);
                                     node.dispatchEvent( event, false );
+                                }else{
+                                    //I dont like this being here:
+                                    //TODO: better  mix-in strategy so the try/catch isnt required
+                                    try{
+                                        if(Window){
+                                            Envjs.loadFrame(node);
+                                            //console.log('src/html/document.js: triggering frame load');
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){}
                                 }
                             }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                console.log('error loading html element %s %e', node, e.toString());
                             }
                             break;
                         case 'link':

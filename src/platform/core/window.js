@@ -27,15 +27,21 @@ Envjs.loadFrame = function(frame, url){
             frame.contentWindow = null; 
         }
         
-        frame.contentWindow = {};
+        //create a new scope for the window proxy
+        //platforms will need to override this function
+        //to make sure the scope is global-like
+        frame.contentWindow = (function(){return this;})();
         new Window(frame.contentWindow, window);
         
         //I dont think frames load asynchronously in firefox
-        //but I haven't verified this...
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
         frame.contentDocument = frame.contentWindow.document;
         frame.contentDocument.async = false;
-        console.log('envjs.loadFrame async %s', frame.contentDocument.async);
-        frame.contentWindow.location = url;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
     } catch(e) {
         console.log("failed to load frame content: from %s %s", url, e);
     }

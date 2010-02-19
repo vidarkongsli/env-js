@@ -4,7 +4,7 @@
  * @param {Object} path
  * @param {Object} base
  */
-Envjs.location = function(path, base){};
+Envjs.uri = function(path, base){};
     
     
 /**

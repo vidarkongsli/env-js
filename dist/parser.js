@@ -605,7 +605,7 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
 
 var __fragmentCache__ = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
-    console.log('HTMLParser.parseDocument %s', htmldoc.async);
+    //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
     Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
     //Envjs.wait(-1);
@@ -729,7 +729,9 @@ var __elementPopped__ = function(ns, name, node){
         case '[object XMLDocument]':
             return;
         case '[object HTMLDocument]':
-            switch(ns){
+            switch(node.namespaceURI){
+                case "http://n.validator.nu/placeholder/":
+                    return;
                 case null:
                 case "":
                 case "http://www.w3.org/1999/xhtml":
@@ -737,7 +739,7 @@ var __elementPopped__ = function(ns, name, node){
                         case 'script':
                             try{
                                 okay = Envjs.loadLocalScript(node, null);
-                                //console.log('loaded script? %s %s', node.uuid, okay);
+                                // console.log('loaded script? %s %s', node.uuid, okay);
                                 // only fire event if we actually had something to load
                                 if (node.src && node.src.length > 0){
                                     event = doc.createEvent('HTMLEvents');
@@ -749,26 +751,16 @@ var __elementPopped__ = function(ns, name, node){
                             }
                             return;
                         case 'frame':
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    //console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
                         case 'iframe':
                             try{
                                 if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.uri(node.src));
                                     event = node.ownerDocument.createEvent('HTMLEvents');
                                     event.initEvent("load", false, false);
                                     node.dispatchEvent( event, false );
+                                }else{
+                                    //console.log('src/parser/htmldocument: triggering frame load (no src)');
                                 }
                             }catch(e){
                                 console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());

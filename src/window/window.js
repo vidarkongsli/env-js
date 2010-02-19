@@ -1,4 +1,3 @@
-
 //These descriptions of window properties are taken loosely David Flanagan's
 //'JavaScript - The Definitive Guide' (O'Reilly)
 
@@ -10,14 +9,15 @@
  */
 Window = function(scope, parent, opener){
     
+    __initStandardObjects__(scope, parent);
+    
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
-        return proxy;
+        return scope;
     });
-
-    __initStandardObjects__(scope, parent);
+    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;
@@ -32,7 +32,7 @@ Window = function(scope, parent, opener){
     $htmlImplementation.errorChecking = false;
     
     // read only reference to the Document object
-    var $document = new HTMLDocument($htmlImplementation);
+    var $document = new HTMLDocument($htmlImplementation, scope);
 
     //The version of this application
     var $version = "0.1";
@@ -133,12 +133,7 @@ Window = function(scope, parent, opener){
         },
         */
         get frames(){
-            // A read-only array of window objects
-            if(HTMLCollection){
-                return new HTMLCollection($document.getElementsByTagName('frame'));
-            }else{
-                return __setArray__({}, []);
-            }
+        return new HTMLCollection($document.getElementsByTagName('frame'));
         },
         get length(){
             // should be frames.length,
@@ -163,7 +158,7 @@ Window = function(scope, parent, opener){
             return $location;
         },
         set location(uri){
-            uri = Envjs.location(uri);
+            uri = Envjs.uri(uri);
             //new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
@@ -258,7 +253,7 @@ Window = function(scope, parent, opener){
             if(name)
                 _window.name = name;
             _window.document.async = false;
-            _window.location.assign(Envjs.location(url));
+            _window.location.assign(Envjs.uri(url));
             return _window;
         },
         close: function(){
@@ -274,7 +269,10 @@ Window = function(scope, parent, opener){
             Envjs.prompt(message, defaultMsg);
         },
         onload: function(){},
-        onunload: function(){}
+        onunload: function(){},
+        get uuid(){
+            return $uuid;
+        }
     });
 
 };
@@ -292,7 +290,7 @@ var __top__ = function(_scope){
 var __windows__ = {};
 
 var __initStandardObjects__ = function(scope, parent){
-
+    
     var __Array__;
     if(!scope.Array){
         __Array__ = function(){
@@ -337,7 +335,7 @@ var __initStandardObjects__ = function(scope, parent){
             return  __Number__;
         });
     }
-    
+     
 };
 
 //finally pre-supply the window with the window-like environment

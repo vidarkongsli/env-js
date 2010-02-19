@@ -2,9 +2,9 @@
 //We dont fire mutation events until someone has registered for them
 var __supportedMutations__ = /DOMSubtreeModified|DOMNodeInserted|DOMNodeRemoved|DOMAttrModified|DOMCharacterDataModified/;
 
-/*var __fireMutationEvents__ = Aspect.before({
-    target: this, 
-    method:__addEventListener__
+var __fireMutationEvents__ = Aspect.before({
+    target: EventTarget, 
+    method: 'addEventListener'
 }, function(target, type){
     if(type && type.match(__supportedMutations__)){
         //unweaving removes the __addEventListener__ aspect
@@ -34,7 +34,7 @@ var __supportedMutations__ = /DOMSubtreeModified|DOMNodeInserted|DOMNodeRemoved|
             return node;
         });
     }
-});*/
+});
 
 /**
  * @name MutationEvent

@@ -116,19 +116,19 @@ Location = function(url, doc, history){
             var _this = this,
                 xhr;
             
-            console.log('assigning %s',url);
+            //console.log('assigning %s',url);
             $url = url;
             //we can only assign if this Location is associated with a document
             if($document){
-                console.log("fetching %s (async? %s)", url, $document.async);
+                //console.log("fetching %s (async? %s)", url, $document.async);
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", url, $document.async);
                 
                 if($document.toString()=="[object HTMLDocument]"){
                     //tell the xhr to not parse the document as XML
-                    console.log("loading html document");
+                    //console.log("loading html document");
                     xhr.onreadystatechange = function(){
-                        console.log("readyState %s", xhr.readyState);
+                        //console.log("readyState %s", xhr.readyState);
                         if(xhr.readyState === 4){
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
                         }    
@@ -171,7 +171,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         HTMLParser.parseDocument(text, doc);
     }catch(e){
         console.log('parsererror %s', e);
-        doc = new HTMLDocument(new DOMImplementation());
+        doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
         title =   doc.createElement('title');

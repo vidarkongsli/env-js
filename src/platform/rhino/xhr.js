@@ -5,7 +5,7 @@
  * @param {Object} path
  * @param {Object} base
  */
-Envjs.location = function(path, base){
+Envjs.uri = function(path, base){
     var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
         m = protocol.exec(path),
         baseURI;
@@ -192,7 +192,7 @@ Envjs.connection = function(xhr, responseHandler, data){
                     xhr.responseHeaders[headerName+''] = headerValue+'';
             }
         }catch(e){
-            Envjs.error('failed to load response headers',e);
+            console.log('failed to load response headers \n%s',e);
         }
         
         xhr.readyState = 4;

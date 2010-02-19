@@ -14,7 +14,9 @@ Envjs.scriptTypes = {
  * @param {Object} script
  * @param {Object} e
  */
-Envjs.onScriptLoadError = function(script, e){};
+Envjs.onScriptLoadError = function(script, e){
+    console.log('error loading script %s %s', script, e);
+};
 
 
 /**
@@ -23,17 +25,8 @@ Envjs.onScriptLoadError = function(script, e){};
  */
 Envjs.loadInlineScript = function(script){
     var tmpFile;
-    try{
-        if(Envjs.DEBUG_ENABLED){
-            //
-            Envjs.writeToTempFile(script.text, 'js') ;
-            Envjs.load(tmpFile);
-        }else{
-            eval(script.text);
-        }
-    }catch(e){
-        Envjs.onScriptLoadError(script, e);
-    }
+    tmpFile = Envjs.writeToTempFile(script.text, 'js') ;
+    load(tmpFile);
 };
 
 
@@ -48,13 +41,10 @@ Envjs.loadLocalScript = function(script){
         src, 
         i, 
         base,
-        filename,
-        // SMP: see also the note in html/document.js about script.type
-        script_type = script.type === null ? 
-            "text/javascript" : script.type;
+        filename;
     
-    if(script_type){
-        types = script_type?script_type.split(";"):[];
+    if(script.type){
+        types = script.type.split(";");
         for(i=0;i<types.length;i++){
             if(Envjs.scriptTypes[types[i]]){
                 //ok this script type is allowed
@@ -68,7 +58,7 @@ Envjs.loadLocalScript = function(script){
             //handle inline scripts
             if(!script.src)
                 Envjs.loadInlineScript(script);
-             return true
+             return true;
         }catch(e){
             //Envjs.error("Error loading script.", e);
             Envjs.onScriptLoadError(script, e);
@@ -89,12 +79,12 @@ Envjs.loadLocalScript = function(script){
             }
         }
         base = "" + script.ownerDocument.location;
-        //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
+        //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
         //console.log('base %s', base);
-        filename = Envjs.location(script.src, base);
+        filename = Envjs.uri(script.src, base);
         try {                      
             load(filename);
-            console.log('loaded %s', filename);
+            //console.log('loaded %s', filename);
         } catch(e) {
             console.log("could not load script %s \n %s", filename, e );
             Envjs.onScriptLoadError(script, e);

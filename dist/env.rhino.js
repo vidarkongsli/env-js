@@ -89,7 +89,9 @@ Envjs.scriptTypes = {
  * @param {Object} script
  * @param {Object} e
  */
-Envjs.onScriptLoadError = function(script, e){};
+Envjs.onScriptLoadError = function(script, e){
+    console.log('error loading script %s %s', script, e);
+};
 
 
 /**
@@ -98,17 +100,8 @@ Envjs.onScriptLoadError = function(script, e){};
  */
 Envjs.loadInlineScript = function(script){
     var tmpFile;
-    try{
-        if(Envjs.DEBUG_ENABLED){
-            //
-            Envjs.writeToTempFile(script.text, 'js') ;
-            Envjs.load(tmpFile);
-        }else{
-            eval(script.text);
-        }
-    }catch(e){
-        Envjs.onScriptLoadError(script, e);
-    }
+    tmpFile = Envjs.writeToTempFile(script.text, 'js') ;
+    load(tmpFile);
 };
 
 
@@ -123,13 +116,10 @@ Envjs.loadLocalScript = function(script){
         src, 
         i, 
         base,
-        filename,
-        // SMP: see also the note in html/document.js about script.type
-        script_type = script.type === null ? 
-            "text/javascript" : script.type;
+        filename;
     
-    if(script_type){
-        types = script_type?script_type.split(";"):[];
+    if(script.type){
+        types = script.type.split(";");
         for(i=0;i<types.length;i++){
             if(Envjs.scriptTypes[types[i]]){
                 //ok this script type is allowed
@@ -143,7 +133,7 @@ Envjs.loadLocalScript = function(script){
             //handle inline scripts
             if(!script.src)
                 Envjs.loadInlineScript(script);
-             return true
+             return true;
         }catch(e){
             //Envjs.error("Error loading script.", e);
             Envjs.onScriptLoadError(script, e);
@@ -164,12 +154,12 @@ Envjs.loadLocalScript = function(script){
             }
         }
         base = "" + script.ownerDocument.location;
-        //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
+        //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
         //console.log('base %s', base);
-        filename = Envjs.location(script.src, base);
+        filename = Envjs.uri(script.src, base);
         try {                      
             load(filename);
-            console.log('loaded %s', filename);
+            //console.log('loaded %s', filename);
         } catch(e) {
             console.log("could not load script %s \n %s", filename, e );
             Envjs.onScriptLoadError(script, e);
@@ -211,7 +201,7 @@ Envjs.WAIT_INTERVAL = 100;//milliseconds
  * @param {Object} path
  * @param {Object} base
  */
-Envjs.location = function(path, base){};
+Envjs.uri = function(path, base){};
     
     
 /**
@@ -282,15 +272,21 @@ Envjs.loadFrame = function(frame, url){
             frame.contentWindow = null; 
         }
         
-        frame.contentWindow = {};
+        //create a new scope for the window proxy
+        //platforms will need to override this function
+        //to make sure the scope is global-like
+        frame.contentWindow = (function(){return this;})();
         new Window(frame.contentWindow, window);
         
         //I dont think frames load asynchronously in firefox
-        //but I haven't verified this...
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
         frame.contentDocument = frame.contentWindow.document;
         frame.contentDocument.async = false;
-        console.log('envjs.loadFrame async %s', frame.contentDocument.async);
-        frame.contentWindow.location = url;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
     } catch(e) {
         console.log("failed to load frame content: from %s %s", url, e);
     }
@@ -351,6 +347,21 @@ Envjs.log = function(message){
 Envjs.lineSource = function(e){
     return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
 };
+/**
+ * load and execute script tag text content
+ * @param {Object} script
+ */
+Envjs.loadInlineScript = function(script){
+    __context__.evaluateString(
+        script.ownerDocument.ownerWindow,
+        script.text,
+        'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
+        0,
+        null
+    );
+    //console.log('evaluated at scope %s \n%s', 
+    //    script.ownerDocument.ownerWindow.uuid, script.text);
+};
 
 //Temporary patch for parser module
 Packages.org.mozilla.javascript.Context.
@@ -396,7 +407,7 @@ Envjs.onExit = function(callback){
  * @param {Object} path
  * @param {Object} base
  */
-Envjs.location = function(path, base){
+Envjs.uri = function(path, base){
     var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
         m = protocol.exec(path),
         baseURI;
@@ -583,7 +594,7 @@ Envjs.connection = function(xhr, responseHandler, data){
                     xhr.responseHeaders[headerName+''] = headerValue+'';
             }
         }catch(e){
-            Envjs.error('failed to load response headers',e);
+            console.log('failed to load response headers \n%s',e);
         }
         
         xhr.readyState = 4;
@@ -642,12 +653,53 @@ Envjs.os_version     = java.lang.System.getProperty("os.version");
 Envjs.lang           = java.lang.System.getProperty("user.lang"); 
 Envjs.platform       = "Rhino ";//how do we get the version
     
+
+/**
+ * 
+ * @param {Object} frameElement
+ * @param {Object} url
+ */
+Envjs.loadFrame = function(frame, url){
+    try {
+        if(frame.contentWindow){
+            //mark for garbage collection
+            frame.contentWindow = null; 
+        }
+        
+        //create a new scope for the window proxy
+        frame.contentWindow = __context__.initStandardObjects();
+        new Window(frame.contentWindow, window);
+        
+        //I dont think frames load asynchronously in firefox
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
+        frame.contentDocument = frame.contentWindow.document;
+        frame.contentDocument.async = false;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
+    } catch(e) {
+        console.log("failed to load frame content: from %s %s", url, e);
+    }
+};
+
 /**
  * Makes an object window-like by proxying object accessors
  * @param {Object} scope
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent){
+
+    try{   
+        if(scope+'' == '[object global]'){
+            __context__.initStandardObjects(scope);
+            //console.log('succeeded to init standard objects %s %s', scope, parent);
+        }
+    }catch(e){
+        console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
+    }
+    
     var _scope = scope;
         _parent = parent||null,
         _this = this,
@@ -695,17 +747,20 @@ Envjs.proxy = function(scope, parent){
                 }
             },
             'delete': function(nameOrIndex){
-                console.log('deleting %s', nameOrIndex);
+                //console.log('deleting %s', nameOrIndex);
                 delete _scope[nameOrIndex+''];
             },
             get parentScope(){
+                //console.log('get proxy parentScope');
                 return _parent;
             },
             set parentScope(parent){
+                //console.log('set proxy parentScope');
                 _parent = parent;
             },
             get topLevelScope(){
-                return _scope;
+                //console.log('get proxy topLevelScope');
+                return _parent;
             },
             equivalentValues: function(value){
                 return (value == _scope || value == this );
@@ -715,7 +770,10 @@ Envjs.proxy = function(scope, parent){
             }
         });
         
+    
+            
     return _proxy;
+    
 };
 
 /**
@@ -4723,9 +4781,9 @@ KeyboardEvent.DOM_KEY_LOCATION_JOYSTICK      = 5;
 //We dont fire mutation events until someone has registered for them
 var __supportedMutations__ = /DOMSubtreeModified|DOMNodeInserted|DOMNodeRemoved|DOMAttrModified|DOMCharacterDataModified/;
 
-/*var __fireMutationEvents__ = Aspect.before({
-    target: this, 
-    method:__addEventListener__
+var __fireMutationEvents__ = Aspect.before({
+    target: EventTarget, 
+    method: 'addEventListener'
 }, function(target, type){
     if(type && type.match(__supportedMutations__)){
         //unweaving removes the __addEventListener__ aspect
@@ -4755,7 +4813,7 @@ var __supportedMutations__ = /DOMSubtreeModified|DOMNodeInserted|DOMNodeRemoved|
             return node;
         });
     }
-});*/
+});
 
 /**
  * @name MutationEvent
@@ -5209,11 +5267,11 @@ function __setArray__( target, array ) {
  *
  * @extends Document
  */
-HTMLDocument = function(implementation, parentWindow, referrer) {
+HTMLDocument = function(implementation, ownerWindow, referrer) {
     Document.apply(this, arguments);
     this.referrer = referrer;
     this.baseURI = "about:blank";
-    this.parentWindow = parentWindow;
+    this.ownerWindow = ownerWindow;
 };
 HTMLDocument.prototype = new Document;
 
@@ -5494,19 +5552,6 @@ var __stubHTMLDocument__ = function(doc){
     }
 };
 
-// These two methods are enough to cover all dom 2 manipulations
-/*Aspect.around({ 
-    target: Node,  
-    method:"removeChild"
-}, function(invocation){
-    var event,
-        node = invocation.arguments[0];
-    event = node.ownerDocument.createEvent('MutationEvents');
-    event.initEvent('DOMNodeRemoved', true, false, node.parentNode, null, null, null, null);
-    node.dispatchEvent(event, false);
-    return invocation.proceed();
-    
-});*/
 Aspect.around({ 
     target: Node,  
     method:"appendChild"
@@ -5547,33 +5592,15 @@ Aspect.around({
                                         node.dispatchEvent( event, false );
                                     }
                                 }catch(e){
-                                    console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    console.log('error loading html element %s %e', node, e.toString());
                                 }
                             }
                             break;
                         case 'frame':
-                            node.contentDocument = new HTMLDocument(new DOMImplementation());
-                            node.contentWindow = { document: node.contentDocument };
-                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
-                                event = node.contentDocument.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            });
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            break;
                         case 'iframe':
-                            node.contentDocument = new HTMLDocument(new DOMImplementation());
-                            node.contentWindow = { document: node.contentDocument };
+                            node.contentWindow = { };
+                            node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
+                            node.contentWindow.document = node.contentDocument
                             node.contentDocument.addEventListener('DOMContentLoaded', function(){
                                 event = node.contentDocument.createEvent('HTMLEvents');
                                 event.initEvent("load", false, false);
@@ -5581,14 +5608,26 @@ Aspect.around({
                             });
                             try{
                                 if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.uri(node.src));
                                     event = node.contentDocument.createEvent('HTMLEvents');
                                     event.initEvent("load", false, false);
                                     node.dispatchEvent( event, false );
+                                }else{
+                                    //I dont like this being here:
+                                    //TODO: better  mix-in strategy so the try/catch isnt required
+                                    try{
+                                        if(Window){
+                                            Envjs.loadFrame(node);
+                                            //console.log('src/html/document.js: triggering frame load');
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){}
                                 }
                             }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                console.log('error loading html element %s %e', node, e.toString());
                             }
                             break;
                         case 'link':
@@ -9207,7 +9246,7 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
 
 var __fragmentCache__ = {};
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
-    console.log('HTMLParser.parseDocument %s', htmldoc.async);
+    //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
     Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
     //Envjs.wait(-1);
@@ -9331,7 +9370,9 @@ var __elementPopped__ = function(ns, name, node){
         case '[object XMLDocument]':
             return;
         case '[object HTMLDocument]':
-            switch(ns){
+            switch(node.namespaceURI){
+                case "http://n.validator.nu/placeholder/":
+                    return;
                 case null:
                 case "":
                 case "http://www.w3.org/1999/xhtml":
@@ -9339,7 +9380,7 @@ var __elementPopped__ = function(ns, name, node){
                         case 'script':
                             try{
                                 okay = Envjs.loadLocalScript(node, null);
-                                //console.log('loaded script? %s %s', node.uuid, okay);
+                                // console.log('loaded script? %s %s', node.uuid, okay);
                                 // only fire event if we actually had something to load
                                 if (node.src && node.src.length > 0){
                                     event = doc.createEvent('HTMLEvents');
@@ -9351,26 +9392,16 @@ var __elementPopped__ = function(ns, name, node){
                             }
                             return;
                         case 'frame':
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    //console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
                         case 'iframe':
                             try{
                                 if (node.src && node.src.length > 0){
-                                    console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.location(node.src));
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.uri(node.src));
                                     event = node.ownerDocument.createEvent('HTMLEvents');
                                     event.initEvent("load", false, false);
                                     node.dispatchEvent( event, false );
+                                }else{
+                                    //console.log('src/parser/htmldocument: triggering frame load (no src)');
                                 }
                             }catch(e){
                                 console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
@@ -9980,19 +10011,19 @@ Location = function(url, doc, history){
             var _this = this,
                 xhr;
             
-            console.log('assigning %s',url);
+            //console.log('assigning %s',url);
             $url = url;
             //we can only assign if this Location is associated with a document
             if($document){
-                console.log("fetching %s (async? %s)", url, $document.async);
+                //console.log("fetching %s (async? %s)", url, $document.async);
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", url, $document.async);
                 
                 if($document.toString()=="[object HTMLDocument]"){
                     //tell the xhr to not parse the document as XML
-                    console.log("loading html document");
+                    //console.log("loading html document");
                     xhr.onreadystatechange = function(){
-                        console.log("readyState %s", xhr.readyState);
+                        //console.log("readyState %s", xhr.readyState);
                         if(xhr.readyState === 4){
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
                         }    
@@ -10035,7 +10066,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         HTMLParser.parseDocument(text, doc);
     }catch(e){
         console.log('parsererror %s', e);
-        doc = new HTMLDocument(new DOMImplementation());
+        doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
         title =   doc.createElement('title');
@@ -10107,7 +10138,7 @@ XMLHttpRequest.prototype = {
 		this.readyState = 1;
 		this.async = (async === false)?false:true;
 		this.method = method || "GET";
-		this.url = Envjs.location(url);
+		this.url = Envjs.uri(url);
 		this.onreadystatechange();
 	},
 	setRequestHeader: function(header, value){
@@ -10265,7 +10296,7 @@ __extend__(HTMLFrameElement.prototype,{
         this.setAttribute('src', value);
         if (this.parentNode && value && value.length > 0){
             //console.log('loading frame %s', value);
-            Envjs.loadFrame(this, Envjs.location(value));
+            Envjs.loadFrame(this, Envjs.uri(value));
             
             //console.log('event frame load %s', value);
             event = this.ownerDocument.createEvent('HTMLEvents');
@@ -10475,7 +10506,6 @@ Screen = function(__window__){
     };
 };
 
-
 //These descriptions of window properties are taken loosely David Flanagan's
 //'JavaScript - The Definitive Guide' (O'Reilly)
 
@@ -10487,14 +10517,15 @@ Screen = function(__window__){
  */
 Window = function(scope, parent, opener){
     
+    __initStandardObjects__(scope, parent);
+    
     // the window property is identical to the self property and to this obj
     var proxy = new Envjs.proxy(scope, parent);
     scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
-        return proxy;
+        return scope;
     });
-
-    __initStandardObjects__(scope, parent);
+    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;
@@ -10509,7 +10540,7 @@ Window = function(scope, parent, opener){
     $htmlImplementation.errorChecking = false;
     
     // read only reference to the Document object
-    var $document = new HTMLDocument($htmlImplementation);
+    var $document = new HTMLDocument($htmlImplementation, scope);
 
     //The version of this application
     var $version = "0.1";
@@ -10610,12 +10641,7 @@ Window = function(scope, parent, opener){
         },
         */
         get frames(){
-            // A read-only array of window objects
-            if(HTMLCollection){
-                return new HTMLCollection($document.getElementsByTagName('frame'));
-            }else{
-                return __setArray__({}, []);
-            }
+        return new HTMLCollection($document.getElementsByTagName('frame'));
         },
         get length(){
             // should be frames.length,
@@ -10640,7 +10666,7 @@ Window = function(scope, parent, opener){
             return $location;
         },
         set location(uri){
-            uri = Envjs.location(uri);
+            uri = Envjs.uri(uri);
             //new Window(this, this.parent, this.opener);
             if($location.href == uri){
                 $location.reload();
@@ -10735,7 +10761,7 @@ Window = function(scope, parent, opener){
             if(name)
                 _window.name = name;
             _window.document.async = false;
-            _window.location.assign(Envjs.location(url));
+            _window.location.assign(Envjs.uri(url));
             return _window;
         },
         close: function(){
@@ -10751,7 +10777,10 @@ Window = function(scope, parent, opener){
             Envjs.prompt(message, defaultMsg);
         },
         onload: function(){},
-        onunload: function(){}
+        onunload: function(){},
+        get uuid(){
+            return $uuid;
+        }
     });
 
 };
@@ -10769,7 +10798,7 @@ var __top__ = function(_scope){
 var __windows__ = {};
 
 var __initStandardObjects__ = function(scope, parent){
-
+    
     var __Array__;
     if(!scope.Array){
         __Array__ = function(){
@@ -10814,7 +10843,7 @@ var __initStandardObjects__ = function(scope, parent){
             return  __Number__;
         });
     }
-    
+     
 };
 
 //finally pre-supply the window with the window-like environment

@@ -8,3 +8,4 @@ htmlparser/gwt*
 htmlparser/html5
 htmlparser/build
 local_settings.js
+java_pid*

@@ -29,7 +29,7 @@ XMLHttpRequest.prototype = {
 		this.readyState = 1;
 		this.async = (async === false)?false:true;
 		this.method = method || "GET";
-		this.url = Envjs.location(url);
+		this.url = Envjs.uri(url);
 		this.onreadystatechange();
 	},
 	setRequestHeader: function(header, value){

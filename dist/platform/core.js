@@ -89,7 +89,9 @@ Envjs.scriptTypes = {
  * @param {Object} script
  * @param {Object} e
  */
-Envjs.onScriptLoadError = function(script, e){};
+Envjs.onScriptLoadError = function(script, e){
+    console.log('error loading script %s %s', script, e);
+};
 
 
 /**
@@ -98,17 +100,8 @@ Envjs.onScriptLoadError = function(script, e){};
  */
 Envjs.loadInlineScript = function(script){
     var tmpFile;
-    try{
-        if(Envjs.DEBUG_ENABLED){
-            //
-            Envjs.writeToTempFile(script.text, 'js') ;
-            Envjs.load(tmpFile);
-        }else{
-            eval(script.text);
-        }
-    }catch(e){
-        Envjs.onScriptLoadError(script, e);
-    }
+    tmpFile = Envjs.writeToTempFile(script.text, 'js') ;
+    load(tmpFile);
 };
 
 
@@ -123,13 +116,10 @@ Envjs.loadLocalScript = function(script){
         src, 
         i, 
         base,
-        filename,
-        // SMP: see also the note in html/document.js about script.type
-        script_type = script.type === null ? 
-            "text/javascript" : script.type;
+        filename;
     
-    if(script_type){
-        types = script_type?script_type.split(";"):[];
+    if(script.type){
+        types = script.type.split(";");
         for(i=0;i<types.length;i++){
             if(Envjs.scriptTypes[types[i]]){
                 //ok this script type is allowed
@@ -143,7 +133,7 @@ Envjs.loadLocalScript = function(script){
             //handle inline scripts
             if(!script.src)
                 Envjs.loadInlineScript(script);
-             return true
+             return true;
         }catch(e){
             //Envjs.error("Error loading script.", e);
             Envjs.onScriptLoadError(script, e);
@@ -164,12 +154,12 @@ Envjs.loadLocalScript = function(script){
             }
         }
         base = "" + script.ownerDocument.location;
-        //filename = Envjs.location(script.src.match(/([^\?#]*)/)[1], base );
+        //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
         //console.log('base %s', base);
-        filename = Envjs.location(script.src, base);
+        filename = Envjs.uri(script.src, base);
         try {                      
             load(filename);
-            console.log('loaded %s', filename);
+            //console.log('loaded %s', filename);
         } catch(e) {
             console.log("could not load script %s \n %s", filename, e );
             Envjs.onScriptLoadError(script, e);
@@ -211,7 +201,7 @@ Envjs.WAIT_INTERVAL = 100;//milliseconds
  * @param {Object} path
  * @param {Object} base
  */
-Envjs.location = function(path, base){};
+Envjs.uri = function(path, base){};
     
     
 /**
@@ -282,15 +272,21 @@ Envjs.loadFrame = function(frame, url){
             frame.contentWindow = null; 
         }
         
-        frame.contentWindow = {};
+        //create a new scope for the window proxy
+        //platforms will need to override this function
+        //to make sure the scope is global-like
+        frame.contentWindow = (function(){return this;})();
         new Window(frame.contentWindow, window);
         
         //I dont think frames load asynchronously in firefox
-        //but I haven't verified this...
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
         frame.contentDocument = frame.contentWindow.document;
         frame.contentDocument.async = false;
-        console.log('envjs.loadFrame async %s', frame.contentDocument.async);
-        frame.contentWindow.location = url;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
     } catch(e) {
         console.log("failed to load frame content: from %s %s", url, e);
     }

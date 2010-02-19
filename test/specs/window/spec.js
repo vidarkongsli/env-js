@@ -213,36 +213,6 @@ test('window.screen', function(){
 });
 
 
-test('frame proxy', function(){
-
-    var frame,
-        doc;
-    
-    expect(7);
-    frame = document.createElement('iframe');
-    frame.width = '100%';
-    frame.height = '380px';
-    frame.frameBorder = '0';
-    frame.addEventListener('load', function(){
-
-        equals(frame.contentWindow.parent, window, '.contentWindow.parent');
-        equals(frame.contentWindow.top, window, '.contentWindow.top');
-        
-        ok(frame.contentWindow.Array !== window.Array, '.Array');
-        ok(new window.Array(), 'new Array');
-        ok(new frame.contentWindow.Array(), 'new Array');
-        
-        doc = frame.contentDocument;
-        equals(doc.title, 'Envjs Proxy Spec', '.contentDocument.title');
-        equals(doc.toString(), '[object HTMLDocument]', '.contentDocument.toString()');
-        start();
-        
-    }, false);
-    frame.src = '../frame/proxy.html';
-    document.body.appendChild(frame);
-    stop();
-});
-
 test('window.addEventListener / window.dispatchEvent multiple listeners', function(){
     expect(36);
     
@@ -307,3 +277,89 @@ test('window.addEventListener / window.dispatchEvent multiple listeners', functi
     window.dispatchEvent(event);
 });
 
+
+test('HTMLParser.parseDocument / non-polluting script', function(){
+    //one of the easiest way to test the HTMLParser is using frames and 
+    //writing the document directly
+    expect(4);
+    var iframe = document.createElement("iframe"),
+        doc,
+        win;
+        
+    document.body.appendChild(iframe);
+    doc = iframe.contentDocument;
+    win = iframe.contentWindow;
+    
+    doc.open();
+    doc.write("<html><head><script>var ABABABABAB = 123;</script></head><body>hello</body></html>");
+    doc.close();
+    ok(doc, 'frame has contentDocument');
+    equals(doc+'', '[object HTMLDocument]', 'doc is HTMLDocument');
+    equals(win.ABABABABAB, 123, 'script evaluated in frame context');
+    try{
+        ABABABABAB;
+        ok(false, 'script not evaluated top window context: '+ABABABABAB);
+    }catch(e){
+        ok(true, 'script not evaluated top window context');
+    }
+    document.body.removeChild( iframe );
+});
+
+test('HTMLParser.parseDocument / polluting script', function(){
+    //one of the easiest way to test the HTMLParser is using frames and 
+    //writing the document directly
+    expect(4);
+    var iframe = document.createElement("iframe"),
+        doc,
+        win;
+        
+    document.body.appendChild(iframe);
+    doc = iframe.contentDocument;
+    win = iframe.contentWindow;
+    
+    doc.open();
+    doc.write("<html><head><script>ABABABABAB = 123;</script></head><body>hello</body></html>");
+    doc.close();
+    ok(doc, 'frame has contentDocument');
+    equals(doc+'', '[object HTMLDocument]', 'doc is HTMLDocument');
+    equals(win.ABABABABAB, 123, 'script evaluated in frame context');
+    try{
+        ABABABABAB;
+        ok(false, 'script not evaluated top window context: '+ABABABABAB);
+    }catch(e){
+        ok(true, 'script not evaluated top window context');
+    }
+    document.body.removeChild( iframe );
+});
+
+
+
+test('frame proxy', function(){
+
+    var frame,
+        doc;
+    
+    expect(7);
+    frame = document.createElement('iframe');
+    frame.width = '100%';
+    frame.height = '380px';
+    frame.frameBorder = '0';
+    frame.addEventListener('load', function(){
+
+        equals(frame.contentWindow.parent, window, '.contentWindow.parent');
+        equals(frame.contentWindow.top, window, '.contentWindow.top');
+        
+        ok(frame.contentWindow.Array !== window.Array, '.Array');
+        ok(new window.Array(), 'new Array');
+        ok(new frame.contentWindow.Array(), 'new Array');
+        
+        doc = frame.contentDocument;
+        equals(doc.title, 'Envjs Proxy Spec', '.contentDocument.title');
+        equals(doc.toString(), '[object HTMLDocument]', '.contentDocument.toString()');
+        start();
+        
+    }, false);
+    frame.src = '../frame/proxy.html';
+    document.body.appendChild(frame);
+    stop();
+});
