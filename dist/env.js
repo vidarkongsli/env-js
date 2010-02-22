@@ -9802,7 +9802,7 @@ XMLHttpRequest.prototype = {
                     if ( parsedoc && _this.responseText.match(/^\s*</) ) {
                         domparser = domparser||new DOMParser();
                         try {
-                            c//onsole.log("parsing response text into xml document");
+                            //console.log("parsing response text into xml document");
                             doc = domparser.parseFromString(_this.responseText+"", 'text/xml');
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);

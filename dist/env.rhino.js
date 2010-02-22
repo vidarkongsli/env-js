@@ -420,7 +420,7 @@ Envjs.onExit = function(callback){
 Envjs.uri = function(path, base){
     var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
         m = protocol.exec(path),
-        baseURI;
+        baseURI, absolutepath;
     if(m&&m.length>1){
         return (new java.net.URL(path).toString()+'')
             .replace('file:/', 'file:///');;
@@ -439,12 +439,19 @@ Envjs.uri = function(path, base){
                 //console.log('baseURI %s', baseURI);
                 return baseURI;
             }else{
-                base = baseURI.substring(0, baseURI.lastIndexOf('/'));
-                if(base.length > 0){
-                    return base + '/' + path;
+                if(path.match(/^\//)){
+                    //absolute path change
+                    absolutepath = (new Location(baseURI)).pathname;
+                    return baseURI.replace(absolutepath, path);
                 }else{
-                    return (new java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
+                    //relative path change
+                    base = baseURI.substring(0, baseURI.lastIndexOf('/'));
+                    if(base.length > 0){
+                        return base + '/' + path;
+                    }else{
+                        return (new java.io.File(path).toURL().toString()+'')
+                            .replace('file:/', 'file:///');
+                    }
                 }
             }
         }else{
@@ -10323,7 +10330,7 @@ XMLHttpRequest.prototype = {
                     if ( parsedoc && _this.responseText.match(/^\s*</) ) {
                         domparser = domparser||new DOMParser();
                         try {
-                            c//onsole.log("parsing response text into xml document");
+                            //console.log("parsing response text into xml document");
                             doc = domparser.parseFromString(_this.responseText+"", 'text/xml');
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
