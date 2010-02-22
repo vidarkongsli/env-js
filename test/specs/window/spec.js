@@ -356,9 +356,17 @@ test('frame proxy', function(){
         doc = frame.contentDocument;
         equals(doc.title, 'Envjs Proxy Spec', '.contentDocument.title');
         equals(doc.toString(), '[object HTMLDocument]', '.contentDocument.toString()');
-        start();
+
+        /**
+         * TODO move this to its own test
+        document.body.removeChild( frame );
         
+        equals(frame.contentWindow, null, '.contentWindow');
+        equals(frame.contentDocument, null, '.contentDocument');
+         */
+        start();
     }, false);
+    
     frame.src = '../frame/proxy.html';
     document.body.appendChild(frame);
     stop();

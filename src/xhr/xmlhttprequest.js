@@ -26,6 +26,7 @@ XMLHttpRequest.DONE = 4;
 
 XMLHttpRequest.prototype = {
 	open: function(method, url, async, user, password){ 
+        //console.log('openning xhr %s %s %s', method, url, async);
 		this.readyState = 1;
 		this.async = (async === false)?false:true;
 		this.method = method || "GET";
@@ -37,7 +38,7 @@ XMLHttpRequest.prototype = {
 	},
 	send: function(data, parsedoc/*non-standard*/){
 		var _this = this;
-        parsedoc = !!parsedoc;
+        parsedoc = (parsedoc === undefined)?true:!!parsedoc;
 		function makeRequest(){
             Envjs.connection(_this, function(){
                 if (!_this.aborted){
@@ -49,8 +50,8 @@ XMLHttpRequest.prototype = {
                     if ( parsedoc && _this.responseText.match(/^\s*</) ) {
                         domparser = domparser||new DOMParser();
                         try {
-                            //Envjs.debug("parsing response text into xml document");
-                            doc = domparser.parseFromString(_this.responseText+"");
+                            c//onsole.log("parsing response text into xml document");
+                            doc = domparser.parseFromString(_this.responseText+"", 'text/xml');
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
                             console.log('parseerror \n%s', e);
@@ -72,14 +73,14 @@ XMLHttpRequest.prototype = {
 		};
 
 		if (this.async){
-		    //Envjs.debug("XHR sending asynch;");
             //TODO: what we really need to do here is rejoin the 
             //      current thread and call onreadystatechange via
             //      setTimeout so the callback is essentially applied
             //      at the end of the current callstack
+            //console.log('requesting async: %s', this.url);
 			Envjs.runAsync(makeRequest);
 		}else{
-		    //Envjs.debug("XHR sending synch;");
+            //console.log('requesting sync: %s', this.url);
 			makeRequest();
 		}
 	},

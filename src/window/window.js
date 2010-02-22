@@ -230,7 +230,7 @@ Window = function(scope, parent, opener){
             return proxy;
         },
         toString : function(){
-          return '[Window]';
+            return '[Window]';
         },
         getComputedStyle : function(element, pseudoElement){
             if(CSS2Properties){
@@ -257,7 +257,18 @@ Window = function(scope, parent, opener){
             return _window;
         },
         close: function(){
-            delete __windows__[$uuid];
+            //console.log('closing window %s', __windows__[$uuid]);
+            try{
+                for(var p in __windows__[$uuid].__proxy__){
+                    delete p;
+                }
+                delete __windows__[$uuid].__proxy__;
+                delete __windows__[$uuid];
+                delete scope;
+                delete this;
+            }catch(e){
+                console.log('%s',e)
+            }
         },
         alert : function(message){
             Envjs.alert(message);
@@ -270,7 +281,7 @@ Window = function(scope, parent, opener){
         },
         onload: function(){},
         onunload: function(){},
-        get uuid(){
+        get guid(){
             return $uuid;
         }
     });
@@ -291,7 +302,7 @@ var __windows__ = {};
 
 var __initStandardObjects__ = function(scope, parent){
     
-    var __Array__;
+    /*var __Array__;
     if(!scope.Array){
         __Array__ = function(){
             return new parent.top.Array();
@@ -334,7 +345,7 @@ var __initStandardObjects__ = function(scope, parent){
         scope.__defineGetter__('Number', function(){
             return  __Number__;
         });
-    }
+    }*/
      
 };
 

@@ -37,7 +37,7 @@ __extend__(HTMLElement.prototype, {
         // values of each child
         for (i=0; i < this.childNodes.length; i++) {
             if(this.childNodes[i]){
-                if(this.childNodes[i].xhtml){
+                if(this.childNodes[i].nodeType === Node.ELEMENT_NODE){
                     ret += this.childNodes[i].xhtml;
                 }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 && 
                     this.childNodes[i-1].nodeType == Node.TEXT_NODE){

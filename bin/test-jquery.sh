@@ -52,7 +52,7 @@ case "$VERSION" in
             java  -cp rhino/js.jar  org.mozilla.javascript.tools.debugger.Main bin/jquery-1.4.1-test.js
         else
             echo 'running with rhino'
-            java -XX:+HeapDumpOnOutOfMemoryError -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
+            java -Xmx64M -XX:+HeapDumpOnOutOfMemoryError -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
         fi
         echo 'completed jquery 1.4.1 tests'
         ;;

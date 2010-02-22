@@ -43,22 +43,49 @@ Envjs.loadFrame = function(frame, url){
 };
 
 /**
+ * unloadFrame
+ * @param {Object} frame
+ */
+Envjs.unloadFrame = function(frame){
+    var all, length, i;
+    try{
+        //clean up all the nodes
+        /*all = frame.contentDocument.all,
+        length = all.length;
+        for(i=0;i<length;i++){
+            all[i].removeEventListeners('*', null, null);
+            delete all.pop();
+        }*/
+        delete frame.contentDocument;
+        frame.contentDocument = null;
+        if(frame.contentWindow){
+            frame.contentWindow.close();
+        }
+        gc();
+    }catch(e){
+        console.log(e);
+    }
+};
+
+/**
  * Makes an object window-like by proxying object accessors
  * @param {Object} scope
  * @param {Object} parent
  */
+//var __proxycount__ = 0;
 Envjs.proxy = function(scope, parent){
 
+    //console.log('__proxycount__ %s', ++__proxycount__);
     try{   
         if(scope+'' == '[object global]'){
-            __context__.initStandardObjects(scope);
+            //__context__.initStandardObjects(scope);
             //console.log('succeeded to init standard objects %s %s', scope, parent);
         }
     }catch(e){
         console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
     }
     
-    var _scope = scope;
+    /*var _scope = scope;
         _parent = parent||null,
         _this = this,
         _undefined = Packages.org.mozilla.javascript.Scriptable.NOT_FOUND,
@@ -126,10 +153,10 @@ Envjs.proxy = function(scope, parent){
             equals: function(value){
                 return (value === _scope || value === this );
             }
-        });
+        });*/
         
     
-            
+    return scope;        
     return _proxy;
     
 };

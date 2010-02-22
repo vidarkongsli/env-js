@@ -340,12 +340,16 @@ Aspect.around({
                         case 'iframe':
                             node.contentWindow = { };
                             node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
-                            node.contentWindow.document = node.contentDocument
-                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
-                                event = node.contentDocument.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            });
+                            node.contentWindow.document = node.contentDocument;
+                            try{
+                                Window;
+                            }catch(e){
+                                node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                });
+                            }
                             try{
                                 if (node.src && node.src.length > 0){
                                     //console.log("getting content document for (i)frame from %s", node.src);
@@ -384,6 +388,78 @@ Aspect.around({
                                 event = doc.createEvent('HTMLEvents');
                                 event.initEvent("load", false, false);
                                 node.dispatchEvent( event, false );
+                            }
+                            break;
+                        default:
+                            if(node.getAttribute('onload')){
+                                console.log('calling attribute onload %s | %s', node.onload, node.tagName);
+                                node.onload();
+                            }
+                            break;
+                    }//switch on name
+                default:
+                    break;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element appended: %s %s', node+'', node.namespaceURI);
+    }//switch on doc.parsing
+    return node;
+
+});
+
+Aspect.around({ 
+    target: Node,  
+    method:"removeChild"
+}, function(invocation) {
+    var event,
+        okay,
+        node = invocation.proceed(),
+        doc = node.ownerDocument;
+    if((node.nodeType !== Node.ELEMENT_NODE)){
+        //for now we are only handling element insertions.  probably we will need
+        //to handle text node changes to script tags and changes to src 
+        //attributes
+        if(node.nodeType !== Node.DOCUMENT_NODE && node.uuid){
+            //console.log('removing event listeners, %s', node, node.uuid);
+            node.removeEventListener('*', null, null);
+        }
+        return node;
+    }
+    //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
+    
+    switch(doc.parsing){
+        case true:
+            //handled by parser if included
+            break;
+        case false:
+            switch(node.namespaceURI){
+                case null:
+                    //fall through
+                case "":
+                    //fall through
+                case "http://www.w3.org/1999/xhtml":
+                    //this is interesting dillema since our event engine is
+                    //storing the registered events in an array accessed
+                    //by the uuid property of the node.  unforunately this
+                    //means listeners hang out way after(forever ;)) the node
+                    //has been removed and gone out of scope.
+                    //console.log('removing event listeners, %s', node, node.uuid);
+                    node.removeEventListener('*', null, null);
+                    switch(node.tagName.toLowerCase()){
+                        case 'frame':
+                        case 'iframe':
+                            try{
+                                //console.log('removing iframe document');
+                                try{
+                                    Envjs.unloadFrame(node);
+                                }catch(e){
+                                    console.log('error freeing resources from frame %s', e);
+                                }
+                                node.contentWindow = null;
+                                node.contentDocument = null;
+                            }catch(e){
+                                console.log('error unloading html element %s %e', node, e.toString());
                             }
                             break;
                         default:

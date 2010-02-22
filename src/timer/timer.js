@@ -71,7 +71,7 @@ setTimeout = function(fn, time){
                 }
             };
         }
-        //Envjs.debug("Creating timer number %s", num);
+        //console.log("Creating timer number %s", num);
         $timers[num] = new Timer(tfn, time);
         $timers[num].start();
     });
@@ -84,6 +84,7 @@ setTimeout = function(fn, time){
  * @param {Object} time
  */
 setInterval = function(fn, time){
+    //console.log('setting interval %s %s', time, fn.toString().substring(0,64));
     time = Timer.normalize(time);
     if ( time < 10 ) {
         time = 10;
@@ -109,7 +110,7 @@ setInterval = function(fn, time){
  * @param {Object} num
  */
 clearInterval = clearTimeout = function(num){
-    //$log("clearing interval "+num);
+    //console.log("clearing interval "+num);
     $timers.lock(function(){
         if ( $timers[num] ) {
             $timers[num].stop();
@@ -153,6 +154,7 @@ Envjs.wait = function(wait) {
         nextfn;
         
     for (;;) {
+        //console.log('timer loop');
         earliest = sleep = goal = now = nextfn = null;
         $timers.lock(function(){
             for(index in $timers){
@@ -172,6 +174,7 @@ Envjs.wait = function(wait) {
         if ( earliest && sleep <= 0 ) {
             nextfn = earliest.fn;
             try {
+                //console.log('running stack %s', nextfn.toString().substring(0,64));
                 earliest.running = true;
                 nextfn();
             } catch (e) {
@@ -217,6 +220,7 @@ Envjs.wait = function(wait) {
         if ( !sleep || sleep > interval ) {
             sleep = interval;
         }
+        //console.log('sleeping %s', sleep);
         Envjs.sleep(sleep);
         
     }

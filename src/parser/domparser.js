@@ -10,19 +10,21 @@ __defineParser__(function(e){
 DOMParser = function(principle, documentURI, baseURI){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
-        var xmldoc = new DOMImplementation().createDocument('','',null);
+        //console.log('DOMParser.parseFromString %s', mimetype);
+        var xmldoc = new Document(new DOMImplementation());
         return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
     }
 });
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
-    //console.log('XMLParser.parseDocument')
+    //console.log('XMLParser.parseDocument');
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
         importedNode,
         tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
+        //console.log('mimetype: text/xml');
         tmpdoc.baseURI = 'http://envjs.com/xml';
         xmlstring = '<html><head></head><body>'+
             '<envjs_1234567890 xmlns="envjs_1234567890">'
@@ -51,7 +53,9 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     return xmldoc;
 };
 
-var __fragmentCache__ = {};
+var __fragmentCache__ = {length:0},
+    __cachable__ = 255;
+
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
@@ -59,7 +63,7 @@ HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //Envjs.wait(-1);
     return htmldoc;
 };
-HTMLParser.parseFragment = function(htmlstring, fragment){
+HTMLParser.parseFragment = function(htmlstring, element){
     //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
     var tmpdoc,
@@ -67,46 +71,58 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
         importedNode,
         tmpNode,
         length,
-        i;
-    
-    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        i,
+        docstring;
+    //console.log('parsing fragment: %s', htmlstring);
+    //console.log('__fragmentCache__.length %s', __fragmentCache__.length)
+    if( htmlstring.length > __cachable__ && htmlstring in __fragmentCache__){
         tmpdoc = __fragmentCache__[htmlstring];
     }else{
         //console.log('parsing html fragment \n%s', htmlstring);
         tmpdoc = new HTMLDocument(new DOMImplementation());
-        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
-        if(htmlstring.length > 127 ){
+        //preserves leading white space
+        docstring = '<html><head></head><body>'+
+            '<envjs_1234567890 xmlns="envjs_1234567890">'
+                +htmlstring+
+            '</envjs_1234567890>'+
+        '</body></html>';
+        Envjs.parseHtmlDocument(docstring,tmpdoc, false, null,null);
+        if(htmlstring.length > __cachable__ ){
             tmpdoc.normalizeDocument();
             __fragmentCache__[htmlstring] = tmpdoc;
+            __fragmentCache__.length += htmlstring.length;
             tmpdoc.cached = true;
         }else{
             tmpdoc.cached = false;
         }
     }
     
-    parent = tmpdoc.body;
-    while(fragment.firstChild != null){
-        tmpNode = fragment.removeChild( fragment.firstChild );
+    //parent is envjs_1234567890 element
+    parent = tmpdoc.body.childNodes[0];
+    while(element.firstChild != null){
+        //zap the elements children so we can import
+        tmpNode = element.removeChild( element.firstChild );
         delete tmpNode;
     }
     if(tmpdoc.cached){
         length = parent.childNodes.length;
         for(i=0;i<length;i++){
-            importedNode = fragment.importNode( parent.childNodes[i], true );
-            fragment.appendChild( importedNode );  
+            importedNode = element.importNode( parent.childNodes[i], true );
+            element.appendChild( importedNode );  
         }
     }else{
         while(parent.firstChild != null){
             tmpNode  = parent.removeChild( parent.firstChild );
-            importedNode = fragment.importNode( tmpNode, true);
-            fragment.appendChild( importedNode );
+            importedNode = element.importNode( tmpNode, true);
+            element.appendChild( importedNode );
             delete tmpNode;
         }
-        delete tmpdoc,
-               htmlstring;
+        delete tmpdoc;
+        delete htmlstring;
     }
     
-    return fragment;
+    // console.log('finished fragment: %s', element.outerHTML);
+    return element;
 };
 
 var __clearFragmentCache__ = function(){

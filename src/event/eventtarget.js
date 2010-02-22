@@ -23,13 +23,15 @@ var $events = [{}];
 function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
         //console.log('event uuid %s %s', target, target.uuid);
+        target.uuid = $events.length+'';
     }
     if ( !$events[target.uuid] ) {
+        //console.log('creating listener for target: %s %s', target, target.uuid);
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
+        //console.log('creating listener for type: %s %s %s', target, target.uuid, type);
         $events[target.uuid][type] = {
             CAPTURING:[],
             BUBBLING:[]
@@ -38,10 +40,12 @@ function __addEventListener__(target, type, fn, phase){
     if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
+        //console.log('creating listener for function: %s %s %s', target, target.uuid, phase);
         $events[target.uuid][type][phase].push( fn );
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
     }
+    //console.log('registered event listeners %s', $events.length);
 };
 
 
@@ -49,16 +53,19 @@ function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
+        return;
     }
     if ( !$events[target.uuid] ) {
-        $events[target.uuid] = {};
+        return;
     }
-    if ( !$events[target.uuid][type] ){
-        $events[target.uuid][type] = {
-            CAPTURING:[],
-            BUBBLING:[]
-        };
+    if(type == '*'){
+        //used to clean all event listeners for a given node
+        //console.log('cleaning all event listeners for node %s %s',target, target.uuid);
+        delete $events[target.uuid];
+        $events[target.uuid] = null;
+        return;
+    }else if ( !$events[target.uuid][type] ){
+        return;
     }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
@@ -67,12 +74,14 @@ function __removeEventListener__(target, type, fn, phase){
     });
 };
 
-
+var __eventuuid__ = 0;
 function __dispatchEvent__(target, event, bubbles){
 
+    if(!event.uuid)
+        event.uuid = __eventuuid__++;
     //the window scope defines the $event object, for IE(^^^) compatibility;
-    $event = event;
-
+    //$event = event;
+    //console.log('dispatching event %s', event.uuid);
     if (bubbles == undefined || bubbles == null)
         bubbles = true;
 
@@ -89,7 +98,8 @@ function __dispatchEvent__(target, event, bubbles){
         event.eventPhase = Event.AT_TARGET;
         if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['CAPTURING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['CAPTURING'].length);
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
                 //console.log('AT_TARGET (CAPTURING) event %s', fn);
                 var returnValue = fn( event );
@@ -98,7 +108,8 @@ function __dispatchEvent__(target, event, bubbles){
                     event.stopPropagation();
                 }
             });
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['BUBBLING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['BUBBLING'].length);
             $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
                 //console.log('AT_TARGET (BUBBLING) event %s', fn);
                 var returnValue = fn( event );
@@ -114,6 +125,10 @@ function __dispatchEvent__(target, event, bubbles){
         if (bubbles && !event.cancelled){
             __bubbleEvent__(target, event);
         }
+        
+        //console.log('deleting event %s', event.uuid);
+        event.target = null;
+        event = null;
     }else{
         throw new EventException(EventException.UNSPECIFIED_EVENT_TYPE_ERR);
     }

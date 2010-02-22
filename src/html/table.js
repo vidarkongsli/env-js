@@ -55,7 +55,7 @@ __extend__(HTMLTableElement.prototype, {
         }
     },
  
-    appendChild : function (child) {
+    /*appendChild : function (child) {
         
         var tagName;
         if(child&&child.nodeType==Node.ELEMENT_NODE){
@@ -81,7 +81,7 @@ __extend__(HTMLTableElement.prototype, {
             //tables can still have text node from white space
             return Node.prototype.appendChild.apply(this, arguments);
         }
-    },
+    },*/
      
     get tBodies() {
         return new HTMLCollection(this.getElementsByTagName("tbody"));

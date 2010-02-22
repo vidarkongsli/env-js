@@ -9,7 +9,7 @@ HTMLTableSectionElement = function(ownerDocument) {
 HTMLTableSectionElement.prototype = new HTMLElement;
 __extend__(HTMLTableSectionElement.prototype, {    
     
-    appendChild : function (child) {
+    /*appendChild : function (child) {
     
         // disallow nesting of these elements.
         if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
@@ -18,7 +18,7 @@ __extend__(HTMLTableSectionElement.prototype, {
             return Node.prototype.appendChild.apply(this, arguments);
         }
 
-    },
+    },*/
     
     get align() {
         return this.getAttribute("align");

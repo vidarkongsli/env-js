@@ -111,7 +111,7 @@ Envjs.loadInlineScript = function(script){
  * @param {Object} parser
  */
 Envjs.loadLocalScript = function(script){
-    console.debug("loading script %s", script);
+    //console.debug("loading script %s", script);
     var types, 
         src, 
         i, 
@@ -352,15 +352,25 @@ Envjs.lineSource = function(e){
  * @param {Object} script
  */
 Envjs.loadInlineScript = function(script){
-    __context__.evaluateString(
-        script.ownerDocument.ownerWindow,
-        script.text,
-        'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
-        0,
-        null
-    );
+    if(script.ownerDocument.ownerWindow){
+        __context__.evaluateString(
+            script.ownerDocument.ownerWindow,
+            script.text,
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
+            0,
+            null
+        );
+    }else{
+        __context__.evaluateString(
+            __this__,
+            script.text,
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
+            0,
+            null
+        );
+    }
     //console.log('evaluated at scope %s \n%s', 
-    //    script.ownerDocument.ownerWindow.uuid, script.text);
+    //    script.ownerDocument.ownerWindow.guid, script.text);
 };
 
 //Temporary patch for parser module
@@ -685,22 +695,49 @@ Envjs.loadFrame = function(frame, url){
 };
 
 /**
+ * unloadFrame
+ * @param {Object} frame
+ */
+Envjs.unloadFrame = function(frame){
+    var all, length, i;
+    try{
+        //clean up all the nodes
+        /*all = frame.contentDocument.all,
+        length = all.length;
+        for(i=0;i<length;i++){
+            all[i].removeEventListeners('*', null, null);
+            delete all.pop();
+        }*/
+        delete frame.contentDocument;
+        frame.contentDocument = null;
+        if(frame.contentWindow){
+            frame.contentWindow.close();
+        }
+        gc();
+    }catch(e){
+        console.log(e);
+    }
+};
+
+/**
  * Makes an object window-like by proxying object accessors
  * @param {Object} scope
  * @param {Object} parent
  */
+//var __proxycount__ = 0;
 Envjs.proxy = function(scope, parent){
 
+    //console.log('__proxycount__ %s', ++__proxycount__);
     try{   
         if(scope+'' == '[object global]'){
-            __context__.initStandardObjects(scope);
+            //__context__.initStandardObjects(scope);
             //console.log('succeeded to init standard objects %s %s', scope, parent);
         }
     }catch(e){
         console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
     }
     
-    var _scope = scope;
+    /*var _scope = scope;
         _parent = parent||null,
         _this = this,
         _undefined = Packages.org.mozilla.javascript.Scriptable.NOT_FOUND,
@@ -768,10 +805,10 @@ Envjs.proxy = function(scope, parent){
             equals: function(value){
                 return (value === _scope || value === this );
             }
-        });
+        });*/
         
     
-            
+    return scope;        
     return _proxy;
     
 };
@@ -4423,13 +4460,15 @@ var $events = [{}];
 function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
         //console.log('event uuid %s %s', target, target.uuid);
+        target.uuid = $events.length+'';
     }
     if ( !$events[target.uuid] ) {
+        //console.log('creating listener for target: %s %s', target, target.uuid);
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
+        //console.log('creating listener for type: %s %s %s', target, target.uuid, type);
         $events[target.uuid][type] = {
             CAPTURING:[],
             BUBBLING:[]
@@ -4438,10 +4477,12 @@ function __addEventListener__(target, type, fn, phase){
     if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
+        //console.log('creating listener for function: %s %s %s', target, target.uuid, phase);
         $events[target.uuid][type][phase].push( fn );
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
     }
+    //console.log('registered event listeners %s', $events.length);
 };
 
 
@@ -4449,16 +4490,19 @@ function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
+        return;
     }
     if ( !$events[target.uuid] ) {
-        $events[target.uuid] = {};
+        return;
     }
-    if ( !$events[target.uuid][type] ){
-        $events[target.uuid][type] = {
-            CAPTURING:[],
-            BUBBLING:[]
-        };
+    if(type == '*'){
+        //used to clean all event listeners for a given node
+        //console.log('cleaning all event listeners for node %s %s',target, target.uuid);
+        delete $events[target.uuid];
+        $events[target.uuid] = null;
+        return;
+    }else if ( !$events[target.uuid][type] ){
+        return;
     }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
@@ -4467,12 +4511,14 @@ function __removeEventListener__(target, type, fn, phase){
     });
 };
 
-
+var __eventuuid__ = 0;
 function __dispatchEvent__(target, event, bubbles){
 
+    if(!event.uuid)
+        event.uuid = __eventuuid__++;
     //the window scope defines the $event object, for IE(^^^) compatibility;
-    $event = event;
-
+    //$event = event;
+    //console.log('dispatching event %s', event.uuid);
     if (bubbles == undefined || bubbles == null)
         bubbles = true;
 
@@ -4489,7 +4535,8 @@ function __dispatchEvent__(target, event, bubbles){
         event.eventPhase = Event.AT_TARGET;
         if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['CAPTURING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['CAPTURING'].length);
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
                 //console.log('AT_TARGET (CAPTURING) event %s', fn);
                 var returnValue = fn( event );
@@ -4498,7 +4545,8 @@ function __dispatchEvent__(target, event, bubbles){
                     event.stopPropagation();
                 }
             });
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['BUBBLING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['BUBBLING'].length);
             $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
                 //console.log('AT_TARGET (BUBBLING) event %s', fn);
                 var returnValue = fn( event );
@@ -4514,6 +4562,10 @@ function __dispatchEvent__(target, event, bubbles){
         if (bubbles && !event.cancelled){
             __bubbleEvent__(target, event);
         }
+        
+        //console.log('deleting event %s', event.uuid);
+        event.target = null;
+        event = null;
     }else{
         throw new EventException(EventException.UNSPECIFIED_EVENT_TYPE_ERR);
     }
@@ -4569,51 +4621,49 @@ Event = function(options){
     // be appropriate in the long run and we'll
     // have to decide if we simply dont adhere to
     // the read-only restriction of the specification
-    var state = __extend__({
-        bubbles : true,
-        cancelable : true,
-        cancelled: false,
-        currentTarget : null,
-        target : null,
-        eventPhase : Event.AT_TARGET,
-        timeStamp : new Date().getTime(),
-        preventDefault : false,
-        stopPropogation : false
-    }, options||{} );
-        
-    return {
-        get bubbles(){return state.bubbles;},
-        get cancelable(){return state.cancelable;},
-        get currentTarget(){return state.currentTarget;},
-        set currentTarget(currentTarget){ state.currentTarget = currentTarget; },
-        get eventPhase(){return state.eventPhase;},
-        set eventPhase(eventPhase){state.eventPhase = eventPhase;},
-        get target(){return state.target;},
-        set target(target){ state.target = target;},
-        get timeStamp(){return state.timeStamp;},
-        get type(){return state.type;},
-        initEvent: function(type, bubbles, cancelable){
-            state.type=type?type:'';
-            state.bubbles=!!bubbles;
-            state.cancelable=!!cancelable;
-        },
-        preventDefault: function(){
-            state.preventDefault = true;
-        },
-        stopPropagation: function(){
-            if(state.cancelable){
-                state.cancelled = true;
-                state.bubbles = false;
-            }
-        },
-        get cancelled(){
-            return state.cancelled;
-        },
-        toString: function(){
-            return '[object Event]';
-        }
-    };
+    this._bubbles = true;
+    this._cancelable = true;
+    this._cancelled = false;
+    this._currentTarget = null;
+    this._target = null;
+    this._eventPhase = Event.AT_TARGET;
+    this._timeStamp = new Date().getTime();
+    this._preventDefault = false;
+    this._stopPropogation = false;
 };
+
+__extend__(Event.prototype,{       
+    get bubbles(){return this._bubbles;},
+    get cancelable(){return this._cancelable;},
+    get currentTarget(){return this._currentTarget;},
+    set currentTarget(currentTarget){ this._currentTarget = currentTarget; },
+    get eventPhase(){return this._eventPhase;},
+    set eventPhase(eventPhase){this._eventPhase = eventPhase;},
+    get target(){return this._target;},
+    set target(target){ this._target = target;},
+    get timeStamp(){return this._timeStamp;},
+    get type(){return this._type;},
+    initEvent: function(type, bubbles, cancelable){
+        this._type=type?type:'';
+        this._bubbles=!!bubbles;
+        this._cancelable=!!cancelable;
+    },
+    preventDefault: function(){
+        this._preventDefault = true;
+    },
+    stopPropagation: function(){
+        if(this._cancelable){
+            this._cancelled = true;
+            this._bubbles = false;
+        }
+    },
+    get cancelled(){
+        return this._cancelled;
+    },
+    toString: function(){
+        return '[object Event]';
+    }
+});
 
 __extend__(Event,{
     CAPTURING_PHASE : 1,
@@ -4629,25 +4679,24 @@ __extend__(Event,{
  * @param {Object} options
  */
 UIEvent = function(options) {
-    var state = __extend__({
-        view : null,
-        detail : 0
-    }, options||{});
-    return __extend__(new Event(state),{
-        get view(){
-            return state.view;
-        },
-        get detail(){
-            return state.detail;
-        },
-        initUIEvent: function(type, bubbles, cancelable, windowObject, detail){
-            this.initEvent(type, bubbles, cancelable);
-            state.detail = 0;
-            state.view = windowObject;
-        }
-    });
+    this._view = null;
+    this._detail = 0;
 };
+
 UIEvent.prototype = new Event;
+__extend__(UIEvent.prototype,{
+    get view(){
+        return this._view;
+    },
+    get detail(){
+        return this._detail;
+    },
+    initUIEvent: function(type, bubbles, cancelable, windowObject, detail){
+        this.initEvent(type, bubbles, cancelable);
+        this._detail = 0;
+        this._view = windowObject;
+    }
+});
 
 var $onblur,
     $onfocus,
@@ -4660,114 +4709,110 @@ var $onblur,
  * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
  */
 MouseEvent = function(options) {
-    var state = __extend__({
-        screenX: 0,
-        screenY: 0,
-        clientX: 0,
-        clientY: 0,
-        ctrlKey: false,
-        metaKey: false,
-        altKey:  false,
-        metaKey: false,
-        button: null,
-        relatedTarget: null
-    }, options||{});
-    return __extend__(new Event(state),{
-        get screenX(){
-            return state.screenX;
-        },
-        get screenY(){
-            return state.screenY;
-        },
-        get clientX(){
-            return state.clientX;
-        },
-        get clientY(){
-            return state.clientY;
-        },
-        get ctrlKey(){
-            return state.ctrlKey;
-        },
-        get altKey(){
-            return state.altKey;
-        },
-        get shiftKey(){
-            return state.shiftKey;
-        },
-        get metaKey(){
-            return state.metaKey;
-        },
-        get button(){
-            return state.button;
-        },
-        get relatedTarget(){
-            return state.relatedTarget;
-        },
-        initMouseEvent: function(type, bubbles, cancelable, windowObject, detail,
-                screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, 
-                metaKey, button, relatedTarget){
-            this.initUIEvent(type, bubbles, cancelable, windowObject, detail);
-            state.screenX = screenX;
-            state.screenY = screenY;
-            state.clientX = clientX;
-            state.clientY = clientY;
-            state.ctrlKey = ctrlKey;
-            state.altKey = altKey;
-            state.shiftKey = shiftKey;
-            state.metaKey = metaKey;
-            state.button = button;
-            state.relatedTarget = relatedTarget;
-        }
-    });
+    this._screenX= 0;
+    this._screenY= 0;
+    this._clientX= 0;
+    this._clientY= 0;
+    this._ctrlKey= false;
+    this._metaKey= false;
+    this._altKey= false;
+    this._button= null;
+    this._relatedTarget= null;
 };
 MouseEvent.prototype = new UIEvent;
+__extend__(MouseEvent.prototype,{
+    get screenX(){
+        return this._screenX;
+    },
+    get screenY(){
+        return this._screenY;
+    },
+    get clientX(){
+        return this._clientX;
+    },
+    get clientY(){
+        return this._clientY;
+    },
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, detail,
+            screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, 
+            metaKey, button, relatedTarget){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, detail);
+        this._screenX = screenX;
+        this._screenY = screenY;
+        this._clientX = clientX;
+        this._clientY = clientY;
+        this._ctrlKey = ctrlKey;
+        this._altKey = altKey;
+        this._shiftKey = shiftKey;
+        this._metaKey = metaKey;
+        this._button = button;
+        this._relatedTarget = relatedTarget;
+    }
+});
 
 /**
  * Interface KeyboardEvent (introduced in DOM Level 3)
  */
 KeyboardEvent = function(options) {
-    var state = __extend__({
-        keyIdentifier: 0,
-        keyLocation: 0,
-        ctrlKey: false,
-        metaKey: false,
-        altKey:  false,
-        metaKey: false,
-    }, options||{});
-    return __extend__(new Event(state),{
-        
-        get ctrlKey(){
-            return state.ctrlKey;
-        },
-        get altKey(){
-            return state.altKey;
-        },
-        get shiftKey(){
-            return state.shiftKey;
-        },
-        get metaKey(){
-            return state.metaKey;
-        },
-        get button(){
-            return state.button;
-        },
-        get relatedTarget(){
-            return state.relatedTarget;
-        },
-        getModifiersState: function(keyIdentifier){
-
-        },
-        initMouseEvent: function(type, bubbles, cancelable, windowObject, 
-                keyIdentifier, keyLocation, modifiersList, repeat){
-            this.initUIEvent(type, bubbles, cancelable, windowObject, 0);
-            state.keyIdentifier = keyIdentifier;
-            state.keyLocation = keyLocation;
-            state.modifiersList = modifiersList;
-            state.repeat = repeat;
-        }
-    });
+    this._keyIdentifier = 0;
+    this._keyLocation = 0;
+    this._ctrlKey = false;
+    this._metaKey = false;
+    this._altKey = false;
+    this._metaKey = false;
 };
 KeyboardEvent.prototype = new UIEvent;
+
+__extend__(KeyboardEvent.prototype,{
+        
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    getModifiersState: function(keyIdentifier){
+
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, 
+            keyIdentifier, keyLocation, modifiersList, repeat){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, 0);
+        this._keyIdentifier = keyIdentifier;
+        this._keyLocation = keyLocation;
+        this._modifiersList = modifiersList;
+        this._repeat = repeat;
+    }
+});
 
 KeyboardEvent.DOM_KEY_LOCATION_STANDARD      = 0;
 KeyboardEvent.DOM_KEY_LOCATION_LEFT          = 1;
@@ -4820,62 +4865,61 @@ var __fireMutationEvents__ = Aspect.before({
  * @param {Object} options
  */
 MutationEvent = function(options) {
-    var state = __extend__({
-        cancelable : false,
-        timeStamp : 0,
-    }, options||{});
-    return __extend__(new Event(state),{
-        get relatedNode(){
-            return state.relatedNode;
-        },
-        get prevValue(){
-            return state.prevValue;
-        },
-        get newValue(){
-            return state.newValue;
-        },
-        get attrName(){
-            return state.attrName;
-        },
-        get attrChange(){
-            return state.attrChange;
-        },
-        initMutationEvent: function( type, bubbles, cancelable, 
-                relatedNode, prevValue, newValue, attrName, attrChange ){
-            state.relatedNode = relatedNode;
-            state.prevValue = prevValue;
-            state.newValue = newValue;
-            state.attrName = attrName;
-            state.attrChange = attrChange;
-            switch(type){
-                case "DOMSubtreeModified":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeInserted":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeRemoved":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeRemovedFromDocument":
-                    this.initEvent(type, false, false);
-                    break;
-                case "DOMNodeInsertedIntoDocument":
-                    this.initEvent(type, false, false);
-                    break;
-                case "DOMAttrModified":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMCharacterDataModified":
-                    this.initEvent(type, true, false);
-                    break;
-                default:
-                    this.initEvent(type, bubbles, cancelable);
-            }
-        }
-    });
+    this._cancelable = false;
+    this._timeStamp = 0;
 };
+
 MutationEvent.prototype = new Event;
+__extend__(MutationEvent.prototype,{
+    get relatedNode(){
+        return this._relatedNode;
+    },
+    get prevValue(){
+        return this._prevValue;
+    },
+    get newValue(){
+        return this._newValue;
+    },
+    get attrName(){
+        return this._attrName;
+    },
+    get attrChange(){
+        return this._attrChange;
+    },
+    initMutationEvent: function( type, bubbles, cancelable, 
+            relatedNode, prevValue, newValue, attrName, attrChange ){
+        this._relatedNode = relatedNode;
+        this._prevValue = prevValue;
+        this._newValue = newValue;
+        this._attrName = attrName;
+        this._attrChange = attrChange;
+        switch(type){
+            case "DOMSubtreeModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeInserted":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemoved":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemovedFromDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMNodeInsertedIntoDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMAttrModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMCharacterDataModified":
+                this.initEvent(type, true, false);
+                break;
+            default:
+                this.initEvent(type, bubbles, cancelable);
+        }
+    }
+});
 
 // constants
 MutationEvent.ADDITION = 0;
@@ -5001,7 +5045,7 @@ setTimeout = function(fn, time){
                 }
             };
         }
-        //Envjs.debug("Creating timer number %s", num);
+        //console.log("Creating timer number %s", num);
         $timers[num] = new Timer(tfn, time);
         $timers[num].start();
     });
@@ -5014,6 +5058,7 @@ setTimeout = function(fn, time){
  * @param {Object} time
  */
 setInterval = function(fn, time){
+    //console.log('setting interval %s %s', time, fn.toString().substring(0,64));
     time = Timer.normalize(time);
     if ( time < 10 ) {
         time = 10;
@@ -5039,7 +5084,7 @@ setInterval = function(fn, time){
  * @param {Object} num
  */
 clearInterval = clearTimeout = function(num){
-    //$log("clearing interval "+num);
+    //console.log("clearing interval "+num);
     $timers.lock(function(){
         if ( $timers[num] ) {
             $timers[num].stop();
@@ -5083,6 +5128,7 @@ Envjs.wait = function(wait) {
         nextfn;
         
     for (;;) {
+        //console.log('timer loop');
         earliest = sleep = goal = now = nextfn = null;
         $timers.lock(function(){
             for(index in $timers){
@@ -5102,6 +5148,7 @@ Envjs.wait = function(wait) {
         if ( earliest && sleep <= 0 ) {
             nextfn = earliest.fn;
             try {
+                //console.log('running stack %s', nextfn.toString().substring(0,64));
                 earliest.running = true;
                 nextfn();
             } catch (e) {
@@ -5147,6 +5194,7 @@ Envjs.wait = function(wait) {
         if ( !sleep || sleep > interval ) {
             sleep = interval;
         }
+        //console.log('sleeping %s', sleep);
         Envjs.sleep(sleep);
         
     }
@@ -5600,12 +5648,16 @@ Aspect.around({
                         case 'iframe':
                             node.contentWindow = { };
                             node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
-                            node.contentWindow.document = node.contentDocument
-                            node.contentDocument.addEventListener('DOMContentLoaded', function(){
-                                event = node.contentDocument.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            });
+                            node.contentWindow.document = node.contentDocument;
+                            try{
+                                Window;
+                            }catch(e){
+                                node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                });
+                            }
                             try{
                                 if (node.src && node.src.length > 0){
                                     //console.log("getting content document for (i)frame from %s", node.src);
@@ -5644,6 +5696,78 @@ Aspect.around({
                                 event = doc.createEvent('HTMLEvents');
                                 event.initEvent("load", false, false);
                                 node.dispatchEvent( event, false );
+                            }
+                            break;
+                        default:
+                            if(node.getAttribute('onload')){
+                                console.log('calling attribute onload %s | %s', node.onload, node.tagName);
+                                node.onload();
+                            }
+                            break;
+                    }//switch on name
+                default:
+                    break;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element appended: %s %s', node+'', node.namespaceURI);
+    }//switch on doc.parsing
+    return node;
+
+});
+
+Aspect.around({ 
+    target: Node,  
+    method:"removeChild"
+}, function(invocation) {
+    var event,
+        okay,
+        node = invocation.proceed(),
+        doc = node.ownerDocument;
+    if((node.nodeType !== Node.ELEMENT_NODE)){
+        //for now we are only handling element insertions.  probably we will need
+        //to handle text node changes to script tags and changes to src 
+        //attributes
+        if(node.nodeType !== Node.DOCUMENT_NODE && node.uuid){
+            //console.log('removing event listeners, %s', node, node.uuid);
+            node.removeEventListener('*', null, null);
+        }
+        return node;
+    }
+    //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
+    
+    switch(doc.parsing){
+        case true:
+            //handled by parser if included
+            break;
+        case false:
+            switch(node.namespaceURI){
+                case null:
+                    //fall through
+                case "":
+                    //fall through
+                case "http://www.w3.org/1999/xhtml":
+                    //this is interesting dillema since our event engine is
+                    //storing the registered events in an array accessed
+                    //by the uuid property of the node.  unforunately this
+                    //means listeners hang out way after(forever ;)) the node
+                    //has been removed and gone out of scope.
+                    //console.log('removing event listeners, %s', node, node.uuid);
+                    node.removeEventListener('*', null, null);
+                    switch(node.tagName.toLowerCase()){
+                        case 'frame':
+                        case 'iframe':
+                            try{
+                                //console.log('removing iframe document');
+                                try{
+                                    Envjs.unloadFrame(node);
+                                }catch(e){
+                                    console.log('error freeing resources from frame %s', e);
+                                }
+                                node.contentWindow = null;
+                                node.contentDocument = null;
+                            }catch(e){
+                                console.log('error unloading html element %s %e', node, e.toString());
                             }
                             break;
                         default:
@@ -6008,7 +6132,7 @@ __extend__(HTMLElement.prototype, {
         // values of each child
         for (i=0; i < this.childNodes.length; i++) {
             if(this.childNodes[i]){
-                if(this.childNodes[i].xhtml){
+                if(this.childNodes[i].nodeType === Node.ELEMENT_NODE){
                     ret += this.childNodes[i].xhtml;
                 }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 && 
                     this.childNodes[i-1].nodeType == Node.TEXT_NODE){
@@ -7754,7 +7878,7 @@ __extend__(HTMLTableElement.prototype, {
         }
     },
  
-    appendChild : function (child) {
+    /*appendChild : function (child) {
         
         var tagName;
         if(child&&child.nodeType==Node.ELEMENT_NODE){
@@ -7780,7 +7904,7 @@ __extend__(HTMLTableElement.prototype, {
             //tables can still have text node from white space
             return Node.prototype.appendChild.apply(this, arguments);
         }
-    },
+    },*/
      
     get tBodies() {
         return new HTMLCollection(this.getElementsByTagName("tbody"));
@@ -7902,7 +8026,7 @@ HTMLTableSectionElement = function(ownerDocument) {
 HTMLTableSectionElement.prototype = new HTMLElement;
 __extend__(HTMLTableSectionElement.prototype, {    
     
-    appendChild : function (child) {
+    /*appendChild : function (child) {
     
         // disallow nesting of these elements.
         if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
@@ -7911,7 +8035,7 @@ __extend__(HTMLTableSectionElement.prototype, {
             return Node.prototype.appendChild.apply(this, arguments);
         }
 
-    },
+    },*/
     
     get align() {
         return this.getAttribute("align");
@@ -8047,13 +8171,13 @@ HTMLTableRowElement = function(ownerDocument) {
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
     
-    appendChild : function (child) {
+    /*appendChild : function (child) {
     
        var retVal = Node.prototype.appendChild.apply(this, arguments);
        retVal.cellIndex = this.cells.length -1;
              
        return retVal;
-    },
+    },*/
     // align gets or sets the horizontal alignment of data within cells of the row.
     get align() {
         return this.getAttribute("align");
@@ -8217,8 +8341,9 @@ function __setArray__( target, array ) {
 /*
 * CSS2Properties - DOM Level 2 CSS
 */
+//var __cssproperties__ = 0;
 CSS2Properties = function(element){
-    //this.onSetCallback = options.onSet?options.onSet:(function(){});
+    //console.log('css2properties %s', __cssproperties__++);
     this.styleIndex = __supportedStyles__();//non-standard
     this.type = element.tagName;//non-standard
     __setArray__(this,[]);
@@ -8246,11 +8371,11 @@ __extend__(CSS2Properties.prototype, {
     },
     getPropertyValue : function(name){
         var index;
-        if(name in this.styleIndex){
+        if(__toCamelCase__(name) in this.styleIndex){
             //$info(name +' in style index');
-            return this[name];
+            return this[__toCamelCase__(name)];
         }else{
-            index = Array.prototype.indexOf.apply(this, name)
+            index = Array.prototype.indexOf.apply(this, [name]);
             if(index > -1)
                 return this[index];
         }
@@ -8271,6 +8396,10 @@ __extend__(CSS2Properties.prototype, {
     setProperty: function(name, value, priority){
         //$info('setting css property '+name+' : '+value);
         name = __toCamelCase__(name);
+        if(value && (value+'').match(/^([0-9]*\.)?[0-9]+$/)){
+            value = Number(value);
+            //console.log('converted %s to number %s', name, value);
+        }
         if(name in this.styleIndex  && value !== undefined){
             //$info('setting camel case css property ');
             this.styleIndex[name] = value;
@@ -9203,19 +9332,21 @@ __defineParser__(function(e){
 DOMParser = function(principle, documentURI, baseURI){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
-        var xmldoc = new DOMImplementation().createDocument('','',null);
+        //console.log('DOMParser.parseFromString %s', mimetype);
+        var xmldoc = new Document(new DOMImplementation());
         return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
     }
 });
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
-    //console.log('XMLParser.parseDocument')
+    //console.log('XMLParser.parseDocument');
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
         importedNode,
         tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
+        //console.log('mimetype: text/xml');
         tmpdoc.baseURI = 'http://envjs.com/xml';
         xmlstring = '<html><head></head><body>'+
             '<envjs_1234567890 xmlns="envjs_1234567890">'
@@ -9244,7 +9375,9 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     return xmldoc;
 };
 
-var __fragmentCache__ = {};
+var __fragmentCache__ = {length:0},
+    __cachable__ = 255;
+
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
@@ -9252,7 +9385,7 @@ HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //Envjs.wait(-1);
     return htmldoc;
 };
-HTMLParser.parseFragment = function(htmlstring, fragment){
+HTMLParser.parseFragment = function(htmlstring, element){
     //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
     var tmpdoc,
@@ -9260,46 +9393,58 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
         importedNode,
         tmpNode,
         length,
-        i;
-    
-    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        i,
+        docstring;
+    //console.log('parsing fragment: %s', htmlstring);
+    //console.log('__fragmentCache__.length %s', __fragmentCache__.length)
+    if( htmlstring.length > __cachable__ && htmlstring in __fragmentCache__){
         tmpdoc = __fragmentCache__[htmlstring];
     }else{
         //console.log('parsing html fragment \n%s', htmlstring);
         tmpdoc = new HTMLDocument(new DOMImplementation());
-        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
-        if(htmlstring.length > 127 ){
+        //preserves leading white space
+        docstring = '<html><head></head><body>'+
+            '<envjs_1234567890 xmlns="envjs_1234567890">'
+                +htmlstring+
+            '</envjs_1234567890>'+
+        '</body></html>';
+        Envjs.parseHtmlDocument(docstring,tmpdoc, false, null,null);
+        if(htmlstring.length > __cachable__ ){
             tmpdoc.normalizeDocument();
             __fragmentCache__[htmlstring] = tmpdoc;
+            __fragmentCache__.length += htmlstring.length;
             tmpdoc.cached = true;
         }else{
             tmpdoc.cached = false;
         }
     }
     
-    parent = tmpdoc.body;
-    while(fragment.firstChild != null){
-        tmpNode = fragment.removeChild( fragment.firstChild );
+    //parent is envjs_1234567890 element
+    parent = tmpdoc.body.childNodes[0];
+    while(element.firstChild != null){
+        //zap the elements children so we can import
+        tmpNode = element.removeChild( element.firstChild );
         delete tmpNode;
     }
     if(tmpdoc.cached){
         length = parent.childNodes.length;
         for(i=0;i<length;i++){
-            importedNode = fragment.importNode( parent.childNodes[i], true );
-            fragment.appendChild( importedNode );  
+            importedNode = element.importNode( parent.childNodes[i], true );
+            element.appendChild( importedNode );  
         }
     }else{
         while(parent.firstChild != null){
             tmpNode  = parent.removeChild( parent.firstChild );
-            importedNode = fragment.importNode( tmpNode, true);
-            fragment.appendChild( importedNode );
+            importedNode = element.importNode( tmpNode, true);
+            element.appendChild( importedNode );
             delete tmpNode;
         }
-        delete tmpdoc,
-               htmlstring;
+        delete tmpdoc;
+        delete htmlstring;
     }
     
-    return fragment;
+    // console.log('finished fragment: %s', element.outerHTML);
+    return element;
 };
 
 var __clearFragmentCache__ = function(){
@@ -9340,17 +9485,21 @@ __extend__(Document.prototype, {
 __extend__(HTMLDocument.prototype,{
 
     open : function(){ 
+        //console.log('opening doc for write.'); 
         this._open = true;  
         this._writebuffer = [];
     },
-    close : function(){ 
+    close : function(){
+        //console.log('closing doc.'); 
         if(this._open){
             HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
             this._open = false;
             this._writebuffer = null;
+            //console.log('finished writing doc.');
         }
     },
     write: function(htmlstring){ 
+        //console.log('writing doc.'); 
         if(this._open)
             this._writebuffer = [htmlstring];
     },
@@ -9366,104 +9515,116 @@ var __elementPopped__ = function(ns, name, node){
     var doc = node.ownerDocument,
         okay,
         event;
-    switch(doc+''){
-        case '[object XMLDocument]':
-            return;
-        case '[object HTMLDocument]':
-            switch(node.namespaceURI){
-                case "http://n.validator.nu/placeholder/":
-                    return;
-                case null:
-                case "":
-                case "http://www.w3.org/1999/xhtml":
-                    switch(name.toLowerCase()){
-                        case 'script':
-                            try{
-                                okay = Envjs.loadLocalScript(node, null);
-                                // console.log('loaded script? %s %s', node.uuid, okay);
-                                // only fire event if we actually had something to load
-                                if (node.src && node.src.length > 0){
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent( okay ? "load" : "error", false, false );
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
-                        case 'frame':
-                        case 'iframe':
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    //console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.uri(node.src));
-                                    event = node.ownerDocument.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }else{
-                                    //console.log('src/parser/htmldocument: triggering frame load (no src)');
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
-                        case 'link':
-                            if (node.href && node.href.length > 0){
-                                // don't actually load anything, so we're "done" immediately:
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            }
-                            return;
-                        case 'img':
-                            if (node.src && node.src.length > 0){
-                                // don't actually load anything, so we're "done" immediately:
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            }
-                            return;
-                        case 'html':
-                            doc.parsing = false;
-                            //DOMContentLoaded event
-                            if(doc.createEvent){
-                                event = doc.createEvent('Events');
-                                event.initEvent("DOMContentLoaded", false, false);
-                                doc.dispatchEvent( event, false );
-                            }
-                            
-                            if(doc.createEvent){
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                doc.dispatchEvent( event, false );
-                            }
-                            
-                            try{
-                                if(doc.parentWindow){
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    doc.parentWindow.dispatchEvent( event, false );
-                                }
-                                if(doc === window.document){
-                                    //console.log('triggering window.load')
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    window.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                //console.log('window load event failed %s', e);
-                                //swallow
-                            }
-                        default:
-                            return;
-                    }//switch on name
-                default:
-                    return;
-            }//switch on ns
+    switch(doc.parsing){
+        case false:
+            //innerHTML so dont do loading patterns for parsing
             break;
-        default: 
-            console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
-    }//switch on doc type
+        case true:
+            switch(doc+''){
+                case '[object XMLDocument]':
+                    break;
+                case '[object HTMLDocument]':
+                    switch(node.namespaceURI){
+                        case "http://n.validator.nu/placeholder/":
+                            break;
+                        case null:
+                        case "":
+                        case "http://www.w3.org/1999/xhtml":
+                            switch(name.toLowerCase()){
+                                case 'script':
+                                    try{
+                                        okay = Envjs.loadLocalScript(node, null);
+                                        // console.log('loaded script? %s %s', node.uuid, okay);
+                                        // only fire event if we actually had something to load
+                                        if (node.src && node.src.length > 0){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent( okay ? "load" : "error", false, false );
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }
+                                    break;
+                                case 'frame':
+                                case 'iframe':
+                                    try{
+                                        if (node.src && node.src.length > 0){
+                                            //console.log("getting content document for (i)frame from %s", node.src);
+                                            Envjs.loadFrame(node, Envjs.uri(node.src));
+                                            event = node.ownerDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }else{
+                                            //console.log('src/parser/htmldocument: triggering frame load (no src)');
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }
+                                    break;
+                                case 'link':
+                                    if (node.href && node.href.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'img':
+                                    if (node.src && node.src.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'html':
+                                    doc.parsing = false;
+                                    //DOMContentLoaded event
+                                    if(doc.createEvent){
+                                        event = doc.createEvent('Events');
+                                        event.initEvent("DOMContentLoaded", false, false);
+                                        doc.dispatchEvent( event, false );
+                                    }
+                                    
+                                    if(doc.createEvent){
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        doc.dispatchEvent( event, false );
+                                    }
+                                    
+                                    try{
+                                        if(doc.parentWindow){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            doc.parentWindow.dispatchEvent( event, false );
+                                        }
+                                        if(doc === window.document){
+                                            //console.log('triggering window.load')
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            window.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        //console.log('window load event failed %s', e);
+                                        //swallow
+                                    }
+                                default:
+                                    if(node.getAttribute('onload')){
+                                        //console.log('%s onload', node);
+                                        node.onload();
+                                    }
+                                    break;
+                            }//switch on name
+                        default:
+                            break;
+                    }//switch on ns
+                    break;
+                default: 
+                    console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
+            }//switch on doc type
+        default:
+            break;
+    }//switch on parsing
 };
 
 __extend__(HTMLElement.prototype,{
@@ -9559,7 +9720,10 @@ __extend__(Document.prototype,{
         return new Location(this.documentURI, this);
     },
     set location(url){
-        this.location.replace(url);
+        //very important or you will go into an infinite
+        //loop when creating a xml document
+        if(url)
+            this.location.replace(url);
     }
 });
 
@@ -10135,6 +10299,7 @@ XMLHttpRequest.DONE = 4;
 
 XMLHttpRequest.prototype = {
 	open: function(method, url, async, user, password){ 
+        //console.log('openning xhr %s %s %s', method, url, async);
 		this.readyState = 1;
 		this.async = (async === false)?false:true;
 		this.method = method || "GET";
@@ -10146,7 +10311,7 @@ XMLHttpRequest.prototype = {
 	},
 	send: function(data, parsedoc/*non-standard*/){
 		var _this = this;
-        parsedoc = !!parsedoc;
+        parsedoc = (parsedoc === undefined)?true:!!parsedoc;
 		function makeRequest(){
             Envjs.connection(_this, function(){
                 if (!_this.aborted){
@@ -10158,8 +10323,8 @@ XMLHttpRequest.prototype = {
                     if ( parsedoc && _this.responseText.match(/^\s*</) ) {
                         domparser = domparser||new DOMParser();
                         try {
-                            //Envjs.debug("parsing response text into xml document");
-                            doc = domparser.parseFromString(_this.responseText+"");
+                            c//onsole.log("parsing response text into xml document");
+                            doc = domparser.parseFromString(_this.responseText+"", 'text/xml');
                         } catch(e) {
                             //Envjs.error('response XML does not appear to be well formed xml', e);
                             console.log('parseerror \n%s', e);
@@ -10181,14 +10346,14 @@ XMLHttpRequest.prototype = {
 		};
 
 		if (this.async){
-		    //Envjs.debug("XHR sending asynch;");
             //TODO: what we really need to do here is rejoin the 
             //      current thread and call onreadystatechange via
             //      setTimeout so the callback is essentially applied
             //      at the end of the current callstack
+            //console.log('requesting async: %s', this.url);
 			Envjs.runAsync(makeRequest);
 		}else{
-		    //Envjs.debug("XHR sending synch;");
+            //console.log('requesting sync: %s', this.url);
 			makeRequest();
 		}
 	},
@@ -10738,7 +10903,7 @@ Window = function(scope, parent, opener){
             return proxy;
         },
         toString : function(){
-          return '[Window]';
+            return '[Window]';
         },
         getComputedStyle : function(element, pseudoElement){
             if(CSS2Properties){
@@ -10765,7 +10930,18 @@ Window = function(scope, parent, opener){
             return _window;
         },
         close: function(){
-            delete __windows__[$uuid];
+            //console.log('closing window %s', __windows__[$uuid]);
+            try{
+                for(var p in __windows__[$uuid].__proxy__){
+                    delete p;
+                }
+                delete __windows__[$uuid].__proxy__;
+                delete __windows__[$uuid];
+                delete scope;
+                delete this;
+            }catch(e){
+                console.log('%s',e)
+            }
         },
         alert : function(message){
             Envjs.alert(message);
@@ -10778,7 +10954,7 @@ Window = function(scope, parent, opener){
         },
         onload: function(){},
         onunload: function(){},
-        get uuid(){
+        get guid(){
             return $uuid;
         }
     });
@@ -10799,7 +10975,7 @@ var __windows__ = {};
 
 var __initStandardObjects__ = function(scope, parent){
     
-    var __Array__;
+    /*var __Array__;
     if(!scope.Array){
         __Array__ = function(){
             return new parent.top.Array();
@@ -10842,7 +11018,7 @@ var __initStandardObjects__ = function(scope, parent){
         scope.__defineGetter__('Number', function(){
             return  __Number__;
         });
-    }
+    }*/
      
 };
 

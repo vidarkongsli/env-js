@@ -9,13 +9,13 @@ HTMLTableRowElement = function(ownerDocument) {
 HTMLTableRowElement.prototype = new HTMLElement;
 __extend__(HTMLTableRowElement.prototype, {
     
-    appendChild : function (child) {
+    /*appendChild : function (child) {
     
        var retVal = Node.prototype.appendChild.apply(this, arguments);
        retVal.cellIndex = this.cells.length -1;
              
        return retVal;
-    },
+    },*/
     // align gets or sets the horizontal alignment of data within cells of the row.
     get align() {
         return this.getAttribute("align");

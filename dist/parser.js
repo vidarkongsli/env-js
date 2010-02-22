@@ -562,19 +562,21 @@ __defineParser__(function(e){
 DOMParser = function(principle, documentURI, baseURI){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
-        var xmldoc = new DOMImplementation().createDocument('','',null);
+        //console.log('DOMParser.parseFromString %s', mimetype);
+        var xmldoc = new Document(new DOMImplementation());
         return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
     }
 });
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
-    //console.log('XMLParser.parseDocument')
+    //console.log('XMLParser.parseDocument');
     var tmpdoc = new Document(new DOMImplementation()),
         parent,
         importedNode,
         tmpNode;
         
     if(mimetype && mimetype == 'text/xml'){
+        //console.log('mimetype: text/xml');
         tmpdoc.baseURI = 'http://envjs.com/xml';
         xmlstring = '<html><head></head><body>'+
             '<envjs_1234567890 xmlns="envjs_1234567890">'
@@ -603,7 +605,9 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     return xmldoc;
 };
 
-var __fragmentCache__ = {};
+var __fragmentCache__ = {length:0},
+    __cachable__ = 255;
+
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
@@ -611,7 +615,7 @@ HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //Envjs.wait(-1);
     return htmldoc;
 };
-HTMLParser.parseFragment = function(htmlstring, fragment){
+HTMLParser.parseFragment = function(htmlstring, element){
     //console.log('HTMLParser.parseFragment')
     // fragment is allowed to be an element as well
     var tmpdoc,
@@ -619,46 +623,58 @@ HTMLParser.parseFragment = function(htmlstring, fragment){
         importedNode,
         tmpNode,
         length,
-        i;
-    
-    if( htmlstring.length > 127 && htmlstring in __fragmentCache__){
+        i,
+        docstring;
+    //console.log('parsing fragment: %s', htmlstring);
+    //console.log('__fragmentCache__.length %s', __fragmentCache__.length)
+    if( htmlstring.length > __cachable__ && htmlstring in __fragmentCache__){
         tmpdoc = __fragmentCache__[htmlstring];
     }else{
         //console.log('parsing html fragment \n%s', htmlstring);
         tmpdoc = new HTMLDocument(new DOMImplementation());
-        Envjs.parseHtmlDocument(htmlstring,tmpdoc, false, null,null);
-        if(htmlstring.length > 127 ){
+        //preserves leading white space
+        docstring = '<html><head></head><body>'+
+            '<envjs_1234567890 xmlns="envjs_1234567890">'
+                +htmlstring+
+            '</envjs_1234567890>'+
+        '</body></html>';
+        Envjs.parseHtmlDocument(docstring,tmpdoc, false, null,null);
+        if(htmlstring.length > __cachable__ ){
             tmpdoc.normalizeDocument();
             __fragmentCache__[htmlstring] = tmpdoc;
+            __fragmentCache__.length += htmlstring.length;
             tmpdoc.cached = true;
         }else{
             tmpdoc.cached = false;
         }
     }
     
-    parent = tmpdoc.body;
-    while(fragment.firstChild != null){
-        tmpNode = fragment.removeChild( fragment.firstChild );
+    //parent is envjs_1234567890 element
+    parent = tmpdoc.body.childNodes[0];
+    while(element.firstChild != null){
+        //zap the elements children so we can import
+        tmpNode = element.removeChild( element.firstChild );
         delete tmpNode;
     }
     if(tmpdoc.cached){
         length = parent.childNodes.length;
         for(i=0;i<length;i++){
-            importedNode = fragment.importNode( parent.childNodes[i], true );
-            fragment.appendChild( importedNode );  
+            importedNode = element.importNode( parent.childNodes[i], true );
+            element.appendChild( importedNode );  
         }
     }else{
         while(parent.firstChild != null){
             tmpNode  = parent.removeChild( parent.firstChild );
-            importedNode = fragment.importNode( tmpNode, true);
-            fragment.appendChild( importedNode );
+            importedNode = element.importNode( tmpNode, true);
+            element.appendChild( importedNode );
             delete tmpNode;
         }
-        delete tmpdoc,
-               htmlstring;
+        delete tmpdoc;
+        delete htmlstring;
     }
     
-    return fragment;
+    // console.log('finished fragment: %s', element.outerHTML);
+    return element;
 };
 
 var __clearFragmentCache__ = function(){
@@ -699,17 +715,21 @@ __extend__(Document.prototype, {
 __extend__(HTMLDocument.prototype,{
 
     open : function(){ 
+        //console.log('opening doc for write.'); 
         this._open = true;  
         this._writebuffer = [];
     },
-    close : function(){ 
+    close : function(){
+        //console.log('closing doc.'); 
         if(this._open){
             HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
             this._open = false;
             this._writebuffer = null;
+            //console.log('finished writing doc.');
         }
     },
     write: function(htmlstring){ 
+        //console.log('writing doc.'); 
         if(this._open)
             this._writebuffer = [htmlstring];
     },
@@ -725,104 +745,116 @@ var __elementPopped__ = function(ns, name, node){
     var doc = node.ownerDocument,
         okay,
         event;
-    switch(doc+''){
-        case '[object XMLDocument]':
-            return;
-        case '[object HTMLDocument]':
-            switch(node.namespaceURI){
-                case "http://n.validator.nu/placeholder/":
-                    return;
-                case null:
-                case "":
-                case "http://www.w3.org/1999/xhtml":
-                    switch(name.toLowerCase()){
-                        case 'script':
-                            try{
-                                okay = Envjs.loadLocalScript(node, null);
-                                // console.log('loaded script? %s %s', node.uuid, okay);
-                                // only fire event if we actually had something to load
-                                if (node.src && node.src.length > 0){
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent( okay ? "load" : "error", false, false );
-                                    node.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
-                        case 'frame':
-                        case 'iframe':
-                            try{
-                                if (node.src && node.src.length > 0){
-                                    //console.log("getting content document for (i)frame from %s", node.src);
-                                    Envjs.loadFrame(node, Envjs.uri(node.src));
-                                    event = node.ownerDocument.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    node.dispatchEvent( event, false );
-                                }else{
-                                    //console.log('src/parser/htmldocument: triggering frame load (no src)');
-                                }
-                            }catch(e){
-                                console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                            }
-                            return;
-                        case 'link':
-                            if (node.href && node.href.length > 0){
-                                // don't actually load anything, so we're "done" immediately:
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            }
-                            return;
-                        case 'img':
-                            if (node.src && node.src.length > 0){
-                                // don't actually load anything, so we're "done" immediately:
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                node.dispatchEvent( event, false );
-                            }
-                            return;
-                        case 'html':
-                            doc.parsing = false;
-                            //DOMContentLoaded event
-                            if(doc.createEvent){
-                                event = doc.createEvent('Events');
-                                event.initEvent("DOMContentLoaded", false, false);
-                                doc.dispatchEvent( event, false );
-                            }
-                            
-                            if(doc.createEvent){
-                                event = doc.createEvent('HTMLEvents');
-                                event.initEvent("load", false, false);
-                                doc.dispatchEvent( event, false );
-                            }
-                            
-                            try{
-                                if(doc.parentWindow){
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    doc.parentWindow.dispatchEvent( event, false );
-                                }
-                                if(doc === window.document){
-                                    //console.log('triggering window.load')
-                                    event = doc.createEvent('HTMLEvents');
-                                    event.initEvent("load", false, false);
-                                    window.dispatchEvent( event, false );
-                                }
-                            }catch(e){
-                                //console.log('window load event failed %s', e);
-                                //swallow
-                            }
-                        default:
-                            return;
-                    }//switch on name
-                default:
-                    return;
-            }//switch on ns
+    switch(doc.parsing){
+        case false:
+            //innerHTML so dont do loading patterns for parsing
             break;
-        default: 
-            console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
-    }//switch on doc type
+        case true:
+            switch(doc+''){
+                case '[object XMLDocument]':
+                    break;
+                case '[object HTMLDocument]':
+                    switch(node.namespaceURI){
+                        case "http://n.validator.nu/placeholder/":
+                            break;
+                        case null:
+                        case "":
+                        case "http://www.w3.org/1999/xhtml":
+                            switch(name.toLowerCase()){
+                                case 'script':
+                                    try{
+                                        okay = Envjs.loadLocalScript(node, null);
+                                        // console.log('loaded script? %s %s', node.uuid, okay);
+                                        // only fire event if we actually had something to load
+                                        if (node.src && node.src.length > 0){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent( okay ? "load" : "error", false, false );
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }
+                                    break;
+                                case 'frame':
+                                case 'iframe':
+                                    try{
+                                        if (node.src && node.src.length > 0){
+                                            //console.log("getting content document for (i)frame from %s", node.src);
+                                            Envjs.loadFrame(node, Envjs.uri(node.src));
+                                            event = node.ownerDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }else{
+                                            //console.log('src/parser/htmldocument: triggering frame load (no src)');
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }
+                                    break;
+                                case 'link':
+                                    if (node.href && node.href.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'img':
+                                    if (node.src && node.src.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'html':
+                                    doc.parsing = false;
+                                    //DOMContentLoaded event
+                                    if(doc.createEvent){
+                                        event = doc.createEvent('Events');
+                                        event.initEvent("DOMContentLoaded", false, false);
+                                        doc.dispatchEvent( event, false );
+                                    }
+                                    
+                                    if(doc.createEvent){
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        doc.dispatchEvent( event, false );
+                                    }
+                                    
+                                    try{
+                                        if(doc.parentWindow){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            doc.parentWindow.dispatchEvent( event, false );
+                                        }
+                                        if(doc === window.document){
+                                            //console.log('triggering window.load')
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            window.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        //console.log('window load event failed %s', e);
+                                        //swallow
+                                    }
+                                default:
+                                    if(node.getAttribute('onload')){
+                                        //console.log('%s onload', node);
+                                        node.onload();
+                                    }
+                                    break;
+                            }//switch on name
+                        default:
+                            break;
+                    }//switch on ns
+                    break;
+                default: 
+                    console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
+            }//switch on doc type
+        default:
+            break;
+    }//switch on parsing
 };
 
 __extend__(HTMLElement.prototype,{

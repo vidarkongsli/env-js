@@ -46,8 +46,9 @@ function __setArray__( target, array ) {
 /*
 * CSS2Properties - DOM Level 2 CSS
 */
+//var __cssproperties__ = 0;
 CSS2Properties = function(element){
-    //this.onSetCallback = options.onSet?options.onSet:(function(){});
+    //console.log('css2properties %s', __cssproperties__++);
     this.styleIndex = __supportedStyles__();//non-standard
     this.type = element.tagName;//non-standard
     __setArray__(this,[]);
@@ -75,11 +76,11 @@ __extend__(CSS2Properties.prototype, {
     },
     getPropertyValue : function(name){
         var index;
-        if(name in this.styleIndex){
+        if(__toCamelCase__(name) in this.styleIndex){
             //$info(name +' in style index');
-            return this[name];
+            return this[__toCamelCase__(name)];
         }else{
-            index = Array.prototype.indexOf.apply(this, name)
+            index = Array.prototype.indexOf.apply(this, [name]);
             if(index > -1)
                 return this[index];
         }
@@ -100,6 +101,10 @@ __extend__(CSS2Properties.prototype, {
     setProperty: function(name, value, priority){
         //$info('setting css property '+name+' : '+value);
         name = __toCamelCase__(name);
+        if(value && (value+'').match(/^([0-9]*\.)?[0-9]+$/)){
+            value = Number(value);
+            //console.log('converted %s to number %s', name, value);
+        }
         if(name in this.styleIndex  && value !== undefined){
             //$info('setting camel case css property ');
             this.styleIndex[name] = value;

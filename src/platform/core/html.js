@@ -36,7 +36,7 @@ Envjs.loadInlineScript = function(script){
  * @param {Object} parser
  */
 Envjs.loadLocalScript = function(script){
-    console.debug("loading script %s", script);
+    //console.debug("loading script %s", script);
     var types, 
         src, 
         i, 

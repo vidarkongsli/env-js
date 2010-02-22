@@ -359,13 +359,15 @@ var $events = [{}];
 function __addEventListener__(target, type, fn, phase){
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
         //console.log('event uuid %s %s', target, target.uuid);
+        target.uuid = $events.length+'';
     }
     if ( !$events[target.uuid] ) {
+        //console.log('creating listener for target: %s %s', target, target.uuid);
         $events[target.uuid] = {};
     }
     if ( !$events[target.uuid][type] ){
+        //console.log('creating listener for type: %s %s %s', target, target.uuid, type);
         $events[target.uuid][type] = {
             CAPTURING:[],
             BUBBLING:[]
@@ -374,10 +376,12 @@ function __addEventListener__(target, type, fn, phase){
     if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
+        //console.log('creating listener for function: %s %s %s', target, target.uuid, phase);
         $events[target.uuid][type][phase].push( fn );
         //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
         //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
     }
+    //console.log('registered event listeners %s', $events.length);
 };
 
 
@@ -385,16 +389,19 @@ function __removeEventListener__(target, type, fn, phase){
 
     phase = !!phase?"CAPTURING":"BUBBLING";
     if ( !target.uuid ) {
-        target.uuid = $events.length+'';
+        return;
     }
     if ( !$events[target.uuid] ) {
-        $events[target.uuid] = {};
+        return;
     }
-    if ( !$events[target.uuid][type] ){
-        $events[target.uuid][type] = {
-            CAPTURING:[],
-            BUBBLING:[]
-        };
+    if(type == '*'){
+        //used to clean all event listeners for a given node
+        //console.log('cleaning all event listeners for node %s %s',target, target.uuid);
+        delete $events[target.uuid];
+        $events[target.uuid] = null;
+        return;
+    }else if ( !$events[target.uuid][type] ){
+        return;
     }
     $events[target.uuid][type][phase] =
     $events[target.uuid][type][phase].filter(function(f){
@@ -403,12 +410,14 @@ function __removeEventListener__(target, type, fn, phase){
     });
 };
 
-
+var __eventuuid__ = 0;
 function __dispatchEvent__(target, event, bubbles){
 
+    if(!event.uuid)
+        event.uuid = __eventuuid__++;
     //the window scope defines the $event object, for IE(^^^) compatibility;
-    $event = event;
-
+    //$event = event;
+    //console.log('dispatching event %s', event.uuid);
     if (bubbles == undefined || bubbles == null)
         bubbles = true;
 
@@ -425,7 +434,8 @@ function __dispatchEvent__(target, event, bubbles){
         event.eventPhase = Event.AT_TARGET;
         if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
             event.currentTarget = target;
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['CAPTURING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['CAPTURING'].length);
             $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
                 //console.log('AT_TARGET (CAPTURING) event %s', fn);
                 var returnValue = fn( event );
@@ -434,7 +444,8 @@ function __dispatchEvent__(target, event, bubbles){
                     event.stopPropagation();
                 }
             });
-            //console.log('dispatching %s %s %s %s', target, event.type, $events[target.uuid][event.type]['BUBBLING'].length);
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['BUBBLING'].length);
             $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
                 //console.log('AT_TARGET (BUBBLING) event %s', fn);
                 var returnValue = fn( event );
@@ -450,6 +461,10 @@ function __dispatchEvent__(target, event, bubbles){
         if (bubbles && !event.cancelled){
             __bubbleEvent__(target, event);
         }
+        
+        //console.log('deleting event %s', event.uuid);
+        event.target = null;
+        event = null;
     }else{
         throw new EventException(EventException.UNSPECIFIED_EVENT_TYPE_ERR);
     }
@@ -505,51 +520,49 @@ Event = function(options){
     // be appropriate in the long run and we'll
     // have to decide if we simply dont adhere to
     // the read-only restriction of the specification
-    var state = __extend__({
-        bubbles : true,
-        cancelable : true,
-        cancelled: false,
-        currentTarget : null,
-        target : null,
-        eventPhase : Event.AT_TARGET,
-        timeStamp : new Date().getTime(),
-        preventDefault : false,
-        stopPropogation : false
-    }, options||{} );
-        
-    return {
-        get bubbles(){return state.bubbles;},
-        get cancelable(){return state.cancelable;},
-        get currentTarget(){return state.currentTarget;},
-        set currentTarget(currentTarget){ state.currentTarget = currentTarget; },
-        get eventPhase(){return state.eventPhase;},
-        set eventPhase(eventPhase){state.eventPhase = eventPhase;},
-        get target(){return state.target;},
-        set target(target){ state.target = target;},
-        get timeStamp(){return state.timeStamp;},
-        get type(){return state.type;},
-        initEvent: function(type, bubbles, cancelable){
-            state.type=type?type:'';
-            state.bubbles=!!bubbles;
-            state.cancelable=!!cancelable;
-        },
-        preventDefault: function(){
-            state.preventDefault = true;
-        },
-        stopPropagation: function(){
-            if(state.cancelable){
-                state.cancelled = true;
-                state.bubbles = false;
-            }
-        },
-        get cancelled(){
-            return state.cancelled;
-        },
-        toString: function(){
-            return '[object Event]';
-        }
-    };
+    this._bubbles = true;
+    this._cancelable = true;
+    this._cancelled = false;
+    this._currentTarget = null;
+    this._target = null;
+    this._eventPhase = Event.AT_TARGET;
+    this._timeStamp = new Date().getTime();
+    this._preventDefault = false;
+    this._stopPropogation = false;
 };
+
+__extend__(Event.prototype,{       
+    get bubbles(){return this._bubbles;},
+    get cancelable(){return this._cancelable;},
+    get currentTarget(){return this._currentTarget;},
+    set currentTarget(currentTarget){ this._currentTarget = currentTarget; },
+    get eventPhase(){return this._eventPhase;},
+    set eventPhase(eventPhase){this._eventPhase = eventPhase;},
+    get target(){return this._target;},
+    set target(target){ this._target = target;},
+    get timeStamp(){return this._timeStamp;},
+    get type(){return this._type;},
+    initEvent: function(type, bubbles, cancelable){
+        this._type=type?type:'';
+        this._bubbles=!!bubbles;
+        this._cancelable=!!cancelable;
+    },
+    preventDefault: function(){
+        this._preventDefault = true;
+    },
+    stopPropagation: function(){
+        if(this._cancelable){
+            this._cancelled = true;
+            this._bubbles = false;
+        }
+    },
+    get cancelled(){
+        return this._cancelled;
+    },
+    toString: function(){
+        return '[object Event]';
+    }
+});
 
 __extend__(Event,{
     CAPTURING_PHASE : 1,
@@ -565,25 +578,24 @@ __extend__(Event,{
  * @param {Object} options
  */
 UIEvent = function(options) {
-    var state = __extend__({
-        view : null,
-        detail : 0
-    }, options||{});
-    return __extend__(new Event(state),{
-        get view(){
-            return state.view;
-        },
-        get detail(){
-            return state.detail;
-        },
-        initUIEvent: function(type, bubbles, cancelable, windowObject, detail){
-            this.initEvent(type, bubbles, cancelable);
-            state.detail = 0;
-            state.view = windowObject;
-        }
-    });
+    this._view = null;
+    this._detail = 0;
 };
+
 UIEvent.prototype = new Event;
+__extend__(UIEvent.prototype,{
+    get view(){
+        return this._view;
+    },
+    get detail(){
+        return this._detail;
+    },
+    initUIEvent: function(type, bubbles, cancelable, windowObject, detail){
+        this.initEvent(type, bubbles, cancelable);
+        this._detail = 0;
+        this._view = windowObject;
+    }
+});
 
 var $onblur,
     $onfocus,
@@ -596,114 +608,110 @@ var $onblur,
  * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
  */
 MouseEvent = function(options) {
-    var state = __extend__({
-        screenX: 0,
-        screenY: 0,
-        clientX: 0,
-        clientY: 0,
-        ctrlKey: false,
-        metaKey: false,
-        altKey:  false,
-        metaKey: false,
-        button: null,
-        relatedTarget: null
-    }, options||{});
-    return __extend__(new Event(state),{
-        get screenX(){
-            return state.screenX;
-        },
-        get screenY(){
-            return state.screenY;
-        },
-        get clientX(){
-            return state.clientX;
-        },
-        get clientY(){
-            return state.clientY;
-        },
-        get ctrlKey(){
-            return state.ctrlKey;
-        },
-        get altKey(){
-            return state.altKey;
-        },
-        get shiftKey(){
-            return state.shiftKey;
-        },
-        get metaKey(){
-            return state.metaKey;
-        },
-        get button(){
-            return state.button;
-        },
-        get relatedTarget(){
-            return state.relatedTarget;
-        },
-        initMouseEvent: function(type, bubbles, cancelable, windowObject, detail,
-                screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, 
-                metaKey, button, relatedTarget){
-            this.initUIEvent(type, bubbles, cancelable, windowObject, detail);
-            state.screenX = screenX;
-            state.screenY = screenY;
-            state.clientX = clientX;
-            state.clientY = clientY;
-            state.ctrlKey = ctrlKey;
-            state.altKey = altKey;
-            state.shiftKey = shiftKey;
-            state.metaKey = metaKey;
-            state.button = button;
-            state.relatedTarget = relatedTarget;
-        }
-    });
+    this._screenX= 0;
+    this._screenY= 0;
+    this._clientX= 0;
+    this._clientY= 0;
+    this._ctrlKey= false;
+    this._metaKey= false;
+    this._altKey= false;
+    this._button= null;
+    this._relatedTarget= null;
 };
 MouseEvent.prototype = new UIEvent;
+__extend__(MouseEvent.prototype,{
+    get screenX(){
+        return this._screenX;
+    },
+    get screenY(){
+        return this._screenY;
+    },
+    get clientX(){
+        return this._clientX;
+    },
+    get clientY(){
+        return this._clientY;
+    },
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, detail,
+            screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, 
+            metaKey, button, relatedTarget){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, detail);
+        this._screenX = screenX;
+        this._screenY = screenY;
+        this._clientX = clientX;
+        this._clientY = clientY;
+        this._ctrlKey = ctrlKey;
+        this._altKey = altKey;
+        this._shiftKey = shiftKey;
+        this._metaKey = metaKey;
+        this._button = button;
+        this._relatedTarget = relatedTarget;
+    }
+});
 
 /**
  * Interface KeyboardEvent (introduced in DOM Level 3)
  */
 KeyboardEvent = function(options) {
-    var state = __extend__({
-        keyIdentifier: 0,
-        keyLocation: 0,
-        ctrlKey: false,
-        metaKey: false,
-        altKey:  false,
-        metaKey: false,
-    }, options||{});
-    return __extend__(new Event(state),{
-        
-        get ctrlKey(){
-            return state.ctrlKey;
-        },
-        get altKey(){
-            return state.altKey;
-        },
-        get shiftKey(){
-            return state.shiftKey;
-        },
-        get metaKey(){
-            return state.metaKey;
-        },
-        get button(){
-            return state.button;
-        },
-        get relatedTarget(){
-            return state.relatedTarget;
-        },
-        getModifiersState: function(keyIdentifier){
-
-        },
-        initMouseEvent: function(type, bubbles, cancelable, windowObject, 
-                keyIdentifier, keyLocation, modifiersList, repeat){
-            this.initUIEvent(type, bubbles, cancelable, windowObject, 0);
-            state.keyIdentifier = keyIdentifier;
-            state.keyLocation = keyLocation;
-            state.modifiersList = modifiersList;
-            state.repeat = repeat;
-        }
-    });
+    this._keyIdentifier = 0;
+    this._keyLocation = 0;
+    this._ctrlKey = false;
+    this._metaKey = false;
+    this._altKey = false;
+    this._metaKey = false;
 };
 KeyboardEvent.prototype = new UIEvent;
+
+__extend__(KeyboardEvent.prototype,{
+        
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    getModifiersState: function(keyIdentifier){
+
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, 
+            keyIdentifier, keyLocation, modifiersList, repeat){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, 0);
+        this._keyIdentifier = keyIdentifier;
+        this._keyLocation = keyLocation;
+        this._modifiersList = modifiersList;
+        this._repeat = repeat;
+    }
+});
 
 KeyboardEvent.DOM_KEY_LOCATION_STANDARD      = 0;
 KeyboardEvent.DOM_KEY_LOCATION_LEFT          = 1;
@@ -756,62 +764,61 @@ var __fireMutationEvents__ = Aspect.before({
  * @param {Object} options
  */
 MutationEvent = function(options) {
-    var state = __extend__({
-        cancelable : false,
-        timeStamp : 0,
-    }, options||{});
-    return __extend__(new Event(state),{
-        get relatedNode(){
-            return state.relatedNode;
-        },
-        get prevValue(){
-            return state.prevValue;
-        },
-        get newValue(){
-            return state.newValue;
-        },
-        get attrName(){
-            return state.attrName;
-        },
-        get attrChange(){
-            return state.attrChange;
-        },
-        initMutationEvent: function( type, bubbles, cancelable, 
-                relatedNode, prevValue, newValue, attrName, attrChange ){
-            state.relatedNode = relatedNode;
-            state.prevValue = prevValue;
-            state.newValue = newValue;
-            state.attrName = attrName;
-            state.attrChange = attrChange;
-            switch(type){
-                case "DOMSubtreeModified":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeInserted":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeRemoved":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMNodeRemovedFromDocument":
-                    this.initEvent(type, false, false);
-                    break;
-                case "DOMNodeInsertedIntoDocument":
-                    this.initEvent(type, false, false);
-                    break;
-                case "DOMAttrModified":
-                    this.initEvent(type, true, false);
-                    break;
-                case "DOMCharacterDataModified":
-                    this.initEvent(type, true, false);
-                    break;
-                default:
-                    this.initEvent(type, bubbles, cancelable);
-            }
-        }
-    });
+    this._cancelable = false;
+    this._timeStamp = 0;
 };
+
 MutationEvent.prototype = new Event;
+__extend__(MutationEvent.prototype,{
+    get relatedNode(){
+        return this._relatedNode;
+    },
+    get prevValue(){
+        return this._prevValue;
+    },
+    get newValue(){
+        return this._newValue;
+    },
+    get attrName(){
+        return this._attrName;
+    },
+    get attrChange(){
+        return this._attrChange;
+    },
+    initMutationEvent: function( type, bubbles, cancelable, 
+            relatedNode, prevValue, newValue, attrName, attrChange ){
+        this._relatedNode = relatedNode;
+        this._prevValue = prevValue;
+        this._newValue = newValue;
+        this._attrName = attrName;
+        this._attrChange = attrChange;
+        switch(type){
+            case "DOMSubtreeModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeInserted":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemoved":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemovedFromDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMNodeInsertedIntoDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMAttrModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMCharacterDataModified":
+                this.initEvent(type, true, false);
+                break;
+            default:
+                this.initEvent(type, bubbles, cancelable);
+        }
+    }
+});
 
 // constants
 MutationEvent.ADDITION = 0;
