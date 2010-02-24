@@ -423,10 +423,10 @@ Envjs.uri = function(path, base){
         baseURI, absolutepath;
     if(m&&m.length>1){
         return (new java.net.URL(path).toString()+'')
-            .replace('file:/', 'file:///');;
+            .replace('file:/', 'file:///');
     }else if(base){
         return (new java.net.URL(new java.net.URL(base), path)+'')
-            .replace('file:/', 'file:///');;
+            .replace('file:/', 'file:///');
     }else{
         //return an absolute url from a url relative to the window location
         //TODO: window should not be inlined here. this should be passed as a 
@@ -1809,6 +1809,15 @@ Node.DOCUMENT_FRAGMENT_NODE      = 11;
 Node.NOTATION_NODE               = 12;
 Node.NAMESPACE_NODE              = 13;
 
+Node.DOCUMENT_POSITION_EQUAL        = 0x00;
+Node.DOCUMENT_POSITION_DISCONNECTED = 0x01;
+Node.DOCUMENT_POSITION_PRECEDING    = 0x02;
+Node.DOCUMENT_POSITION_FOLLOWING    = 0x04;
+Node.DOCUMENT_POSITION_CONTAINS     = 0x08;
+Node.DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC      = 0x20;
+
+
 __extend__(Node.prototype, {
     get localName(){
         return this.prefix?
@@ -2304,7 +2313,80 @@ __extend__(Node.prototype, {
         return !!node;
     },
     compareDocumentPosition : function(b){
-        var a = this;
+        //console.log("comparing document position %s %s", this, b);
+        var i, 
+            length, 
+            a = this, 
+            parent,
+            aparents,
+            bparents;
+        //handle a couple simpler case first
+        if(a === b)
+            return Node.DOCUMENT_POSITION_EQUAL;
+        
+        if(a.ownerDocument !== b.ownerDocument)
+            return Node.DOCUMENT_POSITION_OUTSIDE|
+                   Node.DOCUMENT_POSITION_PRECEDING|
+                   Node.DOCUMENT_POSITION_DISCONNECTED;
+            
+        if(a.parentNode === b.parentNode){
+            length = a.parentNode.childNodes.length;
+            for(i=0;i<length;i++){
+                if(a.parentNode.childNodes[i] === a){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(a.parentNode.childNodes[i] === b){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }
+            }
+        }
+        
+        if(a.contains(b))
+            return Node.DOCUMENT_POSITION_CONTAINED_BY|
+                   Node.DOCUMENT_POSITION_FOLLOWING;
+            
+        if(b.contains(a))
+            return Node.DOCUMENT_POSITION_CONTAINS|
+                   Node.DOCUMENT_POSITION_PRECEDING;
+            
+        aparents = [];
+        parent = a.parentNode;
+        while(parent){
+            aparents[aparents.length] = parent;
+            parent = parent.parentNode;
+        }
+        
+        bparents = [];
+        parent = b.parentNode;
+        while(parent){
+            i = aparents.indexOf(parent);
+            if(i < 0){
+                bparents[bparents.length] = parent;
+                parent = parent.parentNode;
+            }else{
+                //i cant be 0 since we already checked for equal parentNode
+                if(bparents.length > aparents.length){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(bparents.length < aparents.length){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }else{ 
+                    //common ancestor diverge point
+                    if(i === 0)
+                        return Node.DOCUMENT_POSITION_FOLLOWING;
+                    else
+                        parent = aparents[i-1];
+                        
+                    return parent.compareDocumentPosition(bparents.pop());
+                }
+            }
+        }
+            
+        return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_FOLLOWING|
+               Node.DOCUMENT_POSITION_PRECEDING|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
+       
+        /*
+         * yuck selecting every element in the doc to do this is awful
         var number = (a != b && a.contains(b) && 16) + (a != b && b.contains(a) && 8);
         //find position of both
         var all = document.getElementsByTagName("*");
@@ -2317,6 +2399,7 @@ __extend__(Node.prototype, {
         number += (my_location < node_location && 4)
         number += (my_location > node_location && 2)
         return number;
+        */
     } ,
     toString : function(){
         return "[object Node]";
@@ -5472,42 +5555,89 @@ __extend__(HTMLDocument.prototype, {
         return new HTMLCollection(this.getElementsByTagName('applet'));
         
     },
-    get body(){ 
-        var nodelist = this.getElementsByTagName('body');
-        if(nodelist.length === 0){
-            __stubHTMLDocument__(this);
-            nodelist = this.getElementsByTagName('body');
+    //document.head is non-standard
+    get head(){
+        //console.log('get head');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('','',null));
+        var element = this.documentElement,
+            length = element.childNodes.length,
+            i;
+        //check for the presence of the head element in this html doc
+        for(i=0;i<length;i++){
+            if(element.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(element.childNodes[i].tagName.toLowerCase() === 'head'){
+                    return element.childNodes[i];
+                }
+            }
         }
-        return nodelist[0];
-        
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        element.appendChild(this.createElement('head'));
+        return head;
     },
-    set body(html){
-        return this.replaceNode(this.body,html);
-    },
-
     get title(){
-        var titleArray = this.getElementsByTagName('title');
-        if (titleArray.length < 1)
-            return "";
-        return titleArray[0].textContent;
+        //console.log('get title');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('','',null));
+        var title,
+            head = this.head,
+            length = head.childNodes.length,
+            i;
+        //check for the presence of the title element in this head element
+        for(i=0;i<length;i++){
+            if(head.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(head.childNodes[i].tagName.toLowerCase() === 'title'){
+                    return head.childNodes[i].textContent;
+                }
+            }
+        }
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        title = this.createElement('title');
+        head.appendChild(title);
+        return title.appendChild(this.createTextNode('Untitled Document')).nodeValue;
     },
     set title(titleStr){
-        var titleArray = this.getElementsByTagName('title'),
-            titleElem,
-            headArray;
-        if (titleArray.length < 1){
-            // need to make a new element and add it to "head"
-            titleElem = new HTMLTitleElement(this);
-            titleElem.text = titleStr;
-            headArray = this.getElementsByTagName('head');
-    	    if (headArray.length < 1)
-                return;  // ill-formed, just give up.....
-            headArray[0].appendChild(titleElem);
-        } else {
-            titleArray[0].textContent = titleStr;
+        //console.log('set title %s', titleStr);
+        if(!this.documentElement)
+            this.appendChild(this.createElement('','',null));
+        var title,
+            head = this.head,
+            length = head.childNodes.length,
+            i;
+        //check for the presence of the title element in this head element
+        for(i=0;i<length;i++){
+            if(head.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(head.childNodes[i].tagName.toLowerCase() === 'title'){
+                    head.childNodes[i].textContent = titleStr;
+                }
+            }
         }
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        title = this.createElement('title');
+        head.appendChild(title);
+        title.appendChild(this.createTextNode(titleStr));
     },
 
+    get body(){ 
+        //console.log('get body');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('','',null));
+        var body,
+            element = this.documentElement,
+            length = element.childNodes.length,
+            i;
+        //check for the presence of the head element in this html doc
+        for(i=0;i<length;i++){
+            if(element.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(element.childNodes[i].tagName.toLowerCase() === 'body'){
+                    return element.childNodes[i];
+                }
+            }
+        }
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        return element.appendChild(this.createElement('body'));
+    },
+    set body(){console.log('set body');/**in firefox this is a benevolent do nothing*/},
     get cookie(){
         return Cookies.get(this);
     },
@@ -5580,32 +5710,6 @@ __extend__(HTMLDocument.prototype, {
     }
 });
 
-var __stubHTMLDocument__ = function(doc){
-    var html = doc.documentElement,
-        head,
-        body,
-        children, i;    
-    if(!html){
-        //console.log('stubbing html doc');
-        html = doc.createElement('html');
-        doc.appendChild(html);
-        head = doc.createElement('head');
-        html.appendChild(head);
-        body = doc.createElement('body');
-        html.appendChild(body);
-    }else{
-        body = doc.documentElement.getElementsByTagName('body').item(0);
-        if(!body){
-            body = doc.createElement('body');
-            html.appendChild(body);
-        }
-        head = doc.documentElement.getElementsByTagName('head').item(0);
-        if(!head){
-            head = doc.createElement('head');
-            html.appendChild(head);
-        }
-    }
-};
 
 Aspect.around({ 
     target: Node,  

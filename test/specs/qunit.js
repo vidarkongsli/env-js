@@ -740,7 +740,7 @@ QUnit.equiv = function () {
         }
     }
     
-    var callbacks = function () {
+    var callbacks  = function () {
 
         // for string, boolean, number and null
         function useStrictEquality(b, a) {
@@ -860,6 +860,7 @@ QUnit.equiv = function () {
         })(args[0], args[1]) && arguments.callee.apply(this, args.splice(1, args.length -1));
     };
 
+    innerEquiv.callbacks = callbacks;
     return innerEquiv;
 
 }();

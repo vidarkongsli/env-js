@@ -62,6 +62,15 @@ Node.DOCUMENT_FRAGMENT_NODE      = 11;
 Node.NOTATION_NODE               = 12;
 Node.NAMESPACE_NODE              = 13;
 
+Node.DOCUMENT_POSITION_EQUAL        = 0x00;
+Node.DOCUMENT_POSITION_DISCONNECTED = 0x01;
+Node.DOCUMENT_POSITION_PRECEDING    = 0x02;
+Node.DOCUMENT_POSITION_FOLLOWING    = 0x04;
+Node.DOCUMENT_POSITION_CONTAINS     = 0x08;
+Node.DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC      = 0x20;
+
+
 __extend__(Node.prototype, {
     get localName(){
         return this.prefix?
@@ -557,7 +566,80 @@ __extend__(Node.prototype, {
         return !!node;
     },
     compareDocumentPosition : function(b){
-        var a = this;
+        //console.log("comparing document position %s %s", this, b);
+        var i, 
+            length, 
+            a = this, 
+            parent,
+            aparents,
+            bparents;
+        //handle a couple simpler case first
+        if(a === b)
+            return Node.DOCUMENT_POSITION_EQUAL;
+        
+        if(a.ownerDocument !== b.ownerDocument)
+            return Node.DOCUMENT_POSITION_OUTSIDE|
+                   Node.DOCUMENT_POSITION_PRECEDING|
+                   Node.DOCUMENT_POSITION_DISCONNECTED;
+            
+        if(a.parentNode === b.parentNode){
+            length = a.parentNode.childNodes.length;
+            for(i=0;i<length;i++){
+                if(a.parentNode.childNodes[i] === a){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(a.parentNode.childNodes[i] === b){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }
+            }
+        }
+        
+        if(a.contains(b))
+            return Node.DOCUMENT_POSITION_CONTAINED_BY|
+                   Node.DOCUMENT_POSITION_FOLLOWING;
+            
+        if(b.contains(a))
+            return Node.DOCUMENT_POSITION_CONTAINS|
+                   Node.DOCUMENT_POSITION_PRECEDING;
+            
+        aparents = [];
+        parent = a.parentNode;
+        while(parent){
+            aparents[aparents.length] = parent;
+            parent = parent.parentNode;
+        }
+        
+        bparents = [];
+        parent = b.parentNode;
+        while(parent){
+            i = aparents.indexOf(parent);
+            if(i < 0){
+                bparents[bparents.length] = parent;
+                parent = parent.parentNode;
+            }else{
+                //i cant be 0 since we already checked for equal parentNode
+                if(bparents.length > aparents.length){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(bparents.length < aparents.length){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }else{ 
+                    //common ancestor diverge point
+                    if(i === 0)
+                        return Node.DOCUMENT_POSITION_FOLLOWING;
+                    else
+                        parent = aparents[i-1];
+                        
+                    return parent.compareDocumentPosition(bparents.pop());
+                }
+            }
+        }
+            
+        return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_FOLLOWING|
+               Node.DOCUMENT_POSITION_PRECEDING|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
+       
+        /*
+         * yuck selecting every element in the doc to do this is awful
         var number = (a != b && a.contains(b) && 16) + (a != b && b.contains(a) && 8);
         //find position of both
         var all = document.getElementsByTagName("*");
@@ -570,6 +652,7 @@ __extend__(Node.prototype, {
         number += (my_location < node_location && 4)
         number += (my_location > node_location && 2)
         return number;
+        */
     } ,
     toString : function(){
         return "[object Node]";

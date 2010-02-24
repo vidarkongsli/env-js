@@ -121,10 +121,10 @@ Envjs.uri = function(path, base){
         baseURI, absolutepath;
     if(m&&m.length>1){
         return (new java.net.URL(path).toString()+'')
-            .replace('file:/', 'file:///');;
+            .replace('file:/', 'file:///');
     }else if(base){
         return (new java.net.URL(new java.net.URL(base), path)+'')
-            .replace('file:/', 'file:///');;
+            .replace('file:/', 'file:///');
     }else{
         //return an absolute url from a url relative to the window location
         //TODO: window should not be inlined here. this should be passed as a 

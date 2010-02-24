@@ -432,7 +432,7 @@ test('Document.createProcessingInstruction', function(){
     equals(pi.prefix, null, '.prefix');
     equals(pi.textContent, data, '.textContent');
     equals(xmlserializer.serializeToString(pi), 
-        '<?foo bar="pooh"?>', '.serializeToString');
+         '<'+'?foo bar="pooh"?>', '.serializeToString');
 });
 
 test('Document.createDocumentFragment', function(){
@@ -599,6 +599,39 @@ test('DocumentFragment.cloneNode', function(){
     equals(xmlserializer.serializeToString(clone), 
         "<elementA>abc</elementA><elementB>def</elementB>", 'serializeToString');
         
+});
+
+test('compareDocumentPosition', function(){
+
+     var docX, 
+         docY,
+         a, b, c;
+    
+    docX = document.implementation.createDocument('', 'elementX', null);
+    docY = document.implementation.createDocument('', 'elementY', null);
+    a = docX.createElement('elementA');
+    b = docX.createElement('elementB');
+    c = docX.createElement('elementC');
+    b.textContent = "def";
+    docX.documentElement.appendChild(a);
+    docX.documentElement.appendChild(b);
+    a.appendChild(c);
+    
+    equals(a.compareDocumentPosition(a), 0, 
+        'DOCUMENT_POSITION_EQUAL');
+    equals(b.compareDocumentPosition(a), Node.DOCUMENT_POSITION_PRECEDING, 
+        'DOCUMENT_POSITION_FOLLOWING');
+    equals(a.compareDocumentPosition(b), Node.DOCUMENT_POSITION_FOLLOWING, 
+        'DOCUMENT_POSITION_PRECEDING');
+    equals(c.compareDocumentPosition(a), Node.DOCUMENT_POSITION_CONTAINS|Node.DOCUMENT_POSITION_PRECEDING, 
+        'DOCUMENT_POSITION_CONTAINED_BY');
+    equals(a.compareDocumentPosition(c), Node.DOCUMENT_POSITION_CONTAINED_BY|Node.DOCUMENT_POSITION_FOLLOWING, 
+        'DOCUMENT_POSITION_CONTAINS');
+    equals(b.compareDocumentPosition(c), Node.DOCUMENT_POSITION_PRECEDING, 
+        'DOCUMENT_POSITION_DISCONNECTED');
+    ok(a.compareDocumentPosition(docY.documentElement) > 32, 
+        'DOCUMENT_POSITION_OUTSIDE');
+    
 });
 
 
