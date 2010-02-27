@@ -7,14 +7,14 @@ __defineParser__(function(e){
     console.log('Error loading html 5 parser implementation');
 }, 'nu_validator_htmlparser_HtmlParser', '');
 
-DOMParser = function(principle, documentURI, baseURI){};
+/*DOMParser = function(principle, documentURI, baseURI){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
         //console.log('DOMParser.parseFromString %s', mimetype);
         var xmldoc = new Document(new DOMImplementation());
         return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
     }
-});
+});*/
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     //console.log('XMLParser.parseDocument');

@@ -97,6 +97,7 @@ __extend__(Document.prototype,{
     createElementNS : function(namespaceURI, qualifiedName) {
         //we use this as a parser flag to ignore the xhtml
         //namespace assumed by the parser
+        //console.log('creating element %s %s', namespaceURI, qualifiedName);
         if(this.baseURI === 'http://envjs.com/xml' && 
             namespaceURI === 'http://www.w3.org/1999/xhtml'){
             return this.createElement(qualifiedName);
@@ -113,13 +114,13 @@ __extend__(Document.prototype,{
                 throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
             }
         }
-        
         var node  = new Element(this);
         var qname = __parseQName__(qualifiedName);
         node.namespaceURI = namespaceURI;
         node.prefix       = qname.prefix;
         node.nodeName     = qualifiedName;
         
+        //console.log('created element %s %s', namespaceURI, qualifiedName);
         return node;
     },
     createAttribute : function(name) {
@@ -159,7 +160,7 @@ __extend__(Document.prototype,{
         node.prefix       = qname.prefix;
         node.nodeName     = qualifiedName;
         node.nodeValue    = "";
-        
+        //console.log('attribute %s %s %s', node.namespaceURI, node.prefix, node.nodeName);
         return node;
     },
     createNamespace : function(qualifiedName) {

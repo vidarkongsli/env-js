@@ -20,7 +20,7 @@ __extend__(NamedNodeMap.prototype, {
     },
     getNamedItem : function(name) {
         var ret = null;
-        
+        //console.log('NamedNodeMap getNamedItem %s', name);
         // test that Named Node exists
         var itemIndex = __findNamedItemIndex__(this, name);
         
@@ -32,6 +32,7 @@ __extend__(NamedNodeMap.prototype, {
         return ret;                                    
     },
     setNamedItem : function(arg) {
+     //console.log('setNamedItem %s', arg);
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
@@ -50,10 +51,12 @@ __extend__(NamedNodeMap.prototype, {
             }
       }
     
+     //console.log('setNamedItem __findNamedItemIndex__ ');
       // get item index
       var itemIndex = __findNamedItemIndex__(this, arg.name);
       var ret = null;
     
+     //console.log('setNamedItem __findNamedItemIndex__ %s', itemIndex);
       if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
         
@@ -66,13 +69,19 @@ __extend__(NamedNodeMap.prototype, {
             }
       } else {
             // add new NamedNode
+           //console.log('setNamedItem add new named node map (by index)');
             Array.prototype.push.apply(this, [arg]);
-            this[arg.name.toLowerCase()] = arg;
+           //console.log('setNamedItem add new named node map (by name) %s %s', arg, arg.name);
+            this[arg.name] = arg;
+           //console.log('finsished setNamedItem add new named node map (by name) %s', arg.name);
+            
       }
     
+     //console.log('setNamedItem parentNode');
       arg.ownerElement = this.parentNode;            // update ownerElement
-    
-      return ret;                                    // return old node or null
+      // return old node or new node
+     //console.log('setNamedItem exit');
+      return ret;                                    
     },
     removeNamedItem : function(name) {
           var ret = null;
@@ -159,7 +168,7 @@ __extend__(NamedNodeMap.prototype, {
         
         // return old node or null
         return ret;
-        console.log('finished setNamedItemNS %s', arg);
+        //console.log('finished setNamedItemNS %s', arg);
     },
     removeNamedItemNS : function(namespaceURI, localName) {
           var ret = null;

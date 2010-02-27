@@ -251,6 +251,7 @@
             <fileset dir="${SRC_DIR}" includes="dom/document.js" />
             <fileset dir="${SRC_DIR}" includes="dom/domparser.js" />
             <fileset dir="${SRC_DIR}" includes="dom/xmlserializer.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/xmlparser.js" />
             <fileset dir="${SRC_DIR}" includes="dom/location.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>

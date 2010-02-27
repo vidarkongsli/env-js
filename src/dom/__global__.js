@@ -33,6 +33,7 @@ var Attr,
     ProcessingInstruction,
     Text,
     Range,
-    XMLSerializer;
+    XMLSerializer,
+    DOMParser;
 
 

@@ -19,5 +19,29 @@ __extend__(HTMLOptGroupElement.prototype, {
     set label(value){
         this.setAttribute('label',value);
     },
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        //make sure at least one is selected by default
+        if(node.nodeType == Node.ELEMENT_NODE && node.tagName == 'OPTION'){
+            length = this.childNodes.length;
+            for(i=0;i<length;i++){
+                if(this.childNodes[i].nodeType == Node.ELEMENT_NODE && 
+                    this.childNodes[i].tagName == 'OPTION'){
+                    //check if it is selected
+                    if(this.selected){
+                        selected = true;
+                        break;
+                    }
+                }
+            }
+            if(!selected){
+                node.selected = true;
+                this.value = node.value?node.value:'';
+            }
+        }
+        return HTMLElement.prototype.appendChild.apply(this, [node]);
+    }
 });
 	

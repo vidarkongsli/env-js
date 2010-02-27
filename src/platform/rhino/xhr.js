@@ -30,7 +30,7 @@ Envjs.uri = function(path, base){
                 if(path.match(/^\//)){
                     //absolute path change
                     absolutepath = (new Location(baseURI)).pathname;
-                    return baseURI.replace(absolutepath, path);
+                    return baseURI.replace(absolutepath, baseURI.lastIndexOf(absolutepath));
                 }else{
                     //relative path change
                     base = baseURI.substring(0, baseURI.lastIndexOf('/'));

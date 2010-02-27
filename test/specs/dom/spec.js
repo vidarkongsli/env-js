@@ -1,4 +1,4 @@
-module('dom');
+module('DOM Level 3');//A little ambitious but we are on the way
 
 test('DOM Interfaces Available', function(){
     
@@ -33,7 +33,9 @@ try{
 }
 var xmlserializer = new XMLSerializer();
 
-test('XMLDocument', function(){
+module('DOMImplementation');
+
+test('createDocument', function(){
 
     var doc;
     
@@ -96,7 +98,9 @@ test('XMLDocument', function(){
     
 });
 
-test('XMLDocument.location', function(){
+module('Document');
+
+test('location', function(){
 
     var doc;
     
@@ -113,7 +117,7 @@ test('XMLDocument.location', function(){
     
 });
 
-test('XMLDocument.createElement', function(){
+test('createElement', function(){
 
     var doc, 
         element;
@@ -138,7 +142,7 @@ test('XMLDocument.createElement', function(){
     
 });
 
-test('XMLDocument.createElementNS', function(){
+test('createElementNS', function(){
 
     var doc, 
         element;
@@ -174,7 +178,7 @@ test('XMLDocument.createElementNS', function(){
 
 
 
-test('XMLDocument.createAttribute', function(){
+test('createAttribute', function(){
 
     var doc, 
         attribute;
@@ -210,7 +214,7 @@ test('XMLDocument.createAttribute', function(){
     
 });
 
-test('XMLDocument.createAttributeNS', function(){
+test('createAttributeNS', function(){
 
     var doc, 
         attribute;
@@ -294,7 +298,7 @@ test('XMLDocument.createAttributeNS', function(){
     equals(attribute.prefix, null, '.prefix');
 });
 
-test('Document.createTextNode', function(){
+test('createTextNode', function(){
 
     var doc, 
         text,
@@ -330,7 +334,7 @@ test('Document.createTextNode', function(){
     equals(text.textContent, keyboardish, '.textContent');
 });
 
-test('Document.createComment', function(){
+test('createComment', function(){
 
     var doc, 
         comment,
@@ -367,7 +371,7 @@ test('Document.createComment', function(){
     
 });
 
-test('Document.createCDATASection', function(){
+test('createCDATASection', function(){
 
     var doc, 
         cdata,
@@ -406,7 +410,7 @@ test('Document.createCDATASection', function(){
     
 });
 
-test('Document.createProcessingInstruction', function(){
+test('createProcessingInstruction', function(){
 
     var doc, 
         pi,
@@ -435,7 +439,7 @@ test('Document.createProcessingInstruction', function(){
          '<'+'?foo bar="pooh"?>', '.serializeToString');
 });
 
-test('Document.createDocumentFragment', function(){
+test('createDocumentFragment', function(){
 
     var doc, 
         fragment;
@@ -471,7 +475,7 @@ test('Document.createDocumentFragment', function(){
 });
 
 
-test('Document.createComment', function(){
+test('createComment', function(){
 
     var doc, 
         comment;
@@ -508,7 +512,28 @@ test('Document.createComment', function(){
         "<!--This is a pig, 'oink, oink'-->", 'serializeToString');
 });
 
-test('Element.setAttributeNS', function(){
+module('Element');
+
+test('attributes', function(){
+
+    debugger;
+    var doc, 
+        element;
+    
+    doc = document.implementation.createDocument('', '', null);
+    element = doc.createElement('envjs');
+    equals(element.attributes.length, 0, '.attributes.length');
+    
+    element.setAttribute('animal', 'pig');
+    //console.log('dom-spec setAttribute done');
+    equals(element.attributes.length, 1, '.attributes.length');
+    //console.log('dom-spec attributes.length');
+    equals(element.attributes.animal.value, 'pig', 'element.attributes.animal');
+    //console.log('dom-spec attributes.getNamedItem');
+    equals(element.attributes.getNamedItem('animal').value, 'pig', 'element.attributes.getNamedItem');
+});
+
+test('setAttributeNS', function(){
 
     var doc, 
         element;
@@ -522,7 +547,9 @@ test('Element.setAttributeNS', function(){
     
 });
 
-test('DocumentFragment.cloneNode', function(){
+module('DocumentFragment');
+
+test('cloneNode', function(){
 
     var doc, 
         fragment,
@@ -634,4 +661,162 @@ test('compareDocumentPosition', function(){
     
 });
 
+var domparser = new DOMParser();
 
+module('DOMParser');
+test('parseFromString', function(){
+
+    var root,
+        doc;
+        
+    /**
+     * elements
+     */
+    doc = domparser.parseFromString(
+        '<farm><pig><oink/></pig><cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm><pig><oink/></pig><cow/><horse/></farm>', 'serializeToString');
+        
+    
+    /**
+     * elements ns
+     */
+    doc = domparser.parseFromString(
+        '<farm><pig xmlns="http://oink"><oink/></pig><cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm><pig xmlns="http://oink"><oink/></pig><cow/><horse/></farm>', 'serializeToString');
+        
+    
+    doc = domparser.parseFromString(
+        '<farm xmlns:oink="http://oink"><oink:pig>true</oink:pig><cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    //NOTE: known issue with using e4x as it will remove the prefix and add xmlns='http://oink' 
+    //to the pig <farm xmlns:oink="http://oink"><pig xmlns="http://oink">true</pig><cow/><horse/></farm>
+    //equals(xmlserializer.serializeToString(root), 
+    //    '<farm xmlns:oink="http://oink"><oink:pig>true</oink:pig><cow/><horse/></farm>', 'serializeToString');
+    
+    /**
+     * attribute
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/><cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/><cow/><horse/></farm>', 'serializeToString');
+        
+    
+    /**
+     * attribute ns
+     */
+    doc = domparser.parseFromString(
+        '<farm xmlns:a="abc" a:sound="oink"><pig/><cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm xmlns:a="abc" a:sound="oink"><pig/><cow/><horse/></farm>', 'serializeToString');
+        
+        
+    /**
+     * e4x special characters {} (not evaluated outside XML literals)
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/>{abc.123}<cow/><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/>{abc.123}<cow/><horse/></farm>', 'serializeToString');
+    
+    /**
+     * text
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/></farm>', 'serializeToString');
+    
+    
+    /**
+     * comment
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/><!-- farmer --></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/><!-- farmer --></farm>', 'serializeToString');
+
+    /**
+     * processing-instruction
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/><'+'?farmer hadA="duck"?></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/><'+'?farmer hadA="duck"?></farm>', 'serializeToString');
+        
+    //xml pi is stripped out
+    doc = domparser.parseFromString(
+        '<'+'?xml version="1.0"?><farm sound="oink"><pig/></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink"><pig/></farm>', 'serializeToString');
+        
+    /**
+     * CDATA is a known deficiency in this approach, e4x turns it into an xml encoded text node
+     */
+    doc = domparser.parseFromString(
+        '<farm sound="oink"><pig/><cow>moo</cow><horse/><![CDATA[old mac ><&!-- d]]></farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    //equals(xmlserializer.serializeToString(root), 
+    //    '<farm sound="oink"><pig/><cow>moo</cow><horse/><![CDATA[old mac ><&!-- d]]></farm>', 'serializeToString'); 
+    
+    /**
+     * whitespace
+     */
+    doc = domparser.parseFromString(
+        '<'+'?xml version="1.0"?>\
+        <farm sound="oink">\
+            <pig/>\
+            <cow>moo</cow>\
+            <horse/>\
+        </farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink">\
+            <pig/>\
+            <cow>moo</cow>\
+            <horse/>\
+        </farm>', 'serializeToString'); 
+        
+    /**
+     * line breaks
+     */
+    doc = domparser.parseFromString(
+        '<'+'?xml version="1.0"?>\n\
+        <farm sound="oink">\n\
+            <pig/>\n\
+            <cow>moo</cow>\n\
+            <horse/>\n\
+        </farm>', 'text/xml');
+    root = doc.documentElement;
+    equals(root.nodeName, 'farm', 'root.nodeName');
+    equals(xmlserializer.serializeToString(root), 
+        '<farm sound="oink">\n\
+            <pig/>\n\
+            <cow>moo</cow>\n\
+            <horse/>\n\
+        </farm>', 'serializeToString');
+ 
+});

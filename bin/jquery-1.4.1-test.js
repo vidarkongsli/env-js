@@ -12,9 +12,14 @@ Envjs({
         'data/testrunner.js': function(){
             console.log('loaded test runner');
             //hook into qunit.log
-            var count = 0;
+            var count = 0,
+                module;
+            
+            QUnit.moduleStart = function(name, testEnvironment) {
+                module = name;
+            };
             QUnit.log = function(result, message){
-                console.log('(' + (count++) + ')[' + 
+                console.log('{'+module+'}(' + (count++) + ')[' + 
                     ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
             };
             //hook into qunit.done
@@ -34,13 +39,13 @@ Envjs({
                     Envjs.uri('Envjs.jQuery.1.4.1.html')
                 );
             };
-            //spidermonkey and rhino enumerate properties in dofferent orders.
+            //spidermonkey and rhino enumerate properties in different orders.
             //qunit.equiv produces an infinite loop if properties are checked
             //in the wrong order (eg parentNode before childNodes) This patch
             //has been submitted to QUnit
-            QUnit.equiv.callbacks['object'] = function(b,a){
+            /*QUnit.equiv.callbacks['object'] = function(b,a){
                 return b === a;
-            };
+            };*/
             
             //allow jquery to run ajax
             isLocal = false;
@@ -48,11 +53,11 @@ Envjs({
             
             //we are breaking becuase our inheritence pattern causes infinite
             //recursion somewhere in jsDump;
-            QUnit.jsDump = {
+            /*QUnit.jsDump = {
                 parse: function(thing){
-                    return 'jsDump/Envjs infinite recursion patch';
+                    return 'envjs qunit jsdump bug';//thing+"";
                 }
-            }
+            }*/
 
             var _start = start;
             start = function(){

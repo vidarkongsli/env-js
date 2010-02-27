@@ -13,12 +13,6 @@ Node = function(ownerDocument) {
     this.nodeName = "";
     this.nodeValue = null;
     
-    // The parent of this node. All nodes, except Document, DocumentFragment, 
-    // and Attr may have a parent.  However, if a node has just been created 
-    // and not yet added to the tree, or if it has been removed from the tree, 
-    // this is null
-    this.parentNode      = null;
-    
     // A NodeList that contains all children of this node. If there are no 
     // children, this is a NodeList containing no nodes.  The content of the 
     // returned NodeList is "live" in the sense that, for instance, changes to 
@@ -38,12 +32,22 @@ Node = function(ownerDocument) {
     // The node immediately following this node. If there is no such node, 
     // this is null.
     this.nextSibling     = null;
-    // The Document object associated with this node
-    this.ownerDocument = ownerDocument;
+    
     this.attributes = null;
     // The namespaces in scope for this node
     this._namespaces = new NamespaceNodeMap(ownerDocument, this);  
     this._readonly = false;
+    
+    //IMPORTANT: These must come last so rhino will not iterate parent 
+    //           properties before child properties.  (qunit.equiv issue)
+    
+    // The parent of this node. All nodes, except Document, DocumentFragment, 
+    // and Attr may have a parent.  However, if a node has just been created 
+    // and not yet added to the tree, or if it has been removed from the tree, 
+    // this is null
+    this.parentNode      = null;
+    // The Document object associated with this node
+    this.ownerDocument = ownerDocument;
     
 };
 
@@ -359,7 +363,7 @@ __extend__(Node.prototype, {
         var newChildParent = newChild.parentNode;
         if (newChildParent) {
             // remove it
-            console.debug('removing node %s', newChild);
+           //console.debug('removing node %s', newChild);
             newChildParent.removeChild(newChild);
         }
     
@@ -578,9 +582,9 @@ __extend__(Node.prototype, {
             return Node.DOCUMENT_POSITION_EQUAL;
         
         if(a.ownerDocument !== b.ownerDocument)
-            return Node.DOCUMENT_POSITION_OUTSIDE|
-                   Node.DOCUMENT_POSITION_PRECEDING|
-                   Node.DOCUMENT_POSITION_DISCONNECTED;
+            return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_FOLLOWING|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
             
         if(a.parentNode === b.parentNode){
             length = a.parentNode.childNodes.length;
@@ -634,26 +638,9 @@ __extend__(Node.prototype, {
         }
             
         return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
-               Node.DOCUMENT_POSITION_FOLLOWING|
-               Node.DOCUMENT_POSITION_PRECEDING|
                Node.DOCUMENT_POSITION_DISCONNECTED;
-       
-        /*
-         * yuck selecting every element in the doc to do this is awful
-        var number = (a != b && a.contains(b) && 16) + (a != b && b.contains(a) && 8);
-        //find position of both
-        var all = document.getElementsByTagName("*");
-        var my_location = 0, node_location = 0;
-        for(var i=0; i < all.length; i++){
-            if(all[i] == a) my_location = i;
-            if(all[i] == b) node_location = i;
-            if(my_location && node_location) break;
-        }
-        number += (my_location < node_location && 4)
-        number += (my_location > node_location && 2)
-        return number;
-        */
-    } ,
+        
+    },
     toString : function(){
         return "[object Node]";
     }

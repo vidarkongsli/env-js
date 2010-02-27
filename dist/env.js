@@ -601,7 +601,8 @@ var Attr,
     ProcessingInstruction,
     Text,
     Range,
-    XMLSerializer;
+    XMLSerializer,
+    DOMParser;
 
 
 
@@ -864,7 +865,7 @@ __extend__(NamedNodeMap.prototype, {
     },
     getNamedItem : function(name) {
         var ret = null;
-        
+        //console.log('NamedNodeMap getNamedItem %s', name);
         // test that Named Node exists
         var itemIndex = __findNamedItemIndex__(this, name);
         
@@ -876,6 +877,7 @@ __extend__(NamedNodeMap.prototype, {
         return ret;                                    
     },
     setNamedItem : function(arg) {
+     //console.log('setNamedItem %s', arg);
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
@@ -894,10 +896,12 @@ __extend__(NamedNodeMap.prototype, {
             }
       }
     
+     //console.log('setNamedItem __findNamedItemIndex__ ');
       // get item index
       var itemIndex = __findNamedItemIndex__(this, arg.name);
       var ret = null;
     
+     //console.log('setNamedItem __findNamedItemIndex__ %s', itemIndex);
       if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
         
@@ -910,13 +914,19 @@ __extend__(NamedNodeMap.prototype, {
             }
       } else {
             // add new NamedNode
+           //console.log('setNamedItem add new named node map (by index)');
             Array.prototype.push.apply(this, [arg]);
-            this[arg.name.toLowerCase()] = arg;
+           //console.log('setNamedItem add new named node map (by name) %s %s', arg, arg.name);
+            this[arg.name] = arg;
+           //console.log('finsished setNamedItem add new named node map (by name) %s', arg.name);
+            
       }
     
+     //console.log('setNamedItem parentNode');
       arg.ownerElement = this.parentNode;            // update ownerElement
-    
-      return ret;                                    // return old node or null
+      // return old node or new node
+     //console.log('setNamedItem exit');
+      return ret;                                    
     },
     removeNamedItem : function(name) {
           var ret = null;
@@ -1003,7 +1013,7 @@ __extend__(NamedNodeMap.prototype, {
         
         // return old node or null
         return ret;
-        console.log('finished setNamedItemNS %s', arg);
+        //console.log('finished setNamedItemNS %s', arg);
     },
     removeNamedItemNS : function(namespaceURI, localName) {
           var ret = null;
@@ -1232,12 +1242,6 @@ Node = function(ownerDocument) {
     this.nodeName = "";
     this.nodeValue = null;
     
-    // The parent of this node. All nodes, except Document, DocumentFragment, 
-    // and Attr may have a parent.  However, if a node has just been created 
-    // and not yet added to the tree, or if it has been removed from the tree, 
-    // this is null
-    this.parentNode      = null;
-    
     // A NodeList that contains all children of this node. If there are no 
     // children, this is a NodeList containing no nodes.  The content of the 
     // returned NodeList is "live" in the sense that, for instance, changes to 
@@ -1257,12 +1261,22 @@ Node = function(ownerDocument) {
     // The node immediately following this node. If there is no such node, 
     // this is null.
     this.nextSibling     = null;
-    // The Document object associated with this node
-    this.ownerDocument = ownerDocument;
+    
     this.attributes = null;
     // The namespaces in scope for this node
     this._namespaces = new NamespaceNodeMap(ownerDocument, this);  
     this._readonly = false;
+    
+    //IMPORTANT: These must come last so rhino will not iterate parent 
+    //           properties before child properties.  (qunit.equiv issue)
+    
+    // The parent of this node. All nodes, except Document, DocumentFragment, 
+    // and Attr may have a parent.  However, if a node has just been created 
+    // and not yet added to the tree, or if it has been removed from the tree, 
+    // this is null
+    this.parentNode      = null;
+    // The Document object associated with this node
+    this.ownerDocument = ownerDocument;
     
 };
 
@@ -1578,7 +1592,7 @@ __extend__(Node.prototype, {
         var newChildParent = newChild.parentNode;
         if (newChildParent) {
             // remove it
-            console.debug('removing node %s', newChild);
+           //console.debug('removing node %s', newChild);
             newChildParent.removeChild(newChild);
         }
     
@@ -1797,9 +1811,9 @@ __extend__(Node.prototype, {
             return Node.DOCUMENT_POSITION_EQUAL;
         
         if(a.ownerDocument !== b.ownerDocument)
-            return Node.DOCUMENT_POSITION_OUTSIDE|
-                   Node.DOCUMENT_POSITION_PRECEDING|
-                   Node.DOCUMENT_POSITION_DISCONNECTED;
+            return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_FOLLOWING|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
             
         if(a.parentNode === b.parentNode){
             length = a.parentNode.childNodes.length;
@@ -1853,26 +1867,9 @@ __extend__(Node.prototype, {
         }
             
         return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
-               Node.DOCUMENT_POSITION_FOLLOWING|
-               Node.DOCUMENT_POSITION_PRECEDING|
                Node.DOCUMENT_POSITION_DISCONNECTED;
-       
-        /*
-         * yuck selecting every element in the doc to do this is awful
-        var number = (a != b && a.contains(b) && 16) + (a != b && b.contains(a) && 8);
-        //find position of both
-        var all = document.getElementsByTagName("*");
-        var my_location = 0, node_location = 0;
-        for(var i=0; i < all.length; i++){
-            if(all[i] == a) my_location = i;
-            if(all[i] == b) node_location = i;
-            if(my_location && node_location) break;
-        }
-        number += (my_location < node_location && 4)
-        number += (my_location > node_location && 2)
-        return number;
-        */
-    } ,
+        
+    },
     toString : function(){
         return "[object Node]";
     }
@@ -2437,7 +2434,7 @@ __extend__(Element.prototype, {
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        
+       //console.log('attr %s', attr);
         //I had to add this check because as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
@@ -2445,6 +2442,7 @@ __extend__(Element.prototype, {
             if (attr===null||attr===undefined) {
                 // otherwise create it
                 attr = __ownerDocument__(this).createAttribute(name);  
+               //console.log('attr %s', attr);
             }
             
             
@@ -2466,8 +2464,9 @@ __extend__(Element.prototype, {
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
+           //console.log('element setNamedItem %s', attr);
         }else{
-            console.warn('Element has no owner document '+this.tagName+
+           console.warn('Element has no owner document '+this.tagName+
                 '\n\t cant set attribute ' + name + ' = '+value );
         }
     },
@@ -2602,7 +2601,12 @@ __extend__(Element.prototype, {
         attrs = this.attributes;
         attrstring = "";
         for(i=0;i< attrs.length;i++){
-            attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+            if(attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
+        for(i=0;i< attrs.length;i++){
+            if(!attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
         }
         
         if(this.hasChildNodes()){
@@ -3463,6 +3467,7 @@ __extend__(Document.prototype,{
     createElementNS : function(namespaceURI, qualifiedName) {
         //we use this as a parser flag to ignore the xhtml
         //namespace assumed by the parser
+        //console.log('creating element %s %s', namespaceURI, qualifiedName);
         if(this.baseURI === 'http://envjs.com/xml' && 
             namespaceURI === 'http://www.w3.org/1999/xhtml'){
             return this.createElement(qualifiedName);
@@ -3479,13 +3484,13 @@ __extend__(Document.prototype,{
                 throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
             }
         }
-        
         var node  = new Element(this);
         var qname = __parseQName__(qualifiedName);
         node.namespaceURI = namespaceURI;
         node.prefix       = qname.prefix;
         node.nodeName     = qualifiedName;
         
+        //console.log('created element %s %s', namespaceURI, qualifiedName);
         return node;
     },
     createAttribute : function(name) {
@@ -3525,7 +3530,7 @@ __extend__(Document.prototype,{
         node.prefix       = qname.prefix;
         node.nodeName     = qualifiedName;
         node.nodeValue    = "";
-        
+        //console.log('attribute %s %s %s', node.namespaceURI, node.prefix, node.nodeName);
         return node;
     },
     createNamespace : function(qualifiedName) {
@@ -3638,6 +3643,101 @@ var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribut
 };
 
 /**
+ * @author thatcher
+ */
+DOMParser = function(principle, documentURI, baseURI){};
+__extend__(DOMParser.prototype,{
+    parseFromString: function(xmlstring, mimetype){
+        var doc = new Document(new DOMImplementation()),
+            e4;
+        
+        XML.ignoreComments = false;
+        XML.ignoreProcessingInstructions = false;
+        XML.ignoreWhitespace = false;
+        
+        xmlstring = xmlstring.replace(/<\?xml.*\?>/);
+        
+        e4 = new XMLList(xmlstring);
+        
+        __toDomNode__(e4, doc, doc);
+        
+        //console.log('xml \n %s', doc.documentElement.xml);
+        return doc;
+        
+    }
+});
+
+var __toDomNode__ = function(e4, parent, doc){
+    var xnode, 
+        domnode,
+        children,
+        target,
+        value,
+        length,
+        element,
+        kind;
+    //console.log('converting e4x node list \n %s', e4)
+    for each(xnode in e4){
+        kind = xnode.nodeKind(); 
+        //console.log('treating node kind %s', kind);
+        switch(kind){
+            case 'element':
+                //console.log('creating element %s %s', xnode.localName(), xnode.namespace());
+                if(xnode.namespace()){
+                    //console.log('createElementNS %s %s',xnode.namespace()+'', xnode.localName() );
+                    domnode = doc.createElementNS(xnode.namespace()+'', xnode.localName());
+                }else{
+                    domnode = doc.createElement(xnode.name()+'');
+                }
+                parent.appendChild(domnode);
+                 __toDomNode__(xnode.attributes(), domnode, doc);
+                length = xnode.children().length();
+                //console.log('recursing? %s', length?"yes":"no");
+                if(xnode.children().length()>0){
+                    __toDomNode__(xnode.children(), domnode, doc);
+                }
+                break;
+            case 'attribute':
+                //console.log('setting attribute %s %s %s', 
+                //    xnode.localName(), xnode.namespace(), xnode.text());
+                if(xnode.namespace() && xnode.namespace().prefix){
+                    //console.log("%s", xnode.namespace().prefix);
+                    parent.setAttributeNS(xnode.namespace()+'', 
+                        xnode.namespace().prefix+':'+xnode.localName(), 
+                        xnode.text());
+                }else if((xnode.name()+'').match("http://www.w3.org/2000/xmlns/::")){
+                    if(xnode.localName()!=='xmlns'){
+                        parent.setAttributeNS('http://www.w3.org/2000/xmlns/', 
+                            'xmlns:'+xnode.localName(), 
+                            xnode.text());
+                    }
+                }else{
+                    parent.setAttribute(xnode.localName()+'', xnode.text());
+                }
+                break;
+            case 'text':
+                //console.log('creating text node : %s', xnode);
+                domnode = doc.createTextNode(xnode+'');
+                parent.appendChild(domnode);
+                break;
+            case 'comment':
+                //console.log('creating comment node : %s', xnode);
+                value = xnode+'';
+                domnode = doc.createComment(value.substring(4,value.length-3));
+                parent.appendChild(domnode);
+                break;
+            case 'processing-instruction':
+                //console.log('creating processing-instruction node : %s', xnode);
+                value = xnode+'';
+                target = value.split(' ')[0].substring(2);
+                value = value.split(' ').splice(1).join(" ").replace('?>','');
+                //console.log('creating processing-instruction data : %s', value);
+                domnode = doc.createProcessingInstruction(target, value);
+                parent.appendChild(domnode);
+                break;
+        }
+    }
+}; /**
  * @author envjs team
  * @class XMLSerializer 
  */
@@ -6114,10 +6214,18 @@ __extend__(HTMLTypeValueInputs.prototype, {
         this.setAttribute('value',newValue);
     },
     setAttribute: function(name, value){
+        //console.log('setting defaultValue (NS)');
         if(name == 'value' && !this.defaultValue){
             this.defaultValue = value;
         }
         HTMLElement.prototype.setAttribute.apply(this, [name, value]);
+    },
+    setAttributeNS: function(uri, name, value){
+        //console.log('setting defaultValue (NS)');
+        if(name == 'value' && !this.defaultValue){
+            this.defaultValue = value;
+        }
+        HTMLElement.prototype.setAttributeNS.apply(this, [uri, name, value]);
     }
 });
 
@@ -7097,6 +7205,30 @@ __extend__(HTMLOptGroupElement.prototype, {
     set label(value){
         this.setAttribute('label',value);
     },
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        //make sure at least one is selected by default
+        if(node.nodeType == Node.ELEMENT_NODE && node.tagName == 'OPTION'){
+            length = this.childNodes.length;
+            for(i=0;i<length;i++){
+                if(this.childNodes[i].nodeType == Node.ELEMENT_NODE && 
+                    this.childNodes[i].tagName == 'OPTION'){
+                    //check if it is selected
+                    if(this.selected){
+                        selected = true;
+                        break;
+                    }
+                }
+            }
+            if(!selected){
+                node.selected = true;
+                this.value = node.value?node.value:'';
+            }
+        }
+        return HTMLElement.prototype.appendChild.apply(this, [node]);
+    }
 });
 	
 /**
@@ -7131,8 +7263,9 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
+       //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null){
-            this.defaultSelected = this.selected;
+            this.defaultSelected = this.selected+'';
         }
         var selectedValue = (value ? 'selected' : '');
         if (this.getAttribute('selected') == selectedValue) {
@@ -7140,24 +7273,8 @@ __extend__(HTMLOptionElement.prototype, {
             // select's value which modifies option's selected)
             return;
         }
+       //console.log('option setAttribute selected %s', selectedValue);
         this.setAttribute('selected', selectedValue);
-        if (value) {
-            // set select's value to this option's value (this also 
-            // unselects previously selected value)
-            this.parentNode.value = this.value;
-        } else {
-            // if no other option is selected, select the first option in the select
-            var i, anythingSelected;
-            for (i=0; i<this.parentNode.options.length; i++) {
-                if (this.parentNode.options[i].selected) {
-                    anythingSelected = true;
-                    break;
-                }
-            }
-            if (!anythingSelected) {
-                this.parentNode.value = this.parentNode.options[0].value;
-            }
-        }
 
     },
     get text(){
@@ -7166,11 +7283,13 @@ __extend__(HTMLOptionElement.prototype, {
              this.nodeValue;
     },
     get value(){
+       //console.log('getting value on option %s %s', this.text, this.getAttribute('value'));
         return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
             this.text :
             this.getAttribute('value');
     },
     set value(value){
+       //console.log('setting value on option');
         this.setAttribute('value',value);
     }
 });
@@ -7310,30 +7429,34 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
+       //console.log('select set value %s', newValue);
         var options = this.options,
             i, index;
+       //console.log('select options length %s', options.length);
         for (i=0; i<options.length; i++) {
             if (options[i].value == newValue) {
                 index = i;
                 break;
             }
         }
+       //console.log('options index %s', index);
         if (index !== undefined) {
+           //console.log('select setAttribute value %s', newValue);
             this.setAttribute('value', newValue);
             this.selectedIndex = index;
         }
     },
     get value() {
-        var value = this.getAttribute('value');
+       //console.log('select get value');
+        var value = this.getAttribute('value'),
+            index;
         if (value === undefined || value === null) {
-            var index = this.selectedIndex;
+            index = this.selectedIndex;
             return (index != -1) ? this.options[index].value : "";
         } else {
             return value;
         }
     },
-
-
     get length(){
         return this.options.length;
     },
@@ -7347,26 +7470,57 @@ __extend__(HTMLSelectElement.prototype, {
         return this.getElementsByTagName('option');
     },
     get selectedIndex(){
+       //console.log('select get selectedIndex ');
         var options = this.options;
         for(var i=0;i<options.length;i++){
             if(options[i].selected){
+               //console.log('select get selectedIndex %s', i);
                 return i;
             }
         };
+       //console.log('select get selectedIndex %s', -1);
         return -1;
     },
     
     set selectedIndex(value) {
-        var i;
-        for (i=0; i<this.options.length; i++) {
-            this.options[i].selected = (i == Number(value));
+        var i,
+            options = this.options;
+        for (i=0; i<options.length; i++) {
+           //console.log('select set selectedIndex %s', Number(value));
+            if(i === Number(value)){
+                options[i].selected = true;
+            }else{
+                options[i].selected = false;
+            }
+           //console.log('select options[i].selected %s',options[i].selected);
         }
     },
     get type(){
         var type = this.getAttribute('type');
         return type?type:'select-one';
     },
-
+    
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        node = HTMLElement.prototype.appendChild.apply(this, [node]);
+        //make sure at least one is selected by default
+        try{
+       //console.log('select appendChild option %s %s', node.nodeType, node.tagName);   
+        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
+           //console.log('select appending option %s %s', this.value, node.value);                    
+            if(this.value === ""){
+               //console.log('!!! setting select value %s', node.value);     
+                this.value = node.value;
+               //console.log('!!! finished setting select value %s', node.value);  
+            }
+        }}catch(e){
+           //console.log('error appending node to select %s',e);
+        }
+       //console.log('finished select appendChild options %s %s', node.nodeType, node.tagName)
+        return node;
+    },
     add : function(){
         __add__(this);
     },
@@ -8352,12 +8506,10 @@ var __updateCss2Props__ = function(elem, values){
 
 })();
 
-
-var DOMParser,
-    //these are both non-standard globals that
-    //provide static namespaces and functions
-    //to support the html 5 parser from nu.
-    XMLParser = {},
+//these are both non-standard globals that
+//provide static namespaces and functions
+//to support the html 5 parser from nu.
+var XMLParser = {},
     HTMLParser = {};
 
     
@@ -8912,14 +9064,14 @@ __defineParser__(function(e){
     console.log('Error loading html 5 parser implementation');
 }, 'nu_validator_htmlparser_HtmlParser', '');
 
-DOMParser = function(principle, documentURI, baseURI){};
+/*DOMParser = function(principle, documentURI, baseURI){};
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
         //console.log('DOMParser.parseFromString %s', mimetype);
         var xmldoc = new Document(new DOMImplementation());
         return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
     }
-});
+});*/
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     //console.log('XMLParser.parseDocument');

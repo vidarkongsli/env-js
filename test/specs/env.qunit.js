@@ -2,12 +2,25 @@
 var _count = 1,
     _starttime = new Date().getTime(),
     _endtime,
-    _start = QUnit.start;
-    
-
+    _start = QUnit.start,
+    _module,
+    _test;
+//we are breaking becuase our inheritence pattern causes infinite
+//recursion somewhere in jsDump;
+QUnit.jsDump = {
+    parse: function(thing){
+        return thing+"";
+    }
+}
+QUnit.moduleStart = function(name, testEnvironment) {
+    _module = name;
+};
+QUnit.testStart = function(name) {
+    _test = name;
+};
 QUnit.log = function(result, message){
-    if(console)console.log('(' + (_count++) + ')[' + 
-        ((!!result) ? 'PASS' : 'FAIL') + '] ' + message);
+    if(console)console.log('['+((!!result)?'PASS':'FAIL')+']('+ 
+        (_count++)+'){'+_module+'|'+_test+'} '+message);
 };
 QUnit.done = function( fail, pass){
     if(console){

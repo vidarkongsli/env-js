@@ -231,10 +231,18 @@ __extend__(HTMLTypeValueInputs.prototype, {
         this.setAttribute('value',newValue);
     },
     setAttribute: function(name, value){
+        //console.log('setting defaultValue (NS)');
         if(name == 'value' && !this.defaultValue){
             this.defaultValue = value;
         }
         HTMLElement.prototype.setAttribute.apply(this, [name, value]);
+    },
+    setAttributeNS: function(uri, name, value){
+        //console.log('setting defaultValue (NS)');
+        if(name == 'value' && !this.defaultValue){
+            this.defaultValue = value;
+        }
+        HTMLElement.prototype.setAttributeNS.apply(this, [uri, name, value]);
     }
 });
 

@@ -31,7 +31,7 @@ __extend__(Element.prototype, {
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        
+       //console.log('attr %s', attr);
         //I had to add this check because as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
@@ -39,6 +39,7 @@ __extend__(Element.prototype, {
             if (attr===null||attr===undefined) {
                 // otherwise create it
                 attr = __ownerDocument__(this).createAttribute(name);  
+               //console.log('attr %s', attr);
             }
             
             
@@ -60,8 +61,9 @@ __extend__(Element.prototype, {
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
+           //console.log('element setNamedItem %s', attr);
         }else{
-            console.warn('Element has no owner document '+this.tagName+
+           console.warn('Element has no owner document '+this.tagName+
                 '\n\t cant set attribute ' + name + ' = '+value );
         }
     },
@@ -196,7 +198,12 @@ __extend__(Element.prototype, {
         attrs = this.attributes;
         attrstring = "";
         for(i=0;i< attrs.length;i++){
-            attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+            if(attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
+        for(i=0;i< attrs.length;i++){
+            if(!attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
         }
         
         if(this.hasChildNodes()){

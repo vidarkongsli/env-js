@@ -1340,10 +1340,18 @@ __extend__(HTMLTypeValueInputs.prototype, {
         this.setAttribute('value',newValue);
     },
     setAttribute: function(name, value){
+        //console.log('setting defaultValue (NS)');
         if(name == 'value' && !this.defaultValue){
             this.defaultValue = value;
         }
         HTMLElement.prototype.setAttribute.apply(this, [name, value]);
+    },
+    setAttributeNS: function(uri, name, value){
+        //console.log('setting defaultValue (NS)');
+        if(name == 'value' && !this.defaultValue){
+            this.defaultValue = value;
+        }
+        HTMLElement.prototype.setAttributeNS.apply(this, [uri, name, value]);
     }
 });
 
@@ -2323,6 +2331,30 @@ __extend__(HTMLOptGroupElement.prototype, {
     set label(value){
         this.setAttribute('label',value);
     },
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        //make sure at least one is selected by default
+        if(node.nodeType == Node.ELEMENT_NODE && node.tagName == 'OPTION'){
+            length = this.childNodes.length;
+            for(i=0;i<length;i++){
+                if(this.childNodes[i].nodeType == Node.ELEMENT_NODE && 
+                    this.childNodes[i].tagName == 'OPTION'){
+                    //check if it is selected
+                    if(this.selected){
+                        selected = true;
+                        break;
+                    }
+                }
+            }
+            if(!selected){
+                node.selected = true;
+                this.value = node.value?node.value:'';
+            }
+        }
+        return HTMLElement.prototype.appendChild.apply(this, [node]);
+    }
 });
 	
 /**
@@ -2357,8 +2389,9 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
+       //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null){
-            this.defaultSelected = this.selected;
+            this.defaultSelected = this.selected+'';
         }
         var selectedValue = (value ? 'selected' : '');
         if (this.getAttribute('selected') == selectedValue) {
@@ -2366,24 +2399,8 @@ __extend__(HTMLOptionElement.prototype, {
             // select's value which modifies option's selected)
             return;
         }
+       //console.log('option setAttribute selected %s', selectedValue);
         this.setAttribute('selected', selectedValue);
-        if (value) {
-            // set select's value to this option's value (this also 
-            // unselects previously selected value)
-            this.parentNode.value = this.value;
-        } else {
-            // if no other option is selected, select the first option in the select
-            var i, anythingSelected;
-            for (i=0; i<this.parentNode.options.length; i++) {
-                if (this.parentNode.options[i].selected) {
-                    anythingSelected = true;
-                    break;
-                }
-            }
-            if (!anythingSelected) {
-                this.parentNode.value = this.parentNode.options[0].value;
-            }
-        }
 
     },
     get text(){
@@ -2392,11 +2409,13 @@ __extend__(HTMLOptionElement.prototype, {
              this.nodeValue;
     },
     get value(){
+       //console.log('getting value on option %s %s', this.text, this.getAttribute('value'));
         return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
             this.text :
             this.getAttribute('value');
     },
     set value(value){
+       //console.log('setting value on option');
         this.setAttribute('value',value);
     }
 });
@@ -2536,30 +2555,34 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
+       //console.log('select set value %s', newValue);
         var options = this.options,
             i, index;
+       //console.log('select options length %s', options.length);
         for (i=0; i<options.length; i++) {
             if (options[i].value == newValue) {
                 index = i;
                 break;
             }
         }
+       //console.log('options index %s', index);
         if (index !== undefined) {
+           //console.log('select setAttribute value %s', newValue);
             this.setAttribute('value', newValue);
             this.selectedIndex = index;
         }
     },
     get value() {
-        var value = this.getAttribute('value');
+       //console.log('select get value');
+        var value = this.getAttribute('value'),
+            index;
         if (value === undefined || value === null) {
-            var index = this.selectedIndex;
+            index = this.selectedIndex;
             return (index != -1) ? this.options[index].value : "";
         } else {
             return value;
         }
     },
-
-
     get length(){
         return this.options.length;
     },
@@ -2573,26 +2596,57 @@ __extend__(HTMLSelectElement.prototype, {
         return this.getElementsByTagName('option');
     },
     get selectedIndex(){
+       //console.log('select get selectedIndex ');
         var options = this.options;
         for(var i=0;i<options.length;i++){
             if(options[i].selected){
+               //console.log('select get selectedIndex %s', i);
                 return i;
             }
         };
+       //console.log('select get selectedIndex %s', -1);
         return -1;
     },
     
     set selectedIndex(value) {
-        var i;
-        for (i=0; i<this.options.length; i++) {
-            this.options[i].selected = (i == Number(value));
+        var i,
+            options = this.options;
+        for (i=0; i<options.length; i++) {
+           //console.log('select set selectedIndex %s', Number(value));
+            if(i === Number(value)){
+                options[i].selected = true;
+            }else{
+                options[i].selected = false;
+            }
+           //console.log('select options[i].selected %s',options[i].selected);
         }
     },
     get type(){
         var type = this.getAttribute('type');
         return type?type:'select-one';
     },
-
+    
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        node = HTMLElement.prototype.appendChild.apply(this, [node]);
+        //make sure at least one is selected by default
+        try{
+       //console.log('select appendChild option %s %s', node.nodeType, node.tagName);   
+        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
+           //console.log('select appending option %s %s', this.value, node.value);                    
+            if(this.value === ""){
+               //console.log('!!! setting select value %s', node.value);     
+                this.value = node.value;
+               //console.log('!!! finished setting select value %s', node.value);  
+            }
+        }}catch(e){
+           //console.log('error appending node to select %s',e);
+        }
+       //console.log('finished select appendChild options %s %s', node.nodeType, node.tagName)
+        return node;
+    },
     add : function(){
         __add__(this);
     },
