@@ -34,6 +34,8 @@ var Envjs = function(){
 
 //eg "Mozilla"
 Envjs.appCodeName  = "Envjs";
-//eg "Gecko/20070309 Firefox/2.0.0.3"
-Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
 
+//eg "Gecko/20070309 Firefox/2.0.0.3"
+Envjs.appName      = "Resig/20070309 PilotFish/@BUILD_VERSION@";
+
+Envjs.version = "1.6";//?

@@ -9,7 +9,6 @@ Envjs.os_name        = java.lang.System.getProperty("os.name");
 Envjs.os_arch        = java.lang.System.getProperty("os.arch"); 
 Envjs.os_version     = java.lang.System.getProperty("os.version"); 
 Envjs.lang           = java.lang.System.getProperty("user.lang"); 
-Envjs.platform       = "Rhino ";//how do we get the version
     
 
 /**
@@ -25,7 +24,7 @@ Envjs.loadFrame = function(frame, url){
         }
         
         //create a new scope for the window proxy
-        frame.contentWindow = __context__.initStandardObjects();
+        frame.contentWindow = Envjs.proxy();
         new Window(frame.contentWindow, window);
         
         //I dont think frames load asynchronously in firefox
@@ -72,91 +71,16 @@ Envjs.unloadFrame = function(frame){
  * @param {Object} scope
  * @param {Object} parent
  */
-//var __proxycount__ = 0;
 Envjs.proxy = function(scope, parent){
 
-    //console.log('__proxycount__ %s', ++__proxycount__);
     try{   
         if(scope+'' == '[object global]'){
-            //__context__.initStandardObjects(scope);
-            //console.log('succeeded to init standard objects %s %s', scope, parent);
+            return scope
+        }else{
+            return  __context__.initStandardObjects();
         }
     }catch(e){
         console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
     }
-    
-    /*var _scope = scope;
-        _parent = parent||null,
-        _this = this,
-        _undefined = Packages.org.mozilla.javascript.Scriptable.NOT_FOUND,
-        _proxy = new Packages.org.mozilla.javascript.ScriptableObject({
-            getClassName: function(){
-                return 'envjs.platform.rhino.Proxy';
-            },
-            has: function(nameOrIndex, start){
-                var has;
-                //print('proxy has '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    switch(nameOrIndex+''){
-                        case '__iterator__':
-                            return _proxy.__iterator__;
-                            break;
-                        default:
-                            has = (nameOrIndex+'') in _scope;
-                            //print('has as string :'+has);
-                            return has;
-                    }
-                }else{
-                    //print('has not');
-                    return false;
-                }
-            },
-            put: function(nameOrIndex,  start,  value){
-                //print('put '+ value);
-                _scope[nameOrIndex+''] = value;
-            },
-            get: function(nameOrIndex, start){
-                //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                var value;
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("get as string");
-                    value = _scope[nameOrIndex+''];
-                    if(value+'' === "undefined"){
-                        return _undefined;
-                    }else{
-                        return value;
-                    }
-                } else {
-                    //print('get not');
-                    return _undefined;
-                }
-            },
-            'delete': function(nameOrIndex){
-                //console.log('deleting %s', nameOrIndex);
-                delete _scope[nameOrIndex+''];
-            },
-            get parentScope(){
-                //console.log('get proxy parentScope');
-                return _parent;
-            },
-            set parentScope(parent){
-                //console.log('set proxy parentScope');
-                _parent = parent;
-            },
-            get topLevelScope(){
-                //console.log('get proxy topLevelScope');
-                return _parent;
-            },
-            equivalentValues: function(value){
-                return (value == _scope || value == this );
-            },
-            equals: function(value){
-                return (value === _scope || value === this );
-            }
-        });*/
-        
-    
-    return scope;        
-    return _proxy;
     
 };

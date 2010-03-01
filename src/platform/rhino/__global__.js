@@ -6,3 +6,6 @@
  */
 
 var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+
+Envjs.platform       = "Rhino";
+Envjs.revision       = "1.7.0.rc2";

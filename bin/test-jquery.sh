@@ -13,7 +13,7 @@ if [ -n "$2" ]; then
     if [ -n "$2" ]; then VERSION="$2"; else VERSION="1.4.1"; fi
     DEBUG=1
 else 
-    echo 'jquery'
+    #echo 'jquery'
     if [ -n "$1" ]; then VERSION="$1"; else VERSION="1.4.1"; fi
     DEBUG=0
 fi
@@ -48,10 +48,10 @@ case "$VERSION" in
         fi
         echo 'running jquery 1.4.1 tests'
         if [ $DEBUG -eq 1 ]; then
-            echo 'enabling rhino debugger'
+            #echo 'enabling rhino debugger'
             java  -cp rhino/js.jar  org.mozilla.javascript.tools.debugger.Main bin/jquery-1.4.1-test.js
         else
-            echo 'running with rhino'
+            #echo 'running with rhino'
             java -Xmx64M -XX:+HeapDumpOnOutOfMemoryError -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
         fi
         echo 'completed jquery 1.4.1 tests'

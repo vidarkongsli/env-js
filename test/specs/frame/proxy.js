@@ -3,6 +3,7 @@
 var __this__ = this;
 
 window.ABC1234567890 = "abc!@#$%^&*()";
+_ABC1234567890       = "_abc!@#$%^&*()";
 
 function pollute(){
     abc = 123;

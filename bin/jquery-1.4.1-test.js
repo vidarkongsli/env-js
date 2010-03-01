@@ -10,7 +10,7 @@ Envjs({
     },
     afterScriptLoad:{
         'data/testrunner.js': function(){
-            console.log('loaded test runner');
+            //console.log('loaded test runner');
             //hook into qunit.log
             var count = 0,
                 module;
@@ -39,13 +39,6 @@ Envjs({
                     Envjs.uri('Envjs.jQuery.1.4.1.html')
                 );
             };
-            //spidermonkey and rhino enumerate properties in different orders.
-            //qunit.equiv produces an infinite loop if properties are checked
-            //in the wrong order (eg parentNode before childNodes) This patch
-            //has been submitted to QUnit
-            /*QUnit.equiv.callbacks['object'] = function(b,a){
-                return b === a;
-            };*/
             
             //allow jquery to run ajax
             isLocal = false;
@@ -53,16 +46,16 @@ Envjs({
             
             //we are breaking becuase our inheritence pattern causes infinite
             //recursion somewhere in jsDump;
-            /*QUnit.jsDump = {
+            QUnit.jsDump = {
                 parse: function(thing){
-                    return 'envjs qunit jsdump bug';//thing+"";
+                    return thing+"";
                 }
-            }*/
+            }
 
             var _start = start;
             start = function(){
                 _start();
-                Envjs.wait();
+                //Envjs.wait();
             };
             
             //we know some ajax calls will fail becuase
@@ -97,6 +90,7 @@ Envjs({
     }
 });
 
-window.document.async = false;
+//window.document.async = false;
 window.location = 'test/vendor/jQuery/1.4.1/test/index.html';
-Envjs.wait();
+
+

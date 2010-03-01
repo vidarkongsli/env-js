@@ -18,7 +18,7 @@ Navigator = function(){
 			    this.platform +"; "+
 			    "U; "+//?
 			    Envjs.os_name+" "+Envjs.os_arch+" "+Envjs.os_version+"; "+
-			    Envjs.lang+"; "+
+			    (Envjs.lang?Envjs.lang:"en-US")+"; "+
 			    "rv:"+Envjs.revision+
 			  ")";
 		},

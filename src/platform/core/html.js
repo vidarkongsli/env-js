@@ -29,6 +29,14 @@ Envjs.loadInlineScript = function(script){
     load(tmpFile);
 };
 
+/**
+ * Should evaluate script in some context
+ * @param {Object} context
+ * @param {Object} source
+ * @param {Object} name
+ */
+Envjs.eval = function(context, source, name){};
+
 
 /**
  * Executes a script tag
@@ -36,12 +44,13 @@ Envjs.loadInlineScript = function(script){
  * @param {Object} parser
  */
 Envjs.loadLocalScript = function(script){
-    //console.debug("loading script %s", script);
+    //console.log("loading script %s", script);
     var types, 
         src, 
         i, 
         base,
-        filename;
+        filename,
+        xhr;
     
     if(script.type){
         types = script.type.split(";");
@@ -68,7 +77,8 @@ Envjs.loadLocalScript = function(script){
         
         
     if(script.src){
-        //$env.info("loading allowed external script :" + script.src);
+        //console.log("loading allowed external script %s", script.src);
+        
         //lets you register a function to execute 
         //before the script is loaded
         if(Envjs.beforeScriptLoad){
@@ -82,9 +92,22 @@ Envjs.loadLocalScript = function(script){
         //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
         //console.log('base %s', base);
         filename = Envjs.uri(script.src, base);
-        try {                      
-            load(filename);
-            //console.log('loaded %s', filename);
+        try {          
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", filename, false/*syncronous*/);
+            //console.log("loading external script %s", filename);
+            xhr.onreadystatechange = function(){
+                //console.log("readyState %s", xhr.readyState);
+                if(xhr.readyState === 4){
+                    //TODO this is rhino specific
+                    Envjs.eval(
+                        script.ownerDocument.ownerWindow,
+                        xhr.responseText,
+                        filename
+                    );
+                }    
+            };
+            xhr.send(null, false);
         } catch(e) {
             console.log("could not load script %s \n %s", filename, e );
             Envjs.onScriptLoadError(script, e);

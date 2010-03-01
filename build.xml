@@ -116,6 +116,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="core-env.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="platform/core/__global__.js" />
@@ -142,6 +143,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="rhino-env.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="platform/rhino/__global__.js" />
@@ -186,6 +188,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="console.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="console/__global__.js" />
@@ -223,6 +226,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="dom.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="dom/__global__.js" />
@@ -284,6 +288,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="event.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="event/__global__.js" />
@@ -330,6 +335,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="timer.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="timer/__global__.js" />
@@ -366,6 +372,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="html.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="html/__global__.js" />
@@ -453,28 +460,13 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="parser.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="parser/__global__.js" />
-            <!--fileset dir="${SRC_DIR}" includes="parser/strings_0.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/strings_1.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/strings_2.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_0.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_1.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_2.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_3.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_4.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_5.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/functions_6.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/variables_0.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/prototypes.js" /-->
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
-            <!--fileset dir="${SRC_DIR}" includes="parser/string_declarations.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/function_declarations.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/variable_declarations.js" />
-            <fileset dir="${SRC_DIR}" includes="parser/factory.js" /-->
             <fileset dir="${SRC_DIR}" includes="parser/htmlparser.js" />
             <fileset dir="${SRC_DIR}" includes="parser/domparser.js" />
             <fileset dir="${SRC_DIR}" includes="parser/document.js" />
@@ -513,6 +505,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="xhr.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="xhr/__global__.js" />
@@ -555,6 +548,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="css.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="css/__global__.js" />
@@ -597,6 +591,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="window.${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${SRC_DIR}" includes="window/__global__.js" />
@@ -641,6 +636,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${DIST_DIR}" includes="platform/core.js" />
@@ -662,6 +658,7 @@
             <filterchain>    
                 <replacetokens>
                     <token key="VERSION" value="env-${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
                 </replacetokens>
             </filterchain>
             <fileset dir="${DIST_DIR}" includes="platform/core.js" />
@@ -677,63 +674,6 @@
             <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_RHINO} built." />
-    </target>
-    
-    <target name="test" description="Run the tests">
-      <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="envjs"/>
-        <arg value="primary-tests"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
-      <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="envjs"/>
-        <arg value="call-load-test"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
-      <java fork="true" jar="${DIST_DIR}/env-js.jar" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="envjs"/>
-        <arg value="prototype-test"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
-      <java fork="true" jar="${RHINO_JAR}" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="rhino"/>
-        <arg value="primary-tests"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
-      <java fork="true" jar="${RHINO_JAR}" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="rhino"/>
-        <arg value="call-load-test"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
-      <java fork="true" jar="${RHINO_JAR}" failonerror="true">
-        <arg value="-opt"/>
-        <arg value="-1"/>
-        <arg value="test/test.js"/>
-        <arg value="rhino"/>
-        <arg value="prototype-test"/>
-        <jvmarg value="-Dfile.encoding=utf-8"/>
-        <jvmarg value="-Xmx256m"/>
-      </java>
     </target>
     
 </project>

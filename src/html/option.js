@@ -14,10 +14,14 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('defaultSelected',value);
     },
     get index(){
-        var options = this.parent.childNodes;
-        for(var i; i<options.length;i++){
+        var options = this.parentNode.childNodes,
+            i, index = 0;
+        for(i=0; i<options.length;i++){
+            if(options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION"){
+                index++;
+            }
             if(this == options[i])
-                return i;
+                return index;
         }
         return -1;
     },
@@ -31,7 +35,7 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
-       //console.log('option set selected %s', value);
+        //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null){
             this.defaultSelected = this.selected+'';
         }
@@ -41,7 +45,7 @@ __extend__(HTMLOptionElement.prototype, {
             // select's value which modifies option's selected)
             return;
         }
-       //console.log('option setAttribute selected %s', selectedValue);
+        //console.log('option setAttribute selected %s', selectedValue);
         this.setAttribute('selected', selectedValue);
 
     },

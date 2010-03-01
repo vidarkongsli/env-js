@@ -5,22 +5,29 @@
  */
 Envjs.loadInlineScript = function(script){
     if(script.ownerDocument.ownerWindow){
-        __context__.evaluateString(
+        Envjs.eval(
             script.ownerDocument.ownerWindow,
             script.text,
-            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
-            0,
-            null
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
     }else{
-        __context__.evaluateString(
+        Envjs.eval(
             __this__,
             script.text,
-            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
-            0,
-            null
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
     }
     //console.log('evaluated at scope %s \n%s', 
     //    script.ownerDocument.ownerWindow.guid, script.text);
 };
+
+
+Envjs.eval = function(context, source, name){
+    __context__.evaluateString(
+        context,
+        source,
+        name,
+        0,
+        null
+    );
+}

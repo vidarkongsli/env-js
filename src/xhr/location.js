@@ -169,6 +169,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
     try{
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
+        Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);

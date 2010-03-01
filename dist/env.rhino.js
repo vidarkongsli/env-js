@@ -34,9 +34,11 @@ var Envjs = function(){
 
 //eg "Mozilla"
 Envjs.appCodeName  = "Envjs";
-//eg "Gecko/20070309 Firefox/2.0.0.3"
-Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
 
+//eg "Gecko/20070309 Firefox/2.0.0.3"
+Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.0";
+
+Envjs.version = "1.6";//?
 
 /*
  * Envjs core-env.1.2.0.0 
@@ -104,6 +106,14 @@ Envjs.loadInlineScript = function(script){
     load(tmpFile);
 };
 
+/**
+ * Should evaluate script in some context
+ * @param {Object} context
+ * @param {Object} source
+ * @param {Object} name
+ */
+Envjs.eval = function(context, source, name){};
+
 
 /**
  * Executes a script tag
@@ -111,12 +121,13 @@ Envjs.loadInlineScript = function(script){
  * @param {Object} parser
  */
 Envjs.loadLocalScript = function(script){
-    //console.debug("loading script %s", script);
+    //console.log("loading script %s", script);
     var types, 
         src, 
         i, 
         base,
-        filename;
+        filename,
+        xhr;
     
     if(script.type){
         types = script.type.split(";");
@@ -143,7 +154,8 @@ Envjs.loadLocalScript = function(script){
         
         
     if(script.src){
-        //$env.info("loading allowed external script :" + script.src);
+        //console.log("loading allowed external script %s", script.src);
+        
         //lets you register a function to execute 
         //before the script is loaded
         if(Envjs.beforeScriptLoad){
@@ -157,9 +169,22 @@ Envjs.loadLocalScript = function(script){
         //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
         //console.log('base %s', base);
         filename = Envjs.uri(script.src, base);
-        try {                      
-            load(filename);
-            //console.log('loaded %s', filename);
+        try {          
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", filename, false/*syncronous*/);
+            //console.log("loading external script %s", filename);
+            xhr.onreadystatechange = function(){
+                //console.log("readyState %s", xhr.readyState);
+                if(xhr.readyState === 4){
+                    //TODO this is rhino specific
+                    Envjs.eval(
+                        script.ownerDocument.ownerWindow,
+                        xhr.responseText,
+                        filename
+                    );
+                }    
+            };
+            xhr.send(null, false);
         } catch(e) {
             console.log("could not load script %s \n %s", filename, e );
             Envjs.onScriptLoadError(script, e);
@@ -309,6 +334,8 @@ Envjs.loadFrame = function(frame, url){
 
 var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
+Envjs.platform       = "Rhino";
+Envjs.revision       = "1.7.0.rc2";
 /*
  * Envjs rhino-env.1.2.0.0 
  * Pure JavaScript Browser Environment
@@ -353,25 +380,32 @@ Envjs.lineSource = function(e){
  */
 Envjs.loadInlineScript = function(script){
     if(script.ownerDocument.ownerWindow){
-        __context__.evaluateString(
+        Envjs.eval(
             script.ownerDocument.ownerWindow,
             script.text,
-            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
-            0,
-            null
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
     }else{
-        __context__.evaluateString(
+        Envjs.eval(
             __this__,
             script.text,
-            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime(),
-            0,
-            null
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
     }
     //console.log('evaluated at scope %s \n%s', 
     //    script.ownerDocument.ownerWindow.guid, script.text);
 };
+
+
+Envjs.eval = function(context, source, name){
+    __context__.evaluateString(
+        context,
+        source,
+        name,
+        0,
+        null
+    );
+}
 
 //Temporary patch for parser module
 Packages.org.mozilla.javascript.Context.
@@ -668,7 +702,6 @@ Envjs.os_name        = java.lang.System.getProperty("os.name");
 Envjs.os_arch        = java.lang.System.getProperty("os.arch"); 
 Envjs.os_version     = java.lang.System.getProperty("os.version"); 
 Envjs.lang           = java.lang.System.getProperty("user.lang"); 
-Envjs.platform       = "Rhino ";//how do we get the version
     
 
 /**
@@ -684,7 +717,7 @@ Envjs.loadFrame = function(frame, url){
         }
         
         //create a new scope for the window proxy
-        frame.contentWindow = __context__.initStandardObjects();
+        frame.contentWindow = Envjs.proxy();
         new Window(frame.contentWindow, window);
         
         //I dont think frames load asynchronously in firefox
@@ -731,92 +764,17 @@ Envjs.unloadFrame = function(frame){
  * @param {Object} scope
  * @param {Object} parent
  */
-//var __proxycount__ = 0;
 Envjs.proxy = function(scope, parent){
 
-    //console.log('__proxycount__ %s', ++__proxycount__);
     try{   
         if(scope+'' == '[object global]'){
-            //__context__.initStandardObjects(scope);
-            //console.log('succeeded to init standard objects %s %s', scope, parent);
+            return scope
+        }else{
+            return  __context__.initStandardObjects();
         }
     }catch(e){
         console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
     }
-    
-    /*var _scope = scope;
-        _parent = parent||null,
-        _this = this,
-        _undefined = Packages.org.mozilla.javascript.Scriptable.NOT_FOUND,
-        _proxy = new Packages.org.mozilla.javascript.ScriptableObject({
-            getClassName: function(){
-                return 'envjs.platform.rhino.Proxy';
-            },
-            has: function(nameOrIndex, start){
-                var has;
-                //print('proxy has '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                if(nameOrIndex['class'] == java.lang.String){
-                    switch(nameOrIndex+''){
-                        case '__iterator__':
-                            return _proxy.__iterator__;
-                            break;
-                        default:
-                            has = (nameOrIndex+'') in _scope;
-                            //print('has as string :'+has);
-                            return has;
-                    }
-                }else{
-                    //print('has not');
-                    return false;
-                }
-            },
-            put: function(nameOrIndex,  start,  value){
-                //print('put '+ value);
-                _scope[nameOrIndex+''] = value;
-            },
-            get: function(nameOrIndex, start){
-                //print('proxy get '+nameOrIndex+" ("+nameOrIndex['class']+")");
-                var value;
-                if(nameOrIndex['class'] == java.lang.String){
-                    //print("get as string");
-                    value = _scope[nameOrIndex+''];
-                    if(value+'' === "undefined"){
-                        return _undefined;
-                    }else{
-                        return value;
-                    }
-                } else {
-                    //print('get not');
-                    return _undefined;
-                }
-            },
-            'delete': function(nameOrIndex){
-                //console.log('deleting %s', nameOrIndex);
-                delete _scope[nameOrIndex+''];
-            },
-            get parentScope(){
-                //console.log('get proxy parentScope');
-                return _parent;
-            },
-            set parentScope(parent){
-                //console.log('set proxy parentScope');
-                _parent = parent;
-            },
-            get topLevelScope(){
-                //console.log('get proxy topLevelScope');
-                return _parent;
-            },
-            equivalentValues: function(value){
-                return (value == _scope || value == this );
-            },
-            equals: function(value){
-                return (value === _scope || value === this );
-            }
-        });*/
-        
-    
-    return scope;        
-    return _proxy;
     
 };
 
@@ -1405,7 +1363,7 @@ __extend__(NamedNodeMap.prototype, {
         return ret;                                    
     },
     setNamedItem : function(arg) {
-     //console.log('setNamedItem %s', arg);
+      //console.log('setNamedItem %s', arg);
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
@@ -7774,10 +7732,14 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('defaultSelected',value);
     },
     get index(){
-        var options = this.parent.childNodes;
-        for(var i; i<options.length;i++){
+        var options = this.parentNode.childNodes,
+            i, index = 0;
+        for(i=0; i<options.length;i++){
+            if(options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION"){
+                index++;
+            }
             if(this == options[i])
-                return i;
+                return index;
         }
         return -1;
     },
@@ -7791,7 +7753,7 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
-       //console.log('option set selected %s', value);
+        //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null){
             this.defaultSelected = this.selected+'';
         }
@@ -7801,7 +7763,7 @@ __extend__(HTMLOptionElement.prototype, {
             // select's value which modifies option's selected)
             return;
         }
-       //console.log('option setAttribute selected %s', selectedValue);
+        //console.log('option setAttribute selected %s', selectedValue);
         this.setAttribute('selected', selectedValue);
 
     },
@@ -7957,7 +7919,7 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
-       //console.log('select set value %s', newValue);
+       console.log('select set value %s', newValue);
         var options = this.options,
             i, index;
        //console.log('select options length %s', options.length);
@@ -7975,12 +7937,21 @@ __extend__(HTMLSelectElement.prototype, {
         }
     },
     get value() {
-       //console.log('select get value');
+        console.log('select get value');
         var value = this.getAttribute('value'),
             index;
+        console.log('select getAttribute value %s', value);
         if (value === undefined || value === null) {
             index = this.selectedIndex;
-            return (index != -1) ? this.options[index].value : "";
+            console.log('select value index %s', index);
+            if (index > -1){
+                 value = this.options[index].value;
+                 console.log('select value %s', value);
+                 return value;
+            }else{
+                console.log('select value ""');
+                return '';
+            }
         } else {
             return value;
         }
@@ -8028,27 +7999,6 @@ __extend__(HTMLSelectElement.prototype, {
         return type?type:'select-one';
     },
     
-    appendChild: function(node){
-        var i, 
-            length,
-            selected = false;
-        node = HTMLElement.prototype.appendChild.apply(this, [node]);
-        //make sure at least one is selected by default
-        try{
-       //console.log('select appendChild option %s %s', node.nodeType, node.tagName);   
-        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
-           //console.log('select appending option %s %s', this.value, node.value);                    
-            if(this.value === ""){
-               //console.log('!!! setting select value %s', node.value);     
-                this.value = node.value;
-               //console.log('!!! finished setting select value %s', node.value);  
-            }
-        }}catch(e){
-           //console.log('error appending node to select %s',e);
-        }
-       //console.log('finished select appendChild options %s %s', node.nodeType, node.tagName)
-        return node;
-    },
     add : function(){
         __add__(this);
     },
@@ -10491,6 +10441,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
     try{
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
+        Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
@@ -10828,7 +10779,7 @@ Navigator = function(){
 			    this.platform +"; "+
 			    "U; "+//?
 			    Envjs.os_name+" "+Envjs.os_arch+" "+Envjs.os_version+"; "+
-			    Envjs.lang+"; "+
+			    (Envjs.lang?Envjs.lang:"en-US")+"; "+
 			    "rv:"+Envjs.revision+
 			  ")";
 		},
@@ -10945,15 +10896,12 @@ Screen = function(__window__){
  */
 Window = function(scope, parent, opener){
     
-    __initStandardObjects__(scope, parent);
-    
     // the window property is identical to the self property and to this obj
-    var proxy = new Envjs.proxy(scope, parent);
-    scope.__proxy__ = proxy;
+    //var proxy = new Envjs.proxy(scope, parent);
+    //scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
         return scope;
     });
-    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;
@@ -10969,12 +10917,6 @@ Window = function(scope, parent, opener){
     
     // read only reference to the Document object
     var $document = new HTMLDocument($htmlImplementation, scope);
-
-    //The version of this application
-    var $version = "0.1";
-    
-    //This should be hooked to git or svn or whatever
-    var $revision = "0.0.0.0";
     
     // A read-only reference to the Window object that contains this window
     // or frame.  If the window is a top-level window, parent refers to
@@ -11163,7 +11105,7 @@ Window = function(scope, parent, opener){
             return __top__(scope)
         },
         get window(){
-            return proxy;
+            return this;
         },
         toString : function(){
             return '[Window]';
@@ -11177,7 +11119,7 @@ Window = function(scope, parent, opener){
         open: function(url, name, features, replace){
             if (features)
                 console.log("'features argument not yet implemented");
-            var _window = {},
+            var _window = Envjs.proxy({}),
                 open;
             if(replace && name){
                 for(open in __windows__){
@@ -11195,10 +11137,6 @@ Window = function(scope, parent, opener){
         close: function(){
             //console.log('closing window %s', __windows__[$uuid]);
             try{
-                for(var p in __windows__[$uuid].__proxy__){
-                    delete p;
-                }
-                delete __windows__[$uuid].__proxy__;
                 delete __windows__[$uuid];
                 delete scope;
                 delete this;
@@ -11236,59 +11174,10 @@ var __top__ = function(_scope){
 
 var __windows__ = {};
 
-var __initStandardObjects__ = function(scope, parent){
-    
-    /*var __Array__;
-    if(!scope.Array){
-        __Array__ = function(){
-            return new parent.top.Array();
-        };
-        __extend__(__Array__.prototype, parent.top.Array.prototype);
-        scope.__defineGetter__('Array', function(){
-            return  __Array__;
-        });
-    }
-    
-    var __Object__;
-    if(!scope.Object){
-        __Object__ = function(){
-            return new parent.top.Object();
-        };
-        __extend__(__Object__.prototype, parent.top.Object.prototype);
-        scope.__defineGetter__('Object', function(){
-            return  __Object__;
-        });
-    }
-    
-
-    var __Date__;
-    if(!scope.Date){
-        __Date__ = function(){
-            return new parent.top.Date();
-        };
-        __extend__(__Date__.prototype, parent.top.Date.prototype);
-        scope.__defineGetter__('Date', function(){
-            return  __Date__;
-        });
-    }
-    
-    var __Number__;
-    if(!scope.Number){
-        __Number__ = function(){
-            return new parent.top.Number();
-        };
-        __extend__(__Number__.prototype, parent.top.Number.prototype);
-        scope.__defineGetter__('Number', function(){
-            return  __Number__;
-        });
-    }*/
-     
-};
-
 //finally pre-supply the window with the window-like environment
-console.log('Default Window');
+//console.log('Default Window');
 new Window(__this__, __this__);
-
+console.log('[ %s ]',window.navigator.userAgent);
 
 
 /**

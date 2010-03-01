@@ -16,7 +16,7 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
-       //console.log('select set value %s', newValue);
+       console.log('select set value %s', newValue);
         var options = this.options,
             i, index;
        //console.log('select options length %s', options.length);
@@ -34,12 +34,21 @@ __extend__(HTMLSelectElement.prototype, {
         }
     },
     get value() {
-       //console.log('select get value');
+        console.log('select get value');
         var value = this.getAttribute('value'),
             index;
+        console.log('select getAttribute value %s', value);
         if (value === undefined || value === null) {
             index = this.selectedIndex;
-            return (index != -1) ? this.options[index].value : "";
+            console.log('select value index %s', index);
+            if (index > -1){
+                 value = this.options[index].value;
+                 console.log('select value %s', value);
+                 return value;
+            }else{
+                console.log('select value ""');
+                return '';
+            }
         } else {
             return value;
         }
@@ -87,27 +96,6 @@ __extend__(HTMLSelectElement.prototype, {
         return type?type:'select-one';
     },
     
-    appendChild: function(node){
-        var i, 
-            length,
-            selected = false;
-        node = HTMLElement.prototype.appendChild.apply(this, [node]);
-        //make sure at least one is selected by default
-        try{
-       //console.log('select appendChild option %s %s', node.nodeType, node.tagName);   
-        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
-           //console.log('select appending option %s %s', this.value, node.value);                    
-            if(this.value === ""){
-               //console.log('!!! setting select value %s', node.value);     
-                this.value = node.value;
-               //console.log('!!! finished setting select value %s', node.value);  
-            }
-        }}catch(e){
-           //console.log('error appending node to select %s',e);
-        }
-       //console.log('finished select appendChild options %s %s', node.nodeType, node.tagName)
-        return node;
-    },
     add : function(){
         __add__(this);
     },

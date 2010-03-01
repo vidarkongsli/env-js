@@ -2372,10 +2372,14 @@ __extend__(HTMLOptionElement.prototype, {
         this.setAttribute('defaultSelected',value);
     },
     get index(){
-        var options = this.parent.childNodes;
-        for(var i; i<options.length;i++){
+        var options = this.parentNode.childNodes,
+            i, index = 0;
+        for(i=0; i<options.length;i++){
+            if(options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION"){
+                index++;
+            }
             if(this == options[i])
-                return i;
+                return index;
         }
         return -1;
     },
@@ -2389,7 +2393,7 @@ __extend__(HTMLOptionElement.prototype, {
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value){
-       //console.log('option set selected %s', value);
+        //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null){
             this.defaultSelected = this.selected+'';
         }
@@ -2399,7 +2403,7 @@ __extend__(HTMLOptionElement.prototype, {
             // select's value which modifies option's selected)
             return;
         }
-       //console.log('option setAttribute selected %s', selectedValue);
+        //console.log('option setAttribute selected %s', selectedValue);
         this.setAttribute('selected', selectedValue);
 
     },
@@ -2555,7 +2559,7 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
-       //console.log('select set value %s', newValue);
+       console.log('select set value %s', newValue);
         var options = this.options,
             i, index;
        //console.log('select options length %s', options.length);
@@ -2573,12 +2577,21 @@ __extend__(HTMLSelectElement.prototype, {
         }
     },
     get value() {
-       //console.log('select get value');
+        console.log('select get value');
         var value = this.getAttribute('value'),
             index;
+        console.log('select getAttribute value %s', value);
         if (value === undefined || value === null) {
             index = this.selectedIndex;
-            return (index != -1) ? this.options[index].value : "";
+            console.log('select value index %s', index);
+            if (index > -1){
+                 value = this.options[index].value;
+                 console.log('select value %s', value);
+                 return value;
+            }else{
+                console.log('select value ""');
+                return '';
+            }
         } else {
             return value;
         }
@@ -2626,27 +2639,6 @@ __extend__(HTMLSelectElement.prototype, {
         return type?type:'select-one';
     },
     
-    appendChild: function(node){
-        var i, 
-            length,
-            selected = false;
-        node = HTMLElement.prototype.appendChild.apply(this, [node]);
-        //make sure at least one is selected by default
-        try{
-       //console.log('select appendChild option %s %s', node.nodeType, node.tagName);   
-        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
-           //console.log('select appending option %s %s', this.value, node.value);                    
-            if(this.value === ""){
-               //console.log('!!! setting select value %s', node.value);     
-                this.value = node.value;
-               //console.log('!!! finished setting select value %s', node.value);  
-            }
-        }}catch(e){
-           //console.log('error appending node to select %s',e);
-        }
-       //console.log('finished select appendChild options %s %s', node.nodeType, node.tagName)
-        return node;
-    },
     add : function(){
         __add__(this);
     },

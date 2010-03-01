@@ -309,7 +309,7 @@ __extend__(NamedNodeMap.prototype, {
         return ret;                                    
     },
     setNamedItem : function(arg) {
-     //console.log('setNamedItem %s', arg);
+      //console.log('setNamedItem %s', arg);
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document

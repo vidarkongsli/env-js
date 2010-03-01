@@ -9,15 +9,12 @@
  */
 Window = function(scope, parent, opener){
     
-    __initStandardObjects__(scope, parent);
-    
     // the window property is identical to the self property and to this obj
-    var proxy = new Envjs.proxy(scope, parent);
-    scope.__proxy__ = proxy;
+    //var proxy = new Envjs.proxy(scope, parent);
+    //scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
         return scope;
     });
-    
     
     var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
     __windows__[$uuid] = scope;
@@ -33,12 +30,6 @@ Window = function(scope, parent, opener){
     
     // read only reference to the Document object
     var $document = new HTMLDocument($htmlImplementation, scope);
-
-    //The version of this application
-    var $version = "0.1";
-    
-    //This should be hooked to git or svn or whatever
-    var $revision = "0.0.0.0";
     
     // A read-only reference to the Window object that contains this window
     // or frame.  If the window is a top-level window, parent refers to
@@ -227,7 +218,7 @@ Window = function(scope, parent, opener){
             return __top__(scope)
         },
         get window(){
-            return proxy;
+            return this;
         },
         toString : function(){
             return '[Window]';
@@ -241,7 +232,7 @@ Window = function(scope, parent, opener){
         open: function(url, name, features, replace){
             if (features)
                 console.log("'features argument not yet implemented");
-            var _window = {},
+            var _window = Envjs.proxy({}),
                 open;
             if(replace && name){
                 for(open in __windows__){
@@ -259,10 +250,6 @@ Window = function(scope, parent, opener){
         close: function(){
             //console.log('closing window %s', __windows__[$uuid]);
             try{
-                for(var p in __windows__[$uuid].__proxy__){
-                    delete p;
-                }
-                delete __windows__[$uuid].__proxy__;
                 delete __windows__[$uuid];
                 delete scope;
                 delete this;
@@ -300,57 +287,8 @@ var __top__ = function(_scope){
 
 var __windows__ = {};
 
-var __initStandardObjects__ = function(scope, parent){
-    
-    /*var __Array__;
-    if(!scope.Array){
-        __Array__ = function(){
-            return new parent.top.Array();
-        };
-        __extend__(__Array__.prototype, parent.top.Array.prototype);
-        scope.__defineGetter__('Array', function(){
-            return  __Array__;
-        });
-    }
-    
-    var __Object__;
-    if(!scope.Object){
-        __Object__ = function(){
-            return new parent.top.Object();
-        };
-        __extend__(__Object__.prototype, parent.top.Object.prototype);
-        scope.__defineGetter__('Object', function(){
-            return  __Object__;
-        });
-    }
-    
-
-    var __Date__;
-    if(!scope.Date){
-        __Date__ = function(){
-            return new parent.top.Date();
-        };
-        __extend__(__Date__.prototype, parent.top.Date.prototype);
-        scope.__defineGetter__('Date', function(){
-            return  __Date__;
-        });
-    }
-    
-    var __Number__;
-    if(!scope.Number){
-        __Number__ = function(){
-            return new parent.top.Number();
-        };
-        __extend__(__Number__.prototype, parent.top.Number.prototype);
-        scope.__defineGetter__('Number', function(){
-            return  __Number__;
-        });
-    }*/
-     
-};
-
 //finally pre-supply the window with the window-like environment
-console.log('Default Window');
+//console.log('Default Window');
 new Window(__this__, __this__);
-
+console.log('[ %s ]',window.navigator.userAgent);
 
