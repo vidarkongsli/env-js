@@ -139,17 +139,17 @@ Envjs.loadLocalScript = function(script){
             if(i+1 == types.length)
                 return false;
         }
-    }else{
-        try{
-            //handle inline scripts
-            if(!script.src)
-                Envjs.loadInlineScript(script);
-             return true;
-        }catch(e){
-            //Envjs.error("Error loading script.", e);
-            Envjs.onScriptLoadError(script, e);
-            return false;
-        }
+    }
+    
+    try{
+        //handle inline scripts
+        if(!script.src)
+            Envjs.loadInlineScript(script);
+         return true;
+    }catch(e){
+        //Envjs.error("Error loading script.", e);
+        Envjs.onScriptLoadError(script, e);
+        return false;
     }
         
         
