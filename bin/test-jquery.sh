@@ -1,75 +1,93 @@
 #!/bin/sh
 
-# Usage: test-jquery.sh [version]
-# Currently supported versions: 1.4.1, 1.3.2, 1.3.1, and 1.2.6
+###########################################################################
+# Usage: test-jquery.sh <debug?> [version]
+# Currently supported versions: 1.4.2, 1.4.1, 1.3.2
 #
 # This script will check out the jQuery development tree from Subversion 
-# or github if necessary, massage the testing scripts as necessary, copy 
-# our latest version of env.js into place, and then run the test scripts.
-
+# or github if necessary and then run the test scripts.
+###########################################################################
+LATEST="1.4.2"
 
 if [ -n "$2" ]; then 
-    echo 'debug'
-    if [ -n "$2" ]; then VERSION="$2"; else VERSION="1.4.1"; fi
+    echo 'debug mode'
+    if [ -n "$2" ]; then VERSION="$2"; else VERSION=$LATEST; fi
     DEBUG=1
 else 
-    #echo 'jquery'
-    if [ -n "$1" ]; then VERSION="$1"; else VERSION="1.4.1"; fi
+    if [ -n "$1" ]; then VERSION="$1"; else VERSION=$LATEST; fi
     DEBUG=0
 fi
 
-JQUERY_DIR="test/vendor/jQuery/$VERSION";
+echo $VERSION
+SVN=http://jqueryjs.googlecode.com/svn/tags/$VERSION/
+GIT=http://github.com/jquery/jquery.git
 
-#ant
+JQUERY_DIR=test/vendor/jQuery/$VERSION
+echo vendor: $JQUERY_DIR
 
-
+###########################################################################
+#
+#   Get the source
+#
+###########################################################################
 case "$VERSION" in
-    "1.3.2")
-        svn export http://jqueryjs.googlecode.com/svn/tags/$VERSION/ $JQUERY_DIR
-        rm -rf "$JQUERY_DIR/test/qunit"
-        svn export -r6173 http://jqueryjs.googlecode.com/svn/trunk/qunit $JQUERY_DIR/test/qunit
-        ;;
-   "1.3.1")
+
+    "1.2.6")
+        echo "1.2.6 tests are currently known to be broken with envjs 1.2 ..." 
+        #currently broken - the archivist in me doesnt want to let 
+        #jquery 1.2.6 go untested - coming soon 
         if [ ! -d "$JQUERY_DIR" ]; then
-            svn export http://jqueryjs.googlecode.com/svn/tags/$VERSION/ $JQUERY_DIR
-            rm -rf "$JQUERY_DIR/test/qunit"
-            svn export -r6133 http://jqueryjs.googlecode.com/svn/trunk/qunit $JQUERY_DIR/test/qunit  
-        fi
-        ;;
-   "1.4.1")
-        if [ ! -d "$JQUERY_DIR" ]; then
-            echo 'cloning jquery 1.4.1 repo'
-            git clone git://github.com/jquery/jquery.git $JQUERY_DIR
+            svn export  $SVN $JQUERY_DIR
             cd $JQUERY_DIR
-            git branch jquery-1.4.1 1.4.1
-            git checkout jquery-1.4.1
             make
             cd -
         fi
-        echo 'running jquery 1.4.1 tests'
-        if [ $DEBUG -eq 1 ]; then
-            #echo 'enabling rhino debugger'
-            java  -cp rhino/js.jar  org.mozilla.javascript.tools.debugger.Main bin/jquery-1.4.1-test.js
-        else
-            #echo 'running with rhino'
-            java -Xmx64M -XX:+HeapDumpOnOutOfMemoryError -jar rhino/js.jar -opt -1 bin/jquery-1.4.1-test.js
+        ;;
+    "1.3.1"|"1.3.2")
+        if [ ! -d "$JQUERY_DIR" ]; then
+            svn export $SVN $JQUERY_DIR
+            cd $JQUERY_DIR
+            make
+            cd -
         fi
-        echo 'completed jquery 1.4.1 tests'
+        ;;
+   "1.4.1"|"1.4.2")
+        if [ ! -d $JQUERY_DIR ]; then
+            echo 'cloning jquery '$VERSION' repo '$GIT $JQUERY_DIR
+            git clone $GIT $JQUERY_DIR
+            if [ ! -d $JQUERY_DIR ]; then
+                echo 'FAILED to clone from git. \n' $GIT
+                exit
+            fi
+            cd $JQUERY_DIR
+            git branch jquery-$VERSION $VERSION
+            git checkout jquery-$VERSION
+            make
+            cd -
+        fi
         ;;
 esac
 
-#cp dist/env.rhino.js $JQUERY_DIR/build/runtest/env.js
-#cp dist/env-js.jar $JQUERY_DIR/build/js.jar
-#cp bin/jquery-$VERSION-test.js $JQUERY_DIR/build/runtest/test.js
-
-#if [ $DEBUG -eq 1 ]; then
-#    echo 'enabling rhino debugger'
-#    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -cp \\$\{BUILD_DIR}\/js.jar org.mozilla.javascript.tools.debugger.Main/" $JQUERY_DIR/Makefile;
-#else
-#    echo 'running with rhino'
-#    perl -pi~ -e "s/^JAR(.*)(-jar.*|-cp.*)/JAR\1 -jar \\$\{BUILD_DIR}\/js.jar/" $JQUERY_DIR/Makefile;
-#    java -jar rhino/js.jar bin/
-#fi
-
-#cd $JQUERY_DIR
-#make runtest
+###########################################################################
+#
+#   Run the tests
+#
+###########################################################################
+echo 'running jquery '$VERSION' tests'
+if [ $DEBUG -eq 1 ]; then
+    echo 'enabling rhino debugger'
+    java  -cp rhino/js.jar  \
+        org.mozilla.javascript.tools.shell.Main \
+        bin/test-jquery.js $VERSION $3 $4 $5 $6 $7 $8 $9
+else
+    #echo 'running with rhino'
+    #if you experience out of memory errors try add these after java
+    #-Xmx64M \ 
+    #-XX:+HeapDumpOnOutOfMemoryError \  
+    java \
+        -cp rhino/js.jar \
+        org.mozilla.javascript.tools.shell.Main \
+        -opt -1 \
+        bin/test-jquery.js  $VERSION $2 $3 $4 $5 $6 $7 $8 $9
+fi
+echo 'completed jquery' $VERSION 'tests'
