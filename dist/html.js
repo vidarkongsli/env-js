@@ -108,6 +108,8 @@ HTMLDocument = function(implementation, ownerWindow, referrer) {
     this.referrer = referrer;
     this.baseURI = "about:blank";
     this.ownerWindow = ownerWindow;
+    this.head;
+    this.body;
 };
 HTMLDocument.prototype = new Document;
 
@@ -257,7 +259,7 @@ __extend__(HTMLDocument.prototype, {
     get head(){
         //console.log('get head');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var element = this.documentElement,
             length = element.childNodes.length,
             i;
@@ -270,13 +272,13 @@ __extend__(HTMLDocument.prototype, {
             }
         }
         //no head?  ugh bad news html.. I guess we'll force the issue?
-        element.appendChild(this.createElement('head'));
+        var head = element.appendChild(this.createElement('head'));
         return head;
     },
     get title(){
         //console.log('get title');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var title,
             head = this.head,
             length = head.childNodes.length,
@@ -289,37 +291,22 @@ __extend__(HTMLDocument.prototype, {
                 }
             }
         }
-        //no head?  ugh bad news html.. I guess we'll force the issue?
-        title = this.createElement('title');
-        head.appendChild(title);
+        //no title?  ugh bad news html.. I guess we'll force the issue?
+        title = head.appendChild(this.createElement('title'));
         return title.appendChild(this.createTextNode('Untitled Document')).nodeValue;
     },
     set title(titleStr){
         //console.log('set title %s', titleStr);
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
-        var title,
-            head = this.head,
-            length = head.childNodes.length,
-            i;
-        //check for the presence of the title element in this head element
-        for(i=0;i<length;i++){
-            if(head.childNodes[i].nodeType === Node.ELEMENT_NODE){
-                if(head.childNodes[i].tagName.toLowerCase() === 'title'){
-                    head.childNodes[i].textContent = titleStr;
-                }
-            }
-        }
-        //no head?  ugh bad news html.. I guess we'll force the issue?
-        title = this.createElement('title');
-        head.appendChild(title);
-        title.appendChild(this.createTextNode(titleStr));
+            this.appendChild(this.createElement('html'));
+        var title = this.title;
+        title.textContent = titleStr;
     },
 
     get body(){ 
         //console.log('get body');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var body,
             element = this.documentElement,
             length = element.childNodes.length,
@@ -424,7 +411,6 @@ Aspect.around({
         return node;
     }
     //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
-    
     switch(doc.parsing){
         case true:
             //handled by parser if included
@@ -438,7 +424,7 @@ Aspect.around({
                 case "http://www.w3.org/1999/xhtml":
                     switch(node.tagName.toLowerCase()){
                         case 'script':
-                            if((node.parentNode.nodeName+"".toLowerCase() == 'head')){
+                            if((this.nodeName.toLowerCase() == 'head')){
                                 try{
                                     okay = Envjs.loadLocalScript(node, null);
                                     //console.log('loaded script? %s %s', node.uuid, okay);
@@ -2526,13 +2512,13 @@ __extend__(HTMLScriptElement.prototype, {
         this.setAttribute('defer',value);
     },
     get src(){
-        return this.getAttribute('src');
+        return this.getAttribute('src')||'';
     },
     set src(value){
         this.setAttribute('src',value);
     },
     get type(){
-        return this.getAttribute('type');
+        return this.getAttribute('type')||'';
     },
     set type(value){
         this.setAttribute('type',value);

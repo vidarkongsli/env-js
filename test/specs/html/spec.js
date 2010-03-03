@@ -50,6 +50,7 @@ try{
     document;
 }catch(e){
     document = new HTMLDocument(new DOMImplementation());
+    document.body.textContent = 'hello envjs';
 }
 var xmlserializer = new XMLSerializer();
 
@@ -289,6 +290,33 @@ test('HTMLDocument.createElement(frame)', function(){
     equals(element.src, "", '.src');
     equals(element.tagName, 'FRAME', '.name');
     equals(xmlserializer.serializeToString(element), '<FRAME/>', 'xmlserializer');
+    
+});
+
+
+test('HTMLDocument.createElement(script)', function(){
+
+    var element;
+    
+    element = document.createElement('script');
+    
+    ok(element, 'element created');
+    equals(element.childNodes.length, 0, '.childNodes.length');
+    equals(element.localName, 'SCRIPT', '.localName');
+    equals(element.namespaceURI, null, '.namespaceURI');
+    equals(element.nodeName, 'SCRIPT', '.nodeName');
+    equals(element.nodeType, Node.ELEMENT_NODE, '.nodeType');
+    equals(element.ownerDocument, document, '.ownerDocument');
+    equals(element.parentNode, null, '.parentNode');
+    equals(element.prefix, null, '.prefix');    
+    equals(element.src, "", '.src');
+    equals(element.type, "", '.type');
+    equals(element.tagName, 'SCRIPT', '.tagName');
+    equals(xmlserializer.serializeToString(element), '<SCRIPT/>', 'xmlserializer');
+    debugger;
+    element.textContent = 'document.ASDFASDF = "QWERQWER";';
+    document.head.appendChild(element);
+    equals(document.ASDFASDF, 'QWERQWER', 'script appended to head executes');
     
 });
 

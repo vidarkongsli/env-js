@@ -39,7 +39,7 @@ var __toDomNode__ = function(e4, parent, doc){
         switch(kind){
             case 'element':
                 //console.log('creating element %s %s', xnode.localName(), xnode.namespace());
-                if(xnode.namespace()){
+                if(xnode.namespace() && (xnode.namespace()+'') !== ''){
                     //console.log('createElementNS %s %s',xnode.namespace()+'', xnode.localName() );
                     domnode = doc.createElementNS(xnode.namespace()+'', xnode.localName());
                 }else{

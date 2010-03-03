@@ -30,7 +30,8 @@ var Envjs = function(){
         window.location = arguments[0];
     }
     return;
-};
+},
+__this__ = this;
 
 //eg "Mozilla"
 Envjs.appCodeName  = "Envjs";
@@ -143,9 +144,10 @@ Envjs.loadLocalScript = function(script){
     
     try{
         //handle inline scripts
-        if(!script.src)
+        if(!script.src.length){
             Envjs.loadInlineScript(script);
-         return true;
+            return true;
+        }
     }catch(e){
         //Envjs.error("Error loading script.", e);
         Envjs.onScriptLoadError(script, e);
@@ -153,50 +155,48 @@ Envjs.loadLocalScript = function(script){
     }
         
         
-    if(script.src){
-        //console.log("loading allowed external script %s", script.src);
-        
-        //lets you register a function to execute 
-        //before the script is loaded
-        if(Envjs.beforeScriptLoad){
-            for(src in Envjs.beforeScriptLoad){
-                if(script.src.match(src)){
-                    Envjs.beforeScriptLoad[src](script);
-                }
+    //console.log("loading allowed external script %s", script.src);
+    
+    //lets you register a function to execute 
+    //before the script is loaded
+    if(Envjs.beforeScriptLoad){
+        for(src in Envjs.beforeScriptLoad){
+            if(script.src.match(src)){
+                Envjs.beforeScriptLoad[src](script);
             }
         }
-        base = "" + script.ownerDocument.location;
-        //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
-        //console.log('base %s', base);
-        filename = Envjs.uri(script.src, base);
-        try {          
-            xhr = new XMLHttpRequest();
-            xhr.open("GET", filename, false/*syncronous*/);
-            //console.log("loading external script %s", filename);
-            xhr.onreadystatechange = function(){
-                //console.log("readyState %s", xhr.readyState);
-                if(xhr.readyState === 4){
-                    //TODO this is rhino specific
-                    Envjs.eval(
-                        script.ownerDocument.ownerWindow,
-                        xhr.responseText,
-                        filename
-                    );
-                }    
-            };
-            xhr.send(null, false);
-        } catch(e) {
-            console.log("could not load script %s \n %s", filename, e );
-            Envjs.onScriptLoadError(script, e);
-            return false;
-        }
-        //lets you register a function to execute 
-        //after the script is loaded
-        if(Envjs.afterScriptLoad){
-            for(src in Envjs.afterScriptLoad){
-                if(script.src.match(src)){
-                    Envjs.afterScriptLoad[src](script);
-                }
+    }
+    base = "" + script.ownerDocument.location;
+    //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
+    //console.log('base %s', base);
+    filename = Envjs.uri(script.src, base);
+    try {          
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", filename, false/*syncronous*/);
+        //console.log("loading external script %s", filename);
+        xhr.onreadystatechange = function(){
+            //console.log("readyState %s", xhr.readyState);
+            if(xhr.readyState === 4){
+                //TODO this is rhino specific
+                Envjs.eval(
+                    script.ownerDocument.ownerWindow,
+                    xhr.responseText,
+                    filename
+                );
+            }    
+        };
+        xhr.send(null, false);
+    } catch(e) {
+        console.log("could not load script %s \n %s", filename, e );
+        Envjs.onScriptLoadError(script, e);
+        return false;
+    }
+    //lets you register a function to execute 
+    //after the script is loaded
+    if(Envjs.afterScriptLoad){
+        for(src in Envjs.afterScriptLoad){
+            if(script.src.match(src)){
+                Envjs.afterScriptLoad[src](script);
             }
         }
     }
@@ -3708,7 +3708,7 @@ var __toDomNode__ = function(e4, parent, doc){
         switch(kind){
             case 'element':
                 //console.log('creating element %s %s', xnode.localName(), xnode.namespace());
-                if(xnode.namespace()){
+                if(xnode.namespace() && (xnode.namespace()+'') !== ''){
                     //console.log('createElementNS %s %s',xnode.namespace()+'', xnode.localName() );
                     domnode = doc.createElementNS(xnode.namespace()+'', xnode.localName());
                 }else{
@@ -5007,6 +5007,8 @@ HTMLDocument = function(implementation, ownerWindow, referrer) {
     this.referrer = referrer;
     this.baseURI = "about:blank";
     this.ownerWindow = ownerWindow;
+    this.head;
+    this.body;
 };
 HTMLDocument.prototype = new Document;
 
@@ -5156,7 +5158,7 @@ __extend__(HTMLDocument.prototype, {
     get head(){
         //console.log('get head');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var element = this.documentElement,
             length = element.childNodes.length,
             i;
@@ -5169,13 +5171,13 @@ __extend__(HTMLDocument.prototype, {
             }
         }
         //no head?  ugh bad news html.. I guess we'll force the issue?
-        element.appendChild(this.createElement('head'));
+        var head = element.appendChild(this.createElement('head'));
         return head;
     },
     get title(){
         //console.log('get title');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var title,
             head = this.head,
             length = head.childNodes.length,
@@ -5188,37 +5190,22 @@ __extend__(HTMLDocument.prototype, {
                 }
             }
         }
-        //no head?  ugh bad news html.. I guess we'll force the issue?
-        title = this.createElement('title');
-        head.appendChild(title);
+        //no title?  ugh bad news html.. I guess we'll force the issue?
+        title = head.appendChild(this.createElement('title'));
         return title.appendChild(this.createTextNode('Untitled Document')).nodeValue;
     },
     set title(titleStr){
         //console.log('set title %s', titleStr);
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
-        var title,
-            head = this.head,
-            length = head.childNodes.length,
-            i;
-        //check for the presence of the title element in this head element
-        for(i=0;i<length;i++){
-            if(head.childNodes[i].nodeType === Node.ELEMENT_NODE){
-                if(head.childNodes[i].tagName.toLowerCase() === 'title'){
-                    head.childNodes[i].textContent = titleStr;
-                }
-            }
-        }
-        //no head?  ugh bad news html.. I guess we'll force the issue?
-        title = this.createElement('title');
-        head.appendChild(title);
-        title.appendChild(this.createTextNode(titleStr));
+            this.appendChild(this.createElement('html'));
+        var title = this.title;
+        title.textContent = titleStr;
     },
 
     get body(){ 
         //console.log('get body');
         if(!this.documentElement)
-            this.appendChild(this.createElement('','',null));
+            this.appendChild(this.createElement('html'));
         var body,
             element = this.documentElement,
             length = element.childNodes.length,
@@ -5323,7 +5310,6 @@ Aspect.around({
         return node;
     }
     //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
-    
     switch(doc.parsing){
         case true:
             //handled by parser if included
@@ -5337,7 +5323,7 @@ Aspect.around({
                 case "http://www.w3.org/1999/xhtml":
                     switch(node.tagName.toLowerCase()){
                         case 'script':
-                            if((node.parentNode.nodeName+"".toLowerCase() == 'head')){
+                            if((this.nodeName.toLowerCase() == 'head')){
                                 try{
                                     okay = Envjs.loadLocalScript(node, null);
                                     //console.log('loaded script? %s %s', node.uuid, okay);
@@ -7425,13 +7411,13 @@ __extend__(HTMLScriptElement.prototype, {
         this.setAttribute('defer',value);
     },
     get src(){
-        return this.getAttribute('src');
+        return this.getAttribute('src')||'';
     },
     set src(value){
         this.setAttribute('src',value);
     },
     get type(){
-        return this.getAttribute('type');
+        return this.getAttribute('type')||'';
     },
     set type(value){
         this.setAttribute('type',value);
@@ -10167,8 +10153,7 @@ XMLHttpRequest.prototype = {
 var Window,
     Screen,
     History,
-    Navigator,
-    __this__ = this;
+    Navigator;
 
 
 /*

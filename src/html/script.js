@@ -51,13 +51,13 @@ __extend__(HTMLScriptElement.prototype, {
         this.setAttribute('defer',value);
     },
     get src(){
-        return this.getAttribute('src');
+        return this.getAttribute('src')||'';
     },
     set src(value){
         this.setAttribute('src',value);
     },
     get type(){
-        return this.getAttribute('type');
+        return this.getAttribute('type')||'';
     },
     set type(value){
         this.setAttribute('type',value);

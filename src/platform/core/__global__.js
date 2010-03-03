@@ -30,7 +30,8 @@ var Envjs = function(){
         window.location = arguments[0];
     }
     return;
-};
+},
+__this__ = this;
 
 //eg "Mozilla"
 Envjs.appCodeName  = "Envjs";

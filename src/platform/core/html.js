@@ -66,9 +66,10 @@ Envjs.loadLocalScript = function(script){
     
     try{
         //handle inline scripts
-        if(!script.src)
+        if(!script.src.length){
             Envjs.loadInlineScript(script);
-         return true;
+            return true;
+        }
     }catch(e){
         //Envjs.error("Error loading script.", e);
         Envjs.onScriptLoadError(script, e);
@@ -76,50 +77,48 @@ Envjs.loadLocalScript = function(script){
     }
         
         
-    if(script.src){
-        //console.log("loading allowed external script %s", script.src);
-        
-        //lets you register a function to execute 
-        //before the script is loaded
-        if(Envjs.beforeScriptLoad){
-            for(src in Envjs.beforeScriptLoad){
-                if(script.src.match(src)){
-                    Envjs.beforeScriptLoad[src](script);
-                }
+    //console.log("loading allowed external script %s", script.src);
+    
+    //lets you register a function to execute 
+    //before the script is loaded
+    if(Envjs.beforeScriptLoad){
+        for(src in Envjs.beforeScriptLoad){
+            if(script.src.match(src)){
+                Envjs.beforeScriptLoad[src](script);
             }
         }
-        base = "" + script.ownerDocument.location;
-        //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
-        //console.log('base %s', base);
-        filename = Envjs.uri(script.src, base);
-        try {          
-            xhr = new XMLHttpRequest();
-            xhr.open("GET", filename, false/*syncronous*/);
-            //console.log("loading external script %s", filename);
-            xhr.onreadystatechange = function(){
-                //console.log("readyState %s", xhr.readyState);
-                if(xhr.readyState === 4){
-                    //TODO this is rhino specific
-                    Envjs.eval(
-                        script.ownerDocument.ownerWindow,
-                        xhr.responseText,
-                        filename
-                    );
-                }    
-            };
-            xhr.send(null, false);
-        } catch(e) {
-            console.log("could not load script %s \n %s", filename, e );
-            Envjs.onScriptLoadError(script, e);
-            return false;
-        }
-        //lets you register a function to execute 
-        //after the script is loaded
-        if(Envjs.afterScriptLoad){
-            for(src in Envjs.afterScriptLoad){
-                if(script.src.match(src)){
-                    Envjs.afterScriptLoad[src](script);
-                }
+    }
+    base = "" + script.ownerDocument.location;
+    //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
+    //console.log('base %s', base);
+    filename = Envjs.uri(script.src, base);
+    try {          
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", filename, false/*syncronous*/);
+        //console.log("loading external script %s", filename);
+        xhr.onreadystatechange = function(){
+            //console.log("readyState %s", xhr.readyState);
+            if(xhr.readyState === 4){
+                //TODO this is rhino specific
+                Envjs.eval(
+                    script.ownerDocument.ownerWindow,
+                    xhr.responseText,
+                    filename
+                );
+            }    
+        };
+        xhr.send(null, false);
+    } catch(e) {
+        console.log("could not load script %s \n %s", filename, e );
+        Envjs.onScriptLoadError(script, e);
+        return false;
+    }
+    //lets you register a function to execute 
+    //after the script is loaded
+    if(Envjs.afterScriptLoad){
+        for(src in Envjs.afterScriptLoad){
+            if(script.src.match(src)){
+                Envjs.afterScriptLoad[src](script);
             }
         }
     }
