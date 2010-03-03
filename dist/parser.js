@@ -7,7 +7,7 @@ var XMLParser = {},
 
     
 /*
- * Envjs parser.1.2.0.0 
+ * Envjs parser.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -806,6 +806,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }
                                     break;
                                 case 'html':
+                                    //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
                                     if(doc.createEvent){

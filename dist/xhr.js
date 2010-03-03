@@ -1,5 +1,5 @@
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -14,7 +14,7 @@ var Location,
     XMLHttpRequest;
 
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -588,6 +588,9 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
+        try{
+            console.log('document \n %s', doc.documentElement.outerHTML);
+        }catch(ee){}
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -599,6 +602,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(head);
         html.appendChild(body);
         doc.appendChild(html);
+        //console.log('default error document \n %s', doc.documentElement.outerHTML);
         
         //DOMContentLoaded event
         if(doc.createEvent){
@@ -628,8 +632,6 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         }
     }
 };
-
-
 /**
  * 
  * @class XMLHttpRequest

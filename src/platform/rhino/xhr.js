@@ -57,18 +57,16 @@ Envjs.uri = function(path, base){
 Envjs.runAsync = function(fn, onInterupt){
     ////Envjs.debug("running async");
     var running = true,
-        run = sync(function(){ 
-        //while happening only thing in this timer    
-        ////Envjs.debug("running timed function");
-        fn();
-    });
+        run;
     
     try{
-        spawn(run);
+        run = Envjs.sync(function(){ 
+            fn();
+        });
+        Envjs.spawn(run);
     }catch(e){
-        //Envjs.error("error while running async", e);
-        if(onInterrupt)
-            onInterrupt(e);
+        console.log("error while running async operation", e);
+        try{if(onInterrupt)onInterrupt(e)}catch(ee){};
     }
 };
 

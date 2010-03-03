@@ -1,5 +1,5 @@
 /*
- * Envjs core-env.1.2.0.0 
+ * Envjs core-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -37,12 +37,12 @@ __this__ = this;
 Envjs.appCodeName  = "Envjs";
 
 //eg "Gecko/20070309 Firefox/2.0.0.3"
-Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.0";
+Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
 
 Envjs.version = "1.6";//?
 
 /*
- * Envjs core-env.1.2.0.0 
+ * Envjs core-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -326,7 +326,7 @@ Envjs.loadFrame = function(frame, url){
 
 })();
 /*
- * Envjs rhino-env.1.2.0.0 
+ * Envjs rhino-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -337,7 +337,7 @@ var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 Envjs.platform       = "Rhino";
 Envjs.revision       = "1.7.0.rc2";
 /*
- * Envjs rhino-env.1.2.0.0 
+ * Envjs rhino-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -415,15 +415,31 @@ Packages.org.mozilla.javascript.Context.
  * Rhino provides a very succinct 'sync'
  * @param {Function} fn
  */
-Envjs.sync = sync;
-
+try{
+    Envjs.sync = sync;
+    Envjs.spawn = spawn;
+}catch(e){
+    //sync unavailable on AppEngine 
+    Envjs.sync = function(fn){
+        console.log('Threadless platform, sync is safe');
+        return fn;
+    };
+    Envjs.spawn = function(fn){
+        console.log('Threadless platform, spawn shares main thread.');
+        return fn();
+    };
+}
 
 /**
  * sleep thread for specified duration
  * @param {Object} millseconds
  */
 Envjs.sleep = function(millseconds){
-    java.lang.Thread.currentThread().sleep(millseconds);
+    try{
+        java.lang.Thread.currentThread().sleep(millseconds);
+    }catch(e){
+        console.log('Threadless platform, cannot sleep.');
+    }
 };
 
 /**
@@ -503,18 +519,16 @@ Envjs.uri = function(path, base){
 Envjs.runAsync = function(fn, onInterupt){
     ////Envjs.debug("running async");
     var running = true,
-        run = sync(function(){ 
-        //while happening only thing in this timer    
-        ////Envjs.debug("running timed function");
-        fn();
-    });
+        run;
     
     try{
-        spawn(run);
+        run = Envjs.sync(function(){ 
+            fn();
+        });
+        Envjs.spawn(run);
     }catch(e){
-        //Envjs.error("error while running async", e);
-        if(onInterrupt)
-            onInterrupt(e);
+        console.log("error while running async operation", e);
+        try{if(onInterrupt)onInterrupt(e)}catch(ee){};
     }
 };
 
@@ -1053,7 +1067,7 @@ function appendNode(node, html)
 
 })();
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -1093,7 +1107,7 @@ var Attr,
 
 
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4248,7 +4262,7 @@ __extend__(XMLSerializer.prototype, {
 
 })();
 /*
- * Envjs event.1.2.0.0 
+ * Envjs event.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4268,7 +4282,7 @@ var Event,
     //among other things like general profiling
     Aspect;
 /*
- * Envjs event.1.2.0.0 
+ * Envjs event.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -5093,7 +5107,7 @@ EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
 })();
 
 /*
- * Envjs timer.1.2.0.0 
+ * Envjs timer.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -5109,7 +5123,7 @@ var setTimeout,
     clearInterval;
     
 /*
- * Envjs timer.1.2.0.0 
+ * Envjs timer.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -5359,7 +5373,7 @@ Envjs.wait = function(wait) {
 
 })();
 /*
- * Envjs html.1.2.0.0 
+ * Envjs html.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -5409,7 +5423,7 @@ var HTMLDocument,
     HTMLUnknownElement;
     
 /*
- * Envjs html.1.2.0.0 
+ * Envjs html.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -8503,7 +8517,7 @@ var CSS2Properties,
     CSSStyleSheet;
     
 /*
- * Envjs css.1.2.0.0 
+ * Envjs css.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -8978,7 +8992,7 @@ var XMLParser = {},
 
     
 /*
- * Envjs parser.1.2.0.0 
+ * Envjs parser.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -9777,6 +9791,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }
                                     break;
                                 case 'html':
+                                    //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
                                     if(doc.createEvent){
@@ -9841,7 +9856,7 @@ __extend__(HTMLElement.prototype,{
 
 })();
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -9856,7 +9871,7 @@ var Location,
     XMLHttpRequest;
 
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -10430,6 +10445,9 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
+        try{
+            console.log('document \n %s', doc.documentElement.outerHTML);
+        }catch(ee){}
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -10441,6 +10459,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(head);
         html.appendChild(body);
         doc.appendChild(html);
+        //console.log('default error document \n %s', doc.documentElement.outerHTML);
         
         //DOMContentLoaded event
         if(doc.createEvent){
@@ -10470,8 +10489,6 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         }
     }
 };
-
-
 /**
  * 
  * @class XMLHttpRequest
@@ -10618,7 +10635,7 @@ var Window,
 
 
 /*
- * Envjs window.1.2.0.0 
+ * Envjs window.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License

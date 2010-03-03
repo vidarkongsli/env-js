@@ -1,5 +1,5 @@
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -39,7 +39,7 @@ var Attr,
 
 
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License

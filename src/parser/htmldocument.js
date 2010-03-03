@@ -95,6 +95,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }
                                     break;
                                 case 'html':
+                                    //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
                                     if(doc.createEvent){

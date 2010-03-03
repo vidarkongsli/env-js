@@ -1,5 +1,5 @@
 /*
- * Envjs core-env.1.2.0.0 
+ * Envjs core-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -37,12 +37,12 @@ __this__ = this;
 Envjs.appCodeName  = "Envjs";
 
 //eg "Gecko/20070309 Firefox/2.0.0.3"
-Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.0";
+Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
 
 Envjs.version = "1.6";//?
 
 /*
- * Envjs core-env.1.2.0.0 
+ * Envjs core-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -592,7 +592,7 @@ function appendNode(node, html)
 
 })();
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -632,7 +632,7 @@ var Attr,
 
 
 /*
- * Envjs dom.1.2.0.0 
+ * Envjs dom.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -3787,7 +3787,7 @@ __extend__(XMLSerializer.prototype, {
 
 })();
 /*
- * Envjs event.1.2.0.0 
+ * Envjs event.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -3807,7 +3807,7 @@ var Event,
     //among other things like general profiling
     Aspect;
 /*
- * Envjs event.1.2.0.0 
+ * Envjs event.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4632,7 +4632,7 @@ EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
 })();
 
 /*
- * Envjs timer.1.2.0.0 
+ * Envjs timer.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4648,7 +4648,7 @@ var setTimeout,
     clearInterval;
     
 /*
- * Envjs timer.1.2.0.0 
+ * Envjs timer.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4898,7 +4898,7 @@ Envjs.wait = function(wait) {
 
 })();
 /*
- * Envjs html.1.2.0.0 
+ * Envjs html.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -4948,7 +4948,7 @@ var HTMLDocument,
     HTMLUnknownElement;
     
 /*
- * Envjs html.1.2.0.0 
+ * Envjs html.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -8042,7 +8042,7 @@ var CSS2Properties,
     CSSStyleSheet;
     
 /*
- * Envjs css.1.2.0.0 
+ * Envjs css.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -8517,7 +8517,7 @@ var XMLParser = {},
 
     
 /*
- * Envjs parser.1.2.0.0 
+ * Envjs parser.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -9316,6 +9316,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }
                                     break;
                                 case 'html':
+                                    //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
                                     if(doc.createEvent){
@@ -9380,7 +9381,7 @@ __extend__(HTMLElement.prototype,{
 
 })();
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -9395,7 +9396,7 @@ var Location,
     XMLHttpRequest;
 
 /*
- * Envjs xhr.1.2.0.0 
+ * Envjs xhr.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -9969,6 +9970,9 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
+        try{
+            console.log('document \n %s', doc.documentElement.outerHTML);
+        }catch(ee){}
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -9980,6 +9984,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(head);
         html.appendChild(body);
         doc.appendChild(html);
+        //console.log('default error document \n %s', doc.documentElement.outerHTML);
         
         //DOMContentLoaded event
         if(doc.createEvent){
@@ -10009,8 +10014,6 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         }
     }
 };
-
-
 /**
  * 
  * @class XMLHttpRequest
@@ -10157,7 +10160,7 @@ var Window,
 
 
 /*
- * Envjs window.1.2.0.0 
+ * Envjs window.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License

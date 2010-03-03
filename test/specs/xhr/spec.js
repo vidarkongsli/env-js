@@ -21,6 +21,8 @@ try{
     location = new Location(Envjs.uri(expected_path, SETTINGS.AJAX_BASE), document);
     document.baseURI = location.href;
     location.reload();
+    
+    console.log('WARNING: AJAX TESTS WILL FAIL WITHOUT A SERVER AND local_settings.js');
 }
 
 test('Location', function(){

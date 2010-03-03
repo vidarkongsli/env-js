@@ -3,15 +3,31 @@
  * Rhino provides a very succinct 'sync'
  * @param {Function} fn
  */
-Envjs.sync = sync;
-
+try{
+    Envjs.sync = sync;
+    Envjs.spawn = spawn;
+}catch(e){
+    //sync unavailable on AppEngine 
+    Envjs.sync = function(fn){
+        console.log('Threadless platform, sync is safe');
+        return fn;
+    };
+    Envjs.spawn = function(fn){
+        console.log('Threadless platform, spawn shares main thread.');
+        return fn();
+    };
+}
 
 /**
  * sleep thread for specified duration
  * @param {Object} millseconds
  */
 Envjs.sleep = function(millseconds){
-    java.lang.Thread.currentThread().sleep(millseconds);
+    try{
+        java.lang.Thread.currentThread().sleep(millseconds);
+    }catch(e){
+        console.log('Threadless platform, cannot sleep.');
+    }
 };
 
 /**

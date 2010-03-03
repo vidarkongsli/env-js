@@ -1,7 +1,5 @@
-JAR = java -jar rhino/js.jar
+JAR = java -jar rhino/js.jar -opt -1
 
 test-rhino:
 	ant -emacs
 
-run-rhino:
-	echo "load('dist/env.rhino.js');window.location='test/index.html';" | ${JAR}

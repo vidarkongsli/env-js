@@ -20,5 +20,5 @@ load('local_settings.js');
 load('test/specs/window/spec.js');
 
 
-location = SETTINGS.AJAX_BASE + 'test/specs/window/index.html';
+location =  'test/specs/window/index.html';
 Envjs.wait();

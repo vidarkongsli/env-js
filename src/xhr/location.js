@@ -172,6 +172,9 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         Envjs.wait();
     }catch(e){
         console.log('parsererror %s', e);
+        try{
+            console.log('document \n %s', doc.documentElement.outerHTML);
+        }catch(ee){}
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
@@ -183,6 +186,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(head);
         html.appendChild(body);
         doc.appendChild(html);
+        //console.log('default error document \n %s', doc.documentElement.outerHTML);
         
         //DOMContentLoaded event
         if(doc.createEvent){
@@ -212,4 +216,3 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         }
     }
 };
-

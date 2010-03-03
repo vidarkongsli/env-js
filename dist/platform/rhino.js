@@ -1,5 +1,5 @@
 /*
- * Envjs rhino-env.1.2.0.0 
+ * Envjs rhino-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -10,7 +10,7 @@ var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 Envjs.platform       = "Rhino";
 Envjs.revision       = "1.7.0.rc2";
 /*
- * Envjs rhino-env.1.2.0.0 
+ * Envjs rhino-env.1.2.0.1 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -88,15 +88,31 @@ Packages.org.mozilla.javascript.Context.
  * Rhino provides a very succinct 'sync'
  * @param {Function} fn
  */
-Envjs.sync = sync;
-
+try{
+    Envjs.sync = sync;
+    Envjs.spawn = spawn;
+}catch(e){
+    //sync unavailable on AppEngine 
+    Envjs.sync = function(fn){
+        console.log('Threadless platform, sync is safe');
+        return fn;
+    };
+    Envjs.spawn = function(fn){
+        console.log('Threadless platform, spawn shares main thread.');
+        return fn();
+    };
+}
 
 /**
  * sleep thread for specified duration
  * @param {Object} millseconds
  */
 Envjs.sleep = function(millseconds){
-    java.lang.Thread.currentThread().sleep(millseconds);
+    try{
+        java.lang.Thread.currentThread().sleep(millseconds);
+    }catch(e){
+        console.log('Threadless platform, cannot sleep.');
+    }
 };
 
 /**
@@ -176,18 +192,16 @@ Envjs.uri = function(path, base){
 Envjs.runAsync = function(fn, onInterupt){
     ////Envjs.debug("running async");
     var running = true,
-        run = sync(function(){ 
-        //while happening only thing in this timer    
-        ////Envjs.debug("running timed function");
-        fn();
-    });
+        run;
     
     try{
-        spawn(run);
+        run = Envjs.sync(function(){ 
+            fn();
+        });
+        Envjs.spawn(run);
     }catch(e){
-        //Envjs.error("error while running async", e);
-        if(onInterrupt)
-            onInterrupt(e);
+        console.log("error while running async operation", e);
+        try{if(onInterrupt)onInterrupt(e)}catch(ee){};
     }
 };
 
