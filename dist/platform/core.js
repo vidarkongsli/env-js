@@ -1,5 +1,5 @@
 /*
- * Envjs core-env.1.2.0.1 
+ * Envjs core-env.1.2.0.2 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -37,12 +37,12 @@ __this__ = this;
 Envjs.appCodeName  = "Envjs";
 
 //eg "Gecko/20070309 Firefox/2.0.0.3"
-Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.1";
+Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.2";
 
 Envjs.version = "1.6";//?
 
 /*
- * Envjs core-env.1.2.0.1 
+ * Envjs core-env.1.2.0.2 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License

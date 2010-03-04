@@ -7,7 +7,7 @@ var XMLParser = {},
 
     
 /*
- * Envjs parser.1.2.0.1 
+ * Envjs parser.1.2.0.2 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -809,16 +809,23 @@ var __elementPopped__ = function(ns, name, node){
                                     //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
-                                    if(doc.createEvent){
-                                        event = doc.createEvent('Events');
-                                        event.initEvent("DOMContentLoaded", false, false);
-                                        doc.dispatchEvent( event, false );
+                                    try{
+                                        if(doc.createEvent){
+                                            event = doc.createEvent('Events');
+                                            event.initEvent("DOMContentLoaded", false, false);
+                                            doc.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('%s', e);
                                     }
-                                    
-                                    if(doc.createEvent){
-                                        event = doc.createEvent('HTMLEvents');
-                                        event.initEvent("load", false, false);
-                                        doc.dispatchEvent( event, false );
+                                    try{
+                                        if(doc.createEvent){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            doc.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('%s', e);
                                     }
                                     
                                     try{
@@ -827,14 +834,22 @@ var __elementPopped__ = function(ns, name, node){
                                             event.initEvent("load", false, false);
                                             doc.parentWindow.dispatchEvent( event, false );
                                         }
+                                    }catch(e){
+                                        console.log('%s', e);
+                                    }
+                                    try{
                                         if(doc === window.document){
                                             //console.log('triggering window.load')
                                             event = doc.createEvent('HTMLEvents');
                                             event.initEvent("load", false, false);
-                                            window.dispatchEvent( event, false );
+                                            try{
+                                                window.dispatchEvent( event, false );
+                                            }catch(e){
+                                                console.log('%s', e);
+                                            }
                                         }
                                     }catch(e){
-                                        //console.log('window load event failed %s', e);
+                                        //console.log('%s', e);
                                         //swallow
                                     }
                                 default:

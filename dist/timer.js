@@ -1,6 +1,6 @@
 
 /*
- * Envjs timer.1.2.0.1 
+ * Envjs timer.1.2.0.2 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -16,7 +16,7 @@ var setTimeout,
     clearInterval;
     
 /*
- * Envjs timer.1.2.0.1 
+ * Envjs timer.1.2.0.2 
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
