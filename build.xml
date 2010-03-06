@@ -602,6 +602,7 @@
             <fileset dir="${SRC_DIR}" includes="window/history.js" />
             <fileset dir="${SRC_DIR}" includes="window/navigator.js" />
             <fileset dir="${SRC_DIR}" includes="window/screen.js" />
+            <fileset dir="${SRC_DIR}" includes="window/base64.js" />
             <fileset dir="${SRC_DIR}" includes="window/window.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>

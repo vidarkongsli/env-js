@@ -371,3 +371,5 @@ test('frame proxy', function(){
     document.body.appendChild(frame);
     stop();
 });
+
+

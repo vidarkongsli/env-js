@@ -6,6 +6,7 @@
  * @param {Object} base
  */
 Envjs.uri = function(path, base){
+    //console.log('constructing uri from path %s and base %s', path, base);
     var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
         m = protocol.exec(path),
         baseURI, absolutepath;
@@ -13,8 +14,15 @@ Envjs.uri = function(path, base){
         return (new java.net.URL(path).toString()+'')
             .replace('file:/', 'file:///');
     }else if(base){
-        return (new java.net.URL(new java.net.URL(base), path)+'')
-            .replace('file:/', 'file:///');
+        baseURI = base.substring(0, base.lastIndexOf('/'));
+        if(baseURI.length > 0){
+            absolutepath = baseURI + '/' + path;
+        }else{
+            absolutepath = (new java.net.URL(new java.net.URL(base), path)+'')
+                .replace('file:/', 'file:///');
+        }
+        //console.log('constructed absolute path %s', absolutepath);
+        return absolutepath;
     }else{
         //return an absolute url from a url relative to the window location
         //TODO: window should not be inlined here. this should be passed as a 
@@ -22,6 +30,7 @@ Envjs.uri = function(path, base){
         if(document){
             baseURI = document.baseURI;
             if(baseURI == 'about:blank'){
+                //console.log('about:blank change: baseURI %s', document.baseURI);
                 baseURI = (java.io.File(path).toURL().toString()+'')
                         .replace('file:/', 'file:///');
                 //console.log('baseURI %s', baseURI);
@@ -29,10 +38,12 @@ Envjs.uri = function(path, base){
             }else{
                 if(path.match(/^\//)){
                     //absolute path change
+                    //console.log('absolute path change: baseURI %s', document.baseURI);
                     absolutepath = (new Location(baseURI)).pathname;
                     return baseURI.substring(0, baseURI.lastIndexOf(absolutepath)) + path;
                 }else{
                     //relative path change
+                    //console.log('relative path change: baseURI %s', document.baseURI);
                     base = baseURI.substring(0, baseURI.lastIndexOf('/'));
                     if(base.length > 0){
                         return base + '/' + path;

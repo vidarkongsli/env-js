@@ -90,7 +90,7 @@ Envjs.loadLocalScript = function(script){
     }
     base = "" + script.ownerDocument.location;
     //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
-    //console.log('base %s', base);
+    //console.log('loading script from base %s', base);
     filename = Envjs.uri(script.src, base);
     try {          
         xhr = new XMLHttpRequest();

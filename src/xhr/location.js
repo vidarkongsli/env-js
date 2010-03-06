@@ -130,6 +130,8 @@ Location = function(url, doc, history){
                     xhr.onreadystatechange = function(){
                         //console.log("readyState %s", xhr.readyState);
                         if(xhr.readyState === 4){
+                            $document.baseURI = new Location(url, $document);
+                            //console.log('new document baseURI %s', $document.baseURI);
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
                         }    
                     };

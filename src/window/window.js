@@ -266,6 +266,12 @@ Window = function(scope, parent, opener){
         prompt : function(message, defaultMsg){
             Envjs.prompt(message, defaultMsg);
         },
+        btoa: function(binary){
+            return base64.encode(binary);
+        },
+        atob: function(ascii){
+            return base64.decode(ascii);
+        },
         onload: function(){},
         onunload: function(){},
         get guid(){
