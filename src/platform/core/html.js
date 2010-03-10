@@ -59,13 +59,15 @@ Envjs.loadLocalScript = function(script){
                 //ok this script type is allowed
                 break;
             }
-            if(i+1 == types.length)
+            if(i+1 == types.length){
+                //console.log('wont load script type %s', script.type);
                 return false;
+            }
         }
     }
     
     try{
-        //handle inline scripts
+        //console.log('handling inline scripts');
         if(!script.src.length){
             Envjs.loadInlineScript(script);
             return true;

@@ -318,6 +318,7 @@ Aspect.around({
     switch(doc.parsing){
         case true:
             //handled by parser if included
+            //console.log('html document in parse mode');
             break;
         case false:
             switch(node.namespaceURI){

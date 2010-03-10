@@ -165,7 +165,7 @@
     
     <!-- TEST RHINO ENV BINDINGS -->
     <target name='rhino-env-spec'
-            depends='rhino-env'
+            depends='rhino-env, console'
             description='Test Rhino Env Specs'>
         <echo message=""/>
         <echo message="Executing Rhino Env Spec"/>
@@ -180,7 +180,7 @@
     </target>
     
     <!-- BUILD CONSOLE IMPLEMENTATIOM -->
-    <target name="console" depends="env-platforms">
+    <target name="console">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${CONSOLE_DIST}" />

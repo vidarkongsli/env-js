@@ -35,6 +35,7 @@ var __elementPopped__ = function(ns, name, node){
     switch(doc.parsing){
         case false:
             //innerHTML so dont do loading patterns for parsing
+            //console.log('element popped (implies innerHTML) not in parsing mode %s', node.nodeName);
             break;
         case true:
             switch(doc+''){
@@ -43,6 +44,7 @@ var __elementPopped__ = function(ns, name, node){
                 case '[object HTMLDocument]':
                     switch(node.namespaceURI){
                         case "http://n.validator.nu/placeholder/":
+                            //console.log('got script during parsing %s', node.textContent);
                             break;
                         case null:
                         case "":
