@@ -125,7 +125,9 @@ function __dispatchEvent__(target, event, bubbles){
         if (bubbles && !event.cancelled){
             __bubbleEvent__(target, event);
         }
-        
+        if(event._cancelable && !event._cancelled && event._preventDefault){
+            Envjs.defaultEventBehavior(event);
+        }
         //console.log('deleting event %s', event.uuid);
         event.target = null;
         event = null;

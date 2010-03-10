@@ -73,6 +73,7 @@ Envjs.runAsync = function(fn, onInterupt){
     try{
         run = Envjs.sync(function(){ 
             fn();
+            Envjs.wait();
         });
         Envjs.spawn(run);
     }catch(e){
