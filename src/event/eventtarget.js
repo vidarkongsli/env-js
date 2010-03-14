@@ -125,8 +125,15 @@ function __dispatchEvent__(target, event, bubbles){
         if (bubbles && !event.cancelled){
             __bubbleEvent__(target, event);
         }
-        if(event._cancelable && !event._cancelled && event._preventDefault){
-            Envjs.defaultEventBehavior(event);
+        if(!event._preventDefault){
+            //At this point I'm guessing that just HTMLEvents are concerned
+            //with default behavior being executed in a browser but I could be
+            //wrong as usual.  The goal is much more to filter at this point
+            //what events have no need to be handled
+            console.log('triggering default behavior for %s', event.type);
+            if(event.type in Envjs.defaultEventBehaviors){
+                Envjs.defaultEventBehaviors[event.type](event);
+            }
         }
         //console.log('deleting event %s', event.uuid);
         event.target = null;

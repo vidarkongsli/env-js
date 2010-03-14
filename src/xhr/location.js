@@ -122,7 +122,7 @@ Location = function(url, doc, history){
             if($document){
                 //console.log("fetching %s (async? %s)", url, $document.async);
                 xhr = new XMLHttpRequest();
-                xhr.open("GET", url, $document.async);
+                xhr.open("GET", url, false);//$document.async);
                 
                 if($document.toString()=="[object HTMLDocument]"){
                     //tell the xhr to not parse the document as XML

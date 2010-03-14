@@ -101,7 +101,6 @@ Envjs.loadLocalScript = function(script){
         xhr.onreadystatechange = function(){
             //console.log("readyState %s", xhr.readyState);
             if(xhr.readyState === 4){
-                //TODO this is rhino specific
                 Envjs.eval(
                     script.ownerDocument.ownerWindow,
                     xhr.responseText,

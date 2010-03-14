@@ -604,6 +604,7 @@
             <fileset dir="${SRC_DIR}" includes="window/screen.js" />
             <fileset dir="${SRC_DIR}" includes="window/base64.js" />
             <fileset dir="${SRC_DIR}" includes="window/window.js" />
+            <fileset dir="${SRC_DIR}" includes="window/eventtarget.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>
         <echo message="Finished Building ${WINDOW_DIST}"/>
