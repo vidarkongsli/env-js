@@ -51,7 +51,7 @@ __extend__(Element.prototype, {
                 }
                 
                 // throw Exception if the value string contains an illegal character
-                if (!__isValidString__(value)) {
+                if (!__isValidString__(value+'')) {
                     throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
                 }
             }
