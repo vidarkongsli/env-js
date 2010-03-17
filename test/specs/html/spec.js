@@ -2,7 +2,7 @@ module('html');
 
 test('HTML Interfaces Available', function(){
     
-    expect(40);
+    expect(41);
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
     ok(HTMLCollection,          'HTMLCollection defined');
@@ -43,6 +43,14 @@ test('HTML Interfaces Available', function(){
     ok(HTMLTextAreaElement,     'HTMLTextAreaElement defined');
     ok(HTMLTitleElement,        'HTMLTitleElement defined');
     ok(HTMLUnknownElement,      'HTMLUnknownElement defined');
+
+    // Image has a constructor, that implements the HTMLImageElement interface
+    // http://dev.w3.org/html5/spec/Overview.html#the-img-element
+    ok(Image,                   'Image defined');
+    
+    // Option has a constructor and implements the HTMLOptionElement interface
+    // http://dev.w3.org/html5/spec/Overview.html#the-option-element
+    //ok(Option,                  'Option defined');
 });
 
 // mock the global document object if not available
@@ -323,4 +331,44 @@ test('HTMLDocument.createElement(script)', function(){
 // TODO: forms, input radio 
 //http://envjs.lighthouseapp.com/projects/21590/tickets/91-radio-button-value-attribute-output-as-defaultvalue-in-html
 
+/* Image and Option below are unique in the DOM in that they
+ *  have defined constructors, and have implied
+ *  owner documents.
+ */
+test("Image", function() {
+   var x = new Image()
+   // determined experimentally
+   equals(x.width, 0, 'default width is 0');
+   equals(x.height, 0, 'default height is 0');
 
+   x = new Image(1);
+   equals(x.width, 1, 'width');
+   equals(x.height, 0, 'default height is 0');
+
+   x = new Image(1,9);
+   equals(x.width, 1, 'width');
+   equals(x.height, 9, 'height');
+
+   // numbers as strings ok
+   x = new Image("1","9");
+   equals(x.width, 1, 'width');
+   equals(x.height, 9, 'height');
+
+   // make sure attributes are being set.
+
+   equals(x.getAttribute('width'), 1, 'width from attributes');
+   equals(x.getAttribute('height'), 9, 'height from attributes');
+
+   // make sure we are getting back true numbers and  not strings 
+   equals(typeof(x.width), 'number', 'width is a number');
+   equals(typeof(x.height), 'number', 'height is a number');
+
+   // and setting bogus values 
+   x.setAttribute('width', 'foo');
+   equals(x.width, 0, 'bad width default to 0');  
+});
+
+
+/*test("Option", function() {
+   var x = new Option();
+});*/
