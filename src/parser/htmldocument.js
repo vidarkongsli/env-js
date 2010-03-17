@@ -66,7 +66,42 @@ var __elementPopped__ = function(ns, name, node){
                                     break;
                                 case 'frame':
                                 case 'iframe':
+                                    node.contentWindow = { };
+                                    node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
+                                    node.contentWindow.document = node.contentDocument;
                                     try{
+                                        Window;
+                                    }catch(e){
+                                        node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        });
+                                    }
+                                    try{
+                                        if (node.src && node.src.length > 0){
+                                            //console.log("getting content document for (i)frame from %s", node.src);
+                                            Envjs.loadFrame(node, Envjs.uri(node.src));
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }else{
+                                            //I dont like this being here:
+                                            //TODO: better  mix-in strategy so the try/catch isnt required
+                                            try{
+                                                if(Window){
+                                                    Envjs.loadFrame(node);
+                                                    //console.log('src/html/document.js: triggering frame load');
+                                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                                    event.initEvent("load", false, false);
+                                                    node.dispatchEvent( event, false );
+                                                }
+                                            }catch(e){}
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %e', node, e.toString());
+                                    }
+                                    /*try{
                                         if (node.src && node.src.length > 0){
                                             //console.log("getting content document for (i)frame from %s", node.src);
                                             Envjs.loadFrame(node, Envjs.uri(node.src));
@@ -78,7 +113,7 @@ var __elementPopped__ = function(ns, name, node){
                                         }
                                     }catch(e){
                                         console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
-                                    }
+                                    }*/
                                     break;
                                 case 'link':
                                     if (node.href && node.href.length > 0){

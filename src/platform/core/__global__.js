@@ -25,7 +25,7 @@ var Envjs = function(){
         window.location = arguments[0];
     }else if (arguments.length === 1 && typeof(arguments[0]) == "object"){
         override(arguments[0])
-    }else if(arguments.length === 2){
+    }else if(arguments.length === 2 && typeof(arguments[0]) == 'string'){
         override(arguments[1]);
         window.location = arguments[0];
     }
