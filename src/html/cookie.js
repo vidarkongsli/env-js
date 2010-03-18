@@ -33,7 +33,7 @@ Cookies.set = function(doc, cookie){
     
     var domainValid = function(doc, value){
         var i,
-            domainParts = doc.domain.splt('.').reverse(),
+            domainParts = doc.domain.split('.').reverse(),
             newDomainParts = value.split('.').reverse();
         if(newDomainParts.length > 1){
             for(i=0;i<newDomainParts.length;i++){
