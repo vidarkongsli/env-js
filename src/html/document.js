@@ -246,7 +246,7 @@ __extend__(HTMLDocument.prototype, {
     },
     set domain(value){
         var i,
-            domainParts = this.domain.splt('.').reverse(),
+            domainParts = this.domain.split('.').reverse(),
             newDomainParts = value.split('.').reverse();
         if(newDomainParts.length > 1){
             for(i=0;i<newDomainParts.length;i++){
