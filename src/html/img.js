@@ -41,11 +41,20 @@ __extend__(HTMLImageElement.prototype, {
         return this.getAttribute('src');
     },
     set src(value){
-        this.setAttribute('src', value);
+        var event;
+        if (value == '') {
+	    // according to html5 spec
+            event = document.createEvent('Events');
+            event.initEvent('error');
+        } else {
+            this.setAttribute('src', value);
 
-        var event = document.createEvent();
-        event.initEvent("load");
-        this.dispatchEvent( event, false );
+            // Callback API TBD
+
+            event = document.createEvent('Events');
+            event.initEvent('load');
+            this.dispatchEvent(event, false);
+        }
     },
     get width(){
         return parseInt(this.getAttribute('width')) || 0;
