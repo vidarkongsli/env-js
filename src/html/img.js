@@ -43,7 +43,7 @@ __extend__(HTMLImageElement.prototype, {
     set src(value){
         var event;
         if (value == '') {
-	    // according to html5 spec
+            // according to html5 spec
             event = document.createEvent('Events');
             event.initEvent('error');
         } else {
@@ -64,6 +64,9 @@ __extend__(HTMLImageElement.prototype, {
     },
     onload: function(event){
         __eval__(this.getAttribute('onload')||'', this)
+    },
+    toString: function(){
+        return '[object HTMLImageElement]';
     }
 });
 

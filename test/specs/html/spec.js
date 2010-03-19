@@ -336,7 +336,9 @@ test('HTMLDocument.createElement(script)', function(){
  *  owner documents.
  */
 test("Image", function() {
-   var x = new Image()
+   var x = new Image();
+   equals(x, '[object HTMLImageElement]', 'toString');
+
    // determined experimentally
    equals(x.width, 0, 'default width is 0');
    equals(x.height, 0, 'default height is 0');
