@@ -122,7 +122,7 @@ var __supportedStyles__ = function(){
         azimuth:                null,
         background:	            null,
         backgroundAttachment:	null,
-        backgroundColor:	    null,
+        backgroundColor:	    'rgb(0,0,0)',
         backgroundImage:	    null,
         backgroundPosition:	    null,
         backgroundRepeat:	    null,
