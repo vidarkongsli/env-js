@@ -275,7 +275,7 @@ __extend__(HTMLDocument.prototype, {
         var retNodes = __extend__([],new NodeList(this, this.documentElement)),
           node;
         // loop through all Elements
-        var all = this.getElementsByTagName('*';
+        var all = this.getElementsByTagName('*');
         for (var i=0; i < all.length; i++) {
             node = all[i];
             if (node.nodeType == Node.ELEMENT_NODE && 
