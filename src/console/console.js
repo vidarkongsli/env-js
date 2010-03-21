@@ -2,13 +2,15 @@
 /**
  * @author envjs team
  * borrowed 99%-ish with love from firebug-lite
+ *
+ * http://wiki.commonjs.org/wiki/Console
  */
 Console = function(module){
     var $level,
-        $logger,
-        $null = function(){};
-    
-    
+    $logger,
+    $null = function(){};
+
+
     if(Envjs[module] && Envjs[module].loglevel){
         $level = Envjs.module.loglevel;
         $logger = {
@@ -39,12 +41,12 @@ Console = function(module){
             error: $null
         };
     }
-   
+
     return $logger;
-};       
+};
 
 console = new Console("console",1);
-    
+
 function logFormatted(objects, className)
 {
     var html = [];
@@ -74,14 +76,14 @@ function logFormatted(objects, className)
     for (var i = objIndex+1; i < objects.length; ++i)
     {
         appendText(" ", html);
-        
+
         var object = objects[i];
         if (typeof(object) == "string")
             appendText(object, html);
         else
             appendObject(object, html);
     }
-    
+
     Envjs.log(html.join(' '));
 }
 
@@ -89,7 +91,7 @@ function parseFormat(format)
 {
     var parts = [];
 
-    var reg = /((^%|[^\\]%)(\d+)?(\.)([a-zA-Z]))|((^%|[^\\]%)([a-zA-Z]))/;    
+    var reg = /((^%|[^\\]%)(\d+)?(\.)([a-zA-Z]))|((^%|[^\\]%)([a-zA-Z]))/;
     var appenderMap = {s: appendText, d: appendInteger, i: appendInteger, f: appendFloat};
 
     for (var m = reg.exec(format); m; m = reg.exec(format))
@@ -111,7 +113,7 @@ function parseFormat(format)
 
 function escapeHTML(value)
 {
-   return value;
+    return value;
 }
 
 function objectToString(object)
@@ -186,7 +188,7 @@ function appendObject(object, html)
     {
     }
 }
-    
+
 function appendObjectFormatted(object, html)
 {
     var text = objectToString(object);
@@ -218,7 +220,7 @@ function appendNode(node, html)
             var attr = node.attributes[i];
             if (!attr.specified)
                 continue;
-            
+
             html.push( attr.nodeName.toLowerCase(),escapeHTML(attr.nodeValue))
         }
 
@@ -226,7 +228,7 @@ function appendNode(node, html)
         {
             for (var child = node.firstChild; child; child = child.nextSibling)
                 appendNode(child, html);
-                
+
             html.push( node.nodeName.toLowerCase());
         }
     }
