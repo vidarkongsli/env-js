@@ -332,6 +332,35 @@ test('HTMLParser.parseDocument / polluting script', function(){
     document.body.removeChild( iframe );
 });
 
+/*
+ * Unfortunately, the exception is swallowed in html/document.js
+ * so we can't test it. (search for 'error loading html element')
+ * However this cause some error output to printed to console.
+ */
+
+test('HTMLParser.parseDocument / empty script', function(){
+    //one of the easiest way to test the HTMLParser is using frames and
+    //writing the document directly
+    expect(1);
+    var iframe = document.createElement("iframe"),
+    doc,
+    win;
+    document.body.appendChild(iframe);
+    doc = iframe.contentDocument;
+    win = iframe.contentWindow;
+
+    try {
+	doc.open();
+	doc.write("<html><head><script></script></head><body>hello</body></html>");
+	doc.close();
+	ok(true, 'empty script was correctly ignored');
+    } catch (e) {
+	ok(false, 'empty script causes exception:' + e);
+    }
+
+});
+
+
 test('frame proxy', function(){
 
     var frame,
@@ -375,5 +404,5 @@ test('window.[atob|btoa]', function(){
     ok(window.btoa,      'window.btoa available');
 
     equals(window.btoa('1234'),  'MTIzNA==',    'smoke test for btoa');
-    equals(window.atob('MTIzNA=='),  '1234',    'smoke test for btoa');
+    equals(window.atob('MTIzNA=='),  '1234',    'smoke test for atob');
 });

@@ -305,10 +305,11 @@ test('HTMLDocument.createElement(frame)', function(){
 test('HTMLDocument.createElement(script)', function(){
 
     var element;
-    
+
     element = document.createElement('script');
-    
+
     ok(element, 'element created');
+    equals(element.text, '', 'text');
     equals(element.childNodes.length, 0, '.childNodes.length');
     equals(element.localName, 'SCRIPT', '.localName');
     equals(element.namespaceURI, null, '.namespaceURI');
@@ -322,10 +323,18 @@ test('HTMLDocument.createElement(script)', function(){
     equals(element.tagName, 'SCRIPT', '.tagName');
     equals(xmlserializer.serializeToString(element), '<SCRIPT/>', 'xmlserializer');
     debugger;
+
     element.textContent = 'document.ASDFASDF = "QWERQWER";';
+    // TODO: document.ASDFASDF should still be undefined
     document.head.appendChild(element);
     equals(document.ASDFASDF, 'QWERQWER', 'script appended to head executes');
-    
+
+    // create setting and getting 'text' property
+    element = document.createElement('script');
+    var s = 'var x = 1';
+    element.text = s;
+    equals(element.text, s, 'script.text');
+
 });
 
 // TODO: forms, input radio 
