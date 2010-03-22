@@ -1,6 +1,8 @@
 
 /** 
  * HTMLMapElement - DOM Level 2
+ * 4.8.12 The map element
+ * http://dev.w3.org/html5/spec/Overview.html#the-map-element
  */
 HTMLMapElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -15,5 +17,8 @@ __extend__(HTMLMapElement.prototype, {
     },
     set name(value){
         this.setAttribute('name',value);
+    },
+    toString: function() {
+	return '[object HTMLMapElement]';
     }
 });

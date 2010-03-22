@@ -1,7 +1,10 @@
 
-/* 
-* HTMLBaseElement - DOM Level 2
-*/
+/*
+ * HTMLBaseElement - DOM Level 2
+ *
+ * HTML5: 4.2.3 The base element
+ * http://dev.w3.org/html5/spec/Overview.html#the-base-element
+ */
 HTMLBaseElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
@@ -18,7 +21,9 @@ __extend__(HTMLBaseElement.prototype, {
     },
     set target(value){
         this.setAttribute('target',value);
+    },
+    toString: function() {
+	return '[object HTMLBaseElement]';
     }
 });
 
-	

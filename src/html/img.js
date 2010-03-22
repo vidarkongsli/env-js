@@ -1,5 +1,5 @@
 
-/** 
+/**
  * HTMLImageElement - DOM Level 2
  */
 HTMLImageElement = function(ownerDocument) {

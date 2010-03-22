@@ -1,6 +1,8 @@
 
-/** 
+/**
  * HTMLStyleElement - DOM Level 2
+ * HTML5 4.2.6 The style element
+ * http://dev.w3.org/html5/spec/Overview.html#the-style-element
  */
 HTMLStyleElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -24,5 +26,8 @@ __extend__(HTMLStyleElement.prototype, {
     },
     set type(value){
         this.setAttribute('type',value);
+    },
+    toString: function() {
+        return '[object HTMLStyleElement]';
     }
 });

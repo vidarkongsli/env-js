@@ -1,6 +1,9 @@
 
 /* 
 * HTMLTableColElement - DOM Level 2
+*
+* HTML5: 4.9.3 The colgroup element
+* http://dev.w3.org/html5/spec/Overview.html#the-colgroup-element
 */
 HTMLTableColElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -42,6 +45,9 @@ __extend__(HTMLTableColElement.prototype, {
     },
     set width(value){
         this.setAttribute('width', value);
+    },
+    toString: function() {
+	return '[object HTMLTableColElement]';
     }
 });
 

@@ -285,8 +285,8 @@ __extend__(HTMLDocument.prototype, {
         }
         return retNodes;
 	},
-	toString: function(){ 
-	    return "[object HTMLDocument]"; 
+    toString: function(){
+	return "[object HTMLDocument]"; 
     },
 	get innerHTML(){ 
 	    return this.documentElement.outerHTML; 

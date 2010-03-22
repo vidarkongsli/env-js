@@ -1,86 +1,78 @@
 
-/* 
+/*
  * HTMLFormElement - DOM Level 2
+ *
+ * HTML5: http://dev.w3.org/html5/spec/Overview.html#the-form-element
  */
 HTMLFormElement = function(ownerDocument){
     HTMLElement.apply(this, arguments);
     //TODO: on __elementPopped__ from the parser
-    //      we need to determine all the forms default 
+    //      we need to determine all the forms default
     //      values
 };
 HTMLFormElement.prototype = new HTMLElement;
 __extend__(HTMLFormElement.prototype,{
-    get acceptCharset(){ 
+    get acceptCharset(){
         return this.getAttribute('accept-charset');
     },
-    set acceptCharset(acceptCharset){
+    set acceptCharset(acceptCharset) {
         this.setAttribute('accept-charset', acceptCharset);
-        
     },
-    get action(){
+    get action() {
         return this.getAttribute('action');
-        
     },
     set action(action){
         this.setAttribute('action', action);
-        
     },
+
+    // returns HTMLFormControlsCollection
+    // http://dev.w3.org/html5/spec/Overview.html#dom-form-elements
     get elements() {
         return this.getElementsByTagName("*");
-        
     },
-    get enctype(){
+    get enctype() {
         return this.getAttribute('enctype');
-        
     },
-    set enctype(enctype){
+    set enctype(enctype) {
         this.setAttribute('enctype', enctype);
-        
     },
     get length() {
         return this.elements.length;
-        
     },
-    get method(){
+    get method() {
         return this.getAttribute('method');
-        
     },
-    set method(method){
+    set method(method) {
         this.setAttribute('method', method);
-        
     },
-	get name() {
-	    return this.getAttribute("name"); 
-	    
+    get name() {
+        return this.getAttribute("name");
     },
-	set name(val) { 
-	    return this.setAttribute("name",val); 
-	    
+    set name(val) {
+        return this.setAttribute("name",val);
     },
-	get target() { 
-	    return this.getAttribute("target"); 
-	    
+    get target() {
+        return this.getAttribute("target");
     },
-	set target(val) { 
-	    return this.setAttribute("target",val); 
-	    
+    set target(val) {
+        return this.setAttribute("target",val);
     },
-    toString: function(){
+    toString: function() {
         return '[object HTMLFormElement]';
     },
-	submit:function(){
+    submit: function() {
         //TODO: this needs to perform the form inputs serialization
         //      and submission
         //  DONE: see xhr/form.js
-	    var event = __submit__(this);
-	    
+        var event = __submit__(this);
+
     },
-	reset:function(){
+    reset: function() {
         //TODO: this needs to reset all values specified in the form
         //      to those which where set as defaults
-	    __reset__(this);
-	    
+        __reset__(this);
+
     },
-    onsubmit:HTMLEvents.prototype.onsubmit,
+    onsubmit: HTMLEvents.prototype.onsubmit,
     onreset: HTMLEvents.prototype.onreset
 });

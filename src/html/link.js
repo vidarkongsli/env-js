@@ -1,7 +1,10 @@
 
-/* 
-* HTMLLinkElement - DOM Level 2
-*/
+/*
+ * HTMLLinkElement - DOM Level 2
+ *
+ * HTML5: 4.8.12 The map element
+ * http://dev.w3.org/html5/spec/Overview.html#the-map-element
+ */
 HTMLLinkElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
@@ -63,6 +66,9 @@ __extend__(HTMLLinkElement.prototype, {
     },
     onload: function(event){
         __eval__(this.getAttribute('onload')||'', this)
+    },
+    toString: function() {
+        return '[object HTMLLinkElement]';
     }
 });
 

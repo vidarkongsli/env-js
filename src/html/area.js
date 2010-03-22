@@ -1,6 +1,9 @@
 
-/* 
+/*
  * HTMLAreaElement - DOM Level 2
+ *
+ * HTML5: 4.8.13 The area element
+ * http://dev.w3.org/html5/spec/Overview.html#the-area-element
  */
 HTMLAreaElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -39,11 +42,11 @@ __extend__(HTMLAreaElement.prototype, {
         return 0;
     },
     /*get tabIndex(){
-        return this.getAttribute('tabindex');
-    },
-    set tabIndex(value){
-        this.setAttribute('tabindex',value);
-    },*/
+      return this.getAttribute('tabindex');
+      },
+      set tabIndex(value){
+      this.setAttribute('tabindex',value);
+      },*/
     get target(){
         return this.getAttribute('target');
     },
@@ -55,4 +58,3 @@ __extend__(HTMLAreaElement.prototype, {
     }
 });
 
-			

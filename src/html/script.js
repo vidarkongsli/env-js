@@ -1,6 +1,9 @@
 
 /**
  * HTMLScriptElement - DOM Level 2
+ *
+ * HTML5: 4.3.1 The script element
+ * http://dev.w3.org/html5/spec/Overview.html#script
  */
 HTMLScriptElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);

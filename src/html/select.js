@@ -1,6 +1,7 @@
 
 /**
  * HTMLSelectElement - DOM Level 2
+ * HTML5: http://dev.w3.org/html5/spec/Overview.html#the-select-element
  */
 HTMLSelectElement = function(ownerDocument) {
     HTMLTypeValueInputs.apply(this, arguments);
@@ -16,92 +17,94 @@ __extend__(HTMLSelectElement.prototype, {
 
     // over-ride the value setter in HTMLTypeValueInputs
     set value(newValue) {
-       console.log('select set value %s', newValue);
+        //console.log('select set value %s', newValue);
         var options = this.options,
-            i, index;
-       //console.log('select options length %s', options.length);
+        i, index;
+        //console.log('select options length %s', options.length);
         for (i=0; i<options.length; i++) {
             if (options[i].value == newValue) {
                 index = i;
                 break;
             }
         }
-       //console.log('options index %s', index);
+        //console.log('options index %s', index);
         if (index !== undefined) {
-           //console.log('select setAttribute value %s', newValue);
+            //console.log('select setAttribute value %s', newValue);
             this.setAttribute('value', newValue);
             this.selectedIndex = index;
         }
     },
     get value() {
-        console.log('select get value');
+        //console.log('select get value');
         var value = this.getAttribute('value'),
-            index;
-        console.log('select getAttribute value %s', value);
+        index;
+        //console.log('select getAttribute value %s', value);
         if (value === undefined || value === null) {
             index = this.selectedIndex;
-            console.log('select value index %s', index);
-            if (index > -1){
-                 value = this.options[index].value;
-                 console.log('select value %s', value);
-                 return value;
-            }else{
-                console.log('select value ""');
+            //console.log('select value index %s', index);
+            if (index > -1) {
+                value = this.options[index].value;
+                console.log('select value %s', value);
+                return value;
+            } else {
+                //console.log('select value ""');
                 return '';
             }
         } else {
             return value;
         }
     },
-    get length(){
+    get length() {
         return this.options.length;
     },
-    get multiple(){
+    get multiple() {
         return this.getAttribute('multiple');
     },
-    set multiple(value){
+    set multiple(value) {
         this.setAttribute('multiple',value);
     },
-    get options(){
+    // Returns HTMLOptionsCollection
+    get options() {
         return this.getElementsByTagName('option');
     },
-    get selectedIndex(){
-       //console.log('select get selectedIndex ');
+    get selectedIndex() {
+        //console.log('select get selectedIndex ');
         var options = this.options;
         for(var i=0;i<options.length;i++){
             if(options[i].selected){
-               //console.log('select get selectedIndex %s', i);
+                //console.log('select get selectedIndex %s', i);
                 return i;
             }
         };
-       //console.log('select get selectedIndex %s', -1);
+        //console.log('select get selectedIndex %s', -1);
         return -1;
     },
-    
+
     set selectedIndex(value) {
         var i,
-            options = this.options;
+        options = this.options;
         for (i=0; i<options.length; i++) {
-           //console.log('select set selectedIndex %s', Number(value));
-            if(i === Number(value)){
+            //console.log('select set selectedIndex %s', Number(value));
+            if (i === Number(value)) {
                 options[i].selected = true;
-            }else{
+            } else {
                 options[i].selected = false;
             }
-           //console.log('select options[i].selected %s',options[i].selected);
+            //console.log('select options[i].selected %s',options[i].selected);
         }
     },
-    get type(){
+    get type() {
         var type = this.getAttribute('type');
         return type?type:'select-one';
     },
-    
-    add : function(){
+
+    add: function() {
         __add__(this);
     },
-    remove : function(){
+    remove: function() {
         __remove__(this);
+    },
+    toString: function() {
+        return '[object HTMLSelectElement]';
     }
 });
-
-

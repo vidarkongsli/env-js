@@ -1,5 +1,5 @@
 
-/** 
+/**
  * HTMLFrameElement - DOM Level 2
  */
 HTMLFrameElement = function(ownerDocument) {
@@ -11,7 +11,7 @@ HTMLFrameElement = function(ownerDocument) {
 };
 HTMLFrameElement.prototype = new HTMLElement;
 __extend__(HTMLFrameElement.prototype, {
-    
+
     get frameBorder(){
         return this.getAttribute('border')||"";
     },

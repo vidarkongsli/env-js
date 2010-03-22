@@ -1,6 +1,8 @@
 
 /**
  * HTMLOptionElement - DOM Level 2
+ * HTML5: 4.10.10 The option element
+ * http://dev.w3.org/html5/spec/Overview.html#the-option-element
  */
 HTMLOptionElement = function(ownerDocument) {
     HTMLInputCommon.apply(this, arguments);
@@ -15,7 +17,7 @@ __extend__(HTMLOptionElement.prototype, {
     },
     get index(){
         var options = this.parentNode.childNodes,
-            i, index = 0;
+        i, index = 0;
         for(i=0; i<options.length;i++){
             if(options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION"){
                 index++;
@@ -41,7 +43,7 @@ __extend__(HTMLOptionElement.prototype, {
         }
         var selectedValue = (value ? 'selected' : '');
         if (this.getAttribute('selected') == selectedValue) {
-            // prevent inifinite loops (option's selected modifies 
+            // prevent inifinite loops (option's selected modifies
             // select's value which modifies option's selected)
             return;
         }
@@ -50,19 +52,22 @@ __extend__(HTMLOptionElement.prototype, {
 
     },
     get text(){
-         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
-             this.innerHTML :
-             this.nodeValue;
+        return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
+            this.innerHTML :
+            this.nodeValue;
     },
     get value(){
-       //console.log('getting value on option %s %s', this.text, this.getAttribute('value'));
+	//console.log('getting value on option %s %s', this.text, this.getAttribute('value'));
         return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
             this.text :
             this.getAttribute('value');
     },
     set value(value){
-       //console.log('setting value on option');
+	//console.log('setting value on option');
         this.setAttribute('value',value);
+    },
+    toString: function() {
+        return '[object HTMLOptionElement]';
     }
 });
 

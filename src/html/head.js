@@ -1,6 +1,9 @@
 
-/** 
+/**
  * HTMLHeadElement - DOM Level 2
+ *
+ * HTML5: 4.2.1 The head element
+ * http://dev.w3.org/html5/spec/Overview.html#the-head-element-0
  */
 HTMLHeadElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);

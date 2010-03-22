@@ -1,6 +1,9 @@
 
-/** 
+/**
  * HTMLParamElement - DOM Level 2
+ *
+ * HTML5: 4.8.6 The param element
+ * http://dev.w3.org/html5/spec/Overview.html#the-param-element
  */
 HTMLParamElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -31,6 +34,8 @@ __extend__(HTMLParamElement.prototype, {
     set valueType(value){
         this.setAttribute('valuetype',value);
     },
+    toString: function() {
+        return '[object HTMLParamElement]';
+    }
 });
 
-		

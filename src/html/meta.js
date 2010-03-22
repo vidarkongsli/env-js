@@ -1,6 +1,8 @@
 
-/** 
+/**
  * HTMLMetaElement - DOM Level 2
+ * HTML5: 4.2.5 The meta element
+ * http://dev.w3.org/html5/spec/Overview.html#meta
  */
 HTMLMetaElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -30,6 +32,9 @@ __extend__(HTMLMetaElement.prototype, {
     },
     set scheme(value){
         this.setAttribute('scheme',value);
+    },
+    toString: function() {
+        return '[object HTMLMetaElement]';
     }
 });
 

@@ -1,6 +1,8 @@
 
 /**
  * HTMLTextAreaElement - DOM Level 2
+ * HTML5: 4.10.11 The textarea element
+ * http://dev.w3.org/html5/spec/Overview.html#the-textarea-element
  */
 HTMLTextAreaElement = function(ownerDocument) {
     HTMLInputAreaCommon.apply(this, arguments);
@@ -18,6 +20,9 @@ __extend__(HTMLTextAreaElement.prototype, {
     },
     set rows(value){
         this.setAttribute('rows', value);
+    },
+    toString: function() {
+        return '[object HTMLTextAreaElement]';
     }
 });
 

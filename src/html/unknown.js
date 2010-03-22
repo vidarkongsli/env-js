@@ -1,5 +1,5 @@
 
-/** 
+/**
  * HTMLUnknownElement DOM Level 2
  */
 HTMLUnknownElement = function(ownerDocument) {

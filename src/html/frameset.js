@@ -1,5 +1,8 @@
-/** 
+/**
  * HTMLFrameSetElement - DOM Level 2
+ *
+ * HTML5: 12.3.3 Frames
+ * http://dev.w3.org/html5/spec/Overview.html#frameset
  */
 HTMLFrameSetElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -17,5 +20,8 @@ __extend__(HTMLFrameSetElement.prototype, {
     },
     set rows(value){
         this.setAttribute('rows', value);
+    },
+    toString: function() {
+        return '[object HTMLFrameSetElement]';
     }
 });

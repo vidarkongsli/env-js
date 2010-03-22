@@ -1,6 +1,9 @@
 
 /**
  * HTMLLegendElement - DOM Level 2
+ *
+ * HTML5: 4.10.3 The legend element
+ * http://dev.w3.org/html5/spec/Overview.html#the-legend-element
  */
 HTMLLegendElement = function(ownerDocument) {
     HTMLInputCommon.apply(this, arguments);

@@ -1,5 +1,8 @@
 /**
  * HTMLInputElement - DOM Level 2
+ *
+ * HTML5: 4.10.5 The input element
+ * http://dev.w3.org/html5/spec/Overview.html#the-input-element
  */
 HTMLInputElement = function(ownerDocument) {
     HTMLInputAreaCommon.apply(this, arguments);
@@ -50,6 +53,9 @@ __extend__(HTMLInputElement.prototype, {
     },
     click:function(){
         __click__(this);
+    },
+    toString: function() {
+        return '[object HTMLInputElement]';
     }
 });
 

@@ -1,6 +1,9 @@
 
 /*
  * HTMLFieldSetElement - DOM Level 2
+ *
+ * HTML5: 4.10.2 The fieldset element
+ * http://dev.w3.org/html5/spec/Overview.html#the-fieldset-element
  */
 HTMLFieldSetElement = function(ownerDocument) {
     HTMLLegendElement.apply(this, arguments);
@@ -12,5 +15,8 @@ __extend__(HTMLFieldSetElement.prototype, {
     },
     set margin(value){
         this.setAttribute('margin',value);
+    },
+    toString: function() {
+        return '[object HTMLFieldSetElement]';
     }
 });
