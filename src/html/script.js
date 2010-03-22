@@ -31,7 +31,8 @@ __extend__(HTMLScriptElement.prototype, {
         var imax = kids.length;
         for (var i = 0; i < imax; ++i) {
             kid = kids[i];
-            if (kid.nodeType == Node.TEXT_NODE || kid.nodeType == Node.CDATA_SECTION_NODE) {
+            if (kid.nodeType == Node.TEXT_NODE ||
+                kid.nodeType == Node.CDATA_SECTION_NODE) {
                 s += kid.nodeValue;
             }
         }
@@ -40,16 +41,31 @@ __extend__(HTMLScriptElement.prototype, {
 
     /**
      * HTML5 spec "Can be set, to replace the element's children with
-     * the given value."   It *does not* execute the script!
+     * the given value."
      */
     set text(value) {
         // this deletes all children, and make a new single text node
         // with value
         this.textContent = value;
 
-        // it does not execute, but leaving this in for now
-        // only when the script is added THE FIRST time does
-        // this execute.
+        /* Currently we always execute, but this isn't quite right if
+         * the node has *not* been inserted into the document, then it
+         * should *not* fire.  The more detailed answer from the spec:
+         *
+         * When a script element that is neither marked as having
+         * "already started" nor marked as being "parser-inserted"
+         * experiences one of the events listed in the following list,
+         * the user agent must synchronously run the script element:
+         *
+         *   * The script element gets inserted into a document.
+         *   * The script element is in a Document and its child nodes
+         *     are changed.
+         *   * The script element is in a Document and has a src
+         *     attribute set where previously the element had no such
+         *     attribute.
+         *
+         * And no doubt there are other cases as well.
+         */
         Envjs.loadInlineScript(this);
     },
 
