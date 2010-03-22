@@ -9,7 +9,7 @@
  */
 HTMLDocument = function(implementation, ownerWindow, referrer) {
     Document.apply(this, arguments);
-    this.referrer = referrer;
+    this.referrer = referrer || '';
     this.baseURI = "about:blank";
     this.ownerWindow = ownerWindow;
     this.head;
