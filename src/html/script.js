@@ -45,8 +45,8 @@ __extend__(HTMLScriptElement.prototype, {
         this.textContent = value;
 
         // it does not execute, but leaving this in for now
-	// only when the script is added THE FIRST time does
-	// this execute.
+        // only when the script is added THE FIRST time does
+        // this execute.
         Envjs.loadInlineScript(this);
     },
 

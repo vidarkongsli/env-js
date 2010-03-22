@@ -1,7 +1,7 @@
 module('html');
 
 test('HTML Interfaces Available', function(){
-    
+
     expect(41);
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
@@ -47,7 +47,7 @@ test('HTML Interfaces Available', function(){
     // Image has a constructor, that implements the HTMLImageElement interface
     // http://dev.w3.org/html5/spec/Overview.html#the-img-element
     ok(Image,                   'Image defined');
-    
+
     // Option has a constructor and implements the HTMLOptionElement interface
     // http://dev.w3.org/html5/spec/Overview.html#the-option-element
     //ok(Option,                  'Option defined');
@@ -69,16 +69,16 @@ test('HTMLDocument', function(){
     ok(document.applets, '.applets is defined');
     equals(document.attributes, null, '.attributes is null');
     equals(document.location, document.baseURI, '.location is .baseURI');
-    
+
 });
 
 test('HTMLDocument.createAttribute', function(){
 
-    var doc, 
-        attribute;
-    
+    var doc,
+    attribute;
+
     attribute = document.createAttribute('envjs');
-    
+
     ok(attribute, 'attribute created');
     equals(attribute.name, 'envjs', '.name');
     equals(attribute.value, '', '.value');
@@ -103,15 +103,15 @@ test('HTMLDocument.createAttribute', function(){
         ok(true, 'name property is only a getter');
     }
     equals(xmlserializer.serializeToString(attribute), 'abc123', 'xmlserializer');
-    
+
 });
 
 test('HTMLDocument.createAttributeNS', function(){
 
     var attribute;
-    
+
     attribute = document.createAttributeNS('http://www.envjs.com/','x:envjs');
-    
+
     ok(attribute, 'namespaced attribute was created');
     equals(attribute.name, 'x:envjs', '.name');
     equals(attribute.value, '', '.value');
@@ -125,10 +125,10 @@ test('HTMLDocument.createAttributeNS', function(){
     equals(attribute.ownerDocument, document, '.ownerDocument');
     equals(attribute.parentNode, null, '.parentNode');
     equals(attribute.prefix, 'x', '.prefix');
-    
+
     ok(attribute.value = 'abc123', 'set value');
     equals(attribute.value, 'abc123', '.value');
-    
+
     ok(attribute.prefix = 'y', 'set prefix');
     equals(attribute.prefix, 'y', '.prefix');
     equals(attribute.name, 'y:envjs', '.name');
@@ -152,9 +152,9 @@ test('HTMLDocument.createAttributeNS', function(){
 test('HTMLDocument.createElement(unknown)', function(){
 
     var element;
-    
+
     element = document.createElement('envjs');
-    
+
     ok(element, 'element created');
     equals(element.tagName, 'ENVJS', '.name');
     equals(element.childNodes.length, 0, '.childNodes.length');
@@ -164,19 +164,19 @@ test('HTMLDocument.createElement(unknown)', function(){
     equals(element.nodeType, Node.ELEMENT_NODE, '.nodeType');
     equals(element.ownerDocument, document, '.ownerDocument');
     equals(element.parentNode, null, '.parentNode');
-    equals(element.prefix, null, '.prefix');    
+    equals(element.prefix, null, '.prefix');
     equals(element.toString(), '[object HTMLUnknownElement]', '.toString');
     equals(xmlserializer.serializeToString(element), '<ENVJS/>', 'xmlserializer');
-    
-    
+
+
 });
 
 test('HTMLDocument.createElementNS(unknown)', function(){
 
     var element;
-    
+
     element = document.createElementNS('http://www.envjs.com/','x:envjs');
-    
+
     ok(element, 'element created');
     equals(element.tagName, 'x:envjs', '.tagName');
     equals(element.childNodes.length, 0, '.childNodes.length');
@@ -186,29 +186,29 @@ test('HTMLDocument.createElementNS(unknown)', function(){
     equals(element.nodeType, Node.ELEMENT_NODE, '.nodeType');
     equals(element.ownerDocument, document, '.ownerDocument');
     equals(element.parentNode, null, '.parentNode');
-    equals(element.prefix, 'x', '.prefix');    
+    equals(element.prefix, 'x', '.prefix');
     equals(element.toString(), '[object Element]', '.toString');
     equals(xmlserializer.serializeToString(element), '<x:envjs xmlns:x="http://www.envjs.com/"/>', 'xmlserializer');
-    
+
     ok(element.prefix = 'y', 'set prefix');
     equals(element.prefix, 'y', '.prefix');
     equals(element.tagName, 'y:envjs', '.tagName');
     equals(xmlserializer.serializeToString(element), '<y:envjs xmlns:y="http://www.envjs.com/"/>', 'xmlserializer');
-    
+
     element.prefix = null;
     equals(element.prefix, null, '.prefix');
     equals(element.tagName, 'envjs', '.tagName');
     equals(xmlserializer.serializeToString(element), '<envjs xmlns="http://www.envjs.com/"/>', 'xmlserializer');
-    
+
 });
 
 
 test('HTMLDocument.createElement(a)', function(){
 
     var element;
-    
+
     a = document.createElement('a');
-    
+
     ok(a, 'element created');
     equals(a.tagName, 'A', '.name');
     equals(a.childNodes.length, 0, '.childNodes.length');
@@ -218,9 +218,9 @@ test('HTMLDocument.createElement(a)', function(){
     equals(a.nodeType, Node.ELEMENT_NODE, '.nodeType');
     equals(a.ownerDocument, document, '.ownerDocument');
     equals(a.parentNode, null, '.parentNode');
-    equals(a.prefix, null, '.prefix');    
+    equals(a.prefix, null, '.prefix');
     equals(xmlserializer.serializeToString(a), '<A/>', 'xmlserializer');
-    
+
     equals(a.accessKey, '', '.accessKey has expected value');
     equals(a.charset, '', '.charset has expected value');
     equals(a.coords, '', '.coords has expected value');
@@ -228,7 +228,7 @@ test('HTMLDocument.createElement(a)', function(){
     equals(a.hreflang, '', '.hreflang has expected value');
     equals(a.name, '', '.name has expected value');
     equals(a.rel, '', '.rel has expected value');
-    
+
     a.accessKey = 'abc';
     a.charset = 'abc';
     a.coords = 'abc';
@@ -236,10 +236,10 @@ test('HTMLDocument.createElement(a)', function(){
     a.hreflang = 'abc';
     a.name = 'abc';
     a.rel = 'abc';
-    
+
     var absoluteHref = document.location.toString();
     absoluteHref = absoluteHref.substring(0, absoluteHref.lastIndexOf('/')+1) + 'somewhere';
-    
+
     equals(a.accessKey, 'abc', '.accessKey has expected value');
     equals(a.charset, 'abc', '.charset has expected value');
     equals(a.coords, 'abc', '.coords has expected value');
@@ -247,15 +247,15 @@ test('HTMLDocument.createElement(a)', function(){
     equals(a.hreflang, 'abc', '.hreflang has expected value');
     equals(a.name, 'abc', '.name has expected value');
     equals(a.rel, 'abc', '.rel has expected value');
-    
+
 });
 
 test('HTMLDocument.createElement(area)', function(){
 
     var element;
-    
+
     element = document.createElement('area');
-    
+
     ok(element, 'element created');
     equals(element.tagName, 'AREA', '.name');
     equals(element.childNodes.length, 0, '.childNodes.length');
@@ -265,18 +265,18 @@ test('HTMLDocument.createElement(area)', function(){
     equals(element.nodeType, Node.ELEMENT_NODE, '.nodeType');
     equals(element.ownerDocument, document, '.ownerDocument');
     equals(element.parentNode, null, '.parentNode');
-    equals(element.prefix, null, '.prefix');    
+    equals(element.prefix, null, '.prefix');
     equals(xmlserializer.serializeToString(element), '<AREA/>', 'xmlserializer');
-    
+
 });
 
 
 test('HTMLDocument.createElement(frame)', function(){
 
     var element;
-    
+
     element = document.createElement('frame');
-    
+
     ok(element, 'element created');
     equals(element.childNodes.length, 0, '.childNodes.length');
     equals(element.contentDocument, null, '.contentDocument');
@@ -293,12 +293,12 @@ test('HTMLDocument.createElement(frame)', function(){
     equals(element.noResize, false, '.noResize');
     equals(element.ownerDocument, document, '.ownerDocument');
     equals(element.parentNode, null, '.parentNode');
-    equals(element.prefix, null, '.prefix');    
+    equals(element.prefix, null, '.prefix');
     equals(element.scrolling, "", '.scrolling');
     equals(element.src, "", '.src');
     equals(element.tagName, 'FRAME', '.name');
     equals(xmlserializer.serializeToString(element), '<FRAME/>', 'xmlserializer');
-    
+
 });
 
 
@@ -317,7 +317,7 @@ test('HTMLDocument.createElement(script)', function(){
     equals(element.nodeType, Node.ELEMENT_NODE, '.nodeType');
     equals(element.ownerDocument, document, '.ownerDocument');
     equals(element.parentNode, null, '.parentNode');
-    equals(element.prefix, null, '.prefix');    
+    equals(element.prefix, null, '.prefix');
     equals(element.src, "", '.src');
     equals(element.type, "", '.type');
     equals(element.tagName, 'SCRIPT', '.tagName');
@@ -337,7 +337,7 @@ test('HTMLDocument.createElement(script)', function(){
 
 });
 
-// TODO: forms, input radio 
+// TODO: forms, input radio
 //http://envjs.lighthouseapp.com/projects/21590/tickets/91-radio-button-value-attribute-output-as-defaultvalue-in-html
 
 /* Image and Option below are unique in the DOM in that they
@@ -345,41 +345,40 @@ test('HTMLDocument.createElement(script)', function(){
  *  owner documents.
  */
 test("Image", function() {
-   var x = new Image();
-   equals(x, '[object HTMLImageElement]', 'toString');
+    var x = new Image();
+    equals(x, '[object HTMLImageElement]', 'toString');
 
-   // determined experimentally
-   equals(x.width, 0, 'default width is 0');
-   equals(x.height, 0, 'default height is 0');
+    // determined experimentally
+    equals(x.width, 0, 'default width is 0');
+    equals(x.height, 0, 'default height is 0');
 
-   x = new Image(1);
-   equals(x.width, 1, 'width');
-   equals(x.height, 0, 'default height is 0');
+    x = new Image(1);
+    equals(x.width, 1, 'width');
+    equals(x.height, 0, 'default height is 0');
 
-   x = new Image(1,9);
-   equals(x.width, 1, 'width');
-   equals(x.height, 9, 'height');
+    x = new Image(1,9);
+    equals(x.width, 1, 'width');
+    equals(x.height, 9, 'height');
 
-   // numbers as strings ok
-   x = new Image("1","9");
-   equals(x.width, 1, 'width');
-   equals(x.height, 9, 'height');
+    // numbers as strings ok
+    x = new Image("1","9");
+    equals(x.width, 1, 'width');
+    equals(x.height, 9, 'height');
 
-   // make sure attributes are being set.
+    // make sure attributes are being set.
 
-   equals(x.getAttribute('width'), 1, 'width from attributes');
-   equals(x.getAttribute('height'), 9, 'height from attributes');
+    equals(x.getAttribute('width'), 1, 'width from attributes');
+    equals(x.getAttribute('height'), 9, 'height from attributes');
 
-   // make sure we are getting back true numbers and  not strings 
-   equals(typeof(x.width), 'number', 'width is a number');
-   equals(typeof(x.height), 'number', 'height is a number');
+    // make sure we are getting back true numbers and  not strings
+    equals(typeof(x.width), 'number', 'width is a number');
+    equals(typeof(x.height), 'number', 'height is a number');
 
-   // and setting bogus values 
-   x.setAttribute('width', 'foo');
-   equals(x.width, 0, 'bad width default to 0');  
+    // and setting bogus values
+    x.setAttribute('width', 'foo');
+    equals(x.width, 0, 'bad width default to 0');
 });
 
-
 /*test("Option", function() {
-   var x = new Option();
-});*/
+  var x = new Option();
+  });*/
