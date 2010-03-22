@@ -1,5 +1,5 @@
 
-/** 
+/**
  * HTMLScriptElement - DOM Level 2
  */
 HTMLScriptElement = function(ownerDocument) {
@@ -14,11 +14,11 @@ __extend__(HTMLScriptElement.prototype, {
             if (this.childNodes[i].nodeType == Node.CDATA_SECTION_NODE) {
                 return this.childNodes[i].nodeValue;
             }
-        } 
+        }
         // otherwise there will be a text node containing the script
         if (this.childNodes[0] && this.childNodes[0].nodeType == Node.TEXT_NODE) {
             return this.childNodes[0].nodeValue;
- 		}
+        }
         return this.nodeValue;
 
     },
@@ -63,6 +63,10 @@ __extend__(HTMLScriptElement.prototype, {
         this.setAttribute('type',value);
     },
     onload: HTMLEvents.prototype.onload,
-    onerror: HTMLEvents.prototype.onerror
+    onerror: HTMLEvents.prototype.onerror,
+    toString: function() {
+	return '[object HTMLScriptElement]';
+    }
+
 });
 
