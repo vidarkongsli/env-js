@@ -2,7 +2,7 @@
 /**
  * @class  HTMLDocument
  *      The Document interface represents the entire HTML or XML document.
- *      Conceptually, it is the root of the document tree, and provides 
+ *      Conceptually, it is the root of the document tree, and provides
  *      the primary access to the document's data.
  *
  * @extends Document
@@ -153,11 +153,9 @@ __extend__(HTMLDocument.prototype, {
     },
     get anchors(){
         return new HTMLCollection(this.getElementsByTagName('a'));
-        
     },
     get applets(){
         return new HTMLCollection(this.getElementsByTagName('applet'));
-        
     },
     //document.head is non-standard
     get head(){
@@ -207,7 +205,7 @@ __extend__(HTMLDocument.prototype, {
         title.textContent = titleStr;
     },
 
-    get body(){ 
+    get body(){
         //console.log('get body');
         if(!this.documentElement)
             this.appendChild(this.createElement('html'));
@@ -233,12 +231,55 @@ __extend__(HTMLDocument.prototype, {
     set cookie(cookie){
         return Cookies.set(this, cookie);
     },
+
+    /**
+     * document.location
+     *
+     * should be identical to window.location
+     *
+     * HTML5:
+     * http://dev.w3.org/html5/spec/Overview.html#the-location-interface
+     *
+     * Mozilla MDC:
+     * https://developer.mozilla.org/en/DOM/document.location
+     *
+     */
     get location(){
         return this.baseURI;
     },
     set location(url){
         this.baseURI = url;
     },
+
+    /**
+     * document.URL (read-only)
+     *
+     * HTML DOM Level 2:
+     * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-46183437
+     *
+     * HTML5:
+     * http://dev.w3.org/html5/spec/Overview.html#dom-document-url
+     *
+     * Mozilla MDC:
+     * https://developer.mozilla.org/en/DOM/document.URL
+     */
+    get URL() {
+        return this.location;
+    },
+    set URL(url) {
+        this.location = url;
+    },
+
+    /**
+     * document.domain
+     *
+     * HTML5 Spec:
+     * http://dev.w3.org/html5/spec/Overview.html#dom-document-domain
+     *
+     * Mozilla MDC:
+     * https://developer.mozilla.org/en/DOM/document.domain
+     *
+     */
     get domain(){
         var HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
             matches = HOSTNAME.exec(this.baseURI);
@@ -257,20 +298,21 @@ __extend__(HTMLDocument.prototype, {
             this.baseURI = this.baseURI.replace(domainParts.join('.'), value);
         }
     },
+
     get forms(){
-      return new HTMLCollection(this.getElementsByTagName('form'));
+	return new HTMLCollection(this.getElementsByTagName('form'));
     },
     get images(){
         return new HTMLCollection(this.getElementsByTagName('img'));
     },
-    get lastModified(){ 
+    get lastModified(){
         /* TODO */
-        return this._lastModified; 
+        return this._lastModified;
     },
     get links(){
         return new HTMLCollection(this.getElementsByTagName('a'));
     },
-	getElementsByName : function(name){
+    getElementsByName : function(name){
         //returns a real Array + the NodeList
         var retNodes = __extend__([],new NodeList(this, this.documentElement)),
           node;
@@ -286,17 +328,12 @@ __extend__(HTMLDocument.prototype, {
         return retNodes;
 	},
     toString: function(){
-	return "[object HTMLDocument]"; 
+	return "[object HTMLDocument]";
     },
-	get innerHTML(){ 
-	    return this.documentElement.outerHTML; 
+    get innerHTML(){
+	return this.documentElement.outerHTML;
     },
-    get URL(){ 
-        return this.location;  
-    },
-    set URL(url){
-        this.location = url;  
-    }
+
 });
 
 

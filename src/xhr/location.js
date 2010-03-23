@@ -1,28 +1,41 @@
 
 /**
- * @todo: document
+ * Location
+ *
+ * Mozilla MDC:
+ * https://developer.mozilla.org/En/DOM/Window.location
+ * https://developer.mozilla.org/en/DOM/document.location
+ *
+ * HTML5: 6.10.4 The Location interface
+ * http://dev.w3.org/html5/spec/Overview.html#location
+ *
+ * HTML5: 2.5.3 Interfaces for URL manipulation
+ * http://dev.w3.org/html5/spec/Overview.html#url-decomposition-idl-attributes
+ * All of section 2.5 is worth reading, but 2.5.3 contains very
+ * detailed information on how getters/setter should work
+ *
  */
 var HASH     = new RegExp('(\\#.*)'),
-    HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
-    PATHNAME = new RegExp('(\/[^\\?\\#]*)'),
-    PORT     = new RegExp('\:(\\d+)\/'),
-    PROTOCOL = new RegExp('(^\\w*\:)'),
-    SEARCH   = new RegExp('(\\?[^\\#]*)');
-        
+HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
+PATHNAME = new RegExp('(\/[^\\?\\#]*)'),
+PORT     = new RegExp('\:(\\d+)\/'),
+PROTOCOL = new RegExp('(^\\w*\:)'),
+SEARCH   = new RegExp('(\\?[^\\#]*)');
+
 
 Location = function(url, doc, history){
     //console.log('Location url %s', url);
     var $url = url
-        $document = doc?doc:null,
-        $history = history?history:null;
-    
+    $document = doc?doc:null,
+    $history = history?history:null;
+
     return {
         get hash(){
             var m = HASH.exec($url);
             return m&&m.length>1?m[1]:"";
         },
         set hash(hash){
-            $url = this.protocol + this.host + this.pathname + 
+            $url = this.protocol + this.host + this.pathname +
                 this.search + (hash.indexOf('#')===0?hash:"#"+hash);
             if($history){
                 $history.add( $url, 'hash');
@@ -32,7 +45,7 @@ Location = function(url, doc, history){
             return this.hostname + (this.port !== ""?":"+this.port:"");
         },
         set host(host){
-            $url = this.protocol + host + this.pathname + 
+            $url = this.protocol + host + this.pathname +
                 this.search + this.hash;
             if($history){
                 $history.add( $url, 'host');
@@ -45,7 +58,7 @@ Location = function(url, doc, history){
         },
         set hostname(hostname){
             $url = this.protocol + hostname + ((this.port==="")?"":(":"+this.port)) +
-                 this.pathname + this.search + this.hash;
+                this.pathname + this.search + this.hash;
             if($history){
                 $history.add( $url, 'hostname');
             }
@@ -55,7 +68,7 @@ Location = function(url, doc, history){
             return $url;
         },
         set href(url){
-            $url = url;  
+            $url = url;
             if($history){
                 $history.add( $url, 'href');
             }
@@ -67,7 +80,7 @@ Location = function(url, doc, history){
             return m&&m.length>1?m[1]:"/";
         },
         set pathname(pathname){
-            $url = this.protocol + this.host + pathname + 
+            $url = this.protocol + this.host + pathname +
                 this.search + this.hash;
             if($history){
                 $history.add( $url, 'pathname');
@@ -79,7 +92,7 @@ Location = function(url, doc, history){
             return m&&m.length>1?m[1]:"";
         },
         set port(port){
-            $url = this.protocol + this.hostname + ":"+port + this.pathname + 
+            $url = this.protocol + this.hostname + ":"+port + this.pathname +
                 this.search + this.hash;
             if($history){
                 $history.add( $url, 'port');
@@ -90,7 +103,7 @@ Location = function(url, doc, history){
             return this.href && PROTOCOL.exec(this.href)[0];
         },
         set protocol(protocol){
-            $url = protocol + this.host + this.pathname + 
+            $url = protocol + this.host + this.pathname +
                 this.search + this.hash;
             if($history){
                 $history.add( $url, 'protocol');
@@ -102,7 +115,7 @@ Location = function(url, doc, history){
             return m&&m.length>1?m[1]:"";
         },
         set search(search){
-            $url = this.protocol + this.host + this.pathname + 
+            $url = this.protocol + this.host + this.pathname +
                 search + this.hash;
             if($history){
                 $history.add( $url, 'search');
@@ -114,8 +127,8 @@ Location = function(url, doc, history){
         },
         assign: function(url){
             var _this = this,
-                xhr;
-            
+            xhr;
+
             //console.log('assigning %s',url);
             $url = url;
             //we can only assign if this Location is associated with a document
@@ -123,7 +136,7 @@ Location = function(url, doc, history){
                 //console.log("fetching %s (async? %s)", url, $document.async);
                 xhr = new XMLHttpRequest();
                 xhr.open("GET", url, false);//$document.async);
-                
+
                 if($document.toString()=="[object HTMLDocument]"){
                     //tell the xhr to not parse the document as XML
                     //console.log("loading html document");
@@ -133,7 +146,7 @@ Location = function(url, doc, history){
                             $document.baseURI = new Location(url, $document);
                             //console.log('new document baseURI %s', $document.baseURI);
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
-                        }    
+                        }
                     };
                     xhr.send(null, false);
                 }else{
@@ -151,9 +164,9 @@ Location = function(url, doc, history){
                     };
                     xhr.send();
                 }
-                
+
             };
-            
+
         },
         reload: function(forceget){
             //for now we have no caching so just proxy to assign
@@ -189,22 +202,22 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         html.appendChild(body);
         doc.appendChild(html);
         //console.log('default error document \n %s', doc.documentElement.outerHTML);
-        
+
         //DOMContentLoaded event
         if(doc.createEvent){
             event = doc.createEvent('Events');
             event.initEvent("DOMContentLoaded", false, false);
             doc.dispatchEvent( event, false );
-            
+
             event = doc.createEvent('HTMLEvents');
             event.initEvent("load", false, false);
             doc.dispatchEvent( event, false );
         }
-        
+
         //finally fire the window.onload event
         //TODO: this belongs in window.js which is a event
         //      event handler for DOMContentLoaded on document
-        
+
         try{
             if(doc === window.document){
                 console.log('triggering window.load')
