@@ -184,7 +184,115 @@ test('window.location', function(){
     ok(location.replace,        'location.replace');
     ok(location.assign,         'location.assign');
 
+    // HTML5 March 2010: no one implements resolveURL
+    //ok(location.assign,         'location.resolveURL');
 });
+
+test('Location object', function() {
+    // to use the example from
+    // https://developer.mozilla.org/En/DOM/Window.location
+    var x = Location('http://www.google.com:80/search?q=devmo#test');
+
+    // we are modifying x.assign to we can intercept the new
+    // reconstituted url
+    x.assign = function(url) {};
+
+    // test basic parsing
+    equals(x.hash, '#test');
+    equals(x.host, 'www.google.com:80');
+    equals(x.hostname, 'www.google.com');
+    equals(x.href, 'http://www.google.com:80/search?q=devmo#test');
+    equals(x.pathname, '/search');
+    equals(x.protocol, 'http:');
+    equals(x.port, '80');
+    equals(typeof x.port, 'string');
+    equals(x.search, '?q=devmo');
+
+    // setter for hostname
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    // TBD, not clear what should happen
+    // SafarI 4: accept
+    // Firefox 3.6: Error
+    x.protocol = '';
+    // envjs crash
+    //equals(x.protocol, 'http:', 'Setting protocol to emptry string is ignored');
+    x.protocol = 'https:';
+    equals(x.protocol, 'https:', 'Setting protocol with trailing colon');
+    x.protocol = 'http';
+    equals(x.protocol, 'http:', 'Setting protocol without trailing colon');
+
+    // setter for host
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.host = '';
+    // SafarI 4: accept (infinite loop)
+    // Firefox 3.6: Error
+    equals(x.host, 'www.google.com', 'Setting host to emptry string is ignored');
+
+    x.host = 'www.yahoo.com';
+    equals(x.host, 'www.yahoo.com', 'Setting host with no port')
+    equals(x.hostname, 'www.yahoo.com', 'Setting host updates hostname');
+    equals(x.port, '', 'Setting host updates port');
+    equals(x.href, 'http://www.yahoo.com/search?q=devmo#foo');
+
+    x.host = 'www.google.com:80';
+    equals(x.host, 'www.google.com:80', 'Setting host with port');
+    equals(x.hostname,'www.google.com', 'Setting host updates hostname');
+    equals(x.port, '80', 'Setting host updates port');
+    equals(x.href, 'http://www.google.com:80/search?q=devmo#foo');
+
+    // setter for host
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.host = 'www.yahoo.com';
+    equals(x.host, 'www.yahoo.com');
+
+    // setter for port
+    // Safari 4: file://:90/Users/nickg/javascript.html
+    // Firefox: Error
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.port = 81;
+    equals(x.port, 81, 'Setting port as integer');
+    equals(x.host, 'www.google.com:81');
+    equals(x.href, 'http://www.google.com:81/foo?q=devmo#foo');
+    x.port = '82';
+    equals(x.port, '82', 'Setting port as string');
+    equals(x.host, 'www.google.com:82');
+    equals(x.href, 'http://www.google.com:82/foo?q=devmo#foo');
+
+    // setter for path
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.pathname = '/foo';
+    equals(x.path, '/foo', 'Setting path starting with "/"');
+    equals(x.href, 'http://www.google.com:80/foo?q=devmo#foo');
+    x.pathname = 'foobar';
+    equals(x.path, '/foobar', 'Setting path starting without "/"');
+    equals(x.href, 'http://www.google.com:80/foobar?q=devmo#foo');
+
+    // setter for search (query string)
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.search='?q=foo';
+    equals(x.search, '?q=foo', 'Setting search with starting "?"');
+    equals(x.href, 'http://www.google.com:80/search?q=foo#foo');
+    x.search='q=bar';
+    equals(x.search, '?q=bar', 'Setting search without starting "?"');
+    equals(x.href, 'http://www.google.com:80/search?q=bar#foo');
+
+    // setter for hash (fragment)
+    x = Location('http://www.google.com:80/search?q=devmo#test');
+    x.assign = function(url) {};
+    x.hash='#foo'
+    equals(x.hash, '#foo', 'Setting hash with starting "#"');
+    equals(x.href, 'http://www.google.com:80/search?q=devmo#foo');
+    x.hash='q=bar';
+    equals(x.hash, '#bar', 'Setting hash without starting "#"');
+    equals(x.href, 'http://www.google.com:80/search?q=devmo#bar');
+});
+
 
 test('window.screen', function(){
 
