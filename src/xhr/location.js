@@ -14,6 +14,10 @@
  * All of section 2.5 is worth reading, but 2.5.3 contains very
  * detailed information on how getters/setter should work
  *
+ * NOT IMPLEMENTED:
+ *  HTML5: Section 6.10.4.1 Security -- prevents scripts from another domain
+ *   from accessing most of the 'Location'
+ *  Not sure if anyone implements this in HTML4
  */
 var HASH     = new RegExp('(\\#.*)'),
 HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
