@@ -29,107 +29,148 @@ SEARCH   = new RegExp('(\\?[^\\#]*)');
 
 Location = function(url, doc, history){
     //console.log('Location url %s', url);
-    var $url = url
-    $document = doc?doc:null,
-    $history = history?history:null;
+    var $url = url,
+    $document = doc ? doc : null,
+    $history = history ? history : null;
+
+    var parts = urlparse.urlsplit($url);
 
     return {
-        get hash(){
-            var m = HASH.exec($url);
-            return m&&m.length>1?m[1]:"";
+        get hash() {
+	    return parts.fragment ? '#' + parts.fragment : parts.fragment;
         },
-        set hash(hash){
-            $url = this.protocol + this.host + this.pathname +
-                this.search + (hash.indexOf('#')===0?hash:"#"+hash);
-            if($history){
-                $history.add( $url, 'hash');
+        set hash(s) {
+	    if (s[0] === '#') {
+		parts.fragment = s.substr(1);
+	    } else {
+		parts.fragment = s;
+	    }
+	    $url = urlparse.urlunsplit(parts);
+            if ($history) {
+                $history.add($url, 'hash');
             }
         },
-        get host(){
-            return this.hostname + (this.port !== ""?":"+this.port:"");
+
+        get host() {
+	    return parts.netloc;
         },
-        set host(host){
-            $url = this.protocol + host + this.pathname +
-                this.search + this.hash;
-            if($history){
+        set host(s) {
+	    if (!s || s === '') {
+		return;
+	    }
+
+	    parts.netloc = s;
+	    $url = urlparse.urlunsplit(parts);
+
+	    // this regenerates hostname & port
+	    parts = urlparse.urlsplit($url);
+
+            if ($history) {
                 $history.add( $url, 'host');
             }
             this.assign($url);
         },
-        get hostname(){
-            var m = HOSTNAME.exec(this.href);
-            return m&&m.length>1?m[1]:"";
+
+        get hostname() {
+	    return parts.hostname;
         },
-        set hostname(hostname){
-            $url = this.protocol + hostname + ((this.port==="")?"":(":"+this.port)) +
-                this.pathname + this.search + this.hash;
-            if($history){
+        set hostname(s) {
+	    if (!s || s === '') {
+		return '';
+	    }
+
+	    parts.netloc = s;
+	    if (parts.port != '') {
+		parts.netloc += ':' + parts.port;
+	    }
+	    parts.hostname = s;
+            $url = urlparse.urlunsplit(parts);
+            if ($history) {
                 $history.add( $url, 'hostname');
             }
             this.assign($url);
         },
-        get href(){
+
+        get href() {
             return $url;
         },
-        set href(url){
+        set href(url) {
             $url = url;
-            if($history){
-                $history.add( $url, 'href');
+            if ($history) {
+                $history.add($url, 'href');
             }
             this.assign($url);
         },
-        get pathname(){
-            var m = this.href;
-            m = PATHNAME.exec(m.substring(m.indexOf(this.hostname)));
-            return m&&m.length>1?m[1]:"/";
+
+        get pathname() {
+	    return parts.path;
         },
-        set pathname(pathname){
-            $url = this.protocol + this.host + pathname +
-                this.search + this.hash;
-            if($history){
-                $history.add( $url, 'pathname');
+        set pathname(s) {
+	    if (s[0] === '/') {
+		parts.path = s;
+	    } else {
+		parts.path = '/' + s;
+	    }
+            $url = urlparse.urlunsplit(parts);
+
+            if ($history) {
+                $history.add($url, 'pathname');
             }
             this.assign($url);
         },
-        get port(){
-            var m = PORT.exec(this.href);
-            return m&&m.length>1?m[1]:"";
+
+        get port() {
+	    // make sure it's a string
+	    return '' + parts.port;
         },
-        set port(port){
-            $url = this.protocol + this.hostname + ":"+port + this.pathname +
-                this.search + this.hash;
-            if($history){
+        set port(p) {
+	    // make a string
+	    var s = '' + p;
+	    parts.port = s;
+	    parts.netloc = parts.hostname + ':' + parts.port;
+            $url = urlparse.urlunsplit(parts);
+            if ($history) {
                 $history.add( $url, 'port');
             }
             this.assign($url);
         },
-        get protocol(){
-            return this.href && PROTOCOL.exec(this.href)[0];
+
+        get protocol() {
+            return parts.scheme + ':';
         },
-        set protocol(protocol){
-            $url = protocol + this.host + this.pathname +
-                this.search + this.hash;
-            if($history){
-                $history.add( $url, 'protocol');
+        set protocol(s) {
+	    var i = s.indexOf(':');
+	    if (i != -1) {
+		s = s.substr(0,i);
+	    }
+	    parts.scheme = s;
+	    $url = urlparse.urlunsplit(parts);
+            if ($history) {
+                $history.add($url, 'protocol');
             }
             this.assign($url);
         },
-        get search(){
-            var m = SEARCH.exec(this.href);
-            return m&&m.length>1?m[1]:"";
+
+        get search() {
+	    return (parts.query) ? '?' + parts.query : parts.query;
         },
-        set search(search){
-            $url = this.protocol + this.host + this.pathname +
-                search + this.hash;
-            if($history){
-                $history.add( $url, 'search');
+        set search(s) {
+	    if (s[0] == '?') {
+		s = s.substr(1);
+	    }
+	    parts.query = s;
+            $url = urlparse.urlunsplit(parts);
+            if ($history) {
+                $history.add($url, 'search');
             }
             this.assign($url);
         },
-        toString: function(){
+
+        toString: function() {
             return $url;
         },
-        assign: function(url){
+
+        assign: function(url) {
             var _this = this,
             xhr;
 

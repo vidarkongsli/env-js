@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Env" default="all" basedir=".">
-    
+
     <description>Builds, tests, and runs the project Env.</description>
     <tstamp/>
     <property file="build.properties"/>
-                
+
     <echo message="{"/>
-    <echo message="     'BUILD_PROPERTIES': {"/> 
+    <echo message="     'BUILD_PROPERTIES': {"/>
     <echo message="         'PROJECT':      '${PROJECT}',"/>
     <echo message="         'BUILD_MAJOR':  '${BUILD_MAJOR}',"/>
     <echo message="         'BUILD_MINOR':  '${BUILD_MINOR}',"/>
@@ -14,38 +14,38 @@
     <echo message="         'BUILD_VERSION': '${BUILD_VERSION}',"/>
     <echo message="         'BUILD':        '${BUILD}',"/>
     <echo message="         'VERSION':      '${VERSION}'"/>
-    <echo message="     },"/> 
-    
-    
-    <property name= "BASEDIR"        
-            location="."           
+    <echo message="     },"/>
+
+
+    <property name= "BASEDIR"
+            location="."
             description="Base"/>
-    <property name= "SRC_DIR"        
-            location="src"           
+    <property name= "SRC_DIR"
+            location="src"
             description="Source Folder"/>
-    <property name="TOOLS_DIR"      
-            location="tools"         
+    <property name="TOOLS_DIR"
+            location="tools"
             description="Files for parsing etc." />
-    <property name="RHINO_JAR"      
-            location="rhino/js.jar"  
+    <property name="RHINO_JAR"
+            location="rhino/js.jar"
             description="Rhino JS Engine"/>
-    <property name="PREFIX"         
-            location="${basedir}/dist/"       
+    <property name="PREFIX"
+            location="${basedir}/dist/"
             description="Target parent folder for built files"   />
-    <property name="DOCS_DIR"       
-            location="${PREFIX}/docs"         
+    <property name="DOCS_DIR"
+            location="${PREFIX}/docs"
             description="Folder for docs target"  />
-    <property name="TEST_DIR"       
-            location="${PREFIX}/test"         
+    <property name="TEST_DIR"
+            location="${PREFIX}/test"
             description="Folder for test target"  />
-    <property name="DIST_DIR"       
-            location="${PREFIX}/"             
+    <property name="DIST_DIR"
+            location="${PREFIX}/"
             description="Folder for concatenated, min, lite and packed target" />
-    
+
     <available property='HAS_LOCAL'
                file='${BASEDIR}/local_settings.js' />
-                       
-    <echo message="     'ENVIRONMENT':{"/> 
+
+    <echo message="     'ENVIRONMENT':{"/>
     <echo message="         'BASEDIR':      '${BASEDIR}',"/>
     <echo message="         'SRC_DIR':      '${SRC_DIR}',"/>
     <echo message="         'TOOLS_DIR':    '${TOOLS_DIR}',"/>
@@ -55,9 +55,9 @@
     <echo message="         'TEST_DIR':     '${TEST_DIR}',"/>
     <echo message="         'DIST_DIR':     '${DIST_DIR}',"/>
     <echo message="         'HAS_LOCAL':    '${HAS_LOCAL}'"/>
-    <echo message="     },"/> 
-    
-    
+    <echo message="     },"/>
+
+
     <property name="CORE_DIST"      location="${DIST_DIR}/platform/core.js" />
     <property name="RHINO_DIST"     location="${DIST_DIR}/platform/rhino.js" />
     <property name="CONSOLE_DIST"   location="${DIST_DIR}/console.js" />
@@ -71,49 +71,49 @@
     <property name="WINDOW_DIST"    location="${DIST_DIR}/window.js" />
     <property name="ENV_DIST"       location="${DIST_DIR}/env.js" />
     <property name="ENV_RHINO"      location="${DIST_DIR}/env.rhino.js"/>
-    
+
     <echo message="     'DISTRIBUTABLES': {"/>
-    <echo message="         'CORE_DIST':    '${CORE_DIST}',"/> 
-    <echo message="         'RHINO_DIST':   '${RHINO_DIST}',"/> 
-    <echo message="         'CONSOLE_DIST': '${CONSOLE_DIST}'"/> 
-    <echo message="         'DOM_DIST':     '${DOM_DIST}'"/> 
-    <echo message="         'EVENT_DIST':   '${EVENT_DIST}',"/> 
-    <echo message="         'TIMER_DIST':   '${TIMER_DIST}',"/> 
-    <echo message="         'HTML_DIST':    '${HTML_DIST}',"/> 
-    <echo message="         'PARSER_DIST':  '${PARSER_DIST}',"/> 
-    <echo message="         'XHR_DIST':     '${XHR_DIST}',"/> 
-    <echo message="         'CSS_DIST':     '${CSS_DIST}',"/> 
-    <echo message="         'WINDOW_DIST':  '${WINDOW_DIST}',"/> 
-    <echo message="         'ENV_DIST':     '${ENV_DIST}',"/> 
-    <echo message="         'ENV_RHINO':    '${ENV_RHINO}',"/> 
-    <echo message="     }"/> 
-    <echo message=" }"/> 
-    
- 
+    <echo message="         'CORE_DIST':    '${CORE_DIST}',"/>
+    <echo message="         'RHINO_DIST':   '${RHINO_DIST}',"/>
+    <echo message="         'CONSOLE_DIST': '${CONSOLE_DIST}'"/>
+    <echo message="         'DOM_DIST':     '${DOM_DIST}'"/>
+    <echo message="         'EVENT_DIST':   '${EVENT_DIST}',"/>
+    <echo message="         'TIMER_DIST':   '${TIMER_DIST}',"/>
+    <echo message="         'HTML_DIST':    '${HTML_DIST}',"/>
+    <echo message="         'PARSER_DIST':  '${PARSER_DIST}',"/>
+    <echo message="         'XHR_DIST':     '${XHR_DIST}',"/>
+    <echo message="         'CSS_DIST':     '${CSS_DIST}',"/>
+    <echo message="         'WINDOW_DIST':  '${WINDOW_DIST}',"/>
+    <echo message="         'ENV_DIST':     '${ENV_DIST}',"/>
+    <echo message="         'ENV_RHINO':    '${ENV_RHINO}',"/>
+    <echo message="     }"/>
+    <echo message=" }"/>
+
+
     <!-- BUILD TARGETS -->
     <target name="all" depends="concat"/>
-    
+
     <target name="rhino">
         <ant antfile="rhino/build.xml" target="all" inheritAll="false"/>
     </target>
- 
- 
+
+
     <target name='local-settings' unless='${HAS_LOCAL}'>
-        <copy file="${BASEDIR}/settings.js" 
+        <copy file="${BASEDIR}/settings.js"
               tofile="${BASEDIR}/local_settings.js"
               overwrite='false'/>
-    </target>   
+    </target>
 
     <!-- BUILD ENV PLATFORM BINDINGS -->
     <target name="env-platforms" depends='core-env, rhino-env-spec'/>
-    
+
     <!-- BUILD CORE ENV BINDINGS -->
     <target name="core-env" >
         <mkdir dir="${DIST_DIR}/platform" />
         <echo message=""/>
         <echo message="Building ${CORE_DIST}" />
         <concat destfile="${CORE_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="core-env.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -133,14 +133,14 @@
         <echo message="Finished Building ${CORE_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD RHINO ENV BINDINGS -->
     <target name="rhino-env">
         <mkdir dir="${DIST_DIR}/platform" />
         <echo message=""/>
         <echo message="Building ${RHINO_DIST}" />
         <concat destfile="${RHINO_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="rhino-env.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -149,6 +149,7 @@
             <fileset dir="${SRC_DIR}" includes="platform/rhino/__global__.js" />
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
+            <fileset dir="${SRC_DIR}" includes="common/urlparse.js" />
             <fileset dir="${SRC_DIR}" includes="platform/rhino/console.js" />
             <fileset dir="${SRC_DIR}" includes="platform/rhino/dom.js" />
             <fileset dir="${SRC_DIR}" includes="platform/rhino/event.js" />
@@ -162,15 +163,15 @@
         <echo message="Finished Building ${RHINO_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST RHINO ENV BINDINGS -->
     <target name='rhino-env-spec'
             depends='rhino-env, console'
             description='Test Rhino Env Specs'>
         <echo message=""/>
         <echo message="Executing Rhino Env Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/platform/rhino.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -178,14 +179,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD CONSOLE IMPLEMENTATIOM -->
     <target name="console">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${CONSOLE_DIST}" />
         <concat destfile="${CONSOLE_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="console.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -199,15 +200,15 @@
         <echo message="Finished Building ${CONSOLE_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST CONSOLE SPECIFICATION -->
     <target name='console-spec'
             depends='console'
             description='Test Console Specs'>
         <echo message=""/>
         <echo message="Executing Console Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/console/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -215,15 +216,15 @@
         </java>
         <echo message=""/>
     </target>
-    
-    
+
+
     <!-- BUILD DOM IMPLEMENTATIOM -->
     <target name="dom" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${DOM_DIST}" />
         <concat destfile="${DOM_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="dom.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -262,15 +263,15 @@
         <echo message="Finished Building ${DOM_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST DOM SPECIFICATION -->
     <target name='dom-spec'
             depends='dom'
             description='Test DOM Specs'>
         <echo message=""/>
         <echo message="Executing DOM Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/dom/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -278,14 +279,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD EVENT IMPLEMENTATIOM -->
     <target name="event" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${EVENT_DIST}" />
         <concat destfile="${EVENT_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="event.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -309,15 +310,15 @@
         <echo message="Finished Building ${EVENT_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST EVENT SPECIFICATION -->
     <target name='event-spec'
             depends='event'
             description='Test Event Specs'>
         <echo message=""/>
         <echo message="Executing Event Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/event/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -325,14 +326,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD TIMER IMPLEMENTATIOM -->
     <target name="timer" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${TIMER_DIST}" />
         <concat destfile="${TIMER_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="timer.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -346,15 +347,15 @@
         <echo message="Finished Building ${TIMER_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST TIMER SPECIFICATION -->
     <target name='timer-spec'
             depends='timer'
             description='Test Timer Specs'>
         <echo message=""/>
         <echo message="Executing Timer Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/timer/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -362,14 +363,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD HTML IMPLEMENTATIOM -->
     <target name="html" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${HTML_DIST}" />
         <concat destfile="${HTML_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="html.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -433,15 +434,15 @@
         <echo message="Finished Building ${HTML_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST HTML SPECIFICATION -->
     <target name='html-spec'
             depends='html'
             description='Test HTML Specs'>
         <echo message=""/>
         <echo message="Executing HTML Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/html/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -449,15 +450,15 @@
         </java>
         <echo message=""/>
     </target>
-    
-    
+
+
     <!-- BUILD PARSER IMPLEMENTATIOM -->
     <target name="parser" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${PARSER_DIST}" />
         <concat destfile="${PARSER_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="parser.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -477,15 +478,15 @@
         <echo message="Finished Building ${PARSER_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST PARSER SPECIFICATION -->
     <target name='parser-spec'
             depends='parser'
             description='Test Parser Specs'>
         <echo message=""/>
         <echo message="Executing Parser Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="-opt"/>
             <arg value="-1"/>
@@ -495,14 +496,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD XMLHTTPREQUEST IMPLEMENTATIOM -->
     <target name="xhr" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${XHR_DIST}" />
         <concat destfile="${XHR_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="xhr.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -513,6 +514,7 @@
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__trim__.js" />
+            <fileset dir="${SRC_DIR}" includes="common/urlparse.js" />
             <fileset dir="${SRC_DIR}" includes="xhr/document.js" />
             <fileset dir="${SRC_DIR}" includes="xhr/form.js" />
             <fileset dir="${SRC_DIR}" includes="xhr/location.js" />
@@ -522,15 +524,15 @@
         <echo message="Finished Building ${XHR_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST XHR SPECIFICATION -->
     <target name='xhr-spec'
             depends='xhr, local-settings'
             description='Test XMLHttpRequest Specs'>
         <echo message=""/>
         <echo message="Executing XMLHttpRequest Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/xhr/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -538,14 +540,14 @@
         </java>
         <echo message=""/>
     </target>
-    
+
     <!-- BUILD CSS IMPLEMENTATIOM -->
     <target name="css" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${CSS_DIST}" />
         <concat destfile="${CSS_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="css.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -564,15 +566,15 @@
         <echo message="Finished Building ${CSS_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST CSS SPECIFICATION -->
     <target name='css-spec'
             depends='css'
             description='Test CSS Specs'>
         <echo message=""/>
         <echo message="Executing CSS Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/css/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -580,15 +582,15 @@
         </java>
         <echo message=""/>
     </target>
-    
-    
+
+
     <!-- BUILD WINDOW IMPLEMENTATIOM -->
     <target name="window" depends="env-platforms">
         <mkdir dir="${DIST_DIR}" />
         <echo message=""/>
         <echo message="Building ${WINDOW_DIST}" />
         <concat destfile="${WINDOW_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="window.${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -610,15 +612,15 @@
         <echo message="Finished Building ${WINDOW_DIST}"/>
         <echo message=""/>
     </target>
-    
+
     <!-- TEST WINDOW SPECIFICATION -->
     <target name='window-spec'
             depends='window, local-settings'
             description='Test Window Specs'>
         <echo message=""/>
         <echo message="Executing Window Spec"/>
-        <java fork="true" 
-              jar="${RHINO_JAR}" 
+        <java fork="true"
+              jar="${RHINO_JAR}"
               failonerror="true">
             <arg value="test/specs/window/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
@@ -628,14 +630,14 @@
     </target>
 
     <target description="Main ENV build"
-            name="concat" 
-            depends="dom-spec, event-spec, timer-spec, 
-                     html-spec, parser-spec, xhr-spec, 
+            name="concat"
+            depends="dom-spec, event-spec, timer-spec,
+                     html-spec, parser-spec, xhr-spec,
                      css-spec,  window-spec">
         <!-- CORE -->
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -653,11 +655,11 @@
             <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_DIST} built." />
-        
+
         <!-- RHINO -->
         <echo message="Building ${ENV_RHINO}" />
         <concat destfile="${ENV_RHINO}">
-            <filterchain>    
+            <filterchain>
                 <replacetokens>
                     <token key="VERSION" value="env-${BUILD_VERSION}"/>
                     <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
@@ -677,5 +679,5 @@
         </concat>
         <echo message="${ENV_RHINO} built." />
     </target>
-    
+
 </project>

@@ -244,11 +244,19 @@ __extend__(HTMLDocument.prototype, {
      * https://developer.mozilla.org/en/DOM/document.location
      *
      */
-    get location(){
-        return this.baseURI;
+    get location() {
+	if (this.ownerWindow) {
+            return this.ownerWindow.location;
+	} else {
+	    return this.baseURI;
+	}
     },
-    set location(url){
-        this.baseURI = url;
+    set location(url) {
+	if (this.ownerWindow) {
+            this.ownerWindow.location = url;
+	} else {
+	    this.baseURI = url;
+	}
     },
 
     /**

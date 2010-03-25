@@ -1,63 +1,48 @@
 
+
 /**
  * resolves location relative to doc location
- * @param {Object} path
- * @param {Object} path
- * @param {Object} base
+ *
+ * @param {Object} path  Relative or absolute URL
+ * @param {Object} base  (semi-optional)  The base url used in resolving "path" above
  */
 Envjs.uri = function(path, base){
     //console.log('constructing uri from path %s and base %s', path, base);
-    var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
-        m = protocol.exec(path),
-        baseURI, absolutepath;
-    if(m&&m.length>1){
-        return (new java.net.URL(path).toString()+'')
-            .replace('file:/', 'file:///');
-    }else if(base){
-        baseURI = base.substring(0, base.lastIndexOf('/'));
-        if(baseURI.length > 0){
-            absolutepath = baseURI + '/' + path;
-        }else{
-            absolutepath = (new java.net.URL(new java.net.URL(base), path)+'')
-                .replace('file:/', 'file:///');
-        }
-        //console.log('constructed absolute path %s', absolutepath);
-        return absolutepath;
-    }else{
-        //return an absolute url from a url relative to the window location
-        //TODO: window should not be inlined here. this should be passed as a 
-        //      parameter to Envjs.location :DONE
-        if(document){
-            baseURI = document.baseURI;
-            if(baseURI == 'about:blank'){
-                //console.log('about:blank change: baseURI %s', document.baseURI);
-                baseURI = (java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
-                //console.log('baseURI %s', baseURI);
-                return baseURI;
-            }else{
-                if(path.match(/^\//)){
-                    //absolute path change
-                    //console.log('absolute path change: baseURI %s', document.baseURI);
-                    absolutepath = (new Location(baseURI)).pathname;
-                    return baseURI.substring(0, baseURI.lastIndexOf(absolutepath)) + path;
-                }else{
-                    //relative path change
-                    //console.log('relative path change: baseURI %s', document.baseURI);
-                    base = baseURI.substring(0, baseURI.lastIndexOf('/'));
-                    if(base.length > 0){
-                        return base + '/' + path;
-                    }else{
-                        return (new java.io.File(path).toURL().toString()+'')
-                            .replace('file:/', 'file:///');
-                    }
-                }
-            }
-        }else{
-            return (new java.io.File(path).toURL().toString()+'')
-                        .replace('file:/', 'file:///');
-        }
+
+    // Semi-common trick is to make an iframe with src='javascript:false'
+    //  (or some equivalent).  By returning '', the load is skipped
+    if (path.indexOf('javascript') === 0) {
+	return '';
     }
+
+    // if path is absolute, then just normalize and return
+    if (path.match('^[a-zA-Z]+://')) {
+	return urlparse.urlnormalize(path);
+    }
+
+    // if base not passed in, try to get it from document
+    // Ideally I would like the caller to pass in document.baseURI to
+    //  make this more self-sufficient and testable
+    if (!base && document) {
+	base = document.baseURI;
+    }
+
+    // about:blank doesn't count
+    if (base === 'about:blank'){
+	base = '';
+    }
+
+    // if base is still empty, then we are in QA mode loading local
+    // files.  Get current working directory
+    if (!base) {
+	base = 'file://' +  java.lang.System.getProperty("user.dir") + '/';
+    }
+    // handles all cases if path is abosulte or relative to base
+    // 3rd arg is "false" --> remove fragments
+    var newurl = urlparse.urlnormalize(urlparse.urljoin(base, path, false));
+
+    // console.log('New url is: %s', newurl);
+    return newurl;
 };
 
 /**

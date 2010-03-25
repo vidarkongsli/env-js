@@ -68,7 +68,12 @@ test('HTMLDocument', function(){
     ok(document.anchors, '.anchors is defined');
     ok(document.applets, '.applets is defined');
     equals(document.attributes, null, '.attributes is null');
+
+    // baseURI is semi-bogus
     equals(document.location, document.baseURI, '.location is .baseURI');
+
+    // This fake document doesn't have an owner window
+    //equals(document.location, window.location, '.location is window.location');
 
 });
 
