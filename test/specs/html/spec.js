@@ -352,6 +352,7 @@ test('HTMLDocument.createElement(script)', function(){
 test("Image", function() {
     var x = new Image();
     equals(x, '[object HTMLImageElement]', 'toString');
+    equals(x.src, '', 'new image has src as empty string');
 
     // determined experimentally
     equals(x.width, 0, 'default width is 0');

@@ -38,7 +38,7 @@ __extend__(HTMLImageElement.prototype, {
         this.setAttribute('name', value);
     },
     get src(){
-        return this.getAttribute('src');
+        return this.getAttribute('src') || '';
     },
     set src(value){
         var event;
