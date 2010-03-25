@@ -252,10 +252,9 @@ __extend__(HTMLDocument.prototype, {
 	}
     },
     set location(url) {
+	this.baseURI = url;
 	if (this.ownerWindow) {
             this.ownerWindow.location = url;
-	} else {
-	    this.baseURI = url;
 	}
     },
 
