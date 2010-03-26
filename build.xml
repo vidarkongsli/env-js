@@ -395,26 +395,32 @@
             <fileset dir="${SRC_DIR}" includes="html/base.js" />
             <fileset dir="${SRC_DIR}" includes="html/blockquote-q.js" />
             <fileset dir="${SRC_DIR}" includes="html/body.js" />
+            <fileset dir="${SRC_DIR}" includes="html/br.js" />
             <fileset dir="${SRC_DIR}" includes="html/button.js" />
             <fileset dir="${SRC_DIR}" includes="html/canvas.js" />
             <fileset dir="${SRC_DIR}" includes="html/col-colgroup.js" />
             <fileset dir="${SRC_DIR}" includes="html/del-ins.js" />
             <fileset dir="${SRC_DIR}" includes="html/div.js" />
+            <fileset dir="${SRC_DIR}" includes="html/dl.js" />
             <fileset dir="${SRC_DIR}" includes="html/legend.js" />
             <fileset dir="${SRC_DIR}" includes="html/fieldset.js" />
             <fileset dir="${SRC_DIR}" includes="html/form.js" />
             <fileset dir="${SRC_DIR}" includes="html/frame.js" />
             <fileset dir="${SRC_DIR}" includes="html/frameset.js" />
+            <fileset dir="${SRC_DIR}" includes="html/h1.js" />
             <fileset dir="${SRC_DIR}" includes="html/head.js" />
+            <fileset dir="${SRC_DIR}" includes="html/html.js" />
             <fileset dir="${SRC_DIR}" includes="html/iframe.js" />
             <fileset dir="${SRC_DIR}" includes="html/image.js" />
             <fileset dir="${SRC_DIR}" includes="html/img.js" />
             <fileset dir="${SRC_DIR}" includes="html/input.js" />
             <fileset dir="${SRC_DIR}" includes="html/label.js" />
+            <fileset dir="${SRC_DIR}" includes="html/li.js" />
             <fileset dir="${SRC_DIR}" includes="html/link.js" />
             <fileset dir="${SRC_DIR}" includes="html/map.js" />
             <fileset dir="${SRC_DIR}" includes="html/meta.js" />
             <fileset dir="${SRC_DIR}" includes="html/object.js" />
+            <fileset dir="${SRC_DIR}" includes="html/ol.js" />
             <fileset dir="${SRC_DIR}" includes="html/optgroup.js" />
             <fileset dir="${SRC_DIR}" includes="html/option.js" />
             <fileset dir="${SRC_DIR}" includes="html/p.js" />
@@ -428,6 +434,7 @@
             <fileset dir="${SRC_DIR}" includes="html/textarea.js" />
             <fileset dir="${SRC_DIR}" includes="html/title.js" />
             <fileset dir="${SRC_DIR}" includes="html/tr.js" />
+            <fileset dir="${SRC_DIR}" includes="html/ul.js" />
             <fileset dir="${SRC_DIR}" includes="html/unknown.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>

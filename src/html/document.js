@@ -21,7 +21,7 @@ __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
         tagName = tagName.toUpperCase();
         // create Element specifying 'this' as ownerDocument
-        // This is an html document so we need to use explicit interfaces per the 
+        // This is an html document so we need to use explicit interfaces per the
         //TODO: would be much faster as a big switch
         switch(tagName){
             case "A":
@@ -37,7 +37,7 @@ __extend__(HTMLDocument.prototype, {
             case "BODY":
                 node = new HTMLBodyElement(this);break;
             case "BR":
-                node = new HTMLElement(this);break;
+                node = new HTMLBRElement(this);break;
             case "BUTTON":
                 node = new HTMLButtonElement(this);break;
             case "CAPTION":
@@ -53,7 +53,9 @@ __extend__(HTMLDocument.prototype, {
             case "DIV":
                 node = new HTMLDivElement(this);break;
             case "DL":
-                node = new HTMLElement(this);break;
+                node = new HTMLDListElement(this);break;
+	    case "DT":
+	        node = new HTMLElement(this); break
             case "FIELDSET":
                 node = new HTMLFieldSetElement(this);break;
             case "FORM":
@@ -61,21 +63,23 @@ __extend__(HTMLDocument.prototype, {
             case "FRAME":
                 node = new HTMLFrameElement(this);break;
             case "H1":
-                node = new HTMLHeadElement(this);break;
+                node = new HTMLHeadingElement(this);break;
             case "H2":
-                node = new HTMLHeadElement(this);break;
+                node = new HTMLHeadingElement(this);break;
             case "H3":
-                node = new HTMLHeadElement(this);break;
+                node = new HTMLHeadingElement(this);break;
             case "H4":
-                node = new HTMLHeadElement(this);break;
+                node = new HTMLHeadingElement(this);break;
             case "H5":
-                node = new HTMLHeadElement(this);break;
+                node = new HTMLHeadingElement(this);break;
             case "H6":
+                node = new HTMLHeadingElement(this);break;
+            case "HEAD":
                 node = new HTMLHeadElement(this);break;
             case "HR":
-                node = new HTMLElement(this);break;
+                node = new HTMLHRElement(this);break;
             case "HTML":
-                node = new HTMLElement(this);break;
+                node = new HTMLHtmlElement(this);break;
             case "IFRAME":
                 node = new HTMLIFrameElement(this);break;
             case "IMG":
@@ -87,17 +91,19 @@ __extend__(HTMLDocument.prototype, {
             case "LEGEND":
                 node = new HTMLLegendElement(this);break;
             case "LI":
-                node = new HTMLElement(this);break;
+                node = new HTMLLIElement(this);break;
             case "LINK":
                 node = new HTMLLinkElement(this);break;
             case "MAP":
                 node = new HTMLMapElement(this);break;
             case "META":
-                node = new HTMLObjectElement(this);break;
+                node = new HTMLMetaElement(this);break;
             case "OBJECT":
-                node = new HTMLMapElement(this);break;
+                node = new HTMLObjectElement(this);break;
             case "OPTGROUP":
                 node = new HTMLOptGroupElement(this);break;
+	    case "OL":
+	        node = new HTMLOListElement(this); break;
             case "OPTION":
                 node = new HTMLOptionElement(this);break;
             case "P":
@@ -105,7 +111,7 @@ __extend__(HTMLDocument.prototype, {
             case "PARAM":
                 node = new HTMLParamElement(this);break;
             case "PRE":
-                node = new HTMLElement(this);break;
+                node = new HTMLPreElement(this);break;
             case "SCRIPT":
                 node = new HTMLScriptElement(this);break;
             case "SELECT":
@@ -121,9 +127,9 @@ __extend__(HTMLDocument.prototype, {
             case "THEAD":
                 node = new HTMLTableSectionElement(this);break;
             case "TD":
-                node = new HTMLTableCellElement(this);break;
+                node = new HTMLTableDataCellElement(this);break;
             case "TH":
-                node = new HTMLTableCellElement(this);break;
+                node = new HTMLTableHeaderCellElement(this);break;
             case "TEXTAREA":
                 node = new HTMLTextAreaElement(this);break;
             case "TITLE":
@@ -131,7 +137,7 @@ __extend__(HTMLDocument.prototype, {
             case "TR":
                 node = new HTMLTableRowElement(this);break;
             case "UL":
-                node = new HTMLElement(this);break;
+                node = new HTMLULElement(this);break;
             default:
                 node = new HTMLUnknownElement(this);
         }
@@ -245,17 +251,17 @@ __extend__(HTMLDocument.prototype, {
      *
      */
     get location() {
-	if (this.ownerWindow) {
+        if (this.ownerWindow) {
             return this.ownerWindow.location;
-	} else {
-	    return this.baseURI;
-	}
+        } else {
+            return this.baseURI;
+        }
     },
     set location(url) {
-	this.baseURI = url;
-	if (this.ownerWindow) {
+        this.baseURI = url;
+        if (this.ownerWindow) {
             this.ownerWindow.location = url;
-	}
+        }
     },
 
     /**
@@ -307,7 +313,7 @@ __extend__(HTMLDocument.prototype, {
     },
 
     get forms(){
-	return new HTMLCollection(this.getElementsByTagName('form'));
+        return new HTMLCollection(this.getElementsByTagName('form'));
     },
     get images(){
         return new HTMLCollection(this.getElementsByTagName('img'));
@@ -327,34 +333,36 @@ __extend__(HTMLDocument.prototype, {
         var all = this.getElementsByTagName('*');
         for (var i=0; i < all.length; i++) {
             node = all[i];
-            if (node.nodeType == Node.ELEMENT_NODE && 
+            if (node.nodeType == Node.ELEMENT_NODE &&
                 node.getAttribute('name') == name) {
                 retNodes.push(node);
             }
         }
         return retNodes;
-	},
+        },
     toString: function(){
-	return "[object HTMLDocument]";
+        return "[object HTMLDocument]";
     },
     get innerHTML(){
-	return this.documentElement.outerHTML;
+        return this.documentElement.outerHTML;
     },
 
 });
 
 
-Aspect.around({ 
-    target: Node,  
+Aspect.around({
+    target: Node,
     method:"appendChild"
 }, function(invocation) {
     var event,
         okay,
         node = invocation.proceed(),
         doc = node.ownerDocument;
+
+    console.log('element appended: %s %s', node+'', node.namespaceURI);
     if((node.nodeType !== Node.ELEMENT_NODE)){
         //for now we are only handling element insertions.  probably we will need
-        //to handle text node changes to script tags and changes to src 
+        //to handle text node changes to script tags and changes to src
         //attributes
         return node;
     }
@@ -453,15 +461,15 @@ Aspect.around({
                     break;
             }//switch on ns
             break;
-        default: 
+        default:
             console.log('element appended: %s %s', node+'', node.namespaceURI);
     }//switch on doc.parsing
     return node;
 
 });
 
-Aspect.around({ 
-    target: Node,  
+Aspect.around({
+    target: Node,
     method:"removeChild"
 }, function(invocation) {
     var event,
@@ -470,7 +478,7 @@ Aspect.around({
         doc = node.ownerDocument;
     if((node.nodeType !== Node.ELEMENT_NODE)){
         //for now we are only handling element insertions.  probably we will need
-        //to handle text node changes to script tags and changes to src 
+        //to handle text node changes to script tags and changes to src
         //attributes
         if(node.nodeType !== Node.DOCUMENT_NODE && node.uuid){
             //console.log('removing event listeners, %s', node, node.uuid);
@@ -479,7 +487,7 @@ Aspect.around({
         return node;
     }
     //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
-    
+
     switch(doc.parsing){
         case true:
             //handled by parser if included
@@ -521,7 +529,7 @@ Aspect.around({
                     break;
             }//switch on ns
             break;
-        default: 
+        default:
             console.log('element appended: %s %s', node+'', node.namespaceURI);
     }//switch on doc.parsing
     return node;

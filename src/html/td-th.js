@@ -1,7 +1,10 @@
 
 /**
- * HTMLTableCellElement - DOM Level 2
- * Implementation Provided by Steven Wood
+ * HTMLTableCellElement
+ * base interface for TD and TH
+ *
+ * HTML5: 4.9.11 Attributes common to td and th elements
+ * http://dev.w3.org/html5/spec/Overview.html#htmltablecellelement
  */
 HTMLTableCellElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
@@ -9,19 +12,52 @@ HTMLTableCellElement = function(ownerDocument) {
 HTMLTableCellElement.prototype = new HTMLElement;
 __extend__(HTMLTableCellElement.prototype, {
 
-    // TODO :
+
+    // TOOD: attribute unsigned long  colSpan;
+    // TODO: attribute unsigned long  rowSpan;
+    // TODO: attribute DOMString      headers;
+    // TODO: readonly attribute long  cellIndex;
+
+    // Not really necessary but might be helpful in debugging
+    toString: function() {
+	return '[object HTMLTableCellElement]';
+    }
 
 });
 
-// NOTE:
-// HTMLTableCellElement isn't directly used.
-// http://dev.w3.org/html5/spec/Overview.html#the-th-element
-// HTMLTableHeaderCellElement (td) inherits from it
-//  and adds "scope"
-//  remember to change the "toString"
+/**
+ * HTMLTableDataCellElement
+ * HTML5: 4.9.9 The td Element
+ * http://dev.w3.org/html5/spec/Overview.html#the-td-element
+ */
+HTMLTableDataCellElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableDataCellElement.prototype = new HTMLTableCellElement;
+__extend__(HTMLTableDataCellElement.prototype, {
 
-//
-// http://dev.w3.org/html5/spec/Overview.html#the-td-element
-// td just inherits from HTMLTableCellElement, but adds nothing
-//  remember to change the "toString"
-//
+    // adds no new properties or methods
+
+    toString: function() {
+	return '[object HTMLTableDataCellElement]';
+    }
+});
+
+/**
+ * HTMLTableHeaderCellElement
+ * HTML5: 4.9.10 The th Element
+ * http://dev.w3.org/html5/spec/Overview.html#the-th-element
+ */
+HTMLTableHeaderCellElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableHeaderCellElement.prototype = new HTMLTableCellElement;
+__extend__(HTMLTableHeaderCellElement.prototype, {
+
+    // TODO:  attribute DOMString scope
+
+    toString: function() {
+	return '[object HTMLTableHeaderCellElement]';
+    }
+});
+
