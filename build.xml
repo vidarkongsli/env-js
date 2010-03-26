@@ -409,6 +409,7 @@
             <fileset dir="${SRC_DIR}" includes="html/frameset.js" />
             <fileset dir="${SRC_DIR}" includes="html/h1.js" />
             <fileset dir="${SRC_DIR}" includes="html/head.js" />
+            <fileset dir="${SRC_DIR}" includes="html/hr.js" />
             <fileset dir="${SRC_DIR}" includes="html/html.js" />
             <fileset dir="${SRC_DIR}" includes="html/iframe.js" />
             <fileset dir="${SRC_DIR}" includes="html/image.js" />

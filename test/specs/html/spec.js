@@ -2,13 +2,14 @@ module('html');
 
 test('HTML Interfaces Available', function(){
 
-    expect(41);
+    expect(51);
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
     ok(HTMLCollection,          'HTMLCollection defined');
     ok(HTMLAnchorElement,       'HTMLAnchorElement defined');
     ok(HTMLAreaElement,         'HTMLAreaElement defined');
     ok(HTMLBaseElement,         'HTMLBaseElement defined');
+    ok(HTMLBRElement,           'HTMLBRElement defined');
     ok(HTMLQuoteElement,        'HTMLQuoteElement defined');
     ok(HTMLBodyElement,         'HTMLBodyElement defined');
     ok(HTMLButtonElement,       'HTMLButtonElement defined');
@@ -16,20 +17,26 @@ test('HTML Interfaces Available', function(){
     ok(HTMLTableColElement,     'HTMLTableColElement defined');
     ok(HTMLModElement,          'HTMLModElement defined');
     ok(HTMLDivElement,          'HTMLDivElement defined');
+    ok(HTMLDListElement,        'HTMLDListElement defined');
     ok(HTMLFieldSetElement,     'HTMLFieldSetElement defined');
     ok(HTMLFormElement,         'HTMLFormElement defined');
     ok(HTMLFrameElement,        'HTMLFrameElement defined');
     ok(HTMLFrameSetElement,     'HTMLFrameSetElement defined');
     ok(HTMLHeadElement,         'HTMLHeadElement defined');
+    ok(HTMLHeadingElement,      'HTMLHeadingElement defined');
+    ok(HTMLHRElement,           'HTMLHRElement defined');
+    ok(HTMLHtmlElement,         'HTMLHtmElement defined');
     ok(HTMLIFrameElement,       'HTMLIFrameElement defined');
     ok(HTMLImageElement,        'HTMLImageElement defined');
     ok(HTMLInputElement,        'HTMLInputElement defined');
     ok(HTMLLabelElement,        'HTMLLabelElement defined');
+    ok(HTMLLIElement,           'HTMLLIElement defined');
     ok(HTMLLegendElement,       'HTMLLegendElement defined');
     ok(HTMLLinkElement,         'HTMLLinkElement defined');
     ok(HTMLMapElement,          'HTMLMapElement defined');
     ok(HTMLMetaElement,         'HTMLMetaElement defined');
     ok(HTMLObjectElement,       'HTMLObjectElement defined');
+    ok(HTMLOListElement,        'HTMLOListElement defined');
     ok(HTMLOptGroupElement,     'HTMLOptGroupElement defined');
     ok(HTMLOptionElement,       'HTMLOptionElement defined');
     ok(HTMLParamElement,        'HTMLParamElement defined');
@@ -39,9 +46,12 @@ test('HTML Interfaces Available', function(){
     ok(HTMLTableElement,        'HTMLTableElement defined');
     ok(HTMLTableSectionElement, 'HTMLTableSectionElement defined');
     ok(HTMLTableCellElement,    'HTMLTableCellElement defined');
+    ok(HTMLTableDataCellElement,    'HTMLTableDataCellElement defined');
+    ok(HTMLTableHeaderCellElement,  'HTMLTableHeaderCellElement defined');
     ok(HTMLTableRowElement,     'HTMLTableRowElement defined');
     ok(HTMLTextAreaElement,     'HTMLTextAreaElement defined');
     ok(HTMLTitleElement,        'HTMLTitleElement defined');
+    ok(HTMLUListElement,        'HTMLUListElement defined');
     ok(HTMLUnknownElement,      'HTMLUnknownElement defined');
 
     // Image has a constructor, that implements the HTMLImageElement interface
