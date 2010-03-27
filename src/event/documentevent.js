@@ -45,7 +45,7 @@ DocumentEvent.prototype.__EventMap__ = {
 DocumentEvent.prototype.createEvent = function(eventType) {
     var clazz = this.__EventMap__[eventType];
     if (clazz) {
-	return new clazz();
+        return new clazz();
     }
     throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
 };
