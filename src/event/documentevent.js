@@ -18,8 +18,8 @@ DocumentEvent.prototype.createEvent = function(eventType) {
         break;
     case 'HTMLEvent':
     case 'HTMLEvents':
-	// Safari4: accepts HTMLEvents, but not HTMLEvent
-	// Firefox3.6: accepts HTMLEvents, but not HTMLEvent
+        // Safari4: accepts HTMLEvents, but not HTMLEvent
+        // Firefox3.6: accepts HTMLEvents, but not HTMLEvent
         return new Event();
         break;
     case 'UIEvent':
@@ -32,17 +32,17 @@ DocumentEvent.prototype.createEvent = function(eventType) {
         break;
     case 'KeyEvent':
     case 'KeyEvents':
-	// Safari4: both not accepted
-	// Firefox3.6, only KeyEvents is accepted
+        // Safari4: both not accepted
+        // Firefox3.6, only KeyEvents is accepted
         return new KeyboardEvent();
         break;
     case 'KeyboardEvent':
     case 'KeyboardEvents':
-	// Safari4: both accepted
-	// Firefox3.6: none accepted
+        // Safari4: both accepted
+        // Firefox3.6: none accepted
         return new KeyboardEvent();
         break;
-	case
+    case
     case 'MutationEvent':
     case 'MutationEvents':
         return new MutationEvent();
