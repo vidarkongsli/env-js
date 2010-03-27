@@ -33,7 +33,7 @@
  *       .selected
  *       .text
  *       .value   // unique implementation, not duplicated
- *
+ *       .form    // unique implementation, not duplicated
  *  ****
  *
  *    HTMLTypeValueInputs:  common to remaining elements

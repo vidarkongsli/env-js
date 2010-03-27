@@ -2,7 +2,7 @@ module('html');
 
 test('HTML Interfaces Available', function(){
 
-    expect(51);
+    expect(52);
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
     ok(HTMLCollection,          'HTMLCollection defined');
@@ -60,7 +60,7 @@ test('HTML Interfaces Available', function(){
 
     // Option has a constructor and implements the HTMLOptionElement interface
     // http://dev.w3.org/html5/spec/Overview.html#the-option-element
-    //ok(Option,                  'Option defined');
+    ok(Option,                  'Option defined');
 });
 
 // mock the global document object if not available
@@ -395,6 +395,25 @@ test("Image", function() {
     equals(x.width, 0, 'bad width default to 0');
 });
 
-/*test("Option", function() {
-  var x = new Option();
-  });*/
+test("Option", function() {
+    var x = new Option();
+    equals(x.toString(), '[object HTMLOptionElement]', 'toString');
+    equals(x.form, null, 'get form is null');
+    equals(x.selected, false, 'selected is false');
+
+    x = new Option('text');
+    equals(x.text, 'text', 'text content');
+    equals(x.value, 'text', 'value attribute');
+    equals(x.selected, false, 'selected is false');
+
+    x = new Option('text', 'value');
+    equals(x.text, 'text', 'text content');
+    equals(x.value, 'value', 'value attribute');
+    equals(x.selected, false, 'selected is false');
+
+    // TODO: defaultSelect, and selected arguments
+    // Missing since logic to compute 'selectedness' is busted.
+    x = new Option('text', 'value', true);
+    x = new Option('text', 'value', true, true);
+
+});
