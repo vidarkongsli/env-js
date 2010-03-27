@@ -6,17 +6,17 @@
  */
 Envjs.proxy = function(scope, parent, aliasList){};
 
-Envjs.javaEnabled = false;   
+Envjs.javaEnabled = false;
 
-Envjs.tmpdir         = ''; 
-Envjs.os_name        = ''; 
-Envjs.os_arch        = ''; 
-Envjs.os_version     = ''; 
-Envjs.lang           = ''; 
+Envjs.tmpdir         = '';
+Envjs.os_name        = '';
+Envjs.os_arch        = '';
+Envjs.os_version     = '';
+Envjs.lang           = '';
 Envjs.platform       = '';//how do we get the version
-    
+
 /**
- * 
+ *
  * @param {Object} frameElement
  * @param {Object} url
  */
@@ -24,15 +24,15 @@ Envjs.loadFrame = function(frame, url){
     try {
         if(frame.contentWindow){
             //mark for garbage collection
-            frame.contentWindow = null; 
+            frame.contentWindow = null;
         }
-        
+
         //create a new scope for the window proxy
         //platforms will need to override this function
         //to make sure the scope is global-like
         frame.contentWindow = (function(){return this;})();
         new Window(frame.contentWindow, window);
-        
+
         //I dont think frames load asynchronously in firefox
         //and I think the tests have verified this but for
         //some reason I'm less than confident... Are there cases?
@@ -46,3 +46,8 @@ Envjs.loadFrame = function(frame, url){
         console.log("failed to load frame content: from %s %s", url, e);
     }
 };
+
+
+// The following are in rhino/window.js
+// TODO: Envjs.unloadFrame
+// TODO: Envjs.proxy

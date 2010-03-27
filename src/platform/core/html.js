@@ -8,7 +8,7 @@ Envjs.scriptTypes = {
     "text/javascript"   :false,
     "text/envjs"        :true
 };
-    
+
 /**
  * will be called when loading a script throws an error
  * @param {Object} script
@@ -45,13 +45,13 @@ Envjs.eval = function(context, source, name){};
  */
 Envjs.loadLocalScript = function(script){
     //console.log("loading script %s", script);
-    var types, 
-        src, 
-        i, 
-        base,
-        filename,
-        xhr;
-    
+    var types,
+    src,
+    i,
+    base,
+    filename,
+    xhr;
+
     if(script.type){
         types = script.type.split(";");
         for(i=0;i<types.length;i++){
@@ -65,7 +65,7 @@ Envjs.loadLocalScript = function(script){
             }
         }
     }
-    
+
     try{
         //console.log('handling inline scripts');
         if(!script.src.length){
@@ -77,11 +77,11 @@ Envjs.loadLocalScript = function(script){
         Envjs.onScriptLoadError(script, e);
         return false;
     }
-        
-        
+
+
     //console.log("loading allowed external script %s", script.src);
-    
-    //lets you register a function to execute 
+
+    //lets you register a function to execute
     //before the script is loaded
     if(Envjs.beforeScriptLoad){
         for(src in Envjs.beforeScriptLoad){
@@ -94,7 +94,7 @@ Envjs.loadLocalScript = function(script){
     //filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
     //console.log('loading script from base %s', base);
     filename = Envjs.uri(script.src, base);
-    try {          
+    try {
         xhr = new XMLHttpRequest();
         xhr.open("GET", filename, false/*syncronous*/);
         //console.log("loading external script %s", filename);
@@ -106,7 +106,7 @@ Envjs.loadLocalScript = function(script){
                     xhr.responseText,
                     filename
                 );
-            }    
+            }
         };
         xhr.send(null, false);
     } catch(e) {
@@ -114,7 +114,7 @@ Envjs.loadLocalScript = function(script){
         Envjs.onScriptLoadError(script, e);
         return false;
     }
-    //lets you register a function to execute 
+    //lets you register a function to execute
     //after the script is loaded
     if(Envjs.afterScriptLoad){
         for(src in Envjs.afterScriptLoad){
@@ -125,4 +125,3 @@ Envjs.loadLocalScript = function(script){
     }
     return true;
 };
-    

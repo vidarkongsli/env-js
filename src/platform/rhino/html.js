@@ -17,7 +17,7 @@ Envjs.loadInlineScript = function(script){
             'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
     }
-    //console.log('evaluated at scope %s \n%s', 
+    //console.log('evaluated at scope %s \n%s',
     //    script.ownerDocument.ownerWindow.guid, script.text);
 };
 

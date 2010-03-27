@@ -6,13 +6,13 @@
 try{
     Envjs.sync = sync;
     Envjs.spawn = spawn;
-}catch(e){
+} catch(e){
     //sync unavailable on AppEngine
     Envjs.sync = function(fn){
-        //console.log('Threadless platform, sync is safe'); 
+        //console.log('Threadless platform, sync is safe');
         return fn;
     };
-    
+
     Envjs.spawn = function(fn){
         //console.log('Threadless platform, spawn shares main thread.');
         return fn();
@@ -48,4 +48,3 @@ Envjs.onExit = function(callback){
         });
     contextFactory.addListener(listener);
 };
-

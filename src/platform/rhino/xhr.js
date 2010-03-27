@@ -1,5 +1,4 @@
 
-
 /**
  * resolves location relative to doc location
  *
@@ -12,30 +11,30 @@ Envjs.uri = function(path, base){
     // Semi-common trick is to make an iframe with src='javascript:false'
     //  (or some equivalent).  By returning '', the load is skipped
     if (path.indexOf('javascript') === 0) {
-	return '';
+        return '';
     }
 
     // if path is absolute, then just normalize and return
     if (path.match('^[a-zA-Z]+://')) {
-	return urlparse.urlnormalize(path);
+        return urlparse.urlnormalize(path);
     }
 
     // if base not passed in, try to get it from document
     // Ideally I would like the caller to pass in document.baseURI to
     //  make this more self-sufficient and testable
     if (!base && document) {
-	base = document.baseURI;
+        base = document.baseURI;
     }
 
     // about:blank doesn't count
     if (base === 'about:blank'){
-	base = '';
+        base = '';
     }
 
     // if base is still empty, then we are in QA mode loading local
     // files.  Get current working directory
     if (!base) {
-	base = 'file://' +  java.lang.System.getProperty("user.dir") + '/';
+        base = 'file://' +  java.lang.System.getProperty("user.dir") + '/';
     }
     // handles all cases if path is abosulte or relative to base
     // 3rd arg is "false" --> remove fragments
@@ -46,17 +45,17 @@ Envjs.uri = function(path, base){
 };
 
 /**
- * 
+ *
  * @param {Object} fn
  * @param {Object} onInterupt
  */
 Envjs.runAsync = function(fn, onInterupt){
     ////Envjs.debug("running async");
     var running = true,
-        run;
-    
+    run;
+
     try{
-        run = Envjs.sync(function(){ 
+        run = Envjs.sync(function(){
             fn();
             Envjs.wait();
         });
@@ -74,14 +73,14 @@ Envjs.runAsync = function(fn, onInterupt){
  */
 Envjs.writeToFile = function(text, url){
     //Envjs.debug("writing text to url : " + url);
-    var out = new java.io.FileWriter( 
-        new java.io.File( 
-            new java.net.URI(url.toString()))); 
+    var out = new java.io.FileWriter(
+        new java.io.File(
+            new java.net.URI(url.toString())));
     out.write( text, 0, text.length );
     out.flush();
     out.close();
 };
-    
+
 /**
  * Used to write to a local file
  * @param {Object} text
@@ -101,7 +100,7 @@ Envjs.writeToTempFile = function(text, suffix){
     out.close();
     return temp.getAbsolutePath().toString()+'';
 };
-    
+
 
 /**
  * Used to delete a local file
@@ -111,7 +110,7 @@ Envjs.deleteFile = function(url){
     var file = new java.io.File( new java.net.URI( url ) );
     file["delete"]();
 };
-    
+
 /**
  * establishes connection and calls responsehandler
  * @param {Object} xhr
@@ -120,7 +119,7 @@ Envjs.deleteFile = function(url){
  */
 Envjs.connection = function(xhr, responseHandler, data){
     var url = java.net.URL(xhr.url),
-        connection;
+    connection;
     if ( /^file\:/.test(url) ) {
         try{
             if ( xhr.method == "PUT" ) {
@@ -132,7 +131,7 @@ Envjs.connection = function(xhr, responseHandler, data){
                 connection = url.openConnection();
                 connection.connect();
                 //try to add some canned headers that make sense
-                
+
                 try{
                     if(xhr.url.match(/html$/)){
                         xhr.responseHeaders["Content-Type"] = 'text/html';
@@ -145,9 +144,9 @@ Envjs.connection = function(xhr, responseHandler, data){
                     }else{
                         xhr.responseHeaders["Content-Type"] = 'text/plain';
                     }
-                //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
-                //xhr.responseHeaders['Content-Length'] = headerValue+'';
-                //xhr.responseHeaders['Date'] = new Date()+'';*/
+                    //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
+                    //xhr.responseHeaders['Content-Length'] = headerValue+'';
+                    //xhr.responseHeaders['Date'] = new Date()+'';*/
                 }catch(e){
                     console.log('failed to load response headers',e);
                 }
@@ -159,23 +158,23 @@ Envjs.connection = function(xhr, responseHandler, data){
             xhr.statusText = "Local File Protocol Error";
             xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
         }
-    } else { 
+    } else {
         connection = url.openConnection();
         connection.setRequestMethod( xhr.method );
-        
+
         // Add headers to Java connection
         for (var header in xhr.headers){
             connection.addRequestProperty(header+'', xhr.headers[header]+'');
         }
-        
+
         //write data to output stream if required
         if(data){
             if(data instanceof Document){
                 if ( xhr.method == "PUT" || xhr.method == "POST" ) {
                     connection.setDoOutput(true);
                     var outstream = connection.getOutputStream(),
-                        xml = (new XMLSerializer()).serializeToString(data),
-                        outbuffer = new java.lang.String(xml).getBytes('UTF-8');
+                    xml = (new XMLSerializer()).serializeToString(data),
+                    outbuffer = new java.lang.String(xml).getBytes('UTF-8');
                     outstream.write(outbuffer, 0, outbuffer.length);
                     outstream.close();
                 }
@@ -183,7 +182,7 @@ Envjs.connection = function(xhr, responseHandler, data){
                 if ( xhr.method == "PUT" || xhr.method == "POST" ) {
                     connection.setDoOutput(true);
                     var outstream = connection.getOutputStream(),
-                        outbuffer = new java.lang.String(data).getBytes('UTF-8');
+                    outbuffer = new java.lang.String(data).getBytes('UTF-8');
                     outstream.write(outbuffer, 0, outbuffer.length);
                     outstream.close();
                 }
@@ -193,48 +192,48 @@ Envjs.connection = function(xhr, responseHandler, data){
             connection.connect();
         }
     }
-    
+
     if(connection){
         try{
             var respheadlength = connection.getHeaderFields().size();
             // Stick the response headers into responseHeaders
-            for (var i = 0; i < respheadlength; i++) { 
-                var headerName = connection.getHeaderFieldKey(i); 
-                var headerValue = connection.getHeaderField(i); 
+            for (var i = 0; i < respheadlength; i++) {
+                var headerName = connection.getHeaderFieldKey(i);
+                var headerValue = connection.getHeaderField(i);
                 if (headerName)
                     xhr.responseHeaders[headerName+''] = headerValue+'';
             }
         }catch(e){
             console.log('failed to load response headers \n%s',e);
         }
-        
+
         xhr.readyState = 4;
         xhr.status = parseInt(connection.responseCode,10) || undefined;
         xhr.statusText = connection.responseMessage || "";
-        
+
         var contentEncoding = connection.getContentEncoding() || "utf-8",
-            baos = new java.io.ByteArrayOutputStream(),
-            buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
-            length,
-            stream = null,
-            responseXML = null;
+        baos = new java.io.ByteArrayOutputStream(),
+        buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+        length,
+        stream = null,
+        responseXML = null;
 
         try{
-            stream = (contentEncoding.equalsIgnoreCase("gzip") || 
+            stream = (contentEncoding.equalsIgnoreCase("gzip") ||
                       contentEncoding.equalsIgnoreCase("decompress") )?
                 new java.util.zip.GZIPInputStream(connection.getInputStream()) :
                 connection.getInputStream();
         }catch(e){
             if (connection.getResponseCode() == 404){
                 console.log('failed to open connection stream \n %s %s',
-                          e.toString(), e);
+                            e.toString(), e);
             }else{
                 console.log('failed to open connection stream \n %s %s',
-                           e.toString(), e);
+                            e.toString(), e);
             }
             stream = connection.getErrorStream();
         }
-        
+
         while ((length = stream.read(buffer)) != -1) {
             baos.write(buffer, 0, length);
         }
@@ -244,7 +243,7 @@ Envjs.connection = function(xhr, responseHandler, data){
 
         xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
             decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-            
+
     }
     if(responseHandler){
         //Envjs.debug('calling ajax response handler');

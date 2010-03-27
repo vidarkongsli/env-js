@@ -10,7 +10,7 @@ Envjs.sync = function(fn){};
  * @param {Object} millseconds
  */
 Envjs.sleep = function(millseconds){};
-    
+
 /**
  * Interval to wait on event loop when nothing is happening
  */

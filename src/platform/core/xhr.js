@@ -5,8 +5,7 @@
  * @param {Object} base
  */
 Envjs.uri = function(path, base){};
-    
-    
+
 /**
  * Used in the XMLHttpRquest implementation to run a
  * request in a seperate thread
@@ -43,7 +42,3 @@ Envjs.deleteFile = function(url){};
  * @param {Object} data
  */
 Envjs.connection = function(xhr, responseHandler, data){};
-
-
-    
-    
