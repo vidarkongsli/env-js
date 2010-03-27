@@ -7,49 +7,47 @@
  *   Event createEvent (in DOMString eventType)
  *      raises (DOMException);
  * };
+ *
+ * Firefox (3.6) exposes DocumentEvent
+ * Safari (4) does NOT.
+ *
+ * Not sure we need a full prototype.
  */
+
+
 DocumentEvent = function(){};
-DocumentEvent.prototype.createEvent = function(eventType) {
-    //console.debug('createEvent(%s)', eventType);
-    switch (eventType) {
-    case 'Event':
-    case 'Events':
-        return new Event();
-        break;
-    case 'HTMLEvent':
-    case 'HTMLEvents':
-        // Safari4: accepts HTMLEvents, but not HTMLEvent
-        // Firefox3.6: accepts HTMLEvents, but not HTMLEvent
-        return new Event();
-        break;
-    case 'UIEvent':
-    case 'UIEvents':
-        return new UIEvent();
-        break;
-    case 'MouseEvent':
-    case 'MouseEvents':
-        return new MouseEvent();
-        break;
-    case 'KeyEvent':
-    case 'KeyEvents':
-        // Safari4: both not accepted
-        // Firefox3.6, only KeyEvents is accepted
-        return new KeyboardEvent();
-        break;
-    case 'KeyboardEvent':
-    case 'KeyboardEvents':
-        // Safari4: both accepted
-        // Firefox3.6: none accepted
-        return new KeyboardEvent();
-        break;
-    case
-    case 'MutationEvent':
-    case 'MutationEvents':
-        return new MutationEvent();
-        break;
-    default:
-        throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
-    }
+DocumentEvent.prototype.__EventMap__ = {
+    'Event'          : Event,
+    'Events'         : Event,
+    'UIEvent'        : UIEvent,
+    'UIEvents'       : UIEvent,
+    'MouseEvent'     : MouseEvent,
+    'MouseEvents'    : MouseEvent,
+    'MutationEvent'  : MutationEvent,
+    'MutationEvents' : MutationEvent,
+
+    // Safari4: accepts HTMLEvents, but not HTMLEvent
+    // Firefox3.6: accepts HTMLEvents, but not HTMLEvent
+    'HTMLEvent'      : Event,
+    'HTMLEvents'     : Event,
+
+    // Safari4: both not accepted
+    // Firefox3.6, only KeyEvents is accepted
+    'KeyEvent'       : KeyboardEvent,
+    'KeyEvents'      : KeyboardEvent,
+
+    // Safari4: both accepted
+    // Firefox3.6: none accepted
+    'KeyboardEvent'  : KeyboardEvent,
+    'KeyboardEvents' : KeyboardEvent
 };
 
-Document.prototype.createEvent = DocumentEvent.prototype.createEvent;
+DocumentEvent.prototype.createEvent = function(eventType) {
+    var clazz = this.__EventMap__[eventType];
+    if (clazz) {
+	return new clazz();
+    }
+    throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
+};
+
+__extend__(Document.prototype, DocumentEvent.prototype);

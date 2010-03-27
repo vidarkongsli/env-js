@@ -297,7 +297,6 @@
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
             <fileset dir="${SRC_DIR}" includes="event/aspect.js" />
-            <fileset dir="${SRC_DIR}" includes="event/documentevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/eventtarget.js" />
             <fileset dir="${SRC_DIR}" includes="event/event.js" />
             <fileset dir="${SRC_DIR}" includes="event/uievent.js" />
@@ -305,6 +304,7 @@
             <fileset dir="${SRC_DIR}" includes="event/keyboardevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/mutationevent.js" />
             <fileset dir="${SRC_DIR}" includes="event/eventexception.js" />
+            <fileset dir="${SRC_DIR}" includes="event/documentevent.js" />
             <fileset dir="${SRC_DIR}" includes="common/outro.js" />
         </concat>
         <echo message="Finished Building ${EVENT_DIST}"/>
