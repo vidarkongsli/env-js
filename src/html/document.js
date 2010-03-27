@@ -54,8 +54,8 @@ __extend__(HTMLDocument.prototype, {
                 node = new HTMLDivElement(this);break;
             case "DL":
                 node = new HTMLDListElement(this);break;
-	    case "DT":
-	        node = new HTMLElement(this); break
+            case "DT":
+                node = new HTMLElement(this); break
             case "FIELDSET":
                 node = new HTMLFieldSetElement(this);break;
             case "FORM":
@@ -102,8 +102,8 @@ __extend__(HTMLDocument.prototype, {
                 node = new HTMLObjectElement(this);break;
             case "OPTGROUP":
                 node = new HTMLOptGroupElement(this);break;
-	    case "OL":
-	        node = new HTMLOListElement(this); break;
+            case "OL":
+                node = new HTMLOListElement(this); break;
             case "OPTION":
                 node = new HTMLOptionElement(this);break;
             case "P":
@@ -359,7 +359,7 @@ Aspect.around({
         node = invocation.proceed(),
         doc = node.ownerDocument;
 
-    console.log('element appended: %s %s', node+'', node.namespaceURI);
+    //console.log('element appended: %s %s', node+'', node.namespaceURI);
     if((node.nodeType !== Node.ELEMENT_NODE)){
         //for now we are only handling element insertions.  probably we will need
         //to handle text node changes to script tags and changes to src
