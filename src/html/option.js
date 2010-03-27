@@ -32,25 +32,25 @@ __extend__(HTMLOptionElement.prototype, {
      * element. Otherwise, it must return null.
      */
     get form() {
-	var parent = this.parentNode;
-	if (!parent) {
-	    return null;
-	}
-	if (parent.tagName === 'SELECT') {
-	    return parent.form;
-	}
-	if (parent.tagName === 'COLGROUP') {
-	    parent = parent.parentNode;
-	    if (parent && parent.tagName === 'SELECT') {
-		return parent.form;
-	    }
-	}
-	return null;
+        var parent = this.parentNode;
+        if (!parent) {
+            return null;
+        }
+        if (parent.tagName === 'SELECT') {
+            return parent.form;
+        }
+        if (parent.tagName === 'COLGROUP') {
+            parent = parent.parentNode;
+            if (parent && parent.tagName === 'SELECT') {
+                return parent.form;
+            }
+        }
+        return null;
     },
     get index() {
         var options = this.parentNode.childNodes,
-            index = 0,
-	    i;
+        index = 0,
+        i;
 
         for (i=0; i < options.length; i++) {
             if (options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION") {
@@ -58,7 +58,7 @@ __extend__(HTMLOptionElement.prototype, {
             }
             if (this == options[i]) {
                 return index;
-	    }
+            }
         }
         return -1;
     },
@@ -77,12 +77,12 @@ __extend__(HTMLOptionElement.prototype, {
      *  but not entirely.
      */
     get selected() {
-	// if disabled, return false
+        // if disabled, return false
 
         return (this.getAttribute('selected')=='selected');
     },
     set selected(value) {
-	// if disabled, ignore? or error?
+        // if disabled, ignore? or error?
 
         //console.log('option set selected %s', value);
         if(this.defaultSelected===null && this.selected!==null) {
@@ -128,7 +128,7 @@ Option = function(text, value, defaultSelected, selected) {
     HTMLOptionElement.apply(this, [document]);
 
     if (arguments.length >= 1) {
-	this.appendChild(document.createTextNode('' + text));
+        this.appendChild(document.createTextNode('' + text));
     }
     if (arguments.length >= 2) {
         this.value = value;
