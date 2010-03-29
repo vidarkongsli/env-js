@@ -124,7 +124,7 @@ var inputElements_status = {};
 
 var inputElements_onchange = {
     onchange: function(event){
-        __eval__(this.getAttribute('onchange')||'', this)
+        __eval__(this.getAttribute('onchange')||'', this);
     }
 };
 

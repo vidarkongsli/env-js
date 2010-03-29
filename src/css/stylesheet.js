@@ -14,26 +14,26 @@ CSSStyleSheet = function(options){
         //$debug("parsing css");
         //this is pretty ugly, but text is the entire text of a stylesheet
         var cssRules = [];
-    	if (!text) text = "";
-    	text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
-    	// TODO: @import ?
-    	var blocks = text.split("}");
-    	blocks.pop();
-    	var i, len = blocks.length;
-    	var definition_block, properties, selectors;
-    	for (i=0; i<len; i++){
-    		definition_block = blocks[i].split("{");
-    		if(definition_block.length === 2){
-          		selectors = definition_block[0].split(",");
-          		for(var j=0;j<selectors.length;j++){
-          		    cssRules.push(new CSSRule({
-          		        selectorText:selectors[j],
-          		        cssText:definition_block[1]
-          		    }));
-          		}
-          		__setArray__($cssRules, cssRules);
-    		}
-    	}
+        if (!text) text = "";
+        text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
+        // TODO: @import ?
+        var blocks = text.split("}");
+        blocks.pop();
+        var i, len = blocks.length;
+        var definition_block, properties, selectors;
+        for (i=0; i<len; i++){
+                definition_block = blocks[i].split("{");
+                if(definition_block.length === 2){
+                        selectors = definition_block[0].split(",");
+                        for(var j=0;j<selectors.length;j++){
+                            cssRules.push(new CSSRule({
+                                selectorText:selectors[j],
+                                cssText:definition_block[1]
+                            }));
+                        }
+                        __setArray__($cssRules, cssRules);
+                }
+        }
     };
     parseStyleSheet(options.text);
     return __extend__(this, {

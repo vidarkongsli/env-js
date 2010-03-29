@@ -5,32 +5,32 @@
 HTMLElement = function(ownerDocument) {
     Element.apply(this, arguments);
 };
-HTMLElement.prototype = new Element;
+HTMLElement.prototype = new Element();
 //TODO: Not sure where HTMLEvents belongs in the chain
 //      but putting it here satisfies a lowest common 
 //      denominator.
 __extend__(HTMLElement.prototype, HTMLEvents.prototype);
 __extend__(HTMLElement.prototype, {
-	get className() { 
-	    return this.getAttribute("class")||''; 
+        get className() { 
+            return this.getAttribute("class")||''; 
     },
-	set className(value) { 
-	    return this.setAttribute("class",__trim__(value)); 
+        set className(value) { 
+            return this.setAttribute("class",__trim__(value)); 
     },
-	get dir() { 
-	    return this.getAttribute("dir")||"ltr"; 
+        get dir() { 
+            return this.getAttribute("dir")||"ltr"; 
     },
-	set dir(val) { 
-	    return this.setAttribute("dir",val); 
+        set dir(val) { 
+            return this.setAttribute("dir",val); 
     },
-	get id(){  
-	    return this.getAttribute('id'); 
+        get id(){  
+            return this.getAttribute('id'); 
     },
-	set id(id){  
-	    this.setAttribute('id', id); 
+        set id(id){  
+            this.setAttribute('id', id); 
     },
-	get innerHTML(){  
-	    var ret = "",
+        get innerHTML(){  
+            var ret = "",
             i;
         
         // create string containing the concatenation of the string 
@@ -50,42 +50,42 @@ __extend__(HTMLElement.prototype, {
         }
         return ret;
     },
-	get lang() { 
-	    return this.getAttribute("lang"); 
+        get lang() { 
+            return this.getAttribute("lang"); 
     },
-	set lang(val) { 
-	    return this.setAttribute("lang",val); 
+        set lang(val) { 
+            return this.setAttribute("lang",val); 
     },
-	get offsetHeight(){
-	    return Number((this.style["height"]||'').replace("px",""));
-	},
-	get offsetWidth(){
-	    return Number((this.style["width"]||'').replace("px",""));
-	},
-	offsetLeft: 0,
-	offsetRight: 0,
-	get offsetParent(){
-	    /* TODO */
-	    return;
+        get offsetHeight(){
+            return Number((this.style["height"]||'').replace("px",""));
+        },
+        get offsetWidth(){
+            return Number((this.style["width"]||'').replace("px",""));
+        },
+        offsetLeft: 0,
+        offsetRight: 0,
+        get offsetParent(){
+            /* TODO */
+            return;
     },
-	set offsetParent(element){
-	    /* TODO */
-	    return;
+        set offsetParent(element){
+            /* TODO */
+            return;
     },
-	scrollHeight: 0,
-	scrollWidth: 0,
-	scrollLeft: 0, 
-	scrollRight: 0,
-	get style(){
+        scrollHeight: 0,
+        scrollWidth: 0,
+        scrollLeft: 0, 
+        scrollRight: 0,
+        get style(){
         return this.getAttribute('style')||'';
-	},
-	get title() { 
-	    return this.getAttribute("title"); 
+        },
+        get title() { 
+            return this.getAttribute("title"); 
     },
-	set title(value) { 
-	    return this.setAttribute("title", value);
+        set title(value) { 
+            return this.setAttribute("title", value);
     },
-	get tabIndex(){
+        get tabIndex(){
         var tabindex = this.getAttribute('tabindex');
         if(tabindex!==null){
             return Number(tabindex);
@@ -98,9 +98,9 @@ __extend__(HTMLElement.prototype, {
             value = 0;
         this.setAttribute('tabindex',Number(value));
     },
-	get outerHTML(){ 
+        get outerHTML(){ 
         //Not in the specs but I'll leave it here for now.
-	    return this.xhtml; 
+            return this.xhtml; 
     },
     scrollIntoView: function(){
         /*TODO*/
@@ -146,7 +146,7 @@ __extend__(HTMLElement.prototype, {
             for(i=0;i< this.childNodes.length;i++){
                 ret += this.childNodes[i].xhtml ?
                            this.childNodes[i].xhtml : 
-                           this.childNodes[i].xml
+                           this.childNodes[i].xml;
             }
             ret += "</" + name + ">";
         }else{

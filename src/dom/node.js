@@ -1,4 +1,8 @@
 
+var __ownerDocument__ = function(node){
+    return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
+};
+
 /**
  * @class  Node - 
  *      The Node interface is the primary datatype for the entire 
@@ -719,9 +723,6 @@ var __isAncestor__ = function(target, node) {
     return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
 };
 
-var __ownerDocument__ = function(node){
-    return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
-};
 
 
 var __recursivelyGatherText__ = function(aNode) {

@@ -5,7 +5,7 @@
 HTMLImageElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLImageElement.prototype = new HTMLElement;
+HTMLImageElement.prototype = new HTMLElement();
 __extend__(HTMLImageElement.prototype, {
     get alt(){
         return this.getAttribute('alt');
@@ -14,7 +14,7 @@ __extend__(HTMLImageElement.prototype, {
         this.setAttribute('alt', value);
     },
     get height(){
-        return parseInt(this.getAttribute('height')) || 0;
+        return parseInt(this.getAttribute('height'), 10) || 0;
     },
     set height(value){
         this.setAttribute('height', value);
@@ -57,13 +57,13 @@ __extend__(HTMLImageElement.prototype, {
         }
     },
     get width(){
-        return parseInt(this.getAttribute('width')) || 0;
+        return parseInt(this.getAttribute('width'), 10) || 0;
     },
     set width(value){
         this.setAttribute('width', value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
+        __eval__(this.getAttribute('onload')||'', this);
     },
     toString: function(){
         return '[object HTMLImageElement]';
@@ -84,8 +84,8 @@ Image = function(width, height) {
     HTMLElement.apply(this, [document]);
     // Note: firefox will throw an error if the width/height
     //   is not an integer.  Safari just converts to 0 on error.
-    this.width = parseInt(width) || 0;
-    this.height = parseInt(height) || 0;
+    this.width = parseInt(width, 10) || 0;
+    this.height = parseInt(height, 10) || 0;
 };
-Image.prototype = new HTMLImageElement;
+Image.prototype = new HTMLImageElement();
 

@@ -15,7 +15,7 @@ Document = function(implementation, docParentWindow) {
     // The Document Type Declaration (see DocumentType) associated with this document
     this.doctype = null;
     // The DOMImplementation object that handles this document.
-    this.implementation = implementation
+    this.implementation = implementation;
 
     this.nodeName  = "#document";
     // initially false, set to true by parser

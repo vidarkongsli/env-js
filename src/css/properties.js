@@ -1,7 +1,28 @@
-
 /*
-* CSS2Properties - DOM Level 2 CSS
-*/
+ * CSS2Properties - DOM Level 2 CSS
+ */
+
+var __toCamelCase__ = function(name) {
+    //$info('__toCamelCase__'+name);
+    if(name){
+        return name.replace(/\-(\w)/g, function(all, letter){
+                return letter.toUpperCase();
+        });
+    }
+    return name;
+};
+
+var __toDashed__ = function(camelCaseName) {
+    //$info("__toDashed__"+camelCaseName);
+    if(camelCaseName){
+        return camelCaseName.replace(/[A-Z]/g, function(all) {
+                return "-" + all.toLowerCase();
+        });
+    }
+    return camelCaseName;
+};
+
+
 //var __cssproperties__ = 0;
 CSS2Properties = function(element){
     //console.log('css2properties %s', __cssproperties__++);
@@ -86,33 +107,13 @@ var __cssTextToStyles__ = function(css2props, cssText){
     var style, styles = cssText.split(';');
     for ( var i = 0; i < styles.length; i++ ) {
         //$log("Adding style property " + styles[i]);
-    	style = styles[i].split(':');
+        style = styles[i].split(':');
         //$log(" style  " + style[0]);
-    	if ( style.length == 2 ){
+        if ( style.length == 2 ){
             //$log(" value  " + style[1]);
-    	    css2props.setProperty( style[0].replace(" ",'','g'), style[1].replace(" ",'','g'));
-    	}
+            css2props.setProperty( style[0].replace(" ",'','g'), style[1].replace(" ",'','g'));
+        }
     }
-};
-
-var __toCamelCase__ = function(name) {
-    //$info('__toCamelCase__'+name);
-    if(name){
-    	return name.replace(/\-(\w)/g, function(all, letter){
-    		return letter.toUpperCase();
-    	});
-    }
-    return name;
-};
-
-var __toDashed__ = function(camelCaseName) {
-    //$info("__toDashed__"+camelCaseName);
-    if(camelCaseName){
-    	return camelCaseName.replace(/[A-Z]/g, function(all) {
-    		return "-" + all.toLowerCase();
-    	});
-    }
-    return camelCaseName;
 };
 
 //Obviously these arent all supported but by commenting out various sections
@@ -120,148 +121,148 @@ var __toDashed__ = function(camelCaseName) {
 var __supportedStyles__ = function(){
     return {
         azimuth:                null,
-        background:	            null,
-        backgroundAttachment:	null,
-        backgroundColor:	    'rgb(0,0,0)',
-        backgroundImage:	    null,
-        backgroundPosition:	    null,
-        backgroundRepeat:	    null,
-        border:	                null,
-        borderBottom:	        null,
-        borderBottomColor:	    null,
-        borderBottomStyle:	    null,
-        borderBottomWidth:	    null,
-        borderCollapse:	        null,
-        borderColor:	        null,
-        borderLeft:	            null,
-        borderLeftColor:	    null,
-        borderLeftStyle:	    null,
-        borderLeftWidth:	    null,
-        borderRight:	        null,
-        borderRightColor:	    null,
-        borderRightStyle:	    null,
-        borderRightWidth:	    null,
-        borderSpacing:	        null,
-        borderStyle:	        null,
-        borderTop:	            null,
-        borderTopColor:	        null,
-        borderTopStyle:	        null,
-        borderTopWidth:	        null,
-        borderWidth:	        null,
-        bottom:	                null,
-        captionSide:	        null,
-        clear:	                null,
-        clip:	                null,
-        color:	                null,
-        content:	            null,
-        counterIncrement:	    null,
-        counterReset:	        null,
-        cssFloat:	            null,
-        cue:	                null,
-        cueAfter:	            null,
-        cueBefore:	            null,
-        cursor:	                null,
-        direction:	            'ltr',
-        display:	            null,
-        elevation:	            null,
-        emptyCells:	            null,
-        font:	                null,
-        fontFamily:	            null,
-        fontSize:	            "1em",
-        fontSizeAdjust:	null,
-        fontStretch:	null,
-        fontStyle:	null,
-        fontVariant:	null,
-        fontWeight:	null,
-        height:	'',
-        left:	null,
-        letterSpacing:	null,
-        lineHeight:	null,
-        listStyle:	null,
-        listStyleImage:	null,
-        listStylePosition:	null,
-        listStyleType:	null,
-        margin:	null,
-        marginBottom:	"0px",
-        marginLeft:	"0px",
-        marginRight:	"0px",
-        marginTop:	"0px",
-        markerOffset:	null,
-        marks:	null,
-        maxHeight:	null,
-        maxWidth:	null,
-        minHeight:	null,
-        minWidth:	null,
-        opacity:	1,
-        orphans:	null,
-        outline:	null,
-        outlineColor:	null,
-        outlineOffset:	null,
-        outlineStyle:	null,
-        outlineWidth:	null,
-        overflow:	null,
-        overflowX:	null,
-        overflowY:	null,
-        padding:	null,
-        paddingBottom:	"0px",
-        paddingLeft:	"0px",
-        paddingRight:	"0px",
-        paddingTop:	"0px",
-        page:	null,
-        pageBreakAfter:	null,
-        pageBreakBefore:	null,
-        pageBreakInside:	null,
-        pause:	null,
-        pauseAfter:	null,
-        pauseBefore:	null,
-        pitch:	null,
-        pitchRange:	null,
-        position:	null,
-        quotes:	null,
-        richness:	null,
-        right:	null,
-        size:	null,
-        speak:	null,
-        speakHeader:	null,
-        speakNumeral:	null,
-        speakPunctuation:	null,
-        speechRate:	null,
-        stress:	null,
-        tableLayout:	null,
-        textAlign:	null,
-        textDecoration:	null,
-        textIndent:	null,
-        textShadow:	null,
-        textTransform:	null,
-        top:	null,
-        unicodeBidi:	null,
-        verticalAlign:	null,
-        visibility:	null,
-        voiceFamily:	null,
-        volume:	null,
-        whiteSpace:	null,
-        widows:	null,
-        width:	'1px',
-        wordSpacing:	null,
-        zIndex:	1
+        background:                 null,
+        backgroundAttachment:   null,
+        backgroundColor:            'rgb(0,0,0)',
+        backgroundImage:            null,
+        backgroundPosition:         null,
+        backgroundRepeat:           null,
+        border:                 null,
+        borderBottom:           null,
+        borderBottomColor:          null,
+        borderBottomStyle:          null,
+        borderBottomWidth:          null,
+        borderCollapse:         null,
+        borderColor:            null,
+        borderLeft:                 null,
+        borderLeftColor:            null,
+        borderLeftStyle:            null,
+        borderLeftWidth:            null,
+        borderRight:            null,
+        borderRightColor:           null,
+        borderRightStyle:           null,
+        borderRightWidth:           null,
+        borderSpacing:          null,
+        borderStyle:            null,
+        borderTop:                  null,
+        borderTopColor:         null,
+        borderTopStyle:         null,
+        borderTopWidth:         null,
+        borderWidth:            null,
+        bottom:                 null,
+        captionSide:            null,
+        clear:                  null,
+        clip:                   null,
+        color:                  null,
+        content:                    null,
+        counterIncrement:           null,
+        counterReset:           null,
+        cssFloat:                   null,
+        cue:                    null,
+        cueAfter:                   null,
+        cueBefore:                  null,
+        cursor:                 null,
+        direction:                  'ltr',
+        display:                    null,
+        elevation:                  null,
+        emptyCells:                 null,
+        font:                   null,
+        fontFamily:                 null,
+        fontSize:                   "1em",
+        fontSizeAdjust: null,
+        fontStretch:    null,
+        fontStyle:      null,
+        fontVariant:    null,
+        fontWeight:     null,
+        height: '',
+        left:   null,
+        letterSpacing:  null,
+        lineHeight:     null,
+        listStyle:      null,
+        listStyleImage: null,
+        listStylePosition:      null,
+        listStyleType:  null,
+        margin: null,
+        marginBottom:   "0px",
+        marginLeft:     "0px",
+        marginRight:    "0px",
+        marginTop:      "0px",
+        markerOffset:   null,
+        marks:  null,
+        maxHeight:      null,
+        maxWidth:       null,
+        minHeight:      null,
+        minWidth:       null,
+        opacity:        1,
+        orphans:        null,
+        outline:        null,
+        outlineColor:   null,
+        outlineOffset:  null,
+        outlineStyle:   null,
+        outlineWidth:   null,
+        overflow:       null,
+        overflowX:      null,
+        overflowY:      null,
+        padding:        null,
+        paddingBottom:  "0px",
+        paddingLeft:    "0px",
+        paddingRight:   "0px",
+        paddingTop:     "0px",
+        page:   null,
+        pageBreakAfter: null,
+        pageBreakBefore:        null,
+        pageBreakInside:        null,
+        pause:  null,
+        pauseAfter:     null,
+        pauseBefore:    null,
+        pitch:  null,
+        pitchRange:     null,
+        position:       null,
+        quotes: null,
+        richness:       null,
+        right:  null,
+        size:   null,
+        speak:  null,
+        speakHeader:    null,
+        speakNumeral:   null,
+        speakPunctuation:       null,
+        speechRate:     null,
+        stress: null,
+        tableLayout:    null,
+        textAlign:      null,
+        textDecoration: null,
+        textIndent:     null,
+        textShadow:     null,
+        textTransform:  null,
+        top:    null,
+        unicodeBidi:    null,
+        verticalAlign:  null,
+        visibility:     null,
+        voiceFamily:    null,
+        volume: null,
+        whiteSpace:     null,
+        widows: null,
+        width:  '1px',
+        wordSpacing:    null,
+        zIndex: 1
     };
 };
 
 var __displayMap__ = {
-		"DIV"      : "block",
-		"P"        : "block",
-		"A"        : "inline",
-		"CODE"     : "inline",
-		"PRE"      : "block",
-		"SPAN"     : "inline",
-		"TABLE"    : "table",
-		"THEAD"    : "table-header-group",
-		"TBODY"    : "table-row-group",
-		"TR"       : "table-row",
-		"TH"       : "table-cell",
-		"TD"       : "table-cell",
-		"UL"       : "block",
-		"LI"       : "list-item"
+                "DIV"      : "block",
+                "P"        : "block",
+                "A"        : "inline",
+                "CODE"     : "inline",
+                "PRE"      : "block",
+                "SPAN"     : "inline",
+                "TABLE"    : "table",
+                "THEAD"    : "table-header-group",
+                "TBODY"    : "table-row-group",
+                "TR"       : "table-row",
+                "TH"       : "table-cell",
+                "TD"       : "table-cell",
+                "UL"       : "block",
+                "LI"       : "list-item"
 };
 var __styleMap__ = __supportedStyles__();
 

@@ -234,9 +234,9 @@
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
             <fileset dir="${SRC_DIR}" includes="dom/nodelist.js" />
             <fileset dir="${SRC_DIR}" includes="dom/namednodemap.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
             <fileset dir="${SRC_DIR}" includes="dom/namespace.js" />
             <fileset dir="${SRC_DIR}" includes="dom/characterdata.js" />
             <fileset dir="${SRC_DIR}" includes="dom/text.js" />

@@ -56,7 +56,7 @@ __extend__(HTMLDocument.prototype, {
             case "DL":
                 node = new HTMLDListElement(this);break;
             case "DT":
-                node = new HTMLElement(this); break
+                node = new HTMLElement(this); break;
             case "FIELDSET":
                 node = new HTMLFieldSetElement(this);break;
             case "FORM":
@@ -167,8 +167,9 @@ __extend__(HTMLDocument.prototype, {
     //document.head is non-standard
     get head(){
         //console.log('get head');
-        if(!this.documentElement)
+        if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
+	}
         var element = this.documentElement,
             length = element.childNodes.length,
             i;
@@ -186,8 +187,9 @@ __extend__(HTMLDocument.prototype, {
     },
     get title(){
         //console.log('get title');
-        if(!this.documentElement)
+        if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
+	}
         var title,
             head = this.head,
             length = head.childNodes.length,
@@ -206,16 +208,18 @@ __extend__(HTMLDocument.prototype, {
     },
     set title(titleStr){
         //console.log('set title %s', titleStr);
-        if(!this.documentElement)
+        if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
+	}
         var title = this.title;
         title.textContent = titleStr;
     },
 
     get body(){
         //console.log('get body');
-        if(!this.documentElement)
+        if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
+	}
         var body,
             element = this.documentElement,
             length = element.childNodes.length,
