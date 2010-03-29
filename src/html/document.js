@@ -19,6 +19,7 @@ HTMLDocument.prototype = new Document;
 
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
+        var node;
         tagName = tagName.toUpperCase();
         // create Element specifying 'this' as ownerDocument
         // This is an html document so we need to use explicit interfaces per the
