@@ -1,6 +1,19 @@
 //These descriptions of window properties are taken loosely David Flanagan's
 //'JavaScript - The Definitive Guide' (O'Reilly)
 
+
+var __top__ = function(_scope){
+    var _parent = _scope.parent;
+    while (_scope && _parent && _scope !== _parent) {
+        if (_parent === _parent.parent) {
+            break;
+        }
+        _parent = _parent.parent;
+        //console.log('scope %s _parent %s', scope, _parent);
+    }
+    return _parent || null;
+}
+
 /**
  * Window
  * @param {Object} scope
@@ -215,7 +228,7 @@ Window = function(scope, parent, opener){
         // If this window is a frame, the top property refers to the top-level
         // window that contains the frame.
         get top(){
-            return __top__(scope)
+            return __top__(scope);
         },
         get window(){
             return this;
@@ -284,17 +297,6 @@ Window = function(scope, parent, opener){
 
 };
 
-var __top__ = function(_scope){
-    var _parent = _scope.parent;
-    while (_scope && _parent && _scope !== _parent) {
-        if (_parent === _parent.parent) {
-            break;
-        }
-        _parent = _parent.parent;
-        //console.log('scope %s _parent %s', scope, _parent);
-    }
-    return _parent || null;
-}
 
 var __windows__ = {};
 

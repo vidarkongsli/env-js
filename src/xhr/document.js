@@ -18,7 +18,8 @@ __extend__(Document.prototype,{
     set location(url){
         //very important or you will go into an infinite
         //loop when creating a xml document
-        if(url)
+        if(url) {
             this.location.replace(url);
+        }
     }
 });

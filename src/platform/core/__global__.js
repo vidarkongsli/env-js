@@ -1,5 +1,5 @@
 /*
- * Envjs @VERSION@ 
+ * Envjs @VERSION@
  * Pure JavaScript Browser Environment
  * By John Resig <http://ejohn.org/> and the Envjs Team
  * Copyright 2008-2010 John Resig, under the MIT License
@@ -11,13 +11,14 @@ var Envjs = function(){
         override = function(){
             for(i=0;i<arguments.length;i++){
                 for ( name in arguments[i] ) {
-                    var g = arguments[i].__lookupGetter__(name), 
+                    var g = arguments[i].__lookupGetter__(name),
                         s = arguments[i].__lookupSetter__(name);
                     if ( g || s ) {
-                        if ( g ) Envjs.__defineGetter__(name, g);
-                        if ( s ) Envjs.__defineSetter__(name, s);
-                    } else
+                        if ( g ) { Envjs.__defineGetter__(name, g); }
+                        if ( s ) { Envjs.__defineSetter__(name, s); }
+                    } else {
                         Envjs[name] = arguments[i][name];
+                    }
                 }
             }
         };
@@ -40,3 +41,4 @@ Envjs.appCodeName  = "Envjs";
 Envjs.appName      = "Resig/20070309 PilotFish/@BUILD_VERSION@";
 
 Envjs.version = "1.6";//?
+Envjs.revision = '';

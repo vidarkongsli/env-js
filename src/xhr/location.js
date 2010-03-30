@@ -69,7 +69,7 @@ Location = function(url, doc, history) {
         },
         set hostname(s) {
             if (!s || s === '') {
-                return '';
+                return;
             }
 
             parts.netloc = s;
