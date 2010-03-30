@@ -153,6 +153,7 @@ __extend__(HTMLElement.prototype, {
             switch(name){
                 case 'script':
                     ret += "<" + name + ns + attrstring +"></"+name+">";
+                    break;
                 default:
                     ret += "<" + name + ns + attrstring +"/>";
             }
