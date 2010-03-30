@@ -49,14 +49,15 @@ __extend__(HTMLOptionElement.prototype, {
     },
     get index() {
         var options = this.parentNode.childNodes,
-        index = 0,
-        i;
+            index = 0,
+            i, opt;
 
         for (i=0; i < options.length; i++) {
-            if (options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION") {
+            opt = options[i];
+            if (opt.nodeType === Node.ELEMENT_NODE && opt.tagName === "OPTION") {
                 index++;
             }
-            if (this == options[i]) {
+            if (this == opt) {
                 return index;
             }
         }
@@ -79,7 +80,7 @@ __extend__(HTMLOptionElement.prototype, {
     get selected() {
         // if disabled, return false
 
-        return (this.getAttribute('selected')=='selected');
+        return (this.getAttribute('selected') === 'selected');
     },
     set selected(value) {
         // if disabled, ignore? or error?
