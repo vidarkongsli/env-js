@@ -70,6 +70,7 @@
     <property name="CSS_DIST"       location="${DIST_DIR}/css.js" />
     <property name="WINDOW_DIST"    location="${DIST_DIR}/window.js" />
     <property name="ENV_DIST"       location="${DIST_DIR}/env.js" />
+    <property name="ENV_JSLINT"     location="${DIST_DIR}/env.jslint.js" />
     <property name="ENV_RHINO"      location="${DIST_DIR}/env.rhino.js"/>
 
     <echo message="     'DISTRIBUTABLES': {"/>
@@ -234,8 +235,8 @@
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
-            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
             <fileset dir="${SRC_DIR}" includes="dom/nodelist.js" />
+            <fileset dir="${SRC_DIR}" includes="dom/node.js" />
             <fileset dir="${SRC_DIR}" includes="dom/namednodemap.js" />
             <fileset dir="${SRC_DIR}" includes="dom/namespace.js" />
             <fileset dir="${SRC_DIR}" includes="dom/characterdata.js" />
@@ -565,6 +566,7 @@
             <fileset dir="${SRC_DIR}" includes="common/intro.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
+            <fileset dir="${SRC_DIR}" includes="common/__trim__.js" />
             <fileset dir="${SRC_DIR}" includes="css/properties.js" />
             <fileset dir="${SRC_DIR}" includes="css/rule.js" />
             <fileset dir="${SRC_DIR}" includes="css/stylesheet.js" />
@@ -635,6 +637,32 @@
             <jvmarg value="-Xmx256m"/>
         </java>
         <echo message=""/>
+    </target>
+
+    <target description="jslint quick build - no parser!"
+            name="jslint"
+            depends="dom, event, timer, html, xhr, css, window">
+        <echo message="Building ${ENV_JSLINT}" />
+        <concat destfile="${ENV_JSLINT}">
+            <filterchain>
+                <replacetokens>
+                    <token key="VERSION" value="${BUILD_VERSION}"/>
+                    <token key="BUILD_VERSION" value="${BUILD_VERSION}"/>
+                </replacetokens>
+            </filterchain>
+            <fileset dir="${DIST_DIR}" includes="platform/core.js" />
+            <fileset dir="${DIST_DIR}" includes="console.js" />
+            <fileset dir="${DIST_DIR}" includes="dom.js" />
+            <fileset dir="${DIST_DIR}" includes="event.js" />
+            <fileset dir="${DIST_DIR}" includes="timer.js" />
+            <fileset dir="${DIST_DIR}" includes="html.js" />
+            <fileset dir="${DIST_DIR}" includes="css.js" />
+            <!-- NO PARSER, jslint can't handle the truth! -->
+            <!-- <fileset dir="${DIST_DIR}" includes="parser.js" /> -->
+            <fileset dir="${DIST_DIR}" includes="xhr.js" />
+            <fileset dir="${DIST_DIR}" includes="window.js" />
+        </concat>
+        <echo message="${ENV_JSLINT} built." />
     </target>
 
     <target description="Main ENV build"
