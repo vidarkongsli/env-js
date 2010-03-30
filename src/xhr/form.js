@@ -205,9 +205,11 @@ var __fieldValues__ = function(inputs, successful) {
             (value.constructor == Array && !value.length)) {
             continue;
         }
-        value.constructor == Array ?
-            Array.prototype.push(values, value) :
+        if (value.constructor == Array) {
+            Array.prototype.push(values, value);
+        } else {
             values.push(value);
+        }
     }
     return values;
 };
@@ -240,17 +242,20 @@ var __fieldValue__ = function(element, successful) {
         one,
         i, imax,
         value;
-    if (typeof successful == 'undefined') successful = true;
+
+    if (typeof successful == 'undefined')  {
+        successful = true;
+    }
 
     if (successful && (!name || element.disabled || type == 'reset' || type == 'button' ||
              (type == 'checkbox' || type == 'radio') &&  !element.checked ||
              (type == 'submit' || type == 'image') &&
-             element.form && element.form.clk != element || tag == 'select' &&
-             element.selectedIndex == -1)) {
+             element.form && element.form.clk != element || tag === 'select' &&
+             element.selectedIndex === -1)) {
             return null;
     }
 
-    if (tag == 'select') {
+    if (tag === 'select') {
         index = element.selectedIndex;
         if (index < 0) {
             return null;
@@ -292,7 +297,7 @@ var __clearForm__ = function(form) {
         j, jmax,
         elements,
         resetable = ['input','select','textarea'];
-    for(i=0; i<resetable.lenth; i++){
+    for(i=0; i<resetable.length; i++){
         elements = form.getElementsByTagName(resetable[i]);
         jmax = elements.length;
         for(j=0;j<jmax;j++){
@@ -314,11 +319,11 @@ var __clearForm__ = function(form) {
 var __clearField__ = function(element) {
     var type = element.type,
         tag = element.tagName.toLowerCase();
-    if (type == 'text' || type == 'password' || tag == 'textarea') {
+    if (type == 'text' || type == 'password' || tag === 'textarea') {
         element.value = '';
     } else if (type == 'checkbox' || type == 'radio') {
         element.checked = false;
-    } else if (tag == 'select') {
+    } else if (tag === 'select') {
         element.selectedIndex = -1;
     }
 };
