@@ -1,20 +1,20 @@
 /**
- * 
+ *
  * @param {Object} event
  */
 __extend__(Envjs.defaultEventBehaviors,{
 
-    'submit': function(event){
+    'submit': function(event) {
         var target = event.target;
-        while(target.nodeName != 'FORM'){
+        while (target && target.nodeName !== 'FORM') {
             target = target.parentNode;
         }
-        if(target.nodeName == 'FORM'){
-            target.submit
-        }   
+        if (target && target.nodeName === 'FORM') {
+            target.submit();
+        }
     },
-    'click': function(event){
-        console.log('handling event target default behavior for click');
+    'click': function(event) {
+        // console.log('handling event target default behavior for click');
     }
 
 });
