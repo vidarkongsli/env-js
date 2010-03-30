@@ -15,7 +15,7 @@ HTMLDocument = function(implementation, ownerWindow, referrer) {
     this.head;
     this.body;
 };
-HTMLDocument.prototype = new Document;
+HTMLDocument.prototype = new Document();
 
 __extend__(HTMLDocument.prototype, {
     createElement: function(tagName){
@@ -138,7 +138,7 @@ __extend__(HTMLDocument.prototype, {
             case "TR":
                 node = new HTMLTableRowElement(this);break;
             case "UL":
-                node = new HTMLULElement(this);break;
+                node = new HTMLUListElement(this);break;
             default:
                 node = new HTMLUnknownElement(this);
         }
@@ -169,7 +169,7 @@ __extend__(HTMLDocument.prototype, {
         //console.log('get head');
         if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
-	}
+        }
         var element = this.documentElement,
             length = element.childNodes.length,
             i;
@@ -189,7 +189,7 @@ __extend__(HTMLDocument.prototype, {
         //console.log('get title');
         if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
-	}
+        }
         var title,
             head = this.head,
             length = head.childNodes.length,
@@ -210,7 +210,7 @@ __extend__(HTMLDocument.prototype, {
         //console.log('set title %s', titleStr);
         if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
-	}
+        }
         var title = this.title;
         title.textContent = titleStr;
     },
@@ -219,7 +219,7 @@ __extend__(HTMLDocument.prototype, {
         //console.log('get body');
         if (!this.documentElement) {
             this.appendChild(this.createElement('html'));
-	}
+        }
         var body,
             element = this.documentElement,
             length = element.childNodes.length,
@@ -309,7 +309,7 @@ __extend__(HTMLDocument.prototype, {
             newDomainParts = value.split('.').reverse();
         if(newDomainParts.length > 1){
             for(i=0;i<newDomainParts.length;i++){
-                if(!(newDomainParts[i] == domainParts[i])){
+                if(!(newDomainParts[i] === domainParts[i])){
                     return;
                 }
             }
@@ -338,7 +338,7 @@ __extend__(HTMLDocument.prototype, {
         var all = this.getElementsByTagName('*');
         for (var i=0; i < all.length; i++) {
             node = all[i];
-            if (node.nodeType == Node.ELEMENT_NODE &&
+            if (node.nodeType === Node.ELEMENT_NODE &&
                 node.getAttribute('name') == name) {
                 retNodes.push(node);
             }
@@ -386,7 +386,7 @@ Aspect.around({
                 case "http://www.w3.org/1999/xhtml":
                     switch(node.tagName.toLowerCase()){
                         case 'script':
-                            if((this.nodeName.toLowerCase() == 'head')){
+                            if((this.nodeName.toLowerCase() === 'head')){
                                 try{
                                     okay = Envjs.loadLocalScript(node, null);
                                     //console.log('loaded script? %s %s', node.uuid, okay);
