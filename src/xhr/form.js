@@ -331,7 +331,7 @@ var __clearField__ = function(element) {
 
 // Serialize an array of key/values into a query string
 var __param__= function( array ) {
-    var serialized = [];
+    var i, serialized = [];
 
     // Serialize the key/values
     for(i=0; i<array.length; i++){
