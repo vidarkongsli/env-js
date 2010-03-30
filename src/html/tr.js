@@ -9,7 +9,7 @@
 HTMLTableRowElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableRowElement.prototype = new HTMLElement;
+HTMLTableRowElement.prototype = new HTMLElement();
 __extend__(HTMLTableRowElement.prototype, {
 
     /*appendChild : function (child) {
@@ -46,10 +46,13 @@ __extend__(HTMLTableRowElement.prototype, {
         this.setAttribute("chOff", chOff);
     },
 
-    get chOff(chOff) {
+    get chOff() {
         return this.getAttribute("chOff");
     },
 
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#dom-tr-rowindex
+     */
     get rowIndex() {
         var nl = this.parentNode.childNodes;
         for (var i=0; i<nl.length; i++) {
@@ -57,8 +60,12 @@ __extend__(HTMLTableRowElement.prototype, {
                 return i;
             }
         }
+        return -1;
     },
 
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#dom-tr-sectionrowindex
+     */
     get sectionRowIndex() {
         var nl = this.parentNode.getElementsByTagName(this.tagName);
         for (var i=0; i<nl.length; i++) {
@@ -66,6 +73,7 @@ __extend__(HTMLTableRowElement.prototype, {
                 return i;
             }
         }
+        return -1;
     },
 
     get vAlign () {
@@ -112,4 +120,3 @@ __extend__(HTMLTableRowElement.prototype, {
     }
 
 });
-
