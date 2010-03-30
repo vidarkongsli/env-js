@@ -16,13 +16,13 @@ HTMLFormElement.prototype.submit = function(){
         if(xhr.readyState === 4){
             __exchangeHTMLDocument__(this.ownerDocument, xhr.responseText, url);
         }
-    }   
+    }
 }
 /**
  * Form Submissions
- * 
+ *
  * This code is borrow largely from jquery.params and jquery.form.js
- * 
+ *
  * formToArray() gathers form element data into an array of objects that can
  * be passed to any of the following ajax functions: $.get, $.post, or load.
  * Each object in the array has both a 'name' and 'value' property.  An example of
@@ -51,27 +51,29 @@ var __formToArray__ = function(form, semantic) {
         i,j,imax, jmax,
         name,
         value;
-        
-    if (!elements) 
+
+    if (!elements) {
         return array;
-    
+    }
+
     imax = elements.length;
     for(i=0; i < imax; i++) {
         element = elements[i];
         name = element.name;
-        if (!name) 
+        if (!name) {
             continue;
-
-        if (semantic && form.clk && element.type == "image") {
+        }
+        if (semantic && form.clk && element.type === "image") {
             // handle image inputs on the fly when semantic == true
-            if(!element.disabled && form.clk == element)
+            if(!element.disabled && form.clk == element) {
                 array.push({
-                    name: name+'.x', 
+                    name: name+'.x',
                     value: form.clk_x
                 },{
-                    name: name+'.y', 
+                    name: name+'.y',
                     value: form.clk_y
                 });
+            }
             continue;
         }
 
@@ -93,10 +95,11 @@ var __formToArray__ = function(form, semantic) {
         for(i=0; i < imax; i++) {
             element = elements[i];
             name = element.name;
-            if(name && !element.disabled && element.type == "image" && form.clk == input)
+            if(name && !element.disabled && element.type == "image" && form.clk == input) {
                 array.push(
-                    {name: name+'.x', value: form.clk_x}, 
+                    {name: name+'.x', value: form.clk_x},
                     {name: name+'.y', value: form.clk_y});
+            }
         }
     }
     return array;
@@ -142,25 +145,26 @@ var __fieldSerialize__ = function(inputs, successful) {
         name,
         value,
         i,j, imax, jmax;
-        
+
     imax = inputs.length;
     for(i=0; i<imax; i++){
         input = inputs[i];
         name = input.name;
-        if (!name) 
+        if (!name) {
             return;
+        }
         value = __fieldValue__(input, successful);
         if (value && value.constructor == Array) {
             jmax = value.length;
-            for (j=0; j < max; j++){
+            for (j=0; j < jmax; j++){
                 array.push({
-                    name: name, 
+                    name: name,
                     value: value[j]
                 });
             }
         }else if (value !== null && typeof value != 'undefined'){
             array.push({
-                name: input.name, 
+                name: input.name,
                 value: value
             });
         }
@@ -184,12 +188,12 @@ var __fieldSerialize__ = function(inputs, successful) {
  *
  *
  * @name fieldValue
- * @param Boolean successful true if only the values for successful controls 
+ * @param Boolean successful true if only the values for successful controls
  *        should be returned (default is true)
  * @type Array<String>
  */
 var __fieldValues__ = function(inputs, successful) {
-    var i, 
+    var i,
         imax = inputs.length,
         element,
         values = [],
@@ -197,11 +201,12 @@ var __fieldValues__ = function(inputs, successful) {
     for (i=0; i < imax; i++) {
         element = inputs[i];
         value = __fieldValue__(element, successful);
-        if (value === null || typeof value == 'undefined' || 
-            (value.constructor == Array && !value.length))
+        if (value === null || typeof value == 'undefined' ||
+            (value.constructor == Array && !value.length)) {
             continue;
-        value.constructor == Array ? 
-            Array.prototype.push(values, value) : 
+        }
+        value.constructor == Array ?
+            Array.prototype.push(values, value) :
             values.push(value);
     }
     return values;
@@ -225,8 +230,8 @@ var __fieldValues__ = function(inputs, successful) {
  * @type String or Array<String> or null or undefined
  */
 var __fieldValue__ = function(element, successful) {
-    var name = element.name, 
-        type = element.type, 
+    var name = element.name,
+        type = element.type,
         tag = element.tagName.toLowerCase(),
         index,
         array,
@@ -238,16 +243,18 @@ var __fieldValue__ = function(element, successful) {
     if (typeof successful == 'undefined') successful = true;
 
     if (successful && (!name || element.disabled || type == 'reset' || type == 'button' ||
-             (type == 'checkbox' || type == 'radio') &&  !element.checked || 
-             (type == 'submit' || type == 'image') && 
-             element.form && element.form.clk != element || tag == 'select' && 
-             element.selectedIndex == -1))
+             (type == 'checkbox' || type == 'radio') &&  !element.checked ||
+             (type == 'submit' || type == 'image') &&
+             element.form && element.form.clk != element || tag == 'select' &&
+             element.selectedIndex == -1)) {
             return null;
+    }
 
     if (tag == 'select') {
         index = element.selectedIndex;
-        if (index < 0) 
+        if (index < 0) {
             return null;
+        }
         array = [];
         options = element.options;
         one = (type == 'select-one');
@@ -257,8 +264,9 @@ var __fieldValue__ = function(element, successful) {
             option = options[i];
             if (option.selected) {
                 value = option.value;
-                if (one) 
+                if (one) {
                     return value;
+                }
                 array.push(value);
             }
         }
@@ -280,7 +288,7 @@ var __fieldValue__ = function(element, successful) {
  * @name clearForm
  */
 var __clearForm__ = function(form) {
-    var i, 
+    var i,
         j, jmax,
         elements,
         resetable = ['input','select','textarea'];
@@ -304,14 +312,15 @@ var __clearForm__ = function(form) {
  * @name clearFields
  */
 var __clearField__ = function(element) {
-    var type = element.type, 
+    var type = element.type,
         tag = element.tagName.toLowerCase();
-    if (type == 'text' || type == 'password' || tag == 'textarea')
+    if (type == 'text' || type == 'password' || tag == 'textarea') {
         element.value = '';
-    else if (type == 'checkbox' || type == 'radio')
+    } else if (type == 'checkbox' || type == 'radio') {
         element.checked = false;
-    else if (tag == 'select')
+    } else if (tag == 'select') {
         element.selectedIndex = -1;
+    }
 };
 
 
@@ -321,12 +330,11 @@ var __param__= function( array ) {
 
     // Serialize the key/values
     for(i=0; i<array.length; i++){
-        serialized[ serialized.length ] = 
-            encodeURIComponent(array[i].name) + '=' + 
+        serialized[ serialized.length ] =
+            encodeURIComponent(array[i].name) + '=' +
             encodeURIComponent(array[i].value);
     }
 
     // Return the resulting serialization
     return serialized.join("&").replace(/%20/g, "+");
 };
- 
