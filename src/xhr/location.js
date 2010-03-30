@@ -19,15 +19,8 @@
  *   from accessing most of the 'Location'
  *  Not sure if anyone implements this in HTML4
  */
-var HASH     = new RegExp('(\\#.*)'),
-HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
-PATHNAME = new RegExp('(\/[^\\?\\#]*)'),
-PORT     = new RegExp('\:(\\d+)\/'),
-PROTOCOL = new RegExp('(^\\w*\:)'),
-SEARCH   = new RegExp('(\\?[^\\#]*)');
 
-
-Location = function(url, doc, history){
+Location = function(url, doc, history) {
     //console.log('Location url %s', url);
     var $url = url,
     $document = doc ? doc : null,
@@ -37,33 +30,33 @@ Location = function(url, doc, history){
 
     return {
         get hash() {
-	    return parts.fragment ? '#' + parts.fragment : parts.fragment;
+            return parts.fragment ? '#' + parts.fragment : parts.fragment;
         },
         set hash(s) {
-	    if (s[0] === '#') {
-		parts.fragment = s.substr(1);
-	    } else {
-		parts.fragment = s;
-	    }
-	    $url = urlparse.urlunsplit(parts);
+            if (s[0] === '#') {
+                parts.fragment = s.substr(1);
+            } else {
+                parts.fragment = s;
+            }
+            $url = urlparse.urlunsplit(parts);
             if ($history) {
                 $history.add($url, 'hash');
             }
         },
 
         get host() {
-	    return parts.netloc;
+            return parts.netloc;
         },
         set host(s) {
-	    if (!s || s === '') {
-		return;
-	    }
+            if (!s || s === '') {
+                return;
+            }
 
-	    parts.netloc = s;
-	    $url = urlparse.urlunsplit(parts);
+            parts.netloc = s;
+            $url = urlparse.urlunsplit(parts);
 
-	    // this regenerates hostname & port
-	    parts = urlparse.urlsplit($url);
+            // this regenerates hostname & port
+            parts = urlparse.urlsplit($url);
 
             if ($history) {
                 $history.add( $url, 'host');
@@ -72,18 +65,18 @@ Location = function(url, doc, history){
         },
 
         get hostname() {
-	    return parts.hostname;
+            return parts.hostname;
         },
         set hostname(s) {
-	    if (!s || s === '') {
-		return '';
-	    }
+            if (!s || s === '') {
+                return '';
+            }
 
-	    parts.netloc = s;
-	    if (parts.port != '') {
-		parts.netloc += ':' + parts.port;
-	    }
-	    parts.hostname = s;
+            parts.netloc = s;
+            if (parts.port != '') {
+                parts.netloc += ':' + parts.port;
+            }
+            parts.hostname = s;
             $url = urlparse.urlunsplit(parts);
             if ($history) {
                 $history.add( $url, 'hostname');
@@ -103,14 +96,14 @@ Location = function(url, doc, history){
         },
 
         get pathname() {
-	    return parts.path;
+            return parts.path;
         },
         set pathname(s) {
-	    if (s[0] === '/') {
-		parts.path = s;
-	    } else {
-		parts.path = '/' + s;
-	    }
+            if (s[0] === '/') {
+                parts.path = s;
+            } else {
+                parts.path = '/' + s;
+            }
             $url = urlparse.urlunsplit(parts);
 
             if ($history) {
@@ -120,14 +113,14 @@ Location = function(url, doc, history){
         },
 
         get port() {
-	    // make sure it's a string
-	    return '' + parts.port;
+            // make sure it's a string
+            return '' + parts.port;
         },
         set port(p) {
-	    // make a string
-	    var s = '' + p;
-	    parts.port = s;
-	    parts.netloc = parts.hostname + ':' + parts.port;
+            // make a string
+            var s = '' + p;
+            parts.port = s;
+            parts.netloc = parts.hostname + ':' + parts.port;
             $url = urlparse.urlunsplit(parts);
             if ($history) {
                 $history.add( $url, 'port');
@@ -139,12 +132,12 @@ Location = function(url, doc, history){
             return parts.scheme + ':';
         },
         set protocol(s) {
-	    var i = s.indexOf(':');
-	    if (i != -1) {
-		s = s.substr(0,i);
-	    }
-	    parts.scheme = s;
-	    $url = urlparse.urlunsplit(parts);
+            var i = s.indexOf(':');
+            if (i != -1) {
+                s = s.substr(0,i);
+            }
+            parts.scheme = s;
+            $url = urlparse.urlunsplit(parts);
             if ($history) {
                 $history.add($url, 'protocol');
             }
@@ -152,13 +145,13 @@ Location = function(url, doc, history){
         },
 
         get search() {
-	    return (parts.query) ? '?' + parts.query : parts.query;
+            return (parts.query) ? '?' + parts.query : parts.query;
         },
         set search(s) {
-	    if (s[0] == '?') {
-		s = s.substr(1);
-	    }
-	    parts.query = s;
+            if (s[0] == '?') {
+                s = s.substr(1);
+            }
+            parts.query = s;
             $url = urlparse.urlunsplit(parts);
             if ($history) {
                 $history.add($url, 'search');
@@ -177,32 +170,35 @@ Location = function(url, doc, history){
             //console.log('assigning %s',url);
             $url = url;
             //we can only assign if this Location is associated with a document
-            if($document){
-                //console.log("fetching %s (async? %s)", url, $document.async);
+            if ($document) {
+                //console.log('fetching %s (async? %s)', url, $document.async);
                 xhr = new XMLHttpRequest();
-                xhr.open("GET", url, false);//$document.async);
 
-                if($document.toString()=="[object HTMLDocument]"){
+                // TODO: make async flag a Envjs paramter
+                xhr.open('GET', url, false);//$document.async);
+
+                // TODO: is there a better way to test if a node is an HTMLDocument?
+                if ($document.toString() === '[object HTMLDocument]') {
                     //tell the xhr to not parse the document as XML
-                    //console.log("loading html document");
-                    xhr.onreadystatechange = function(){
-                        //console.log("readyState %s", xhr.readyState);
-                        if(xhr.readyState === 4){
+                    //console.log('loading html document');
+                    xhr.onreadystatechange = function() {
+                        //console.log('readyState %s', xhr.readyState);
+                        if (xhr.readyState === 4) {
                             $document.baseURI = new Location(url, $document);
                             //console.log('new document baseURI %s', $document.baseURI);
                             __exchangeHTMLDocument__($document, xhr.responseText, url);
                         }
                     };
                     xhr.send(null, false);
-                }else{
+                } else {
                     //Treat as an XMLDocument
-                    xhr.onreadystatechange = function(){
-                        if(xhr.readyState === 4){
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
                             $document = xhr.responseXML;
                             $document.baseURI = $url;
-                            if($document.createEvent){
-                                event = $document.createEvent('Events');
-                                event.initEvent("DOMContentLoaded");
+                            if ($document.createEvent) {
+                                event = $document.createEvent('Event');
+                                event.initEvent('DOMContentLoaded');
                                 $document.dispatchEvent( event, false );
                             }
                         }
@@ -213,35 +209,37 @@ Location = function(url, doc, history){
             };
 
         },
-        reload: function(forceget){
+        reload: function(forceget) {
             //for now we have no caching so just proxy to assign
             //console.log('reloading %s',$url);
             this.assign($url);
         },
-        replace: function(url){
+        replace: function(url) {
             this.assign(url);
         }
     }
 };
 
-var __exchangeHTMLDocument__ = function(doc, text, url){
-    var html, head, title, body, event;
-    try{
+var __exchangeHTMLDocument__ = function(doc, text, url) {
+    var html, head, title, body, event, e;
+    try {
         doc.baseURI = url;
         HTMLParser.parseDocument(text, doc);
         Envjs.wait();
-    }catch(e){
+    } catch (e) {
         console.log('parsererror %s', e);
-        try{
+        try {
             console.log('document \n %s', doc.documentElement.outerHTML);
-        }catch(ee){}
+        } catch (e) {
+            // swallow
+        }
         doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
         html =    doc.createElement('html');
         head =    doc.createElement('head');
         title =   doc.createElement('title');
         body =    doc.createElement('body');
-        title.appendChild(doc.createTextNode("Error"));
-        body.appendChild(doc.createTextNode(e+''));
+        title.appendChild(doc.createTextNode('Error'));
+        body.appendChild(doc.createTextNode('' + e));
         head.appendChild(title);
         html.appendChild(head);
         html.appendChild(body);
@@ -249,13 +247,13 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         //console.log('default error document \n %s', doc.documentElement.outerHTML);
 
         //DOMContentLoaded event
-        if(doc.createEvent){
-            event = doc.createEvent('Events');
-            event.initEvent("DOMContentLoaded", false, false);
+        if (doc.createEvent) {
+            event = doc.createEvent('Event');
+            event.initEvent('DOMContentLoaded', false, false);
             doc.dispatchEvent( event, false );
 
             event = doc.createEvent('HTMLEvents');
-            event.initEvent("load", false, false);
+            event.initEvent('load', false, false);
             doc.dispatchEvent( event, false );
         }
 
@@ -263,14 +261,14 @@ var __exchangeHTMLDocument__ = function(doc, text, url){
         //TODO: this belongs in window.js which is a event
         //      event handler for DOMContentLoaded on document
 
-        try{
-            if(doc === window.document){
+        try {
+            if (doc === window.document) {
                 console.log('triggering window.load')
                 event = doc.createEvent('HTMLEvents');
-                event.initEvent("load", false, false);
+                event.initEvent('load', false, false);
                 window.dispatchEvent( event, false );
             }
-        }catch(e){
+        } catch (e) {
             //console.log('window load event failed %s', e);
             //swallow
         }

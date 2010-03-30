@@ -42,14 +42,14 @@ __extend__(CSS2Properties.prototype, {
         }
         return css;
     },
-    set cssText(cssText){ 
-        __cssTextToStyles__(this, cssText); 
+    set cssText(cssText){
+        __cssTextToStyles__(this, cssText);
     },
     getPropertyCSSValue : function(name){
         //?
     },
     getPropertyPriority : function(){
-        
+
     },
     getPropertyValue : function(name){
         var index;
@@ -101,7 +101,7 @@ __extend__(CSS2Properties.prototype, {
 
 
 var __cssTextToStyles__ = function(css2props, cssText){
-    
+
     //console.log('__cssTextToStyles__ %s %s', css2props, cssText);
     //var styleArray=[];
     var style, styles = cssText.split(';');

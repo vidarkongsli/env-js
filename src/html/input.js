@@ -7,7 +7,7 @@
 HTMLInputElement = function(ownerDocument) {
     HTMLInputAreaCommon.apply(this, arguments);
 };
-HTMLInputElement.prototype = new HTMLInputAreaCommon;
+HTMLInputElement.prototype = new HTMLInputAreaCommon();
 __extend__(HTMLInputElement.prototype, {
     get alt(){
         return this.getAttribute('alt');
@@ -16,7 +16,7 @@ __extend__(HTMLInputElement.prototype, {
         this.setAttribute('alt', value);
     },
     get checked(){
-        return (this.getAttribute('checked')=='checked');
+        return (this.getAttribute('checked') === 'checked');
     },
     set checked(value){
         this.setAttribute('checked', (value ? 'checked' :''));

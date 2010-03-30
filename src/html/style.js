@@ -7,7 +7,7 @@
 HTMLStyleElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLStyleElement.prototype = new HTMLElement;
+HTMLStyleElement.prototype = new HTMLElement();
 __extend__(HTMLStyleElement.prototype, {
     get disabled(){
         return this.getAttribute('disabled');

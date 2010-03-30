@@ -1,5 +1,5 @@
 
-/** 
+/**
  * HTMLMapElement - DOM Level 2
  * 4.8.12 The map element
  * http://dev.w3.org/html5/spec/Overview.html#the-map-element
@@ -7,7 +7,7 @@
 HTMLMapElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLMapElement.prototype = new HTMLElement;
+HTMLMapElement.prototype = new HTMLElement();
 __extend__(HTMLMapElement.prototype, {
     get areas(){
         return this.getElementsByTagName('area');
@@ -19,6 +19,6 @@ __extend__(HTMLMapElement.prototype, {
         this.setAttribute('name',value);
     },
     toString: function() {
-	return '[object HTMLMapElement]';
+        return '[object HTMLMapElement]';
     }
 });

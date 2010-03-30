@@ -160,11 +160,11 @@ var inputElements_focusEvents = {
 var HTMLInputCommon = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLInputCommon.prototype = new HTMLElement;
+HTMLInputCommon.prototype = new HTMLElement();
 __extend__(HTMLInputCommon.prototype, {
     get form(){
         var parent = this.parentNode;
-        while(parent.nodeName.toLowerCase() != 'form'){
+        while(parent.nodeName.toLowerCase() !== 'form') {
             parent = parent.parentNode;
         }
         return parent;
@@ -182,7 +182,7 @@ __extend__(HTMLInputCommon.prototype, {
         this.setAttribute('access', value);
     },
     get disabled(){
-        return (this.getAttribute('disabled')=='disabled');
+        return (this.getAttribute('disabled') === 'disabled');
     },
     set disabled(value){
         this.setAttribute('disabled', (value ? 'disabled' :''));
@@ -196,12 +196,12 @@ __extend__(HTMLInputCommon.prototype, {
 * HTMLTypeValueInputs - convenience class, not DOM
 */
 var HTMLTypeValueInputs = function(ownerDocument) {
-    
+
     HTMLInputCommon.apply(this, arguments);
 
     this._oldValue = "";
 };
-HTMLTypeValueInputs.prototype = new HTMLInputCommon;
+HTMLTypeValueInputs.prototype = new HTMLInputCommon();
 __extend__(HTMLTypeValueInputs.prototype, inputElements_size);
 __extend__(HTMLTypeValueInputs.prototype, inputElements_status);
 __extend__(HTMLTypeValueInputs.prototype, inputElements_dataProperties);
@@ -253,7 +253,7 @@ __extend__(HTMLTypeValueInputs.prototype, {
 var HTMLInputAreaCommon = function(ownerDocument) {
     HTMLTypeValueInputs.apply(this, arguments);
 };
-HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
+HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs();
 __extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);
 __extend__(HTMLInputAreaCommon.prototype, inputElements_onchange);
 __extend__(HTMLInputAreaCommon.prototype, {
@@ -268,4 +268,3 @@ __extend__(HTMLInputAreaCommon.prototype, {
 
     }
 });
-

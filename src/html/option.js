@@ -8,7 +8,7 @@ HTMLOptionElement = function(ownerDocument) {
     HTMLInputCommon.apply(this, arguments);
     this._selected = false;
 };
-HTMLOptionElement.prototype = new HTMLInputCommon;
+HTMLOptionElement.prototype = new HTMLInputCommon();
 __extend__(HTMLOptionElement.prototype, {
 
     /**
@@ -144,4 +144,4 @@ Option = function(text, value, defaultSelected, selected) {
     }
 }
 
-Option.prototype = new HTMLOptionElement;
+Option.prototype = new HTMLOptionElement();

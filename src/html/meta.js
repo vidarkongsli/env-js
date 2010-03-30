@@ -7,7 +7,7 @@
 HTMLMetaElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLMetaElement.prototype = new HTMLElement;
+HTMLMetaElement.prototype = new HTMLElement();
 __extend__(HTMLMetaElement.prototype, {
     get content(){
         return this.getAttribute('content');

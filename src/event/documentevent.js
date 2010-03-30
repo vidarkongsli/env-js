@@ -10,13 +10,15 @@
  *
  * Firefox (3.6) exposes DocumentEvent
  * Safari (4) does NOT.
- *
- * Not sure we need a full prototype.
  */
 
-
+/**
+ * TODO: Not sure we need a full prototype.  We not just an regular object?
+ */
 DocumentEvent = function(){};
 DocumentEvent.prototype.__EventMap__ = {
+    // Safari4: singular and plural forms accepted
+    // Firefox3.6: singular and plural forms accepted
     'Event'          : Event,
     'Events'         : Event,
     'UIEvent'        : UIEvent,

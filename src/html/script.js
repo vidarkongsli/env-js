@@ -8,7 +8,7 @@
 HTMLScriptElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLScriptElement.prototype = new HTMLElement;
+HTMLScriptElement.prototype = new HTMLElement();
 __extend__(HTMLScriptElement.prototype, {
 
     /**
@@ -31,8 +31,8 @@ __extend__(HTMLScriptElement.prototype, {
         var imax = kids.length;
         for (var i = 0; i < imax; ++i) {
             kid = kids[i];
-            if (kid.nodeType == Node.TEXT_NODE ||
-                kid.nodeType == Node.CDATA_SECTION_NODE) {
+            if (kid.nodeType === Node.TEXT_NODE ||
+                kid.nodeType === Node.CDATA_SECTION_NODE) {
                 s += kid.nodeValue;
             }
         }
@@ -110,6 +110,5 @@ __extend__(HTMLScriptElement.prototype, {
     toString: function() {
         return '[object HTMLScriptElement]';
     }
-
 });
 

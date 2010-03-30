@@ -7,7 +7,7 @@
 HTMLLabelElement = function(ownerDocument) {
     HTMLInputCommon.apply(this, arguments);
 };
-HTMLLabelElement.prototype = new HTMLInputCommon;
+HTMLLabelElement.prototype = new HTMLInputCommon();
 __extend__(HTMLLabelElement.prototype, inputElements_dataProperties);
 __extend__(HTMLLabelElement.prototype, {
     get htmlFor() {

@@ -7,7 +7,7 @@
 HTMLFrameSetElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLFrameSetElement.prototype = new HTMLElement;
+HTMLFrameSetElement.prototype = new HTMLElement();
 __extend__(HTMLFrameSetElement.prototype, {
     get cols(){
         return this.getAttribute('cols');

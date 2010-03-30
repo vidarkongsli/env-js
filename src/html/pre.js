@@ -8,13 +8,13 @@ HTMLPreElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLPreElement.prototype = new HTMLElement;
+HTMLPreElement.prototype = new HTMLElement();
 __extend__(HTMLPreElement.prototype, {
 
     // no additional properties or elements
 
     toString: function() {
-	return '[object HTMLPreElement]';
+        return '[object HTMLPreElement]';
     }
 });
 

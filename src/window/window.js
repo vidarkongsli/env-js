@@ -8,18 +8,18 @@
  * @param {Object} opener
  */
 Window = function(scope, parent, opener){
-    
+
     // the window property is identical to the self property and to this obj
     //var proxy = new Envjs.proxy(scope, parent);
     //scope.__proxy__ = proxy;
     scope.__defineGetter__('window', function(){
         return scope;
     });
-    
-    var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
+
+    var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000);
     __windows__[$uuid] = scope;
     //console.log('opening window %s', $uuid);
-    
+
     // every window has one-and-only-one .document property which is always
     // an [object HTMLDocument].  also, only window.document objects are
     // html documents, all other documents created by the window.document are
@@ -27,78 +27,78 @@ Window = function(scope, parent, opener){
     var $htmlImplementation =  new DOMImplementation();
     $htmlImplementation.namespaceAware = true;
     $htmlImplementation.errorChecking = false;
-    
+
     // read only reference to the Document object
     var $document = new HTMLDocument($htmlImplementation, scope);
-    
+
     // A read-only reference to the Window object that contains this window
     // or frame.  If the window is a top-level window, parent refers to
     // the window itself.  If this window is a frame, this property refers
     // to the window or frame that contains it.
     var $parent = parent;
-    
+
     /**> $cookies - see cookie.js <*/
     // read only boolean specifies whether the window has been closed
     var $closed = false;
-    
-    // a read/write string that specifies the default message that 
-    // appears in the status line 
+
+    // a read/write string that specifies the default message that
+    // appears in the status line
     var $defaultStatus = "Done";
-    
-    // IE only, refers to the most recent event object - this maybe be 
+
+    // IE only, refers to the most recent event object - this maybe be
     // removed after review
     var $event = null;
-    
+
     // a read-only reference to the History object
     var $history = new History();
-    
-    // a read-only reference to the Location object.  the location object does 
+
+    // a read-only reference to the Location object.  the location object does
     // expose read/write properties
     var $location = new Location('about:blank', $document, $history);
-    
+
     // The name of window/frame. Set directly, when using open(), or in frameset.
     // May be used when specifying the target attribute of links
     var $name = null;
-    
+
     // a read-only reference to the Navigator object
     var $navigator = new Navigator();
-    
-    // a read/write reference to the Window object that contained the script 
-    // that called open() to open this browser window.  This property is valid 
+
+    // a read/write reference to the Window object that contained the script
+    // that called open() to open this browser window.  This property is valid
     // only for top-level window objects.
     var $opener = opener?opener:null;
-    
+
     // read-only properties that specify the height and width, in pixels
     var $innerHeight = 600, $innerWidth = 800;
-    
-    // Read-only properties that specify the total height and width, in pixels, 
-    // of the browser window. These dimensions include the height and width of 
-    // the menu bar, toolbars, scrollbars, window borders and so on.  These 
-    // properties are not supported by IE and IE offers no alternative 
+
+    // Read-only properties that specify the total height and width, in pixels,
+    // of the browser window. These dimensions include the height and width of
+    // the menu bar, toolbars, scrollbars, window borders and so on.  These
+    // properties are not supported by IE and IE offers no alternative
     // properties;
-    var $outerHeight = $innerHeight, 
+    var $outerHeight = $innerHeight,
         $outerWidth = $innerWidth;
-    
-    // Read-only properties that specify the number of pixels that the current 
-    // document has been scrolled to the right and down.  These are not 
+
+    // Read-only properties that specify the number of pixels that the current
+    // document has been scrolled to the right and down.  These are not
     // supported by IE.
     var $pageXOffset = 0, $pageYOffset = 0;
-    
-    // a read-only reference to the Screen object that specifies information  
-    // about the screen: the number of available pixels and the number of 
+
+    // a read-only reference to the Screen object that specifies information
+    // about the screen: the number of available pixels and the number of
     // available colors.
     var $screen = new Screen(scope);
-   
-    // read only properties that specify the coordinates of the upper-left 
+
+    // read only properties that specify the coordinates of the upper-left
     // corner of the screen.
-    var $screenX = 1, 
+    var $screenX = 1,
         $screenY = 1;
-    var $screenLeft = $screenX, 
+    var $screenLeft = $screenX,
         $screenTop = $screenY;
-    
+
     // a read/write string that specifies the current status line.
     var $status = '';
-    
+
     __extend__(scope, EventTarget.prototype);
 
     return __extend__( scope, {
@@ -111,10 +111,10 @@ Window = function(scope, parent, opener){
         set defaultStatus(defaultStatus){
             $defaultStatus = defaultStatus;
         },
-        get document(){ 
+        get document(){
             return $document;
         },
-        set document(doc){ 
+        set document(doc){
             $document = doc;
         },
         /*
@@ -162,12 +162,12 @@ Window = function(scope, parent, opener){
         get name(){
             return $name;
         },
-        set name(newName){ 
-            $name = newName; 
+        set name(newName){
+            $name = newName;
         },
         get navigator(){
             return $navigator;
-        }, 
+        },
         get opener(){
             return $opener;
         },
@@ -211,8 +211,8 @@ Window = function(scope, parent, opener){
             $status = status;
         },
         // a read-only reference to the top-level window that contains this window.
-        // If this window is a top-level window it is simply a reference to itself.  
-        // If this window is a frame, the top property refers to the top-level 
+        // If this window is a top-level window it is simply a reference to itself.
+        // If this window is a frame, the top property refers to the top-level
         // window that contains the frame.
         get top(){
             return __top__(scope)
@@ -230,19 +230,22 @@ Window = function(scope, parent, opener){
             }
         },
         open: function(url, name, features, replace){
-            if (features)
+            if (features) {
                 console.log("'features argument not yet implemented");
+            }
             var _window = Envjs.proxy({}),
                 open;
             if(replace && name){
                 for(open in __windows__){
-                    if(open.name === name)
+                    if(open.name === name) {
                         _window = open;
+                    }
                 }
             }
             new Window(_window, _window, this);
-            if(name)
+            if(name) {
                 _window.name = name;
+            }
             _window.document.async = false;
             _window.location.assign(Envjs.uri(url));
             return _window;
@@ -283,8 +286,10 @@ Window = function(scope, parent, opener){
 
 var __top__ = function(_scope){
     var _parent = _scope.parent;
-    while(_scope && _parent && _scope !== _parent){
-        if(_parent === _parent.parent)break;
+    while (_scope && _parent && _scope !== _parent) {
+        if (_parent === _parent.parent) {
+            break;
+        }
         _parent = _parent.parent;
         //console.log('scope %s _parent %s', scope, _parent);
     }
@@ -297,4 +302,3 @@ var __windows__ = {};
 //console.log('Default Window');
 new Window(__this__, __this__);
 console.log('[ %s ]',window.navigator.userAgent);
-

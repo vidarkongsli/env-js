@@ -6,7 +6,7 @@
 HTMLBodyElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLBodyElement.prototype = new HTMLElement;
+HTMLBodyElement.prototype = new HTMLElement();
 __extend__(HTMLBodyElement.prototype, {
     onload: function(event){
         __eval__(this.getAttribute('onload')||'', this);
@@ -15,6 +15,6 @@ __extend__(HTMLBodyElement.prototype, {
         __eval__(this.getAttribute('onunload')||'', this);
     },
     toString: function() {
-	return '[object HTMLBodyElement]';
+        return '[object HTMLBodyElement]';
     }
 });

@@ -8,7 +8,7 @@
 HTMLLinkElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLLinkElement.prototype = new HTMLElement;
+HTMLLinkElement.prototype = new HTMLElement();
 __extend__(HTMLLinkElement.prototype, {
     get disabled(){
         return this.getAttribute('disabled');
@@ -65,10 +65,9 @@ __extend__(HTMLLinkElement.prototype, {
         this.setAttribute('type',value);
     },
     onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
+        __eval__(this.getAttribute('onload')||'', this);
     },
     toString: function() {
         return '[object HTMLLinkElement]';
     }
 });
-

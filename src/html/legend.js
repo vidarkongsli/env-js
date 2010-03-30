@@ -8,7 +8,7 @@
 HTMLLegendElement = function(ownerDocument) {
     HTMLInputCommon.apply(this, arguments);
 };
-HTMLLegendElement.prototype = new HTMLInputCommon;
+HTMLLegendElement.prototype = new HTMLInputCommon();
 __extend__(HTMLLegendElement.prototype, {
     get align(){
         return this.getAttribute('align');

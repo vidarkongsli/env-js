@@ -1,8 +1,8 @@
 
 /**
- * @class  DOMImplementation - 
+ * @class  DOMImplementation -
  *      provides a number of methods for performing operations
- *      that are independent of any particular instance of the 
+ *      that are independent of any particular instance of the
  *      document object model.
  *
  * @author Jon van Noort (jon@webarcana.com.au)
@@ -40,14 +40,14 @@ __extend__(DOMImplementation.prototype,{
         return doctype;
     },
     createDocument : function(nsuri, qname, doctype){
-        
+
         var doc = null, documentElement;
-            
+
         doc = new Document(this, null);
         if(doctype){
             doc.doctype = doctype;
         }
-        
+
         if(nsuri && qname){
             documentElement = doc.createElementNS(nsuri, qname);
         }else if(qname){
@@ -211,7 +211,7 @@ var re_invalidStringChars = /\x01|\x02|\x03|\x04|\x05|\x06|\x07|\x08|\x0B|\x0C|\
 function __parseNSName__(qualifiedName) {
     var resultNSName = {};
     // unless the qname has a namespaceName, the prefix is the entire String
-    resultNSName.prefix          = qualifiedName;  
+    resultNSName.prefix          = qualifiedName;
     resultNSName.namespaceName   = "";
     // split on ':'
     var delimPos = qualifiedName.indexOf(':');
@@ -233,7 +233,7 @@ function __parseNSName__(qualifiedName) {
 function __parseQName__(qualifiedName) {
     var resultQName = {};
     // unless the qname has a prefix, the local name is the entire String
-    resultQName.localName = qualifiedName; 
+    resultQName.localName = qualifiedName;
     resultQName.prefix    = "";
     // split on ':'
     var delimPos = qualifiedName.indexOf(':');
@@ -246,7 +246,7 @@ function __parseQName__(qualifiedName) {
     return resultQName;
 };
 
-    
+
 // Local Variables:
 // espresso-indent-level:4
 // c-basic-offset:4

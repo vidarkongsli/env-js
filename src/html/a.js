@@ -8,7 +8,7 @@
 HTMLAnchorElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLAnchorElement.prototype = new HTMLElement;
+HTMLAnchorElement.prototype = new HTMLElement();
 __extend__(HTMLAnchorElement.prototype, {
     get accessKey() {
         return this.getAttribute("accesskey")||'';

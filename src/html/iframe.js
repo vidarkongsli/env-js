@@ -8,7 +8,7 @@
 HTMLIFrameElement = function(ownerDocument) {
     HTMLFrameElement.apply(this, arguments);
 };
-HTMLIFrameElement.prototype = new HTMLFrameElement;
+HTMLIFrameElement.prototype = new HTMLFrameElement();
 __extend__(HTMLIFrameElement.prototype, {
     get height() {
         return this.getAttribute("height") || "";

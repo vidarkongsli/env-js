@@ -8,13 +8,13 @@ HTMLHRElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLHRElement.prototype = new HTMLElement;
+HTMLHRElement.prototype = new HTMLElement();
 __extend__(HTMLHRElement.prototype, {
 
     // no additional properties or elements
 
     toString: function() {
-	return '[object HTMLHRElement]';
+        return '[object HTMLHRElement]';
     }
 });
 

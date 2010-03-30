@@ -8,13 +8,13 @@ HTMLUListElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLUListElement.prototype = new HTMLElement;
+HTMLUListElement.prototype = new HTMLElement();
 __extend__(HTMLUListElement.prototype, {
 
     // no additional properties or elements
 
     toString: function() {
-	return '[object HTMLUListElement]';
+        return '[object HTMLUListElement]';
     }
 });
 

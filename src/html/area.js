@@ -8,7 +8,7 @@
 HTMLAreaElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLAreaElement.prototype = new HTMLElement;
+HTMLAreaElement.prototype = new HTMLElement();
 __extend__(HTMLAreaElement.prototype, {
     get accessKey(){
         return this.getAttribute('accesskey');

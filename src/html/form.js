@@ -10,7 +10,7 @@ HTMLFormElement = function(ownerDocument){
     //      we need to determine all the forms default
     //      values
 };
-HTMLFormElement.prototype = new HTMLElement;
+HTMLFormElement.prototype = new HTMLElement();
 __extend__(HTMLFormElement.prototype,{
     get acceptCharset(){
         return this.getAttribute('accept-charset');

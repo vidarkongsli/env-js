@@ -1,5 +1,5 @@
 
-/* 
+/*
 * HTMLTableColElement - DOM Level 2
 *
 * HTML5: 4.9.3 The colgroup element
@@ -8,7 +8,7 @@
 HTMLTableColElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableColElement.prototype = new HTMLElement;
+HTMLTableColElement.prototype = new HTMLElement();
 __extend__(HTMLTableColElement.prototype, {
     get align(){
         return this.getAttribute('align');
@@ -47,7 +47,7 @@ __extend__(HTMLTableColElement.prototype, {
         this.setAttribute('width', value);
     },
     toString: function() {
-	return '[object HTMLTableColElement]';
+        return '[object HTMLTableColElement]';
     }
 });
 

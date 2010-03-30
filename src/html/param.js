@@ -8,7 +8,7 @@
 HTMLParamElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLParamElement.prototype = new HTMLElement;
+HTMLParamElement.prototype = new HTMLElement();
 __extend__(HTMLParamElement.prototype, {
     get name(){
         return this.getAttribute('name');

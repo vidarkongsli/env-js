@@ -8,7 +8,7 @@
 HTMLTitleElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTitleElement.prototype = new HTMLElement;
+HTMLTitleElement.prototype = new HTMLElement();
 __extend__(HTMLTitleElement.prototype, {
     get text() {
         return this.innerText;

@@ -7,7 +7,7 @@
 HTMLTextAreaElement = function(ownerDocument) {
     HTMLInputAreaCommon.apply(this, arguments);
 };
-HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
+HTMLTextAreaElement.prototype = new HTMLInputAreaCommon();
 __extend__(HTMLTextAreaElement.prototype, {
     get cols(){
         return this.getAttribute('cols');

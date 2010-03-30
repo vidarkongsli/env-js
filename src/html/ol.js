@@ -8,14 +8,14 @@ HTMLOListElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLOListElement.prototype = new HTMLElement;
+HTMLOListElement.prototype = new HTMLElement();
 __extend__(HTMLOListElement.prototype, {
 
     // TODO: attribute boolean reversed;
     // TODO:  attribute long start;
 
     toString: function() {
-	return '[object HTMLOListElement]';
+        return '[object HTMLOListElement]';
     }
 });
 

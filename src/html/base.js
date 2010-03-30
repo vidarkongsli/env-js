@@ -8,7 +8,7 @@
 HTMLBaseElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLBaseElement.prototype = new HTMLElement;
+HTMLBaseElement.prototype = new HTMLElement();
 __extend__(HTMLBaseElement.prototype, {
     get href(){
         return this.getAttribute('href');
@@ -23,7 +23,7 @@ __extend__(HTMLBaseElement.prototype, {
         this.setAttribute('target',value);
     },
     toString: function() {
-	return '[object HTMLBaseElement]';
+        return '[object HTMLBaseElement]';
     }
 });
 

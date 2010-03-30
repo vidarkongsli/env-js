@@ -8,7 +8,7 @@ HTMLHeadingElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLHeadingElement.prototype = new HTMLElement;
+HTMLHeadingElement.prototype = new HTMLElement();
 __extend__(HTMLHeadingElement.prototype, {
     toString: function() {
         return '[object HTMLHeadingElement]';

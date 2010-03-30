@@ -9,7 +9,7 @@
 HTMLTableElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableElement.prototype = new HTMLElement;
+HTMLTableElement.prototype = new HTMLElement();
 __extend__(HTMLTableElement.prototype, {
 
     get tFoot() {

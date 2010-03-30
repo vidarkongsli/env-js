@@ -8,13 +8,13 @@ HTMLDListElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLDListElement.prototype = new HTMLElement;
+HTMLDListElement.prototype = new HTMLElement();
 __extend__(HTMLDListElement.prototype, {
 
     // no additional properties or elements
 
     toString: function() {
-	return '[object HTMLDListElement]';
+        return '[object HTMLDListElement]';
     }
 });
 

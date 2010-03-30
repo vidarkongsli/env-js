@@ -9,7 +9,7 @@ HTMLFrameElement = function(ownerDocument) {
     this.contentDocument = null;
     this.contentWindow = null;
 };
-HTMLFrameElement.prototype = new HTMLElement;
+HTMLFrameElement.prototype = new HTMLElement();
 __extend__(HTMLFrameElement.prototype, {
 
     get frameBorder(){

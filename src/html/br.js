@@ -8,13 +8,13 @@ HTMLBRElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLBRElement.prototype = new HTMLElement;
+HTMLBRElement.prototype = new HTMLElement();
 __extend__(HTMLBRElement.prototype, {
 
     // no additional properties or elements
 
     toString: function() {
-	return '[object HTMLBRElement]';
+        return '[object HTMLBRElement]';
     }
 });
 

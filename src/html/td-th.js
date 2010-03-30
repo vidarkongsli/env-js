@@ -9,7 +9,7 @@
 HTMLTableCellElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableCellElement.prototype = new HTMLElement;
+HTMLTableCellElement.prototype = new HTMLElement();
 __extend__(HTMLTableCellElement.prototype, {
 
 
@@ -20,7 +20,7 @@ __extend__(HTMLTableCellElement.prototype, {
 
     // Not really necessary but might be helpful in debugging
     toString: function() {
-	return '[object HTMLTableCellElement]';
+        return '[object HTMLTableCellElement]';
     }
 
 });
@@ -33,13 +33,13 @@ __extend__(HTMLTableCellElement.prototype, {
 HTMLTableDataCellElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableDataCellElement.prototype = new HTMLTableCellElement;
+HTMLTableDataCellElement.prototype = new HTMLTableCellElement();
 __extend__(HTMLTableDataCellElement.prototype, {
 
     // adds no new properties or methods
 
     toString: function() {
-	return '[object HTMLTableDataCellElement]';
+        return '[object HTMLTableDataCellElement]';
     }
 });
 
@@ -51,13 +51,13 @@ __extend__(HTMLTableDataCellElement.prototype, {
 HTMLTableHeaderCellElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableHeaderCellElement.prototype = new HTMLTableCellElement;
+HTMLTableHeaderCellElement.prototype = new HTMLTableCellElement();
 __extend__(HTMLTableHeaderCellElement.prototype, {
 
     // TODO:  attribute DOMString scope
 
     toString: function() {
-	return '[object HTMLTableHeaderCellElement]';
+        return '[object HTMLTableHeaderCellElement]';
     }
 });
 

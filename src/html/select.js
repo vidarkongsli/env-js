@@ -8,7 +8,7 @@ HTMLSelectElement = function(ownerDocument) {
 
     this._oldIndex = -1;
 };
-HTMLSelectElement.prototype = new HTMLTypeValueInputs;
+HTMLSelectElement.prototype = new HTMLTypeValueInputs();
 __extend__(HTMLSelectElement.prototype, inputElements_dataProperties);
 __extend__(HTMLButtonElement.prototype, inputElements_size);
 __extend__(HTMLSelectElement.prototype, inputElements_onchange);

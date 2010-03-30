@@ -7,39 +7,39 @@ HTMLElement = function(ownerDocument) {
 };
 HTMLElement.prototype = new Element();
 //TODO: Not sure where HTMLEvents belongs in the chain
-//      but putting it here satisfies a lowest common 
+//      but putting it here satisfies a lowest common
 //      denominator.
 __extend__(HTMLElement.prototype, HTMLEvents.prototype);
 __extend__(HTMLElement.prototype, {
-        get className() { 
-            return this.getAttribute("class")||''; 
+        get className() {
+            return this.getAttribute("class")||'';
     },
-        set className(value) { 
-            return this.setAttribute("class",__trim__(value)); 
+        set className(value) {
+            return this.setAttribute("class",__trim__(value));
     },
-        get dir() { 
-            return this.getAttribute("dir")||"ltr"; 
+        get dir() {
+            return this.getAttribute("dir")||"ltr";
     },
-        set dir(val) { 
-            return this.setAttribute("dir",val); 
+        set dir(val) {
+            return this.setAttribute("dir",val);
     },
-        get id(){  
-            return this.getAttribute('id'); 
+        get id(){
+            return this.getAttribute('id');
     },
-        set id(id){  
-            this.setAttribute('id', id); 
+        set id(id){
+            this.setAttribute('id', id);
     },
-        get innerHTML(){  
+        get innerHTML(){
             var ret = "",
             i;
-        
-        // create string containing the concatenation of the string 
+
+        // create string containing the concatenation of the string
         // values of each child
         for (i=0; i < this.childNodes.length; i++) {
             if(this.childNodes[i]){
                 if(this.childNodes[i].nodeType === Node.ELEMENT_NODE){
                     ret += this.childNodes[i].xhtml;
-                }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 && 
+                }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 &&
                     this.childNodes[i-1].nodeType == Node.TEXT_NODE){
                     //add a single space between adjacent text nodes
                     ret += " "+this.childNodes[i].xml;
@@ -50,11 +50,11 @@ __extend__(HTMLElement.prototype, {
         }
         return ret;
     },
-        get lang() { 
-            return this.getAttribute("lang"); 
+        get lang() {
+            return this.getAttribute("lang");
     },
-        set lang(val) { 
-            return this.setAttribute("lang",val); 
+        set lang(val) {
+            return this.setAttribute("lang",val);
     },
         get offsetHeight(){
             return Number((this.style["height"]||'').replace("px",""));
@@ -74,15 +74,15 @@ __extend__(HTMLElement.prototype, {
     },
         scrollHeight: 0,
         scrollWidth: 0,
-        scrollLeft: 0, 
+        scrollLeft: 0,
         scrollRight: 0,
         get style(){
         return this.getAttribute('style')||'';
         },
-        get title() { 
-            return this.getAttribute("title"); 
+        get title() {
+            return this.getAttribute("title");
     },
-        set title(value) { 
+        set title(value) {
             return this.setAttribute("title", value);
     },
         get tabIndex(){
@@ -98,9 +98,9 @@ __extend__(HTMLElement.prototype, {
             value = 0;
         this.setAttribute('tabindex',Number(value));
     },
-        get outerHTML(){ 
+        get outerHTML(){
         //Not in the specs but I'll leave it here for now.
-            return this.xhtml; 
+            return this.xhtml;
     },
     scrollIntoView: function(){
         /*TODO*/
@@ -111,12 +111,12 @@ __extend__(HTMLElement.prototype, {
     },
     get xhtml() {
         // HTMLDocument.xhtml is non-standard
-        // This is exactly like Document.xml except the tagName has to be 
+        // This is exactly like Document.xml except the tagName has to be
         // lower cased.  I dont like to duplicate this but its really not
         // a simple work around between xml and html serialization via
         // XMLSerializer (which uppercases html tags) and innerHTML (which
         // lowercases tags)
-        
+
         var ret = "",
             ns = "",
             name = (this.tagName+"").toLowerCase(),
@@ -128,24 +128,24 @@ __extend__(HTMLElement.prototype, {
         if (this.namespaceURI){
             if((this === this.ownerDocument.documentElement) ||
                 (!this.parentNode)||
-                (this.parentNode && 
+                (this.parentNode &&
                 (this.parentNode.namespaceURI !== this.namespaceURI)))
                 ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
                     '="'+this.namespaceURI+'"';
         }
-        
+
         // serialize Attribute declarations
         attrs = this.attributes;
         for(i=0;i< attrs.length;i++){
             attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
         }
-        
+
         if(this.hasChildNodes()){
             // serialize this Element
             ret += "<" + name + ns + attrstring +">";
             for(i=0;i< this.childNodes.length;i++){
                 ret += this.childNodes[i].xhtml ?
-                           this.childNodes[i].xhtml : 
+                           this.childNodes[i].xhtml :
                            this.childNodes[i].xml;
             }
             ret += "</" + name + ">";
@@ -157,7 +157,7 @@ __extend__(HTMLElement.prototype, {
                     ret += "<" + name + ns + attrstring +"/>";
             }
         }
-        
+
         return ret;
     }
 });

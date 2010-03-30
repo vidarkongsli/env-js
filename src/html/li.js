@@ -8,13 +8,13 @@ HTMLLIElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLLIElement.prototype = new HTMLElement;
+HTMLLIElement.prototype = new HTMLElement();
 __extend__(HTMLLIElement.prototype, {
 
     // TODO: attribute long value;
 
     toString: function() {
-	return '[object HTMLLIElement]';
+        return '[object HTMLLIElement]';
     }
 });
 

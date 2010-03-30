@@ -10,7 +10,7 @@
 HTMLTableSectionElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLTableSectionElement.prototype = new HTMLElement;
+HTMLTableSectionElement.prototype = new HTMLElement();
 __extend__(HTMLTableSectionElement.prototype, {
 
     /*appendChild : function (child) {
@@ -41,7 +41,7 @@ __extend__(HTMLTableSectionElement.prototype, {
         this.setAttribute("chOff", chOff);
     },
 
-    get chOff(chOff) {
+    get chOff() {
         return this.getAttribute("chOff");
     },
 
@@ -93,4 +93,3 @@ __extend__(HTMLTableSectionElement.prototype, {
         return '[object HTMLTableSectionElement]';
     }
 });
-

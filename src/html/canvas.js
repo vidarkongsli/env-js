@@ -7,7 +7,7 @@
 HTMLCanvasElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLCanvasElement.prototype = new HTMLElement;
+HTMLCanvasElement.prototype = new HTMLElement();
 __extend__(HTMLCanvasElement.prototype, {
 
     // TODO: obviously a big challenge

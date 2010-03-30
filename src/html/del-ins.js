@@ -6,7 +6,7 @@
 HTMLModElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLModElement.prototype = new HTMLElement;
+HTMLModElement.prototype = new HTMLElement();
 __extend__(HTMLModElement.prototype, {
     get cite(){
         return this.getAttribute('cite');
@@ -21,6 +21,6 @@ __extend__(HTMLModElement.prototype, {
         this.setAttribute('datetime', value);
     },
     toString: function() {
-	return '[object HTMLModElement]';
+        return '[object HTMLModElement]';
     }
 });

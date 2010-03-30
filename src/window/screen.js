@@ -16,7 +16,7 @@ Screen = function(__window__){
         $left         = 0;
         $availTop     = 0;
         $availLeft    = 0;
-        
+
     __extend__( __window__, {
         moveBy : function(dx,dy){
             //TODO - modify $locals to reflect change
@@ -43,8 +43,8 @@ Screen = function(__window__){
         scrollTo : function(x,y){
             //TODO - modify $locals to reflect change
         }
-    });   
-    
+    });
+
     return {
         get top(){
             return $top;

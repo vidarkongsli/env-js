@@ -7,7 +7,7 @@
 HTMLObjectElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLObjectElement.prototype = new HTMLElement;
+HTMLObjectElement.prototype = new HTMLElement();
 __extend__(HTMLObjectElement.prototype, {
     get code(){
         return this.getAttribute('code');

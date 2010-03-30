@@ -7,7 +7,7 @@
 HTMLOptGroupElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
-HTMLOptGroupElement.prototype = new HTMLElement;
+HTMLOptGroupElement.prototype = new HTMLElement();
 __extend__(HTMLOptGroupElement.prototype, {
     get disabled(){
         return this.getAttribute('disabled');
@@ -26,11 +26,11 @@ __extend__(HTMLOptGroupElement.prototype, {
         length,
         selected = false;
         //make sure at least one is selected by default
-        if(node.nodeType == Node.ELEMENT_NODE && node.tagName == 'OPTION'){
+        if(node.nodeType === Node.ELEMENT_NODE && node.tagName === 'OPTION'){
             length = this.childNodes.length;
             for(i=0;i<length;i++){
-                if(this.childNodes[i].nodeType == Node.ELEMENT_NODE &&
-                   this.childNodes[i].tagName == 'OPTION'){
+                if(this.childNodes[i].nodeType === Node.ELEMENT_NODE &&
+                   this.childNodes[i].tagName === 'OPTION'){
                     //check if it is selected
                     if(this.selected){
                         selected = true;
@@ -46,6 +46,6 @@ __extend__(HTMLOptGroupElement.prototype, {
         return HTMLElement.prototype.appendChild.apply(this, [node]);
     },
     toString: function() {
-	return '[object HTMLOptGroupElement]';
+        return '[object HTMLOptGroupElement]';
     }
 });

@@ -8,7 +8,7 @@
 HTMLButtonElement = function(ownerDocument) {
     HTMLTypeValueInputs.apply(this, arguments);
 };
-HTMLButtonElement.prototype = new HTMLTypeValueInputs;
+HTMLButtonElement.prototype = new HTMLTypeValueInputs();
 __extend__(HTMLButtonElement.prototype, inputElements_status);
 __extend__(HTMLButtonElement.prototype, {
     get dataFormatAs(){
@@ -18,7 +18,7 @@ __extend__(HTMLButtonElement.prototype, {
         this.setAttribute('dataFormatAs',value);
     },
     toString: function() {
-	return '[object HTMLButtonElement]';
+        return '[object HTMLButtonElement]';
     }
 });
 

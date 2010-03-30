@@ -8,7 +8,7 @@ HTMLDivElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
 
-HTMLDivElement.prototype = new HTMLElement;
+HTMLDivElement.prototype = new HTMLElement();
 __extend__(HTMLDivElement.prototype, {
     get align(){
         return this.getAttribute('align') || 'left';
@@ -17,7 +17,7 @@ __extend__(HTMLDivElement.prototype, {
         this.setAttribute('align', value);
     },
     toString: function() {
-	return '[object HTMLDivElement]';
+        return '[object HTMLDivElement]';
     }
 });
 
