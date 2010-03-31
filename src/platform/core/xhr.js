@@ -1,10 +1,56 @@
 
 /**
- * resolves location relative to base or window location
- * @param {Object} path
- * @param {Object} base
+ * getcwd - named after posix call of same name (see 'man 2 getcwd')
+ * 
  */
-Envjs.uri = function(path, base){};
+Envjs.getcwd = function() {
+    return '.';
+}
+
+/**
+ * resolves location relative to doc location
+ *
+ * @param {Object} path  Relative or absolute URL
+ * @param {Object} base  (semi-optional)  The base url used in resolving "path" above
+ */
+Envjs.uri = function(path, base) {
+    //console.log('constructing uri from path %s and base %s', path, base);
+
+    // Semi-common trick is to make an iframe with src='javascript:false'
+    //  (or some equivalent).  By returning '', the load is skipped
+    if (path.indexOf('javascript') === 0) {
+        return '';
+    }
+
+    // if path is absolute, then just normalize and return
+    if (path.match('^[a-zA-Z]+://')) {
+        return urlparse.urlnormalize(path);
+    }
+
+    // if base not passed in, try to get it from document
+    // Ideally I would like the caller to pass in document.baseURI to
+    //  make this more self-sufficient and testable
+    if (!base && document) {
+        base = document.baseURI;
+    }
+
+    // about:blank doesn't count
+    if (base === 'about:blank'){
+        base = '';
+    }
+
+    // if base is still empty, then we are in QA mode loading local
+    // files.  Get current working directory
+    if (!base) {
+        base = 'file://' +  Envjs.getcwd() + '/';
+    }
+    // handles all cases if path is abosulte or relative to base
+    // 3rd arg is "false" --> remove fragments
+    var newurl = urlparse.urlnormalize(urlparse.urljoin(base, path, false));
+
+    return newurl;
+};
+
 
 /**
  * Used in the XMLHttpRquest implementation to run a
