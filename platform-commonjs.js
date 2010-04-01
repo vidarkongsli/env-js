@@ -15,6 +15,8 @@
  * src/dom/domparser.js has embedded java
  * http://envjs.lighthouseapp.com/projects/21590/tickets/145-secret-embedded-java-in-domdomparserjs
  *
+ * prototype 1.6 collides with dom.Element
+ * http://envjs.lighthouseapp.com/projects/21590/tickets/108-prototypejs-wont-load-due-it-clobbering-element
  */
 Envjs.platform = 'commonjs';
 Envjs.revision = '1';
