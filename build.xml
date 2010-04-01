@@ -663,6 +663,21 @@
             <fileset dir="${DIST_DIR}" includes="window.js" />
         </concat>
         <echo message="${ENV_JSLINT} built." />
+        <exec executable="python"
+              input="${ENV_JSLINT}"
+              output="dist/jslint-in.js" >
+          <arg value="misc/deaccessor.py" />
+        </exec>
+        <java fork="true"
+              jar="${RHINO_JAR}"
+              failonerror="false"
+              output="dist/jslint-out.txt" >
+            <arg value="misc/jslint.js"/>
+            <arg value="dist/jslint-in.js"/>
+            <jvmarg value="-Dfile.encoding=utf-8"/>
+            <jvmarg value="-Xmx256m"/>
+        </java>
+        <echo message="dist/jslint-out.txt has results" />
     </target>
 
     <target description="Main ENV build"
