@@ -10,6 +10,11 @@
  * load('platform-commonjs.js');  // this file
  *
  * good luck!
+ *
+ * Other issues:
+ * src/dom/domparser.js has embedded java
+ * http://envjs.lighthouseapp.com/projects/21590/tickets/145-secret-embedded-java-in-domdomparserjs
+ *
  */
 Envjs.platform = 'commonjs';
 Envjs.revision = '1';
