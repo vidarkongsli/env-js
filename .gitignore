@@ -9,3 +9,10 @@ htmlparser/html5
 htmlparser/build
 local_settings.js
 java_pid*
+
+# gpsee compiled js files
+*.jsc
+
+# emacs turds
+\#*
+
