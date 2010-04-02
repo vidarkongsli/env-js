@@ -151,7 +151,7 @@ var __fieldSerialize__ = function(inputs, successful) {
         input = inputs[i];
         name = input.name;
         if (!name) {
-            return;
+            return '';
         }
         value = __fieldValue__(input, successful);
         if (value && value.constructor == Array) {

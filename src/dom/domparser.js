@@ -7,6 +7,9 @@ __extend__(DOMParser.prototype,{
         var doc = new Document(new DOMImplementation()),
             e4;
 
+        // TODO: JAVA ALERT -- 'XML' is a global object
+        //  not sure if this is envjs-special? or a normal java thing
+        // if (XML) {  ????
         XML.ignoreComments = false;
         XML.ignoreProcessingInstructions = false;
         XML.ignoreWhitespace = false;
