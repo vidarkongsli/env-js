@@ -69,7 +69,7 @@ base64.makeDOMException = function() {
         ex.toString = function() { return 'Error: ' + ex.name + ': ' + ex.message; };
         return ex;
     }
-}
+};
 
 base64.getbyte64 = function(s,i) {
     // This is oddly fast, except on Chrome/V8.
@@ -80,14 +80,14 @@ base64.getbyte64 = function(s,i) {
         throw base64.makeDOMException();
     }
     return idx;
-}
+};
 
 base64.decode = function(s) {
     // convert to string
     s = '' + s;
     var getbyte64 = base64.getbyte64;
     var pads, i, b10;
-    var imax = s.length
+    var imax = s.length;
     if (imax === 0) {
         return s;
     }
@@ -96,7 +96,7 @@ base64.decode = function(s) {
         throw base64.makeDOMException();
     }
 
-    pads = 0
+    pads = 0;
     if (s.charAt(imax - 1) === base64.PADCHAR) {
         pads = 1;
         if (s.charAt(imax - 2) === base64.PADCHAR) {
@@ -124,7 +124,7 @@ base64.decode = function(s) {
         break;
     }
     return x.join('');
-}
+};
 
 base64.getbyte = function(s,i) {
     var x = s.charCodeAt(i);
@@ -132,7 +132,7 @@ base64.getbyte = function(s,i) {
         throw base64.makeDOMException();
     }
     return x;
-}
+};
 
 base64.encode = function(s) {
     if (arguments.length !== 1) {
@@ -173,4 +173,4 @@ base64.encode = function(s) {
         break;
     }
     return x.join('');
-}
+};

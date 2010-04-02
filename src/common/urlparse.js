@@ -124,7 +124,7 @@ urlparse.normalizepath = function(path)
         path = '/';
     }
     return path;
-}
+};
 
 //
 // Does many of the normalizations that the stock
@@ -164,7 +164,7 @@ urlparse.urlnormalize = function(url)
     parts.path = urlparse.normalizepath(parts.path);
 
     return urlparse.urlunsplit(parts);
-}
+};
 
 urlparse.urldefrag = function(url)
 {
@@ -174,10 +174,12 @@ urlparse.urldefrag = function(url)
     } else {
         return [ url.substr(0,idx), url.substr(idx+1) ];
     }
-}
+};
 
 urlparse.urlsplit = function(url, default_scheme, allow_fragments)
 {
+    var leftover;
+
     if (typeof allow_fragments === 'undefined') {
         allow_fragments = true;
     }
@@ -202,12 +204,12 @@ urlparse.urlsplit = function(url, default_scheme, allow_fragments)
             o.netloc += ':' + parts[4];
         }
 
-        var leftover = parts[5];
+        leftover = parts[5];
     } else {
         o.scheme = default_scheme || '';
         o.netloc = '';
         o.hostname = '';
-        var leftover = url;
+        leftover = url;
     }
     o.scheme = o.scheme.toLowerCase();
 
@@ -223,7 +225,7 @@ urlparse.urlsplit = function(url, default_scheme, allow_fragments)
     }
 
     return o;
-}
+};
 
 urlparse.urlunsplit = function(o) {
     var s = '';
@@ -258,7 +260,7 @@ urlparse.urlunsplit = function(o) {
         s += '#' + o.fragment;
     }
     return s;
-}
+};
 
 urlparse.urljoin = function(base, url, allow_fragments)
 {
@@ -324,4 +326,4 @@ urlparse.urljoin = function(base, url, allow_fragments)
     }
 
     return urlparse.urlunsplit(base_parts);
-}
+};
