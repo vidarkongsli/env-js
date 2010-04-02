@@ -21,7 +21,7 @@
 Envjs.platform = 'commonjs';
 Envjs.revision = '1';
 
-Envjs.log = require('system').print;
+Envjs.log = print; //require('system').print;
 Envjs.lineSoruce = function(e) {
     // TBD -- what does this do again?
 };
