@@ -43,7 +43,7 @@ write("""/*jslint browser: false,
    bitwise: false,
    maxerr: 100000
 */
-/*global window:true, document:true */
+/*global window:true, document:true, XML: true, XMLList: true */
 """)
 count = 0
 for line in sys.stdin:
