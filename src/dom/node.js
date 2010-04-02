@@ -471,8 +471,10 @@ __extend__(Node.prototype, {
         // delegate to _getElementsByTagNameRecursive
         // recurse childNodes
         var nodelist = new NodeList(__ownerDocument__(this));
-        for(var i = 0; i < this.childNodes.length; i++) {
-            nodeList = __getElementsByTagNameRecursive__(this.childNodes.item(i), tagname, nodelist);
+        for (var i = 0; i < this.childNodes.length; i++) {
+            __getElementsByTagNameRecursive__(this.childNodes.item(i),
+					      tagname,
+					      nodelist);
         }
         return nodelist;
     },

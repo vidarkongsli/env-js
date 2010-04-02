@@ -664,6 +664,7 @@ test('compareDocumentPosition', function(){
 var domparser = new DOMParser();
 
 module('DOMParser');
+
 test('parseFromString', function(){
 
     var root,
@@ -707,6 +708,7 @@ test('parseFromString', function(){
         '<farm sound="oink"><pig/><cow/><horse/></farm>', 'text/xml');
     root = doc.documentElement;
     equals(root.nodeName, 'farm', 'root.nodeName');
+    ok(root.hasAttribute('sound'), 'hasAttribute');
     equals(xmlserializer.serializeToString(root), 
         '<farm sound="oink"><pig/><cow/><horse/></farm>', 'serializeToString');
         
@@ -820,3 +822,18 @@ test('parseFromString', function(){
         </farm>', 'serializeToString');
  
 });
+
+test('getElementsByTagName', function() {
+    var nodes, doc;
+    doc = domparser.parseFromString(
+	'<root><div><div>123</div></div><div></div></root>'
+    );
+    
+    nodes = doc.getElementsByTagName('*');
+    equals(nodes.length, 4, 'all elements');
+    nodes = doc.getElementsByTagName('root');
+    equals(nodes.length, 1, 'non-recursive');
+    nodes = doc.getElementsByTagName('div');
+    equals(nodes.length, 3, 'recursive');
+});
+
