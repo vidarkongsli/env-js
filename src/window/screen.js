@@ -11,10 +11,10 @@ Screen = function(__window__){
         $colorDepth   = 16,
         $pixelDepth   = 24,
         $height       = 600,
-        $width        = 800;
-        $top          = 0;
-        $left         = 0;
-        $availTop     = 0;
+        $width        = 800,
+        $top          = 0,
+        $left         = 0,
+        $availTop     = 0,
         $availLeft    = 0;
 
     __extend__( __window__, {
@@ -56,7 +56,7 @@ Screen = function(__window__){
             return $availTop;
         },
         get availLeft(){
-            return $availleft;
+            return $availLeft;
         },
         get availHeight(){
             return $availHeight;
