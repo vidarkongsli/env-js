@@ -164,8 +164,9 @@ Location = function(url, doc, history) {
         },
 
         assign: function(url) {
-            var _this = this,
-            xhr;
+            var _this = this;
+            var xhr;
+            var event;
 
             //console.log('assigning %s',url);
             $url = url;
@@ -217,7 +218,7 @@ Location = function(url, doc, history) {
         replace: function(url) {
             this.assign(url);
         }
-    }
+    };
 };
 
 var __exchangeHTMLDocument__ = function(doc, text, url) {
@@ -263,7 +264,7 @@ var __exchangeHTMLDocument__ = function(doc, text, url) {
 
         try {
             if (doc === window.document) {
-                console.log('triggering window.load')
+                console.log('triggering window.load');
                 event = doc.createEvent('HTMLEvents');
                 event.initEvent('load', false, false);
                 window.dispatchEvent( event, false );
@@ -272,5 +273,5 @@ var __exchangeHTMLDocument__ = function(doc, text, url) {
             //console.log('window load event failed %s', e);
             //swallow
         }
-    }
+    };  /* closes return {... */
 };
