@@ -6,15 +6,15 @@
 
 History = function(owner) {
     var $current = 0,
-    $history = [null],
-    $owner = owner;
+        $history = [null],
+        $owner = owner;
 
     return {
         go : function(target) {
-            if (typeof target == "number") {
+            if (typeof target === "number") {
                 target = $current + target;
                 if (target > -1 && target < $history.length){
-                    if ($history[target].type == "hash") {
+                    if ($history[target].type === "hash") {
                         if ($owner.location) {
                             $owner.location.hash = $history[target].value;
                         }
@@ -29,9 +29,11 @@ History = function(owner) {
                 //TODO: walk through the history and find the 'best match'?
             }
         },
+
         get length() {
             return $history.length;
         },
+
         back : function(count) {
             if (count) {
                 this.go(-count);
@@ -39,12 +41,15 @@ History = function(owner) {
                 this.go(-1);
             }
         },
+
         get current() {
             return this.item($current);
         },
+
         get previous() {
             return this.item($current-1);
         },
+
         forward : function(count) {
             if (count) {
                 this.go(count);
@@ -52,9 +57,10 @@ History = function(owner) {
                 this.go(1);
             }
         },
-        item: function(index) {
-            if (index < $history.length) {
-                return $history[index];
+
+        item: function(idx) {
+            if (idx >= 0 && idx < $history.length) {
+                return $history[idx];
             } else {
                 return null;
             }
@@ -66,11 +72,10 @@ History = function(owner) {
             if (newLocation !== $history[$current]) {
                 $history.slice(0, $current);
                 $history.push({
-                    type: type||"href",
-                    value: value
+                    type: type || 'href',
+                    value: newLocation
                 });
             }
         }
     }; /* closes 'return {' */
 };
-
