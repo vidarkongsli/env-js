@@ -146,8 +146,9 @@ Envjs.writeToFile = function(text, url) {
 };
 
 Envjs.writeToTempFile = function(text, suffix) {
-    // TODO
-    throw new Error("writeToTempFile!");
+    var fname = '/tmp/envjs-' + Math.round(Math.random() * 1000000) + '.' + suffix;
+    Envjs.writeToFile(text, fname);
+    return fname;
 };
 
 Envjs.deleteFile = function(url) {
