@@ -53,7 +53,7 @@ History = function(owner) {
             }
         },
         item: function(index) {
-            if (index < history.length) {
+            if (index < $history.length) {
                 return $history[index];
             } else {
                 return null;
