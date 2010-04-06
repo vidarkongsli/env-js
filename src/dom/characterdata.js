@@ -68,7 +68,7 @@ __extend__(CharacterData.prototype,{
             this.data =  this.data.substring(0, offset).concat(arg, this.data.substring(offset));
         }else {
             // throw Exception if offset is negative or greater than the data length,
-            if (__ownerDocument__(this).implementation.errorChecking && (offset != 0)) {
+            if (__ownerDocument__(this).implementation.errorChecking && (offset !== 0)) {
                throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
 

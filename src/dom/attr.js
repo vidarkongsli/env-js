@@ -37,7 +37,7 @@ __extend__(Attr.prototype, {
         this.nodeValue = newText;
     },
     get specified(){
-        return (this!==null&&this!=undefined);
+        return (this !== null && this !== undefined);
     },
     get nodeType(){
         return Node.ATTRIBUTE_NODE;

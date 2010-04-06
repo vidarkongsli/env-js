@@ -4,7 +4,7 @@
  */
 CSSRule = function(options){
     var $style,
-    $selectorText = options.selectorText?options.selectorText:"";
+    $selectorText = options.selectorText ? options.selectorText : '';
     $style = new CSS2Properties({
         cssText:options.cssText?options.cssText:null
     });

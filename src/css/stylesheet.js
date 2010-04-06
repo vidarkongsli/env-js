@@ -4,10 +4,10 @@
  */
 CSSStyleSheet = function(options){
     var $cssRules,
-        $disabled = options.disabled?options.disabled:false,
-        $href = options.href?options.href:null,
-        $parentStyleSheet = options.parentStyleSheet?options.parentStyleSheet:null,
-        $title = options.title?options.title:"",
+        $disabled = options.disabled ? options.disabled : false,
+        $href = options.href ?options.href : null,
+        $parentStyleSheet = options.parentStyleSheet ? options.parentStyleSheet : null,
+        $title = options.title ? options.title : "",
         $type = "text/css";
 
     function parseStyleSheet(text){
@@ -36,8 +36,10 @@ CSSStyleSheet = function(options){
                 __setArray__($cssRules, cssRules);
             }
         }
-    };
+    }
+
     parseStyleSheet(options.text);
+
     return __extend__(this, {
         get cssRules(){
             return $cssRules;

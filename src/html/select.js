@@ -75,7 +75,7 @@ __extend__(HTMLSelectElement.prototype, {
                 //console.log('select get selectedIndex %s', i);
                 return i;
             }
-        };
+        }
         //console.log('select get selectedIndex %s', -1);
         return -1;
     },

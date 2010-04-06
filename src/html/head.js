@@ -32,6 +32,6 @@ __extend__(HTMLHeadElement.prototype, {
     },
     toString: function(){
         return '[object HTMLHeadElement]';
-    },
+    }
 });
 

@@ -13,4 +13,4 @@ function __extend__(a,b) {
             a[i] = b[i];
         }
     } return a;
-};
+}

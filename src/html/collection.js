@@ -22,7 +22,7 @@ HTMLCollection = function(nodelist, type) {
     }
 
     this.length = nodelist.length;
-}
+};
 
 HTMLCollection.prototype = {
 

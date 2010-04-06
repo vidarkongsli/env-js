@@ -79,8 +79,8 @@ __extend__(Document.prototype,{
     },
     createProcessingInstruction: function(target, data) {
         // throw Exception if the target string contains an illegal character
-        if (__ownerDocument__(this).implementation.errorChecking
-            && (!__isValidName__(target))) {
+        if (__ownerDocument__(this).implementation.errorChecking &&
+            (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
 
@@ -91,8 +91,8 @@ __extend__(Document.prototype,{
     },
     createElement: function(tagName) {
         // throw Exception if the tagName string contains an illegal character
-        if (__ownerDocument__(this).implementation.errorChecking
-                && (!__isValidName__(tagName))) {
+        if (__ownerDocument__(this).implementation.errorChecking &&
+            (!__isValidName__(tagName))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         var node = new Element(this);
@@ -131,8 +131,8 @@ __extend__(Document.prototype,{
     createAttribute : function(name) {
         //console.log('createAttribute %s ', name);
         // throw Exception if the name string contains an illegal character
-        if (__ownerDocument__(this).implementation.errorChecking
-            && (!__isValidName__(name))) {
+        if (__ownerDocument__(this).implementation.errorChecking &&
+            (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
         var node = new Attr(this);
@@ -209,7 +209,7 @@ __extend__(Document.prototype,{
         return retNode;
     },
     normalizeDocument: function(){
-            this.normalize();
+        this.normalize();
     },
     get nodeType(){
         return Node.DOCUMENT_NODE;

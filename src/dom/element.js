@@ -188,22 +188,25 @@ __extend__(Element.prototype, {
         // serialize namespace declarations
         if (this.namespaceURI ){
             if((this === this.ownerDocument.documentElement) ||
-                (!this.parentNode)||
-                (this.parentNode && (this.parentNode.namespaceURI !== this.namespaceURI)))
-                ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
-                    '="'+this.namespaceURI+'"';
+               (!this.parentNode)||
+               (this.parentNode && (this.parentNode.namespaceURI !== this.namespaceURI))) {
+                ns = ' xmlns' + (this.prefix?(':'+this.prefix):'') +
+                    '="' + this.namespaceURI + '"';
+            }
         }
 
         // serialize Attribute declarations
         attrs = this.attributes;
         attrstring = "";
         for(i=0;i< attrs.length;i++){
-            if(attrs[i].name.match('xmlns:'))
+            if(attrs[i].name.match('xmlns:')) {
                 attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+            }
         }
         for(i=0;i< attrs.length;i++){
-            if(!attrs[i].name.match('xmlns:'))
+            if(!attrs[i].name.match('xmlns:')) {
                 attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+            }
         }
 
         if(this.hasChildNodes()){

@@ -101,16 +101,16 @@ __extend__(HTMLTableElement.prototype, {
         }
 
         var rows = this.rows,
-        numRows = rows.length,
-        node,
-        inserted,
-        lastRow;
+            numRows = rows.length,
+            node,
+            inserted,
+            lastRow;
 
         if (idx > numRows) {
             throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
         }
 
-        var inserted = document.createElement("tr");
+        inserted = document.createElement("tr");
         // If index is -1 or equal to the number of rows,
         // the row is appended as the last row. If index is omitted
         // or greater than the number of rows, an error will result

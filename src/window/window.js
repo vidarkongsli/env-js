@@ -1,6 +1,7 @@
 //These descriptions of window properties are taken loosely David Flanagan's
 //'JavaScript - The Definitive Guide' (O'Reilly)
 
+var __windows__ = {};
 
 var __top__ = function(_scope){
     var _parent = _scope.parent;
@@ -12,7 +13,7 @@ var __top__ = function(_scope){
         //console.log('scope %s _parent %s', scope, _parent);
     }
     return _parent || null;
-}
+};
 
 /**
  * Window
@@ -270,7 +271,7 @@ Window = function(scope, parent, opener){
                 delete scope;
                 delete this;
             }catch(e){
-                console.log('%s',e)
+                console.log('%s',e);
             }
         },
         alert : function(message){
@@ -297,8 +298,6 @@ Window = function(scope, parent, opener){
 
 };
 
-
-var __windows__ = {};
 
 //finally pre-supply the window with the window-like environment
 //console.log('Default Window');

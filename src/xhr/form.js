@@ -17,7 +17,8 @@ HTMLFormElement.prototype.submit = function(){
             __exchangeHTMLDocument__(this.ownerDocument, xhr.responseText, url);
         }
     }
-}
+};
+
 /**
  * Form Submissions
  *
@@ -168,7 +169,8 @@ var __fieldSerialize__ = function(inputs, successful) {
                 value: value
             });
         }
-    };
+    }
+
     //hand off  for proper encoding
     return __param__(array);
 };

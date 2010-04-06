@@ -142,6 +142,6 @@ Option = function(text, value, defaultSelected, selected) {
     if (arguments.length >= 4) {
         this._selected = (selected) ? true : false;
     }
-}
+};
 
 Option.prototype = new HTMLOptionElement();
