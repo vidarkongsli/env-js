@@ -109,7 +109,7 @@ Cookies.get = function(doc){
 };
 
 function __cookieString__(cookies, doc) {
-    var cookieString = ""
+    var cookieString = "",
         domain, 
         path,
         name;
