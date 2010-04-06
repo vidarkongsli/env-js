@@ -1,11 +1,11 @@
 
 /**
  * getcwd - named after posix call of same name (see 'man 2 getcwd')
- * 
+ *
  */
 Envjs.getcwd = function() {
     return '.';
-}
+};
 
 /**
  * resolves location relative to doc location
@@ -25,6 +25,12 @@ Envjs.uri = function(path, base) {
     // if path is absolute, then just normalize and return
     if (path.match('^[a-zA-Z]+://')) {
         return urlparse.urlnormalize(path);
+    }
+
+    // interesting special case, a few very large websites use
+    // '//foo/bar/' to mean 'http://foo/bar'
+    if (path.match('^//')) {
+        path = 'http:' + path;
     }
 
     // if base not passed in, try to get it from document
