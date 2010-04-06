@@ -41,5 +41,7 @@ java \
     -draftCompile \
     nu.validator.htmlparser.HtmlParser;
 
+cp war/nu.validator.htmlparser.HtmlParser/nu.validator.htmlparser.HtmlParser.nocache.js ../../src/parser/htmlparser.js
+
 echo "DONE"
 

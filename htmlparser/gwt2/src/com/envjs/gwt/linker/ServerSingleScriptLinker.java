@@ -73,6 +73,8 @@ public class ServerSingleScriptLinker extends SelectionScriptLinker {
     DefaultTextOutput out = new DefaultTextOutput(true);
 
     // Emit the selection script.
+    // this for 'real browsers' to load the script
+    // we don't need this.
     /*
     String bootstrap = generateSelectionScript(logger, context, artifacts);
     bootstrap = context.optimizeJavaScript(logger, bootstrap);
@@ -80,8 +82,16 @@ public class ServerSingleScriptLinker extends SelectionScriptLinker {
     out.newlineOpt();
     */
 
-    // Emit the module's JS a closure.
+    // we need a ref to the top level window
+    //  it is referenced in the closure below
     out.print("var $_window = this;");
+    out.newlineOpt();
+
+    // this is a hack to make backwards compatible
+    out.print("var __defineParser__ = function(){};");
+    out.newlineOpt();
+
+    // Emit the module's JS a closure.
     out.newlineOpt();
     out.print("(function () {");
     out.newlineOpt();
