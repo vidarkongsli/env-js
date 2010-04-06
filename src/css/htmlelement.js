@@ -2,7 +2,7 @@
 /**
  * @author envjs team
  */
-$css2properties = [{}];
+var $css2properties = [{}];
 
 __extend__(HTMLElement.prototype, {
     get style(){
