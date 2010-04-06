@@ -24,7 +24,7 @@ if [ ! -d "${GWT}" ]; then
     unzip ${GWT_ZIP}
 fi
 
-echo "Starting get compile..."
+echo "Starting GWT compile..."
 CP="./src:./${PARSER}/src:./${PARSER}/super:./${GWT}/gwt-user.jar:./${GWT}/gwt-dev.jar"
 
 # Compile a new GWT linker.  Very simple to Single Script Linker but
