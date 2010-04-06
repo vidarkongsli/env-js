@@ -169,4 +169,16 @@ Envjs.connection = function(xhr, responseHandler, data) {
 
 // XHR is a confusing bit of code in envjs.  Need to simplify.
 // if you are lucky your impl has a XHR already
-XMLHttpRequest = require('xhr').XMLHttpRequest;
+var XMLHttpRequestCore = require('xhr').XMLHttpRequest;
+
+XMLHttpRequest = function() {
+    XMLHttpRequestCore.apply(this, arguments);
+};
+XMLHttpRequest.prototype = new XMLHttpRequestCore();
+XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+    require('xhr').XMLHttpRequest.prototype.open.apply(this, arguments);
+    this.setRequestHeader('User-Agent', window.navigator.userAgent);
+    this.setRequestHeader('Accept', 'image/png,image/*;q=0.8,*/*;q=0.5');
+    this.setRequestHeader('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7');
+    this.setRequestHeader('Accept-Language','en-us;en;q=0.5');
+};
