@@ -41,7 +41,8 @@ write("""/*jslint browser: false,
    onevar: false,
    eqeqeq: false,
    bitwise: false,
-   maxerr: 100000
+   maxerr: 100000,
+   es5: false
 */
 /*global console: true, window:true, document:true, XML: true, XMLList: true */
 """)
