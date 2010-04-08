@@ -179,7 +179,14 @@ XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
     // resolve relative URLs (server-side version doesn't do this,
     //  require absolute urls)
     //print("******* " + url);
-    url = Envjs.uri(url, document.location);
+    if (document.location) {
+       url = Envjs.uri(url, document.location.href);
+    } else {
+        // sometimes document.location is null
+	// should we always use baseURI?
+	url = Envjs.uri(url, document.baseURI);
+    }
+    
     //print("******* " + url);
     require('xhr').XMLHttpRequest.prototype.open.apply(this, arguments);
     this.setRequestHeader('User-Agent', window.navigator.userAgent);
