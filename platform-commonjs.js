@@ -67,16 +67,12 @@ Envjs.lang           = 'en-US';
  * @param {Object} parent
  */
 Envjs.proxy = function(scope, parent) {
-    try {
-        if (scope + '' == '[object global]') {
-            return scope;
-        } else {
-            // WRONG.. but not sure what to do yet
-            return scope
-            //return  __context__.initStandardObjects();
-        }
-    } catch(e) {
-        console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
+    if (scope + '' == '[object global]') {
+        return scope;
+    } else {
+        // WRONG.. but not sure what to do yet
+        return window;
+        //return  __context__.initStandardObjects();
     }
 };
 
@@ -84,29 +80,24 @@ Envjs.proxy = function(scope, parent) {
 // THis can be moved to Envjs.platform.core
 // this is all pure javascript
 Envjs.loadFrame = function(frame, url) {
-    try {
-        if (frame.contentWindow) {
-            //mark for garbage collection
-            frame.contentWindow = null;
-        }
-
-        //create a new scope for the window proxy
-        frame.contentWindow = Envjs.proxy();
-        new Window(frame.contentWindow, window);
-
-        //I dont think frames load asynchronously in firefox
-        //and I think the tests have verified this but for
-        //some reason I'm less than confident... Are there cases?
-        frame.contentDocument = frame.contentWindow.document;
-        frame.contentDocument.async = false;
-        if(url){
-            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
-            frame.contentWindow.location = url;
-        }
-    } catch(e) {
-        console.log("failed to load frame content: from %s %s", url, e);
+    if (frame.contentWindow) {
+        //mark for garbage collection
+        frame.contentWindow = null;
     }
-
+    
+    //create a new scope for the window proxy
+    frame.contentWindow = Envjs.proxy();
+    new Window(frame.contentWindow, window);
+    
+    //I dont think frames load asynchronously in firefox
+    //and I think the tests have verified this but for
+    //some reason I'm less than confident... Are there cases?
+    frame.contentDocument = frame.contentWindow.document;
+    frame.contentDocument.async = false;
+    if (url) {
+        //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+        frame.contentWindow.location = url;
+    }
 };
 
 /**
@@ -115,14 +106,10 @@ Envjs.loadFrame = function(frame, url) {
  * MOVE TO ENVJs.platform.core
  */
 Envjs.unloadFrame = function(frame){
-    try {
-        delete frame.contentDocument;
-        frame.contentDocument = null;
-        if (frame.contentWindow) {
-            frame.contentWindow.close();
-        }
-    } catch (e) {
-        console.log(e);
+    delete frame.contentDocument;
+    frame.contentDocument = null;
+    if (frame.contentWindow) {
+        frame.contentWindow.close();
     }
 };
 
