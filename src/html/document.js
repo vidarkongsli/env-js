@@ -12,9 +12,8 @@ HTMLDocument = function(implementation, ownerWindow, referrer) {
     this.referrer = referrer || '';
     this.baseURI = "about:blank";
     this.ownerWindow = ownerWindow;
-    this.head;
-    this.body;
 };
+
 HTMLDocument.prototype = new Document();
 
 __extend__(HTMLDocument.prototype, {
@@ -350,8 +349,7 @@ __extend__(HTMLDocument.prototype, {
     },
     get innerHTML(){
         return this.documentElement.outerHTML;
-    },
-
+    }
 });
 
 

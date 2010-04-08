@@ -1,7 +1,7 @@
 
 /**
-* HTMLElement - DOM Level 2
-*/
+ * HTMLElement - DOM Level 2
+ */
 HTMLElement = function(ownerDocument) {
     Element.apply(this, arguments);
 };
@@ -11,27 +11,27 @@ HTMLElement.prototype = new Element();
 //      denominator.
 __extend__(HTMLElement.prototype, HTMLEvents.prototype);
 __extend__(HTMLElement.prototype, {
-        get className() {
-            return this.getAttribute("class")||'';
+    get className() {
+        return this.getAttribute("class")||'';
     },
-        set className(value) {
-            return this.setAttribute("class",__trim__(value));
+    set className(value) {
+        return this.setAttribute("class",__trim__(value));
     },
-        get dir() {
-            return this.getAttribute("dir")||"ltr";
+    get dir() {
+        return this.getAttribute("dir")||"ltr";
     },
-        set dir(val) {
-            return this.setAttribute("dir",val);
+    set dir(val) {
+        return this.setAttribute("dir",val);
     },
-        get id(){
-            return this.getAttribute('id');
+    get id(){
+        return this.getAttribute('id');
     },
-        set id(id){
-            this.setAttribute('id', id);
+    set id(id){
+        this.setAttribute('id', id);
     },
-        get innerHTML(){
-            var ret = "",
-            i;
+    get innerHTML(){
+        var ret = "",
+        i;
 
         // create string containing the concatenation of the string
         // values of each child
@@ -39,8 +39,8 @@ __extend__(HTMLElement.prototype, {
             if(this.childNodes[i]){
                 if(this.childNodes[i].nodeType === Node.ELEMENT_NODE){
                     ret += this.childNodes[i].xhtml;
-                }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 &&
-                    this.childNodes[i-1].nodeType == Node.TEXT_NODE){
+                } else if (this.childNodes[i].nodeType === Node.TEXT_NODE && i>0 &&
+                           this.childNodes[i-1].nodeType === Node.TEXT_NODE){
                     //add a single space between adjacent text nodes
                     ret += " "+this.childNodes[i].xml;
                 }else{
@@ -50,42 +50,42 @@ __extend__(HTMLElement.prototype, {
         }
         return ret;
     },
-        get lang() {
-            return this.getAttribute("lang");
+    get lang() {
+        return this.getAttribute("lang");
     },
-        set lang(val) {
-            return this.setAttribute("lang",val);
+    set lang(val) {
+        return this.setAttribute("lang",val);
     },
-        get offsetHeight(){
-            return Number((this.style["height"]||'').replace("px",""));
-        },
-        get offsetWidth(){
-            return Number((this.style["width"]||'').replace("px",""));
-        },
-        offsetLeft: 0,
-        offsetRight: 0,
-        get offsetParent(){
-            /* TODO */
-            return;
+    get offsetHeight(){
+        return Number((this.style.height || '').replace("px",""));
     },
-        set offsetParent(element){
-            /* TODO */
-            return;
+    get offsetWidth(){
+        return Number((this.style.width || '').replace("px",""));
     },
-        scrollHeight: 0,
-        scrollWidth: 0,
-        scrollLeft: 0,
-        scrollRight: 0,
-        get style(){
+    offsetLeft: 0,
+    offsetRight: 0,
+    get offsetParent(){
+        /* TODO */
+        return;
+    },
+    set offsetParent(element){
+        /* TODO */
+        return;
+    },
+    scrollHeight: 0,
+    scrollWidth: 0,
+    scrollLeft: 0,
+    scrollRight: 0,
+    get style(){
         return this.getAttribute('style')||'';
-        },
-        get title() {
-            return this.getAttribute("title");
     },
-        set title(value) {
-            return this.setAttribute("title", value);
+    get title() {
+        return this.getAttribute("title");
     },
-        get tabIndex(){
+    set title(value) {
+        return this.setAttribute("title", value);
+    },
+    get tabIndex(){
         var tabindex = this.getAttribute('tabindex');
         if(tabindex!==null){
             return Number(tabindex);
@@ -94,13 +94,14 @@ __extend__(HTMLElement.prototype, {
         }
     },
     set tabIndex(value){
-        if(value===undefined||value===null)
+        if (value === undefined || value === null) {
             value = 0;
+	}
         this.setAttribute('tabindex',Number(value));
     },
-        get outerHTML(){
+    get outerHTML(){
         //Not in the specs but I'll leave it here for now.
-            return this.xhtml;
+        return this.xhtml;
     },
     scrollIntoView: function(){
         /*TODO*/
@@ -118,20 +119,21 @@ __extend__(HTMLElement.prototype, {
         // lowercases tags)
 
         var ret = "",
-            ns = "",
-            name = (this.tagName+"").toLowerCase(),
-            attrs,
-            attrstring = "",
-            i;
+        ns = "",
+        name = (this.tagName+"").toLowerCase(),
+        attrs,
+        attrstring = "",
+        i;
 
         // serialize namespace declarations
         if (this.namespaceURI){
             if((this === this.ownerDocument.documentElement) ||
-                (!this.parentNode)||
-                (this.parentNode &&
-                (this.parentNode.namespaceURI !== this.namespaceURI)))
-                ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
-                    '="'+this.namespaceURI+'"';
+               (!this.parentNode) ||
+               (this.parentNode &&
+                (this.parentNode.namespaceURI !== this.namespaceURI))) {
+                ns = ' xmlns' + (this.prefix ? (':' + this.prefix) : '') +
+                    '="' + this.namespaceURI + '"';
+	    }
         }
 
         // serialize Attribute declarations
@@ -145,17 +147,17 @@ __extend__(HTMLElement.prototype, {
             ret += "<" + name + ns + attrstring +">";
             for(i=0;i< this.childNodes.length;i++){
                 ret += this.childNodes[i].xhtml ?
-                           this.childNodes[i].xhtml :
-                           this.childNodes[i].xml;
+                    this.childNodes[i].xhtml :
+                    this.childNodes[i].xml;
             }
             ret += "</" + name + ">";
         }else{
             switch(name){
-                case 'script':
-                    ret += "<" + name + ns + attrstring +"></"+name+">";
-                    break;
-                default:
-                    ret += "<" + name + ns + attrstring +"/>";
+            case 'script':
+                ret += "<" + name + ns + attrstring +"></"+name+">";
+                break;
+            default:
+                ret += "<" + name + ns + attrstring +"/>";
             }
         }
 
