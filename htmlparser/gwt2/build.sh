@@ -19,7 +19,7 @@ fi
 GWT=gwt-2.0.3
 GWT_ZIP="${GWT}.zip"
 
-if [ ! -d "${GWT}" ]; then 
+if [ ! -d "${GWT}" ]; then
     wget "http://google-web-toolkit.googlecode.com/files/${GWT_ZIP}"
     unzip ${GWT_ZIP}
 fi
@@ -38,9 +38,9 @@ java \
     com.google.gwt.dev.Compiler \
     -logLevel ERROR \
     -style PRETTY \
-    -draftCompile \
     nu.validator.htmlparser.HtmlParser;
 
+#    -draftCompile \
 cp war/nu.validator.htmlparser.HtmlParser/nu.validator.htmlparser.HtmlParser.nocache.js ../../src/parser/htmlparser.js
 
 echo "DONE"
