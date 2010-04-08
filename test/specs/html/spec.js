@@ -1,4 +1,4 @@
-module('html');
+QUnit.module('html');
 
 test('HTML Interfaces Available', function(){
 
@@ -289,7 +289,7 @@ test('HTMLDocument.createElement(area)', function(){
 test('HTMLDocument.createElement(frame)', function(){
 
     var element;
-
+    ok(1);
     element = document.createElement('frame');
 
     ok(element, 'element created');

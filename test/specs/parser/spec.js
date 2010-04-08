@@ -1,4 +1,4 @@
-module('parser');
+QUnit.module('parser');
 
 test('Parser Interfaces Available', function(){
     

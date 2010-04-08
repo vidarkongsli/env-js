@@ -1,4 +1,4 @@
-module('timer');
+QUnit.module('timer');
 test('Timer Interfaces Available', function(){
     
     expect(4);

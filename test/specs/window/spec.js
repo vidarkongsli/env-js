@@ -1,4 +1,4 @@
-module('window');
+QUnit.module('window');
 
 window.ABC1234567890 = "abc!@#$%^&*()";
 

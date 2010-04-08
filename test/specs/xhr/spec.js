@@ -1,4 +1,4 @@
-module('xhr');
+QUnit.module('xhr');
 
 test('XMLHttpRequest Interfaces Available', function(){
     

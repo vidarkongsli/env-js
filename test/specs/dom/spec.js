@@ -1,4 +1,4 @@
-module('DOM Level 3');//A little ambitious but we are on the way
+QUnit.module('DOM Level 3');//A little ambitious but we are on the way
 
 test('DOM Interfaces Available', function(){
     
@@ -33,7 +33,7 @@ try{
 }
 var xmlserializer = new XMLSerializer();
 
-module('DOMImplementation');
+QUnit.module('DOMImplementation');
 
 test('createDocument', function(){
 
@@ -98,7 +98,7 @@ test('createDocument', function(){
     
 });
 
-module('Document');
+QUnit.module('Document');
 
 test('location', function(){
 
@@ -512,7 +512,7 @@ test('createComment', function(){
         "<!--This is a pig, 'oink, oink'-->", 'serializeToString');
 });
 
-module('Element');
+QUnit.module('Element');
 
 test('attributes', function(){
 
@@ -547,7 +547,7 @@ test('setAttributeNS', function(){
     
 });
 
-module('DocumentFragment');
+QUnit.module('DocumentFragment');
 
 test('cloneNode', function(){
 
@@ -663,7 +663,7 @@ test('compareDocumentPosition', function(){
 
 var domparser = new DOMParser();
 
-module('DOMParser');
+QUnit.module('DOMParser');
 
 test('parseFromString', function(){
 

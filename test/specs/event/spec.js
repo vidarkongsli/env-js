@@ -1,4 +1,4 @@
-module('event');
+QUnit.module('event');
 test('Event Interfaces Available', function(){
 
     expect(7);

@@ -3,7 +3,7 @@
  * @todo: document
  */
 
-module('console');
+QUnit.module('console');
 
 test('Console Interfaces Available', function(){
     

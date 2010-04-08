@@ -7,7 +7,7 @@ try{
     document = new HTMLDocument(new DOMImplementation());
 }
 
-module('css');
+QUnit.module('css');
 
 test('CSS Interfaces Available', function(){
     
