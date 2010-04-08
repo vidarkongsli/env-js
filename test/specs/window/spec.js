@@ -458,12 +458,12 @@ test('HTMLParser.parseDocument / empty script', function(){
     win = iframe.contentWindow;
 
     try {
-	doc.open();
-	doc.write("<html><head><script></script></head><body>hello</body></html>");
-	doc.close();
-	ok(true, 'empty script was correctly ignored');
+        doc.open();
+        doc.write("<html><head><script></script></head><body>hello</body></html>");
+        doc.close();
+        ok(true, 'empty script was correctly ignored');
     } catch (e) {
-	ok(false, 'empty script causes exception:' + e);
+        ok(false, 'empty script causes exception:' + e);
     }
 
 });
@@ -513,4 +513,36 @@ test('window.[atob|btoa]', function(){
 
     equals(window.btoa('1234'),  'MTIzNA==',    'smoke test for btoa');
     equals(window.atob('MTIzNA=='),  '1234',    'smoke test for atob');
+});
+
+/**
+ * Not sure where this goes, since it needs the parser
+ */
+test('Named Element Lookup', function(){
+    //one of the easiest way to test the HTMLParser is using frames and
+    //writing the document directly
+    expect(4);
+    var iframe = document.createElement("iframe");
+    var doc;
+
+    document.body.appendChild(iframe);
+    doc = iframe.contentDocument;
+    doc.open();
+    doc.write('<html><head></head><body><form name="foo"></form></body></html>');
+    doc.close();
+
+    var nodelist = doc.getElementsByName('foo');
+    equals(nodelist.length, 1);
+    var node2 = doc.foo;
+    equals(nodelist[0], node2, 'named lookedup');
+
+    // ok now let's try to use innerHTML
+    var str = '<form name="bar"></form>';
+    doc.body.innerHTML = str;
+    var node3 = doc.bar;
+    ok(node3, 'named lookeup after innerHTML');
+
+    // the other one should be zapped
+    node2 = doc.foo;
+    ok(! node2, 'old named element is gone');
 });
