@@ -169,7 +169,11 @@ Location = function(url, doc, history) {
             var event;
 
             //console.log('assigning %s',url);
+
+            // update closure upvars
             $url = url;
+            parts = urlparse.urlsplit($url);
+
             //we can only assign if this Location is associated with a document
             if ($document) {
                 //console.log('fetching %s (async? %s)', url, $document.async);
