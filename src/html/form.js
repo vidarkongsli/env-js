@@ -6,6 +6,7 @@
  */
 HTMLFormElement = function(ownerDocument){
     HTMLElement.apply(this, arguments);
+
     //TODO: on __elementPopped__ from the parser
     //      we need to determine all the forms default
     //      values
@@ -25,19 +26,11 @@ __extend__(HTMLFormElement.prototype,{
         this.setAttribute('action', action);
     },
 
-    // returns HTMLFormControlsCollection
-    // http://dev.w3.org/html5/spec/Overview.html#dom-form-elements
-    get elements() {
-        return this.getElementsByTagName("*");
-    },
     get enctype() {
         return this.getAttribute('enctype');
     },
     set enctype(enctype) {
         this.setAttribute('enctype', enctype);
-    },
-    get length() {
-        return this.elements.length;
     },
     get method() {
         return this.getAttribute('method');
@@ -56,6 +49,44 @@ __extend__(HTMLFormElement.prototype,{
     },
     set target(val) {
         return this.setAttribute("target",val);
+    },
+
+    /**
+     * "Named Elements"
+     *
+     */
+    /**
+     * returns HTMLFormControlsCollection
+     * http://dev.w3.org/html5/spec/Overview.html#dom-form-elements
+     *
+     * button fieldset input keygen object output select textarea
+     */
+    get elements() {
+        var nodes = this.getElementsByTagName('*');
+        var alist = [];
+        var i;
+        for (i = 0; i < nodes.length; ++i) {
+            if (HTMLFormElement.prototype._isFormNamedElement(nodes[i])) {
+                alist.push(nodes[i]);
+                this[i] = nodes[i];
+                if ('name' in nodes[i]) {
+                    this[nodes[i].name] = nodes[i];
+                }
+            }
+        }
+        return new HTMLCollection(alist);
+    },
+    _updateElements: function() {
+        this.elements;
+    },
+    get length() {
+        return this.elements.length;
+    },
+    item: function(idx) {
+        return this.elements[idx];
+    },
+    namedItem: function(aname) {
+        return this.elements[aname];
     },
     toString: function() {
         return '[object HTMLFormElement]';
