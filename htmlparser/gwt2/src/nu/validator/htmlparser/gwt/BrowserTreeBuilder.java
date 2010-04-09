@@ -2,22 +2,22 @@
  * Copyright (c) 2007 Henri Sivonen
  * Copyright (c) 2008-2009 Mozilla Foundation
  *
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in 
+ * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
 
@@ -63,7 +63,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
         /**
          * Returns the script.
-         * 
+         *
          * @return the script
          */
         public JavaScriptObject getScript() {
@@ -72,7 +72,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
         /**
          * Returns the placeholder.
-         * 
+         *
          * @return the placeholder
          */
         public JavaScriptObject getPlaceholder() {
@@ -98,7 +98,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
                                   obj.setAttribute("id", "mathplayer");
                                   obj.setAttribute("classid", "clsid:32F66A20-7614-11D4-BD11-00104BD3F987");
                                   document.getElementsByTagName("head")[0].appendChild(obj);
-                                  document.namespaces.add("m", "http://www.w3.org/1998/Math/MathML", "#mathplayer");  
+                                  document.namespaces.add("m", "http://www.w3.org/1998/Math/MathML", "#mathplayer");
                                   doc.mathplayerinitialized = true;
                               }
                               return doc.createElement("m:" + local);
@@ -108,7 +108,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
                                   obj.setAttribute("id", "renesis");
                                   obj.setAttribute("classid", "clsid:AC159093-1683-4BA2-9DCF-0C350141D7F2");
                                   document.getElementsByTagName("head")[0].appendChild(obj);
-                                  document.namespaces.add("s", "http://www.w3.org/2000/svg", "#renesis");  
+                                  document.namespaces.add("s", "http://www.w3.org/2000/svg", "#renesis");
                                   doc.renesisinitialized = true;
                               }
                               return doc.createElement("s:" + local);
@@ -121,12 +121,12 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native boolean hasAttributeNS(JavaScriptObject element,
             String uri, String localName) /*-{
-                        return element.hasAttributeNS(uri, localName); 
+                        return element.hasAttributeNS(uri, localName);
                     }-*/;
 
     private static native void setAttributeNS(JavaScriptObject element,
             String uri, String localName, String value) /*-{
-                        element.setAttributeNS(uri, localName, value); 
+                        element.setAttributeNS(uri, localName, value);
                     }-*/;
 
     @Override protected void addAttributesToElement(JavaScriptObject element,
@@ -147,12 +147,12 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native void appendChild(JavaScriptObject parent,
             JavaScriptObject child) /*-{
-                        parent.appendChild(child); 
+                        parent.appendChild(child);
                     }-*/;
 
     private static native JavaScriptObject createTextNode(JavaScriptObject doc,
             String text) /*-{
-                        return doc.createTextNode(text); 
+                        return doc.createTextNode(text);
                     }-*/;
 
     @Override protected void appendCharacters(JavaScriptObject parent,
@@ -169,12 +169,12 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
     }
 
     private static native boolean hasChildNodes(JavaScriptObject element) /*-{
-                        return element.hasChildNodes(); 
+                        return element.hasChildNodes();
                     }-*/;
 
     private static native JavaScriptObject getFirstChild(
             JavaScriptObject element) /*-{
-                        return element.firstChild; 
+                        return element.firstChild;
                     }-*/;
 
     @Override protected void appendChildrenToNewParent(
@@ -191,7 +191,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native JavaScriptObject createComment(JavaScriptObject doc,
             String text) /*-{
-                        return doc.createComment(text); 
+                        return doc.createComment(text);
                     }-*/;
 
     @Override protected void appendComment(JavaScriptObject parent,
@@ -217,7 +217,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native JavaScriptObject createElementNS(
             JavaScriptObject doc, String ns, String local) /*-{
-                        return doc.createElementNS(ns, local); 
+                        return doc.createElementNS(ns, local);
                     }-*/;
 
     @Override protected JavaScriptObject createElement(String ns, String name,
@@ -269,7 +269,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native JavaScriptObject getParentNode(
             JavaScriptObject element) /*-{
-                        return element.parentNode; 
+                        return element.parentNode;
                     }-*/;
 
     @Override protected void appendElement(JavaScriptObject child,
@@ -304,18 +304,12 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
                     }-*/;
 
     private static native JavaScriptObject cloneNode(JavaScriptObject node) /*-{
-		      return node.cloneNode(false);
-	      }-*/;
+                      return node.cloneNode(false);
+              }-*/;
 
-    @Override protected JavaScriptObject shallowClone(JavaScriptObject element)
-	throws SAXException {
-	try {
-	    return cloneNode(element);
-	} catch (JavaScriptException e) {
-	    fatal(e);
-	    throw new RuntimeException("Unreachable");
-	}
-    }
+    protected native JavaScriptObject shallowClone(JavaScriptObject node) /*-{
+        return node.cloneNode(false);
+        }-*/;
 
     private static native JavaScriptObject cloneNodeDeep(JavaScriptObject node) /*-{
               return node.cloneNode(true);
@@ -323,7 +317,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     /**
      * Returns the document.
-     * 
+     *
      * @return the document
      */
     JavaScriptObject getDocument() {
@@ -334,7 +328,7 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
 
     private static native JavaScriptObject createDocumentFragment(
             JavaScriptObject doc) /*-{
-                        return doc.createDocumentFragment(); 
+                        return doc.createDocumentFragment();
                     }-*/;
 
     JavaScriptObject getDocumentFragment() {
@@ -393,16 +387,16 @@ class BrowserTreeBuilder extends CoalescingTreeBuilder<JavaScriptObject> {
         //the 'sax end element event'
         elementPoppedNative(ns, name, node);
     }
-    
+
     private static native void elementPoppedNative(String ns, String name,
-    		JavaScriptObject node)  /*-{
-    	__elementPopped__(ns, name, node);
-	}-*/;
+                JavaScriptObject node)  /*-{
+        __elementPopped__(ns, name, node);
+        }-*/;
 
     private static native void replace(JavaScriptObject oldNode,
             JavaScriptObject newNode) /*-{
         oldNode.parentNode.replaceChild(newNode, oldNode);
-		__elementPopped__('', newNode.nodeName, newNode);
+                __elementPopped__('', newNode.nodeName, newNode);
     }-*/;
 
     void maybeRunScript() {
