@@ -162,9 +162,11 @@ var HTMLInputCommon = function(ownerDocument) {
 };
 HTMLInputCommon.prototype = new HTMLElement();
 __extend__(HTMLInputCommon.prototype, {
-    get form(){
+    get form() {
+        // parent can be null if element is outside of a form
+        // or not yet added to the document
         var parent = this.parentNode;
-        while(parent.nodeName.toLowerCase() !== 'form') {
+        while (parent && parent.nodeName.toLowerCase() !== 'form') {
             parent = parent.parentNode;
         }
         return parent;

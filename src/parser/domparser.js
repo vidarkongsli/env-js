@@ -96,7 +96,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
             tmpdoc.cached = false;
         }
     }
-    
+
     //parent is envjs_1234567890 element
     parent = tmpdoc.body.childNodes[0];
     while(element.firstChild != null){
@@ -108,7 +108,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
         length = parent.childNodes.length;
         for(i=0;i<length;i++){
             importedNode = element.importNode( parent.childNodes[i], true );
-            element.appendChild( importedNode );  
+            element.appendChild( importedNode );
         }
     }else{
         while(parent.firstChild != null){
@@ -120,7 +120,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
         delete tmpdoc;
         delete htmlstring;
     }
-    
+
     // console.log('finished fragment: %s', element.outerHTML);
     return element;
 };
