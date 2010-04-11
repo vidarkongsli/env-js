@@ -7,13 +7,26 @@ __extend__(DOMParser.prototype,{
         var doc = new Document(new DOMImplementation()),
             e4;
 
-        // TODO: JAVA ALERT -- 'XML' is a global object
-        //  not sure if this is envjs-special? or a normal java thing
-        // if (XML) {  ????
+        // The following are e4x directives.
+        // Full spec is here:
+        // http://www.ecma-international.org/publications/standards/Ecma-357.htm
+        //
+        // that is pretty gross, so checkout this summary
+        // http://rephrase.net/days/07/06/e4x
+        //
+        // also see the Mozilla Developer Center:
+        // https://developer.mozilla.org/en/E4X
+        //
         XML.ignoreComments = false;
         XML.ignoreProcessingInstructions = false;
         XML.ignoreWhitespace = false;
 
+        // for some reason e4x can't handle initial xml declarations
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=336551
+        // The official workaround is the big regexp below
+        // but simpler one seems to be ok
+        // xmlstring = xmlstring.replace(/^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, "");
+        //
         xmlstring = xmlstring.replace(/<\?xml.*\?>/);
 
         e4 = new XMLList(xmlstring);
@@ -37,8 +50,16 @@ var __toDomNode__ = function(e4, parent, doc){
         kind,
         item;
     //console.log('converting e4x node list \n %s', e4)
+
+    // not using the for each(item in e4) since some engines can't
+    // handle the syntax (i.e. says syntax error)
+    //
+    // for each(xnode in e4) {
     for (item in e4) {
+        // NO do not do this if (e4.hasOwnProperty(item)) {
+        // breaks spidermonkey
         xnode = e4[item];
+
         kind = xnode.nodeKind();
         //console.log('treating node kind %s', kind);
         switch(kind){
@@ -51,7 +72,8 @@ var __toDomNode__ = function(e4, parent, doc){
                     domnode = doc.createElement(xnode.name()+'');
                 }
                 parent.appendChild(domnode);
-                 __toDomNode__(xnode.attributes(), domnode, doc);
+
+            __toDomNode__(xnode.attributes(), domnode, doc);
                 length = xnode.children().length();
                 //console.log('recursing? %s', length?"yes":"no");
                 if(xnode.children().length()>0){
@@ -59,21 +81,28 @@ var __toDomNode__ = function(e4, parent, doc){
                 }
                 break;
             case 'attribute':
-                //console.log('setting attribute %s %s %s',
-                //    xnode.localName(), xnode.namespace(), xnode.text());
+                 // console.log('setting attribute %s %s %s',
+                 //       xnode.localName(), xnode.namespace(), xnode.valueOf());
+
+                //
+                // cross-platform alert.  The original code used
+                //  xnode.text() to get the attribute value
+                //  This worked in Rhino, but did not in Spidermonkey
+                //  valueOf seemed to work in both
+                //
                 if(xnode.namespace() && xnode.namespace().prefix){
                     //console.log("%s", xnode.namespace().prefix);
                     parent.setAttributeNS(xnode.namespace()+'',
                         xnode.namespace().prefix+':'+xnode.localName(),
-                        xnode.text());
+                        xnode.valueOf());
                 }else if((xnode.name()+'').match("http://www.w3.org/2000/xmlns/::")){
                     if(xnode.localName()!=='xmlns'){
                         parent.setAttributeNS('http://www.w3.org/2000/xmlns/',
                             'xmlns:'+xnode.localName(),
-                            xnode.text());
+                            xnode.valueOf());
                     }
                 }else{
-                    parent.setAttribute(xnode.localName()+'', xnode.text());
+                    parent.setAttribute(xnode.localName()+'', xnode.valueOf());
                 }
                 break;
             case 'text':
@@ -96,6 +125,9 @@ var __toDomNode__ = function(e4, parent, doc){
                 domnode = doc.createProcessingInstruction(target, value);
                 parent.appendChild(domnode);
                 break;
+        default:
+            console.log("e4x DOM ERROR");
+            throw new Error("Assertion failed in xml parser");
         }
     }
 };
