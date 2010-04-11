@@ -222,7 +222,7 @@ test('HTMLDocument.createElement(a)', function(){
 
     var element;
 
-    a = document.createElement('a');
+    var a = document.createElement('a');
 
     ok(a, 'element created');
     equals(a.tagName, 'A', '.name');
