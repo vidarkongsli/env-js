@@ -30,8 +30,8 @@ Document = function(implementation, docParentWindow) {
     this.ownerDocument = null;
 
     this.importing = false;
-    this.location = null;
 };
+
 Document.prototype = new Node();
 __extend__(Document.prototype,{
     get localName(){
