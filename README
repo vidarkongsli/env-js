@@ -83,12 +83,12 @@ Getting the code:
    
 == contributing tests with patches ==
     
-    Each module has a spec in env-js/test/spec.  Most tests will run whether you 
+    Each module has a spec in env-js/specs.  Most tests will run whether you
     load them in the file:, http:, or https:, though once you get to xhr.js 
     the tests will fail for the 'file:' protocol in firefox because of 
     permissions.  To run xhr.js and window.js specs, copy settings.js to 
-    local_settings.js and run a local server to satisfy those urls included in
-    the spec.js;
+    local_settings.js, update it, and run a local server to satisfy
+    those urls included in the spec.js;
     
     
 == platforms ==
