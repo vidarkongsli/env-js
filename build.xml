@@ -382,6 +382,7 @@
             <fileset dir="${SRC_DIR}" includes="common/__trim__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
+            <fileset dir="${SRC_DIR}" includes="html/cookie.js" />
             <fileset dir="${SRC_DIR}" includes="html/document.js" />
             <fileset dir="${SRC_DIR}" includes="html/htmlevents.js" />
             <fileset dir="${SRC_DIR}" includes="html/keyboardevents.js" />
@@ -429,6 +430,7 @@
             <fileset dir="${SRC_DIR}" includes="html/param.js" />
             <fileset dir="${SRC_DIR}" includes="html/script.js" />
             <fileset dir="${SRC_DIR}" includes="html/select.js" />
+            <fileset dir="${SRC_DIR}" includes="html/span.js" />
             <fileset dir="${SRC_DIR}" includes="html/style.js" />
             <fileset dir="${SRC_DIR}" includes="html/table.js" />
             <fileset dir="${SRC_DIR}" includes="html/tbody-thead-tfoot.js" />

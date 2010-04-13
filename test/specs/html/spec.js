@@ -2,7 +2,7 @@ QUnit.module('html');
 
 test('HTML Interfaces Available', function(){
 
-    expect(52);
+    expect(53);
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
     ok(HTMLCollection,          'HTMLCollection defined');
@@ -42,6 +42,7 @@ test('HTML Interfaces Available', function(){
     ok(HTMLParamElement,        'HTMLParamElement defined');
     ok(HTMLScriptElement,       'HTMLScriptElement defined');
     ok(HTMLSelectElement,       'HTMLSelectElement defined');
+    ok(HTMLSpanElement,       'HTMLSpanElement defined');
     ok(HTMLStyleElement,        'HTMLStyleElement defined');
     ok(HTMLTableElement,        'HTMLTableElement defined');
     ok(HTMLTableSectionElement, 'HTMLTableSectionElement defined');
