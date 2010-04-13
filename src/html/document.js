@@ -98,6 +98,8 @@ __extend__(HTMLDocument.prototype, {
             node = new HTMLMapElement(this);break;
         case "META":
             node = new HTMLMetaElement(this);break;
+        case "NOSCRIPT":
+            node = new HTMLElement(this);break;
         case "OBJECT":
             node = new HTMLObjectElement(this);break;
         case "OPTGROUP":
@@ -116,6 +118,12 @@ __extend__(HTMLDocument.prototype, {
             node = new HTMLScriptElement(this);break;
         case "SELECT":
             node = new HTMLSelectElement(this);break;
+        case "SMALL":
+            node = new HTMLElement(this);break;
+        case "SPAN":
+            node = new HTMLSpanElement(this);break;
+        case "STRONG":
+            node = new HTMLElement(this);break;
         case "STYLE":
             node = new HTMLStyleElement(this);break;
         case "TABLE":
@@ -421,7 +429,7 @@ Aspect.around({
     node = invocation.proceed(),
     doc = node.ownerDocument;
 
-    //console.log('element appended: %s %s', node+'', node.namespaceURI);
+    //console.log('element appended: %s %s %s', node+'', node.nodeName, node.namespaceURI);
     if((node.nodeType !== Node.ELEMENT_NODE)){
         //for now we are only handling element insertions.  probably
         //we will need to handle text node changes to script tags and
@@ -525,7 +533,7 @@ Aspect.around({
         }//switch on ns
         break;
     default:
-        console.log('element appended: %s %s', node+'', node.namespaceURI);
+        // console.log('element appended: %s %s', node+'', node.namespaceURI);
     }//switch on doc.parsing
     return node;
 
