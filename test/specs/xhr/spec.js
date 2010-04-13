@@ -35,7 +35,8 @@ test('Location', function(){
         '.toString()'
     );
     equals(location.hash, '', '.hash');
-    equals(location.host, 'localhost:8080', '.host');
+    var port = (SETTINGS.LOCAL_PORT == "") ? "" : (":" + SETTINGS.LOCAL_PORT);
+    equals(location.host, 'localhost'+port, '.host');
     equals(location.hostname, 'localhost', '.hostname');
     ok(//this test may run in xhr or env so we allow for both paths
         location.href === href || 
@@ -47,7 +48,7 @@ test('Location', function(){
         location.pathname === ('/env-js/'+expected_path).replace('xhr','env'), 
         '.href'
     );
-    equals(location.port, '8080', '.port');
+    equals(location.port, SETTINGS.LOCAL_PORT, '.port');
     equals(location.protocol, 'http:', '.protocol');
     equals(location.search, '', '.search');
     
