@@ -36,7 +36,7 @@
             location="${PREFIX}/docs"
             description="Folder for docs target"  />
     <property name="TEST_DIR"
-            location="${PREFIX}/test"
+            location="${basedir}/test/specs"
             description="Folder for test target"  />
     <property name="DIST_DIR"
             location="${PREFIX}/"
@@ -174,7 +174,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/platform/rhino.js"/>
+            <arg value="${TEST_DIR}/platform/rhino.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -211,7 +211,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/console/boot.js"/>
+            <arg value="${TEST_DIR}/console/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -274,7 +274,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/dom/boot.js"/>
+            <arg value="${TEST_DIR}/dom/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -321,7 +321,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/event/boot.js"/>
+            <arg value="${TEST_DIR}/event/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -358,7 +358,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/timer/boot.js"/>
+            <arg value="${TEST_DIR}/timer/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -453,7 +453,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/html/boot.js"/>
+            <arg value="${TEST_DIR}/html/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -499,7 +499,7 @@
               failonerror="true">
             <arg value="-opt"/>
             <arg value="-1"/>
-            <arg value="test/specs/parser/boot.js"/>
+            <arg value="${TEST_DIR}/parser/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -543,7 +543,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/xhr/boot.js"/>
+            <arg value="${TEST_DIR}/xhr/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -586,7 +586,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/css/boot.js"/>
+            <arg value="${TEST_DIR}/css/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
@@ -632,7 +632,7 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
-            <arg value="test/specs/window/boot.js"/>
+            <arg value="${TEST_DIR}/window/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
         </java>
