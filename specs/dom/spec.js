@@ -513,7 +513,6 @@ QUnit.module('Element');
 
 test('attributes', function(){
 
-    debugger;
     var doc,
         element;
 

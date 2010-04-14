@@ -2,7 +2,13 @@ QUnit.module('html');
 
 test('HTML Interfaces Available', function(){
 
-    expect(53);
+    var areInEnvjs = navigator.userAgent.search( /Envjs/ ) > -1;
+
+    if (areInEnvjs)
+        expect(53);
+    else
+        expect(51);
+
     ok(HTMLDocument,            'HTMLDocument defined');
     ok(HTMLElement,             'HTMLElement defined');
     ok(HTMLCollection,          'HTMLCollection defined');
@@ -47,8 +53,12 @@ test('HTML Interfaces Available', function(){
     ok(HTMLTableElement,        'HTMLTableElement defined');
     ok(HTMLTableSectionElement, 'HTMLTableSectionElement defined');
     ok(HTMLTableCellElement,    'HTMLTableCellElement defined');
-    ok(HTMLTableDataCellElement,    'HTMLTableDataCellElement defined');
-    ok(HTMLTableHeaderCellElement,  'HTMLTableHeaderCellElement defined');
+
+    if (areInEnvjs){
+        ok(HTMLTableDataCellElement,    'HTMLTableDataCellElement defined');
+        ok(HTMLTableHeaderCellElement,  'HTMLTableHeaderCellElement defined');
+    }
+
     ok(HTMLTableRowElement,     'HTMLTableRowElement defined');
     ok(HTMLTextAreaElement,     'HTMLTextAreaElement defined');
     ok(HTMLTitleElement,        'HTMLTitleElement defined');
@@ -338,11 +348,10 @@ test('HTMLDocument.createElement(script)', function(){
     equals(element.type, "", '.type');
     equals(element.tagName, 'SCRIPT', '.tagName');
     equals(xmlserializer.serializeToString(element), '<SCRIPT/>', 'xmlserializer');
-    debugger;
 
     element.textContent = 'document.ASDFASDF = "QWERQWER";';
     // TODO: document.ASDFASDF should still be undefined
-    document.head.appendChild(element);
+    document.getElementsByTagName('head')[0].appendChild(element);
     equals(document.ASDFASDF, 'QWERQWER', 'script appended to head executes');
 
     // create setting and getting 'text' property
