@@ -641,6 +641,22 @@
         <echo message=""/>
     </target>
 
+    <!-- TEST FRAME SPECIFICATION -->
+    <target name='frame-spec'
+            depends='local-settings'
+            description='Test Frame Specs'>
+        <echo message=""/>
+        <echo message="Executing Frame Spec"/>
+        <java fork="true"
+              jar="${RHINO_JAR}"
+              failonerror="true">
+            <arg value="${TEST_DIR}/frame/boot.js"/>
+            <jvmarg value="-Dfile.encoding=utf-8"/>
+            <jvmarg value="-Xmx256m"/>
+        </java>
+        <echo message=""/>
+    </target>
+
     <target description="jslint quick build - no parser!"
             name="jslint"
             depends="dom, event, timer, html, xhr, css, window">
@@ -686,7 +702,7 @@
             name="concat"
             depends="dom-spec, event-spec, timer-spec,
                      html-spec, parser-spec, xhr-spec,
-                     css-spec,  window-spec">
+                     css-spec,  window-spec,  frame-spec">
         <!-- CORE -->
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
