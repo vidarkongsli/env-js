@@ -1,32 +1,49 @@
 
-__extend__(HTMLDocument.prototype,{
 
-    open : function(){ 
-        //console.log('opening doc for write.'); 
-        this._open = true;  
-        this._writebuffer = [];
+__extend__(HTMLDocument.prototype, {
+
+    open : function() {
+        //console.log('opening doc for write.');
+        if (! this._writebuffer) {
+            this._writebuffer = [];
+        }
     },
-    close : function(){
-        //console.log('closing doc.'); 
-        if(this._open){
-            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
-            this._open = false;
+    close : function() {
+        //console.log('closing doc.');
+        if (this._writebuffer) {
+            HTMLParser.parseDocument(this._writebuffer.join(''), this);
             this._writebuffer = null;
             //console.log('finished writing doc.');
         }
     },
-    write: function(htmlstring){ 
-        //console.log('writing doc.'); 
-        if(this._open)
-            this._writebuffer = [htmlstring];
+
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#document.write
+     */
+    write: function(htmlstring) {
+        //console.log('writing doc.');
+        this.open();
+        this._writebuffer.push(htmlstring);
     },
-    writeln: function(htmlstring){ 
-        if(this.open)
-            this._writebuffer.push(htmlstring); 
+
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#dom-document-writeln
+     */
+    writeln: function(htmlstring) {
+        this.open();
+        this._writebuffer.push(htmlstring + '\n');
     }
-    
 });
 
+/**
+ * elementPopped is called by the parser in two cases
+ *
+ * - an 'tag' is * complete (all children process and end tag, real or
+ *   implied is * processed)
+ * - a replaceElement happens (this happens by making placeholder
+ *   nodes and then the real one is swapped in.
+ *
+ */
 var __elementPopped__ = function(ns, name, node){
     //console.log('popped html element %s %s %s', ns, name, node);
     var doc = node.ownerDocument,
