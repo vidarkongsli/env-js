@@ -823,7 +823,8 @@ test('parseFromString', function(){
 test('getElementsByTagName', function() {
     var nodes, doc;
     doc = domparser.parseFromString(
-        '<root><div><div>123</div></div><div></div></root>'
+        '<root><div><div>123</div></div><div></div></root>',
+        'text/xml'
     );
 
     nodes = doc.getElementsByTagName('*');
