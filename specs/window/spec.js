@@ -531,30 +531,37 @@ test('window.[atob|btoa]', function(){
  * Not sure where this goes, since it needs the parser
  */
 test('Document Named Element Lookup', function(){
-    expect(4);
-    var iframe = document.createElement("iframe");
-    var doc;
+    if (runningUnderEnvjs())
+        expect(6);
+    else
+        expect(5);
 
+    var iframe = document.createElement("iframe");
     document.body.appendChild(iframe);
-    doc = iframe.contentDocument;
+    var doc = iframe.contentDocument;
     doc.open();
-    doc.write('<html><head></head><body><form name="foo"></form></body></html>');
+    doc.write(
+        '<html><head></head><body><form name="foo"></form></body></html>');
     doc.close();
 
     var nodelist = doc.getElementsByName('foo');
     equals(nodelist.length, 1);
-    var node2 = doc.foo;
-    equals(nodelist[0], node2, 'named lookedup');
+    var node = doc.foo;
+    ok(node, 'named lookup finds element');
+    equals(nodelist[0], node, 'element is one expected');
 
     // ok now let's try to use innerHTML
     var str = '<form name="bar"></form>';
     doc.body.innerHTML = str;
-    var node3 = doc.bar;
-    ok(node3, 'named lookeup after innerHTML');
+    ok(doc.bar, 'named lookup after innerHTML');
 
     // the other one should be zapped
-    node2 = doc.foo;
-    ok(! node2, 'old named element is gone');
+    nodelist = doc.getElementsByName('foo');
+    equals(nodelist.length, 0, 'old named element not found ByName');
+
+    //I think it is actually a Firefox bug that this test doesn't pass there
+    if (runningUnderEnvjs())
+        ok(!doc.foo, 'old named element not found via named lookup');
 });
 
 test('Form Named Element Lookup', function(){
