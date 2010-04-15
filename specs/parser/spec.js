@@ -192,7 +192,6 @@ test('HTMLParser.parseDocument / simple content', function(){
     }, false);
 
     var doc = iframe.contentDocument;
-    doc.open();
     doc.write("<body><p id='p1'>this is a pig</p></body>");
     doc.close();
     stop();
@@ -219,7 +218,6 @@ test('HTMLParser.parseDocument / malformed content', function(){
     }, false);
 
     var doc = iframe.contentDocument;
-    doc.open();
     doc.write("<body><p id='p1'>this is a pig</body>");
     doc.close();
     stop();
@@ -284,12 +282,13 @@ test('Image Loading', function(){
         // appendChild does not fire again (since we fired already)
         doc.body.appendChild(img);
         equals(counter, 5, "appendChild(img) does *not* fire");
-
+        start();
     }, false);
 
     var doc = iframe.contentDocument;
-    doc.writeln('<html><head></head><body><img src="/foo"></body></html>');
+    doc.write('<html><head></head><body><img src="/foo"></body></html>');
     doc.close();
+    stop();
 });
 
 /**
@@ -353,10 +352,11 @@ test('Link Loading', function(){
          */
         equals(counter, 4, "Link *not* fired during appendChild");
 
-
+        start();
     }, false);
 
     var doc = iframe.contentDocument;
-    doc.writeln('<html><head></head><body><link rel="stylesheet" type="text/css" href="/foo"></body></html>');
+    doc.write('<html><head></head><body><link rel="stylesheet" type="text/css" href="/foo"></body></html>');
     doc.close();
+    stop();
 });
