@@ -125,3 +125,42 @@ Envjs.loadLocalScript = function(script){
     }
     return true;
 };
+
+
+/**
+ * An 'image' was requested by the document.
+ *
+ * - During inital parse of a <link>
+ * - Via an innerHTML parse of a <link>
+ * - A modificiation of the 'src' attribute of an Image/HTMLImageElement
+ *
+ * NOTE: this is optional API.  If this doesn't exist then the default
+ * 'loaded' event occurs.
+ *
+ * @param node {Object} the <img> node
+ * @param node the src value
+ * @return 'true' to indicate the 'load' succeed, false otherwise
+ */
+Envjs.loadImage = function(node, src) {
+    return true;
+}
+
+
+/**
+ * A 'link'  was requested by the document.  Typically this occurs when:
+ * - During inital parse of a <link>
+ * - Via an innerHTML parse of a <link>
+ * - A modificiation of the 'href' attribute on a <link> node in the tree
+ *
+ * @param node {Object} is the link node in question
+ * @param href {String} is the href.
+ *
+ * Return 'true' to indicate that the 'load' was successful, or false
+ * otherwise.  The appropriate event is then triggered.
+ *
+ * NOTE: this is optional API.  If this doesn't exist then the default
+ *   'loaded' event occurs
+ */
+Envjs.loadLink = function(node, href) {
+    return true;
+}

@@ -22,7 +22,7 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
         parent,
         importedNode,
         tmpNode;
-        
+
     if(mimetype && mimetype == 'text/xml'){
         //console.log('mimetype: text/xml');
         tmpdoc.baseURI = 'http://envjs.com/xml';
@@ -31,13 +31,13 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
                 +xmlstring+
             '</envjs_1234567890>'+
         '</body></html>';
-        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);  
+        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);
         parent = tmpdoc.getElementsByTagName('envjs_1234567890')[0];
     }else{
-        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);  
+        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);
         parent = tmpdoc.documentElement;
     }
-    
+
     while(xmldoc.firstChild != null){
         tmpNode = xmldoc.removeChild( xmldoc.firstChild );
         delete tmpNode;
@@ -59,7 +59,7 @@ var __fragmentCache__ = {length:0},
 HTMLParser.parseDocument = function(htmlstring, htmldoc){
     //console.log('HTMLParser.parseDocument %s', htmldoc.async);
     htmldoc.parsing = true;
-    Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
+    Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);
     //Envjs.wait(-1);
     return htmldoc;
 };
@@ -80,6 +80,16 @@ HTMLParser.parseFragment = function(htmlstring, element){
     }else{
         //console.log('parsing html fragment \n%s', htmlstring);
         tmpdoc = new HTMLDocument(new DOMImplementation());
+
+
+        // Need some indicator that this document isn't THE document
+        // to fire off img.src change events and other items.
+        // Otherwise, what happens is the tmpdoc fires and img.src
+        // event, then when it's all imported to the original document
+        // it happens again.
+
+        tmpdoc.fragment = true;
+
         //preserves leading white space
         docstring = '<html><head></head><body>'+
             '<envjs_1234567890 xmlns="envjs_1234567890">'
@@ -104,6 +114,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
         tmpNode = element.removeChild( element.firstChild );
         delete tmpNode;
     }
+
     if(tmpdoc.cached){
         length = parent.childNodes.length;
         for(i=0;i<length;i++){

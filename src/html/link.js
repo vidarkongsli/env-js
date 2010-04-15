@@ -64,10 +64,80 @@ __extend__(HTMLLinkElement.prototype, {
     set type(value){
         this.setAttribute('type',value);
     },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this);
-    },
     toString: function() {
         return '[object HTMLLinkElement]';
     }
+});
+
+__loadLink__ = function(node, value) {
+    var event;
+    var owner = node.ownerDocument;
+
+    if (owner.fragment) {
+        /**
+         * if we are in an innerHTML fragment parsing step
+         * then ignore.  It will be handled once the fragment is
+         * added to the real doco
+         */
+        return;
+    }
+
+    if (node.parentNode === null) {
+        /*
+         * if a <link> is parentless (normally by create a new link
+         * via document.createElement('link'), then do *not* fire an
+         * event, even if it has a valid 'href' attribute.
+         */
+        return;
+    }
+    if (value != '' && (!Envjs.loadLink ||
+                        (Envjs.loadLink &&
+                         Envjs.loadLink(node, value)))) {
+        // value has to be something (easy)
+        // if the user-land API doesn't exist
+        // Or if the API exists and it returns true, then ok:
+        event = document.createEvent('Events');
+        event.initEvent('load');
+    } else {
+        // oops
+        event = document.createEvent('Events');
+        event.initEvent('error');
+    }
+    node.dispatchEvent(event, false);
+};
+
+__extend__(HTMLLinkElement.prototype, {
+    setAttribute: function(name, value) {
+        var result = HTMLElement.prototype.setAttribute.apply(this, arguments);
+        if (name === 'href') {
+            __loadLink__(this, value);
+        }
+        return result;
+    },
+    setAttributeNS: function(namespaceURI, name, value) {
+        var result = HTMLElement.prototype.setAttributeNS.apply(this, arguments);
+        if (name === 'href') {
+            __loadLink__(this, value);
+        }
+        return result;
+    },
+    setAttributeNode: function(newnode) {
+        var result = HTMLElement.prototype.setAttributeNode.apply(this, arguments);
+        var src = this.getAttribute('href');
+        if (src) {
+            __loadLink__(this, src);
+        }
+        return result;
+    },
+    setAttributeNodeNS: function(newnode) {
+        var result = HTMLElement.prototype.setAttributeNodeNS.apply(this, arguments);
+        var src = this.getAttribute('href');
+        if (src) {
+            __loadLink__(this, src);
+        }
+        return result;
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this);
+    },
 });

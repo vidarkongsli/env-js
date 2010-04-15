@@ -133,19 +133,13 @@ var __elementPopped__ = function(ns, name, node){
                                     }*/
                                     break;
                                 case 'link':
-                                    if (node.href && node.href.length > 0){
-                                        // don't actually load anything, so we're "done" immediately:
-                                        event = doc.createEvent('HTMLEvents');
-                                        event.initEvent("load", false, false);
-                                        node.dispatchEvent( event, false );
+                                    if (node.href) {
+                                        __loadLink__(node, node.href);
                                     }
                                     break;
                                 case 'img':
-                                    if (node.src && node.src.length > 0){
-                                        // don't actually load anything, so we're "done" immediately:
-                                        event = doc.createEvent('HTMLEvents');
-                                        event.initEvent("load", false, false);
-                                        node.dispatchEvent( event, false );
+                                    if (node.src){
+                                        __loadImage__(node, node.src);
                                     }
                                     break;
                                 case 'html':
@@ -170,7 +164,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }catch(e){
                                         console.log('%s', e);
                                     }
-                                    
+
                                     try{
                                         if(doc.parentWindow){
                                             event = doc.createEvent('HTMLEvents');
@@ -206,7 +200,7 @@ var __elementPopped__ = function(ns, name, node){
                             break;
                     }//switch on ns
                     break;
-                default: 
+                default:
                     console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
             }//switch on doc type
         default:
