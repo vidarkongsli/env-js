@@ -76,14 +76,20 @@ test('window properties', function(){
     //This is how a proxy window differs from the top level window
     ok( window !== top,        'top is not this window when the window is in a frame');
     ok( window !== parent,     'window parent is not itself');
-    equals(window.top, window.parent, 'top is parent one frame deep');
+
+    if (top.allTestsAreBeingRunWithinAnExtraIFrame)
+        equals(window.top, window.parent.parent,
+            'top is parent two frames deep');
+    else
+        equals(window.top, window.parent, 'top is parent one frame deep');
     
     // now we finally prove the top level window is the window 
     // we expected it to be.
     equals(parent.ABC1234567890, ABC1234567890, 'parent has unique id');
     
     parent.ABC1234567890 = 'QWERTYUIOP{}|';
-    equals(parent.ABC1234567890, 'QWERTYUIOP{}|', 'parent scope can be modified');
+    equals(parent.ABC1234567890, 'QWERTYUIOP{}|',
+        'variables in parent scope can be modified');
     
 });
 

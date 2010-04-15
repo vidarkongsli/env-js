@@ -8,17 +8,28 @@
               media="screen"
               href="../qunit.css"/>
 
-        <script type="text/javascript">
-            listOfTests = [
-                'console', 'dom', 'event', 'timer', 'html', 'parser',
-                'xhr', 'css', 'window' ];
-        </script>
         <script src="../qunit.js"
                 type="text/javascript" ></script>
         <script src="../../local_settings.js"
                 type="text/javascript" ></script>
+
+        <script type="text/envjs">
+            // Running under Envjs, the above are loaded in 'boot.js' and
+            // executing them from here would be redundant/problematic.  Now
+            // that we're past, though, make sure the rest execute under
+            // both Envjs and browsers:
+            Envjs.scriptTypes['text/javascript'] = true;
+        </script>
+        <script type="text/javascript">
+            listOfTests = [
+                'console', 'dom', 'event', 'timer', 'html', 'parser',
+                'xhr', 'css', 'window' ];
+            window.allTestsAreBeingRunWithinAnExtraIFrame = true;
+        </script>
         <script src="spec.js"
                 type="text/javascript" ></script>
+
+
 
         <style>
             #qunit-main iframe {
@@ -52,7 +63,6 @@
                     document.write('/index.html"></iframe>');
                 }
             </script>
-
         </div>
     </body>
 </html>

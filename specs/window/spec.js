@@ -77,9 +77,18 @@ test('window properties', function(){
 
     equals( window, __this__,   'window is the global scope "this"');
     equals( window, self,       'self is an alias for window');
-    equals( window, top,        'top is an alias for window when the window is not in a frame');
-    equals( window, window.parent, 'window parent is itself');
 
+    if (top.allTestsAreBeingRunWithinAnExtraIFrame){
+        ok( window !== top,
+            'when in an iframe, window is different from top');
+        ok( window !== window.parent,
+            'when in an iframe, window and its parent are distinct');
+    }
+    else {
+        equals( window, top,
+            'top is an alias for window when the window is not in a frame');
+        equals( window, window.parent, 'top windows parent is itself');
+    }
 });
 
 test('window event target', function(){
@@ -488,13 +497,17 @@ test('frame proxy', function(){
 
     expect(7);
     frame = document.createElement('iframe');
+    frame.id = 'iframe-proxy';
     frame.width = '100%';
     frame.height = '380px';
     frame.frameBorder = '0';
     frame.addEventListener('load', function(){
 
         equals(frame.contentWindow.parent, window, '.contentWindow.parent');
-        equals(frame.contentWindow.top, window, '.contentWindow.top');
+        if (top.allTestsAreBeingRunWithinAnExtraIFrame)
+            equals(frame.contentWindow.top, window.top, '.contentWindow.top');
+        else
+            equals(frame.contentWindow.top, window, '.contentWindow.top');
 
         ok(frame.contentWindow.Array !== window.Array, '.Array');
         ok(new window.Array(), 'new Array');
