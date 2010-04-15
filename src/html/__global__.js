@@ -60,4 +60,6 @@ var HTMLDocument,
     HTMLUListElement,
     HTMLUnknownElement,
     Image,
-    Option;
+    Option,
+    __loadImage__,
+    __loadLink__;
