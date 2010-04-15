@@ -1,32 +1,49 @@
 
-__extend__(HTMLDocument.prototype,{
 
-    open : function(){ 
-        //console.log('opening doc for write.'); 
-        this._open = true;  
-        this._writebuffer = [];
+__extend__(HTMLDocument.prototype, {
+
+    open : function() {
+        //console.log('opening doc for write.');
+        if (! this._writebuffer) {
+            this._writebuffer = [];
+        }
     },
-    close : function(){
-        //console.log('closing doc.'); 
-        if(this._open){
-            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
-            this._open = false;
+    close : function() {
+        //console.log('closing doc.');
+        if (this._writebuffer) {
+            HTMLParser.parseDocument(this._writebuffer.join(''), this);
             this._writebuffer = null;
             //console.log('finished writing doc.');
         }
     },
-    write: function(htmlstring){ 
-        //console.log('writing doc.'); 
-        if(this._open)
-            this._writebuffer = [htmlstring];
+
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#document.write
+     */
+    write: function(htmlstring) {
+        //console.log('writing doc.');
+        this.open();
+        this._writebuffer.push(htmlstring);
     },
-    writeln: function(htmlstring){ 
-        if(this.open)
-            this._writebuffer.push(htmlstring); 
+
+    /**
+     * http://dev.w3.org/html5/spec/Overview.html#dom-document-writeln
+     */
+    writeln: function(htmlstring) {
+        this.open();
+        this._writebuffer.push(htmlstring + '\n');
     }
-    
 });
 
+/**
+ * elementPopped is called by the parser in two cases
+ *
+ * - an 'tag' is * complete (all children process and end tag, real or
+ *   implied is * processed)
+ * - a replaceElement happens (this happens by making placeholder
+ *   nodes and then the real one is swapped in.
+ *
+ */
 var __elementPopped__ = function(ns, name, node){
     //console.log('popped html element %s %s %s', ns, name, node);
     var doc = node.ownerDocument,
@@ -116,19 +133,13 @@ var __elementPopped__ = function(ns, name, node){
                                     }*/
                                     break;
                                 case 'link':
-                                    if (node.href && node.href.length > 0){
-                                        // don't actually load anything, so we're "done" immediately:
-                                        event = doc.createEvent('HTMLEvents');
-                                        event.initEvent("load", false, false);
-                                        node.dispatchEvent( event, false );
+                                    if (node.href) {
+                                        __loadLink__(node, node.href);
                                     }
                                     break;
                                 case 'img':
-                                    if (node.src && node.src.length > 0){
-                                        // don't actually load anything, so we're "done" immediately:
-                                        event = doc.createEvent('HTMLEvents');
-                                        event.initEvent("load", false, false);
-                                        node.dispatchEvent( event, false );
+                                    if (node.src){
+                                        __loadImage__(node, node.src);
                                     }
                                     break;
                                 case 'html':
@@ -153,7 +164,7 @@ var __elementPopped__ = function(ns, name, node){
                                     }catch(e){
                                         console.log('%s', e);
                                     }
-                                    
+
                                     try{
                                         if(doc.parentWindow){
                                             event = doc.createEvent('HTMLEvents');
@@ -189,7 +200,7 @@ var __elementPopped__ = function(ns, name, node){
                             break;
                     }//switch on ns
                     break;
-                default: 
+                default:
                     console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
             }//switch on doc type
         default:

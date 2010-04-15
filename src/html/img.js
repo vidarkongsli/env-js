@@ -1,7 +1,9 @@
 
 /**
- * HTMLImageElement - DOM Level 2
+ * HTMLImageElement and Image
  */
+
+
 HTMLImageElement = function(ownerDocument) {
     HTMLElement.apply(this, arguments);
 };
@@ -41,20 +43,7 @@ __extend__(HTMLImageElement.prototype, {
         return this.getAttribute('src') || '';
     },
     set src(value){
-        var event;
-        if (value == '') {
-            // according to html5 spec
-            event = document.createEvent('Events');
-            event.initEvent('error');
-        } else {
-            this.setAttribute('src', value);
-
-            // Callback API TBD
-
-            event = document.createEvent('Events');
-            event.initEvent('load');
-            this.dispatchEvent(event, false);
-        }
+        this.setAttribute('src', value);
     },
     get width(){
         return parseInt(this.getAttribute('width'), 10) || 0;
@@ -62,14 +51,10 @@ __extend__(HTMLImageElement.prototype, {
     set width(value){
         this.setAttribute('width', value);
     },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this);
-    },
     toString: function(){
         return '[object HTMLImageElement]';
     }
 });
-
 
 /*
  * html5 4.8.1
@@ -88,4 +73,123 @@ Image = function(width, height) {
     this.height = parseInt(height, 10) || 0;
 };
 Image.prototype = new HTMLImageElement();
+
+
+/*
+ * Image.src attribute events.
+ *
+ * Not sure where this should live... in events/img.js? in parser/img.js?
+ * Split out to make it easy to move.
+ */
+
+/**
+ * HTMLImageElement && Image are a bit odd in that the 'src' attribute
+ * is 'active' -- changing it triggers loading of the image from the
+ * network.
+ *
+ * This can occur by
+ *   - Directly setting the Image.src =
+ *   - Using one of the Element.setAttributeXXX methods
+ *   - Node.importNode an image
+ *   - The initial creation and parsing of an <img> tag
+ *
+ * __onImageRequest__ is a function that handles eventing
+ *  and dispatches to a user-callback.
+ *
+ */
+__loadImage__ = function(node, value) {
+    var event;
+    if (value && (!Envjs.loadImage ||
+                  (Envjs.loadImage &&
+                   Envjs.loadImage(node, value)))) {
+        // value has to be something (easy)
+        // if the user-land API doesn't exist
+        // Or if the API exists and it returns true, then ok:
+        event = document.createEvent('Events');
+        event.initEvent('load');
+    } else {
+        // oops
+        event = document.createEvent('Events');
+        event.initEvent('error');
+    }
+    node.dispatchEvent(event, false);
+};
+
+__extend__(HTMLImageElement.prototype, {
+    /*
+     * Image Loading
+     *
+     * The difference between "owner.parsing" and "owner.fragment"
+     *
+     * If owner.parsing === true, then during the html5 parsing then,
+     *  __elementPopped__ is called when a compete tag (with attrs and
+     *  children) is full parsed and added the DOM.
+     *
+     *   For images, __elementPopped__ is called with everything the tag has.
+     *    which in turn looks for a "src" attr and calls __loadImage__
+     *
+     * If owner.parser === false (or non-existant), then we are not in a parsing step.
+     * For images,  perhaps someone directly modified a 'src' attribute of an
+     * existing image.
+     *
+     * 'innerHTML' is tricky since we first create a "fake document", parse it, then
+     *  import the right parts.   This may call img.setAttributeNS twice.  once during the
+     *  parse and once during the clone of the node.  We want event to trigger on the later
+     *  and not during th fake doco.  "owner.fragment" is set by the fake doco parser to
+     * indicate that events should not be triggered on this.
+     *
+     * We coud make 'owner.parser' == [ 'none', 'full', 'fragment']
+     * and just use one variable That was not done since the patch is
+     * quite large as is.
+     *
+     * This same problem occurs with scripts.  innerHTML oddly does
+     * not eval any <script> tags inside.
+     */
+
+    setAttribute: function(name, value) {
+        var result = HTMLElement.prototype.setAttribute.apply(this, arguments);
+        var owner = this.ownerDocument;
+        if (name === 'src' && !owner.parsing && !owner.fragment) {
+            __loadImage__(this, value);
+        }
+        return result;
+    },
+    setAttributeNS: function(namespaceURI, name, value) {
+        var result = HTMLElement.prototype.setAttributeNS.apply(this, arguments);
+        var owner = this.ownerDocument;
+        if (name === 'src' && !owner.parsing && !owner.fragment) {
+            __loadImage__(this, value);
+        }
+        return result;
+    },
+    setAttributeNode: function(newnode) {
+        var src;
+        var result = HTMLElement.prototype.setAttributeNode.apply(this, arguments);
+        var owner = this.ownerDocument;
+        if (!owner.parsing && !owner.fragment) {
+            src = this.getAttribute('src');
+            if (src) {
+                __loadImage__(this, src);
+            }
+        }
+        return result;
+    },
+    setAttributeNodeNS: function(newnode) {
+        var result = HTMLElement.prototype.setAttributeNodeNS.apply(this, arguments);
+        var owner = this.ownerDocument;
+        if (!owner.parsing && !owner.fragment) {
+            var src = this.getAttribute('src');
+            if (src) {
+                __loadImage__(this, src);
+            }
+        }
+        return result;
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload') || '', this);
+    }
+});
+
+
+
 
