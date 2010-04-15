@@ -61,7 +61,6 @@ function __removeEventListener__(target, type, fn, phase){
         //used to clean all event listeners for a given node
         //console.log('cleaning all event listeners for node %s %s',target, target.uuid);
         delete $events[target.uuid];
-        $events[target.uuid] = null;
         return;
     }else if ( !$events[target.uuid][type] ){
         return;

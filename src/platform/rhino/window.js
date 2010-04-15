@@ -48,14 +48,10 @@ Envjs.loadFrame = function(frame, url){
 Envjs.unloadFrame = function(frame){
     var all, length, i;
     try{
-        //clean up all the nodes
-        /*all = frame.contentDocument.all,
-          length = all.length;
-          for(i=0;i<length;i++){
-          all[i].removeEventListeners('*', null, null);
-          delete all.pop();
-          }*/
-        delete frame.contentDocument;
+        //TODO: probably self-referencing structures within a document tree
+        //preventing it from being entirely garbage collected once orphaned.
+        //Should have code to walk tree and break all links between contained
+        //objects.
         frame.contentDocument = null;
         if(frame.contentWindow){
             frame.contentWindow.close();
