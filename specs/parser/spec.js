@@ -178,7 +178,6 @@ test('HTMLParser.parseDocument / simple content', function(){
     expect(4);
     var iframe = document.createElement("iframe");
     document.body.appendChild(iframe);
-
     iframe.addEventListener('load', function(){
         var doc;
         ok(true, 'frame loaded');
@@ -195,7 +194,6 @@ test('HTMLParser.parseDocument / simple content', function(){
     doc.write("<body><p id='p1'>this is a pig</p></body>");
     doc.close();
     stop();
-
 });
 
 test('HTMLParser.parseDocument / malformed content', function(){
@@ -223,9 +221,6 @@ test('HTMLParser.parseDocument / malformed content', function(){
     stop();
 
 });
-
-
-
 
 /**
  * Test that image loading works in various contexts
@@ -282,6 +277,8 @@ test('Image Loading', function(){
         // appendChild does not fire again (since we fired already)
         doc.body.appendChild(img);
         equals(counter, 5, "appendChild(img) does *not* fire");
+
+        document.body.removeChild(iframe);
         start();
     }, false);
 
@@ -352,6 +349,7 @@ test('Link Loading', function(){
          */
         equals(counter, 4, "Link *not* fired during appendChild");
 
+        document.body.removeChild(iframe);
         start();
     }, false);
 
