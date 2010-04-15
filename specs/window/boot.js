@@ -15,6 +15,7 @@ load('dist/window.js');
 
 load('specs/qunit.js');
 load('specs/env.qunit.js');
+load('specs/helpers.js');
 
 load('local_settings.js');
 load('specs/window/spec.js');

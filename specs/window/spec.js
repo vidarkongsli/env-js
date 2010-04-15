@@ -188,111 +188,123 @@ test('window.location', function(){
     //ok(location.assign,         'location.resolveURL');
 });
 
-test('Location object', function() {
-    // to use the example from
-    // https://developer.mozilla.org/En/DOM/Window.location
-    var x = Location('http://www.google.com:80/search?q=devmo#test');
+if (runningUnderEnvjs()){
+    /* This test won't run in a browser.  In-browser testing with
+     * modern versions of IE, Safari, and FF shows that "Location"
+     * ranges from being entirely undefined to not callable as an
+     * object constructor, but Envjs seems to be the only system that
+     * allows for instances of the Location object outside of being a
+     * member of the 'window' object.  I'm leaving the test as it is
+     * written, however, because performing these validations on
+     * window.location itself would cause the browser (simulation) to
+     * attempt to navigate all over the place creating huge problems.
+     */
 
-    // we are modifying x.assign to we can intercept the new
-    // reconstituted url
-    x.assign = function(url) {};
+    test('Location object', function() {
+        // to use the example from
+        // https://developer.mozilla.org/En/DOM/Window.location
+        var x = new Location('http://www.google.com:80/search?q=devmo#test');
 
-    // test basic parsing
-    equals(x.hash, '#test');
-    equals(x.host, 'www.google.com:80');
-    equals(x.hostname, 'www.google.com');
-    equals(x.href, 'http://www.google.com:80/search?q=devmo#test');
-    equals(x.pathname, '/search');
-    equals(x.protocol, 'http:');
-    equals(x.port, '80');
-    equals(typeof x.port, 'string');
-    equals(x.search, '?q=devmo');
+        // we are modifying x.assign to we can intercept the new
+        // reconstituted url
+        x.assign = function(url) {};
 
-    // setter for hostname
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    // TBD, not clear what should happen
-    // SafarI 4: accept
-    // Firefox 3.6: Error
-    x.protocol = '';
-    // envjs crash
-    //equals(x.protocol, 'http:', 'Setting protocol to emptry string is ignored');
-    x.protocol = 'https:';
-    equals(x.protocol, 'https:', 'Setting protocol with trailing colon');
-    x.protocol = 'http';
-    equals(x.protocol, 'http:', 'Setting protocol without trailing colon');
+        // test basic parsing
+        equals(x.hash, '#test');
+        equals(x.host, 'www.google.com:80');
+        equals(x.hostname, 'www.google.com');
+        equals(x.href, 'http://www.google.com:80/search?q=devmo#test');
+        equals(x.pathname, '/search');
+        equals(x.protocol, 'http:');
+        equals(x.port, '80');
+        equals(typeof x.port, 'string');
+        equals(x.search, '?q=devmo');
 
-    // setter for host
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.host = '';
-    // SafarI 4: accept (infinite loop)
-    // Firefox 3.6: Error
-    equals(x.host, 'www.google.com:80', 'Setting host to emptry string is ignored');
+        // setter for hostname
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        // TBD, not clear what should happen
+        // SafarI 4: accept
+        // Firefox 3.6: Error
+        x.protocol = '';
+        // envjs crash
+        //equals(x.protocol, 'http:', 'Setting protocol to emptry string is ignored');
+        x.protocol = 'https:';
+        equals(x.protocol, 'https:', 'Setting protocol with trailing colon');
+        x.protocol = 'http';
+        equals(x.protocol, 'http:', 'Setting protocol without trailing colon');
 
-    x.host = 'www.yahoo.com';
-    equals(x.host, 'www.yahoo.com', 'Setting host with no port')
-    equals(x.hostname, 'www.yahoo.com', 'Setting host updates hostname');
-    equals(x.port, '', 'Setting host updates port');
-    equals(x.href, 'http://www.yahoo.com/search?q=devmo#test');
+        // setter for host
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.host = '';
+        // SafarI 4: accept (infinite loop)
+        // Firefox 3.6: Error
+        equals(x.host, 'www.google.com:80', 'Setting host to emptry string is ignored');
 
-    x.host = 'www.google.com:80';
-    equals(x.host, 'www.google.com:80', 'Setting host with port');
-    equals(x.hostname,'www.google.com', 'Setting host updates hostname');
-    equals(x.port, '80', 'Setting host updates port');
-    equals(x.href, 'http://www.google.com:80/search?q=devmo#test');
+        x.host = 'www.yahoo.com';
+        equals(x.host, 'www.yahoo.com', 'Setting host with no port')
+        equals(x.hostname, 'www.yahoo.com', 'Setting host updates hostname');
+        equals(x.port, '', 'Setting host updates port');
+        equals(x.href, 'http://www.yahoo.com/search?q=devmo#test');
 
-    // setter for host
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.host = 'www.yahoo.com';
-    equals(x.host, 'www.yahoo.com');
+        x.host = 'www.google.com:80';
+        equals(x.host, 'www.google.com:80', 'Setting host with port');
+        equals(x.hostname,'www.google.com', 'Setting host updates hostname');
+        equals(x.port, '80', 'Setting host updates port');
+        equals(x.href, 'http://www.google.com:80/search?q=devmo#test');
 
-    // setter for port
-    // Safari 4: file://:90/Users/nickg/javascript.html
-    // Firefox: Error
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.port = 81;
-    equals(x.port, 81, 'Setting port as integer');
-    equals(x.host, 'www.google.com:81');
-    equals(x.href, 'http://www.google.com:81/search?q=devmo#test');
-    x.port = '82';
-    equals(x.port, '82', 'Setting port as string');
-    equals(x.host, 'www.google.com:82');
-    equals(x.href, 'http://www.google.com:82/search?q=devmo#test');
+        // setter for host
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.host = 'www.yahoo.com';
+        equals(x.host, 'www.yahoo.com');
 
-    // setter for path
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.pathname = '/foo';
-    equals(x.pathname, '/foo', 'Setting path starting with "/"');
-    equals(x.href, 'http://www.google.com:80/foo?q=devmo#test');
-    x.pathname = 'foobar';
-    equals(x.pathname, '/foobar', 'Setting path starting without "/"');
-    equals(x.href, 'http://www.google.com:80/foobar?q=devmo#test');
+        // setter for port
+        // Safari 4: file://:90/Users/nickg/javascript.html
+        // Firefox: Error
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.port = 81;
+        equals(x.port, 81, 'Setting port as integer');
+        equals(x.host, 'www.google.com:81');
+        equals(x.href, 'http://www.google.com:81/search?q=devmo#test');
+        x.port = '82';
+        equals(x.port, '82', 'Setting port as string');
+        equals(x.host, 'www.google.com:82');
+        equals(x.href, 'http://www.google.com:82/search?q=devmo#test');
 
-    // setter for search (query string)
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.search='?q=foo';
-    equals(x.search, '?q=foo', 'Setting search with starting "?"');
-    equals(x.href, 'http://www.google.com:80/search?q=foo#test');
-    x.search='q=bar';
-    equals(x.search, '?q=bar', 'Setting search without starting "?"');
-    equals(x.href, 'http://www.google.com:80/search?q=bar#test');
+        // setter for path
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.pathname = '/foo';
+        equals(x.pathname, '/foo', 'Setting path starting with "/"');
+        equals(x.href, 'http://www.google.com:80/foo?q=devmo#test');
+        x.pathname = 'foobar';
+        equals(x.pathname, '/foobar', 'Setting path starting without "/"');
+        equals(x.href, 'http://www.google.com:80/foobar?q=devmo#test');
 
-    // setter for hash (fragment)
-    x = Location('http://www.google.com:80/search?q=devmo#test');
-    x.assign = function(url) {};
-    x.hash = '#foo';
-    equals(x.hash, '#foo', 'Setting hash with starting "#"');
-    equals(x.href, 'http://www.google.com:80/search?q=devmo#foo');
-    x.hash = '#bar';
-    equals(x.hash, '#bar', 'Setting hash without starting "#"');
-    equals(x.href, 'http://www.google.com:80/search?q=devmo#bar');
-});
+        // setter for search (query string)
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.search='?q=foo';
+        equals(x.search, '?q=foo', 'Setting search with starting "?"');
+        equals(x.href, 'http://www.google.com:80/search?q=foo#test');
+        x.search='q=bar';
+        equals(x.search, '?q=bar', 'Setting search without starting "?"');
+        equals(x.href, 'http://www.google.com:80/search?q=bar#test');
 
+        // setter for hash (fragment)
+        x = Location('http://www.google.com:80/search?q=devmo#test');
+        x.assign = function(url) {};
+        x.hash = '#foo';
+        equals(x.hash, '#foo', 'Setting hash with starting "#"');
+        equals(x.href, 'http://www.google.com:80/search?q=devmo#foo');
+        x.hash = '#bar';
+        equals(x.hash, '#bar', 'Setting hash without starting "#"');
+        equals(x.href, 'http://www.google.com:80/search?q=devmo#bar');
+    });
+}
 
 test('window.screen', function(){
 
@@ -519,30 +531,37 @@ test('window.[atob|btoa]', function(){
  * Not sure where this goes, since it needs the parser
  */
 test('Document Named Element Lookup', function(){
-    expect(4);
-    var iframe = document.createElement("iframe");
-    var doc;
+    if (runningUnderEnvjs())
+        expect(6);
+    else
+        expect(5);
 
+    var iframe = document.createElement("iframe");
     document.body.appendChild(iframe);
-    doc = iframe.contentDocument;
+    var doc = iframe.contentDocument;
     doc.open();
-    doc.write('<html><head></head><body><form name="foo"></form></body></html>');
+    doc.write(
+        '<html><head></head><body><form name="foo"></form></body></html>');
     doc.close();
 
     var nodelist = doc.getElementsByName('foo');
     equals(nodelist.length, 1);
-    var node2 = doc.foo;
-    equals(nodelist[0], node2, 'named lookedup');
+    var node = doc.foo;
+    ok(node, 'named lookup finds element');
+    equals(nodelist[0], node, 'element is one expected');
 
     // ok now let's try to use innerHTML
     var str = '<form name="bar"></form>';
     doc.body.innerHTML = str;
-    var node3 = doc.bar;
-    ok(node3, 'named lookeup after innerHTML');
+    ok(doc.bar, 'named lookup after innerHTML');
 
     // the other one should be zapped
-    node2 = doc.foo;
-    ok(! node2, 'old named element is gone');
+    nodelist = doc.getElementsByName('foo');
+    equals(nodelist.length, 0, 'old named element not found ByName');
+
+    //I think it is actually a Firefox bug that this test doesn't pass there
+    if (runningUnderEnvjs())
+        ok(!doc.foo, 'old named element not found via named lookup');
 });
 
 test('Form Named Element Lookup', function(){
@@ -570,7 +589,7 @@ test('Form Named Element Lookup', function(){
     elements = doc.bar.elements;
     equals(elements.length, 1);
     equals(form.length, 1);
-    print('element is : ' + elements.input1);
+    //print('element is : ' + elements.input1);
     ok(elements.input1 instanceof HTMLInputElement);
     ok(form.input1 instanceof HTMLInputElement);
 

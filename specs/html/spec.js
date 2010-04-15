@@ -2,9 +2,7 @@ QUnit.module('html');
 
 test('HTML Interfaces Available', function(){
 
-    var areInEnvjs = navigator.userAgent.search( /Envjs/ ) > -1;
-
-    if (areInEnvjs)
+    if (runningUnderEnvjs())
         expect(53);
     else
         expect(51);
@@ -54,7 +52,7 @@ test('HTML Interfaces Available', function(){
     ok(HTMLTableSectionElement, 'HTMLTableSectionElement defined');
     ok(HTMLTableCellElement,    'HTMLTableCellElement defined');
 
-    if (areInEnvjs){
+    if (runningUnderEnvjs()){
         ok(HTMLTableDataCellElement,    'HTMLTableDataCellElement defined');
         ok(HTMLTableHeaderCellElement,  'HTMLTableHeaderCellElement defined');
     }
