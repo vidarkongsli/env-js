@@ -13,4 +13,3 @@ load('local_settings.js');
 
 
 location = 'specs/frame/index.html';
-Envjs.wait();

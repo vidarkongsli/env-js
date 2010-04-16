@@ -650,6 +650,8 @@
         <java fork="true"
               jar="${RHINO_JAR}"
               failonerror="true">
+            <arg value="-opt"/>
+            <arg value="-1"/>
             <arg value="${TEST_DIR}/frame/boot.js"/>
             <jvmarg value="-Dfile.encoding=utf-8"/>
             <jvmarg value="-Xmx256m"/>
