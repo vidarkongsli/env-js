@@ -233,7 +233,7 @@ test('HTMLParser.parseDocument / malformed content', function(){
  */
 test('Image Loading', function(){
     var node;
-    if (!Envjs) {
+    if ((typeof Envjs == 'undefined') || !Envjs) {
         Envjs = {};
     }
 
@@ -297,7 +297,7 @@ test('Image Loading', function(){
  */
 test('Link Loading', function(){
     var node;
-    if (!Envjs) {
+    if ((typeof Envjs == 'undefined') || !Envjs) {
         Envjs = {};
     }
 
