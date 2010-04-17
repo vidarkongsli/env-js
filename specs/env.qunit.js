@@ -30,6 +30,8 @@ QUnit.done = function( fail, pass){
         console.log('\t\tFAILED: ' +fail);
         console.log('\tCompleted in '+(_endtime-_starttime)+' milliseconds.\n');
     }
+    if (fail > 0)
+        quit(42);
 };
 QUnit.start = function(){
     _start();

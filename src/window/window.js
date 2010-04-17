@@ -268,8 +268,6 @@ Window = function(scope, parent, opener){
             //console.log('closing window %s', __windows__[$uuid]);
             try{
                 delete __windows__[$uuid];
-                delete scope;
-                delete this;
             }catch(e){
                 console.log('%s',e);
             }
