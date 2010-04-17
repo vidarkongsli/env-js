@@ -641,7 +641,11 @@
         <echo message=""/>
     </target>
 
-    <!-- TEST FRAME SPECIFICATION -->
+    <!-- INTEGRATION TESTS
+        The following test targets do not have corresponding source modules,
+        and are concerned with over-all behavior of the library.  They use
+        the concatenated-into-a-single-file version of env.js.
+      -->
     <target name='frame-spec'
             depends='local-settings'
             description='Test Frame Specs'>
@@ -658,6 +662,25 @@
         </java>
         <echo message=""/>
     </target>
+
+    <target name='scope-spec'
+            depends='local-settings'
+            description='Test Scope Specs'>
+        <echo message=""/>
+        <echo message="Executing Scope Spec"/>
+        <java fork="true"
+              jar="${RHINO_JAR}"
+              failonerror="true">
+            <arg value="-opt"/>
+            <arg value="-1"/>
+            <arg value="${TEST_DIR}/scope/boot.js"/>
+            <jvmarg value="-Dfile.encoding=utf-8"/>
+            <jvmarg value="-Xmx256m"/>
+        </java>
+        <echo message=""/>
+    </target>
+
+
 
     <target description="jslint quick build - no parser!"
             name="jslint"
@@ -704,7 +727,7 @@
             name="concat"
             depends="dom-spec, event-spec, timer-spec,
                      html-spec, parser-spec, xhr-spec,
-                     css-spec,  window-spec,  frame-spec">
+                     css-spec,  window-spec, scope-spec, frame-spec">
         <!-- CORE -->
         <echo message="Building ${ENV_DIST}" />
         <concat destfile="${ENV_DIST}">
