@@ -9,20 +9,20 @@ HTMLMetaElement = function(ownerDocument) {
 };
 HTMLMetaElement.prototype = new HTMLElement();
 __extend__(HTMLMetaElement.prototype, {
-    get content(){
-        return this.getAttribute('content');
+    get content() {
+        return this.getAttribute('content') || '';
     },
     set content(value){
         this.setAttribute('content',value);
     },
     get httpEquiv(){
-        return this.getAttribute('http-equiv');
+        return this.getAttribute('http-equiv') || '';
     },
     set httpEquiv(value){
         this.setAttribute('http-equiv',value);
     },
     get name(){
-        return this.getAttribute('name');
+        return this.getAttribute('name') || '';
     },
     set name(value){
         this.setAttribute('name',value);

@@ -84,7 +84,11 @@ __extend__(HTMLAnchorElement.prototype, {
     focus: function() {
         __focus__(this);
     },
+
+    /**
+     * Unlike other elements, toString returns the href
+     */
     toString: function() {
-        return '[object HTMLAnchorElement]';
+        return this.href;
     }
 });

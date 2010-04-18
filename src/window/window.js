@@ -237,12 +237,30 @@ Window = function(scope, parent, opener){
         toString : function(){
             return '[Window]';
         },
-        getComputedStyle : function(element, pseudoElement){
-            if(CSS2Properties){
-                return element?
-                    element.style:new CSS2Properties({cssText:""});
-            }
+
+        /**
+         * getComputedStyle
+         *
+         * Firefox 3.6:
+         *  - Requires both elements to be present else an
+         *    exception is thrown.
+         *  - Returns a 'ComputedCSSStyleDeclaration' object.
+         *    while a raw element.style returns a 'CSSStyleDeclaration' object.
+         *  - Bogus input also throws exception
+         *
+         * Safari 4:
+         *  - Requires one argument (second can be MIA)
+         *  - Returns a CSSStyleDeclaration object
+         *  - if bad imput, returns null
+         *
+         * getComputedStyle should really be an "add on" from the css
+         * modules.  Unfortunately, 'window' comes way after the 'css'
+         * so css can't add it.
+         */
+        getComputedStyle: function(element, pseudoElement) {
+            return element.style;
         },
+
         open: function(url, name, features, replace){
             if (features) {
                 console.log("'features argument not yet implemented");

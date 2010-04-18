@@ -540,6 +540,22 @@ test('window.[atob|btoa]', function(){
     equals(window.atob('MTIzNA=='),  '1234',    'smoke test for atob');
 });
 
+test('window.getComputedStyle', function() {
+    // getComputedStyle is more of a stub than an engine that really
+    // computes styles. Test to make sure the objects-in, objects-out
+    // and behavior on errors is correct
+
+    // first test to make sure dependencies are correct
+    //ok(CSS2Properties, 'Dependencies CSS2Properties exists');
+    ok(window.getComputedStyle, 'getComputedStyle exists');
+
+    // TODO: make this better.  See notes in
+    // window.getComputedProperty
+    //
+    // ok(window.getComputedStyle(), 'getComputedStyle with no args returns non-null');
+
+});
+
 /**
  * Not sure where this goes, since it needs the parser
  */

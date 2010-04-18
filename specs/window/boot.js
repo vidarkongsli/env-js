@@ -8,6 +8,7 @@ load('dist/console.js');
 load('dist/dom.js');
 load('dist/event.js');
 load('dist/html.js');
+load('dist/css.js');
 load('dist/timer.js');
 load('dist/parser.js');
 load('dist/xhr.js');
