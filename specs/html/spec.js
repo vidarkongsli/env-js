@@ -360,6 +360,116 @@ test('HTMLDocument.createElement(script)', function(){
 
 });
 
+/*
+test('HTMLBaseElement', function() {
+    var element;
+
+    element = document.createElement('base');
+
+    // TODO: need test to see that this sets the document root
+    // http://dev.w3.org/html5/spec/Overview.html#htmlbaseelement
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLBaseElement]', 'toString');
+});
+*/
+/*
+test('HTMLLabelElement', function() {
+    var element;
+
+    element = document.createElement('label');
+
+    // TODO: need test to see that this sets the document root
+    // http://dev.w3.org/html5/spec/Overview.html#htmlbaseelement
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLLabelElement]', 'toString');
+});
+*/
+
+/*
+test('HTMLMapElement', function() {
+    var element;
+
+    element = document.createElement('map');
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLMapElement]', 'toString');
+
+    equals(element.name, '', 'get name()');
+    element.name = 'foo';
+    equals(element.name, 'foo', 'get name()');
+    equals(element.getAttribute('name'), 'foo', 'get name via attribute');
+});
+*/
+/*
+test('HTMLMetaElement', function() {
+    var element;
+
+    element = document.createElement('meta');
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLMetaElement]', 'toString');
+
+    equals(element.name, '', 'get name()');
+    element.name = 'foo';
+    equals(element.name, 'foo', 'get name()');
+    equals(element.getAttribute('name'), 'foo', 'get name via attribute');
+
+    equals(element.httpEquiv, '', 'get httpEquiv()');
+    element.httpEquiv = 'foo';
+    equals(element.httpEquiv, 'foo', 'get httpEquiv()');
+    equals(element.getAttribute('name'), 'foo', 'get http-equiiv via attribute');
+
+    equals(element.content, '', 'get content()');
+    element.content = 'foo';
+    equals(element.content, 'foo', 'get content()');
+    equals(element.getAttribute('content'), 'foo', 'get content via attribute');
+});
+*/
+
+/*
+test('HTMLParamElement', function() {
+    var element;
+
+    element = document.createElement('param');
+    equals(element.name, '', 'get name()');
+    element.name = 'foo';
+    equals(element.name, 'foo', 'get name()');
+    equals(element.getAttribute('name'), 'foo', 'get name via attribute');
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLParamElement]', 'toString');
+});
+
+test('HTMLQuoteElement', function() {
+    var element;
+
+    element = document.createElement('blockquote');
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLQuoteElement]', 'toString');
+
+    equals(element.cite, '', 'get cite()');
+    element.cite = 'http://envjs.com/';
+    equals(element.cite, 'http://envjs.com/', 'get cite()');
+    equals(element.getAttribute('cite'), 'http://envjs.com/', 'get cite via attribute');
+
+    // TODO: cite is a relative link, then it needs to be made absolute
+    // See http://dev.w3.org/html5/spec/Overview.html#dom-quote-cite
+});
+*/
+/*
+test('HTMLTitleElement', function() {
+    var element;
+
+    element = document.createElement('title');
+
+
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTitleElement]', 'toString');
+});
+*/
+
 // TODO: forms, input radio
 //http://envjs.lighthouseapp.com/projects/21590/tickets/91-radio-button-value-attribute-output-as-defaultvalue-in-html
 
