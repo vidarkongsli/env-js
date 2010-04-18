@@ -228,13 +228,13 @@ test('HTMLDocument.createElementNS(unknown)', function(){
 });
 
 
-test('HTMLDocument.createElement(a)', function(){
+test('HTMLAnchorElement', function(){
 
     var element;
 
     var a = document.createElement('a');
-
     ok(a, 'element created');
+
     equals(a.tagName, 'A', '.name');
     equals(a.childNodes.length, 0, '.childNodes.length');
     equals(a.localName, 'A', '.localName');
@@ -253,6 +253,11 @@ test('HTMLDocument.createElement(a)', function(){
     equals(a.hreflang, '', '.hreflang has expected value');
     equals(a.name, '', '.name has expected value');
     equals(a.rel, '', '.rel has expected value');
+
+    // anchor to string has different behavior than others
+    equals(a.toString(), '');
+    a.href='http://envjs.com/';
+    equals(a.toString(), 'http://envjs.com/', 'toString returns href');
 
     a.accessKey = 'abc';
     a.charset = 'abc';
@@ -275,13 +280,15 @@ test('HTMLDocument.createElement(a)', function(){
 
 });
 
-test('HTMLDocument.createElement(area)', function(){
+test('HTMLAreaElement', function(){
 
     var element;
 
     element = document.createElement('area');
 
     ok(element, 'element created');
+
+
     equals(element.tagName, 'AREA', '.name');
     equals(element.childNodes.length, 0, '.childNodes.length');
     equals(element.localName, 'AREA', '.localName');
@@ -293,6 +300,9 @@ test('HTMLDocument.createElement(area)', function(){
     equals(element.prefix, null, '.prefix');
     equals(xmlserializer.serializeToString(element), '<AREA/>', 'xmlserializer');
 
+    equals(element.toString(), '', 'toString returns href');
+    element.href = 'http://envjs.com/';
+    equals(element.toString(), 'http://envjs.com/', 'toString returns href');
 });
 
 
@@ -375,6 +385,42 @@ test('HTMLBaseElement', function() {
     equals(element.toString(), '[object HTMLBaseElement]', 'toString');
 });
 
+test('HTMLBRElement', function() {
+    var a = document.createElement('br');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLBRElement]');
+});
+
+test('HTMLDivElement', function() {
+    var a = document.createElement('div');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLDivElement]');
+});
+
+test('HTMLDListElement', function() {
+    var a = document.createElement('dl');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLDListElement]');
+});
+
+test('HTMLHeadingElement', function() {
+    var a = document.createElement('h1');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLHeadingElement]');
+});
+
+test('HTMLHRElement', function() {
+    var a = document.createElement('hr');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLHRElement]');
+});
+
+test('HTMLHtmlElement', function() {
+    var a = document.createElement('html');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLHtmlElement]');
+});
+
 test('HTMLLabelElement', function() {
     var element;
 
@@ -384,6 +430,12 @@ test('HTMLLabelElement', function() {
     // http://dev.w3.org/html5/spec/Overview.html#htmlbaseelement
     ok(element, 'element created');
     equals(element.toString(), '[object HTMLLabelElement]', 'toString');
+});
+
+test('HTMLLIElement', function() {
+    var a = document.createElement('li');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLLIElement]');
 });
 
 test('HTMLMapElement', function() {
@@ -424,6 +476,12 @@ test('HTMLMetaElement', function() {
     equals(element.getAttribute('content'), 'foo', 'get content via attribute');
 });
 
+test('HTMLOListElement', function() {
+    var a = document.createElement('ol');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLOListElement]');
+});
+
 test('HTMLParamElement', function() {
     var element;
 
@@ -454,13 +512,57 @@ test('HTMLQuoteElement', function() {
     // See http://dev.w3.org/html5/spec/Overview.html#dom-quote-cite
 });
 
+test('HTMLSpanElement', function() {
+    var a = document.createElement('span');
+    ok(a, 'element created');
+    equals(a.toString(), '[object HTMLSpanElement]');
+});
+
+test('HTMLStyleElement', function() {
+    var element;
+    element = document.createElement('style');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLStyleElement]', 'toString');
+});
+
+test('HTMLTableElement', function() {
+    var element;
+    element = document.createElement('table');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTableElement]', 'toString');
+});
+
+test('HTMLTableDataCellElement', function() {
+    var element;
+    element = document.createElement('td');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTableDataCellElement]', 'toString');
+});
+
+test('HTMLTableHeaderCellElement', function() {
+    var element;
+    element = document.createElement('th');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTableHeaderCellElement]', 'toString');
+});
+
+test('HTMLTableRowElement', function() {
+    var element;
+    element = document.createElement('tr');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTableRowElement]', 'toString');
+});
+
+test('HTMLTableSectionElement', function() {
+    var element;
+    element = document.createElement('thead');
+    ok(element, 'element created');
+    equals(element.toString(), '[object HTMLTableSectionElement]', 'toString');
+});
 
 test('HTMLTitleElement', function() {
     var element;
-
     element = document.createElement('title');
-
-
     ok(element, 'element created');
     equals(element.toString(), '[object HTMLTitleElement]', 'toString');
 });

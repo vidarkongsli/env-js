@@ -29,7 +29,7 @@ __extend__(HTMLAreaElement.prototype, {
         this.setAttribute('coords',value);
     },
     get href(){
-        return this.getAttribute('href');
+        return this.getAttribute('href') || '';
     },
     set href(value){
         this.setAttribute('href',value);
@@ -53,8 +53,12 @@ __extend__(HTMLAreaElement.prototype, {
     set target(value){
         this.setAttribute('target',value);
     },
-    toString: function(){
-        return '[object HTMLAreaElement]';
+
+    /**
+     * toString like <a>, returns the href
+     */
+    toString: function() {
+        return this.href;
     }
 });
 
