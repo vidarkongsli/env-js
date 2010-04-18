@@ -14,14 +14,26 @@ load('dist/console.js');
 load('dist/dom.js');
 load('dist/event.js');
 load('dist/html.js');
-load('dist/timer.js');
-load('dist/parser.js');
-load('dist/xhr.js');
-load('dist/window.js');
 
-load('local_settings.js');
+// if the html code has forward references, then
+//  we have a different problem.
+
+//load('dist/timer.js');
+//load('dist/parser.js');
+//load('dist/xhr.js');
+//load('dist/window.js');
+
+/*
+// try/catch is oddly not catching the error here
+//
+try {
+  load('local_settings.js');
+} catch (e) {
+    NOP
+}
+*/
+
 load('specs/html/spec.js');
-
 
 location =  'specs/html/index.html';
 start();
