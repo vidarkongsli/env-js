@@ -20,6 +20,8 @@
             // both Envjs and browsers:
             Envjs.scriptTypes['text/javascript'] = true;
         </script>
+        <script src="../fixtures/scope/define-some-variables.js"
+                type="text/javascript" ></script>
         <script src="spec.js"
                 type="text/javascript" ></script>
 
@@ -37,7 +39,9 @@
         </div>
 
         <div id="qunit-main" style="text-align: center;">
-
+            <iframe id='loaded-iframe' style='display:none'
+                src='../fixtures/scope/iframe1a.html'></iframe>
+            <iframe id='empty-iframe' style='display:none'></iframe>
         </div>
     </body>
 </html>
