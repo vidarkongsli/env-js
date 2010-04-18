@@ -1,5 +1,5 @@
 // helpers available to all tests
 
 function runningUnderEnvjs(){
-    return navigator.userAgent.search( /Envjs/ ) > -1;
+    return (typeof navigator === 'object') && navigator.userAgent.search( /Envjs/ ) > -1;
 }
