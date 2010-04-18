@@ -23,16 +23,6 @@ load('dist/html.js');
 //load('dist/xhr.js');
 //load('dist/window.js');
 
-/*
-// try/catch is oddly not catching the error here
-//
-try {
-  load('local_settings.js');
-} catch (e) {
-    NOP
-}
-*/
-
 load('specs/html/spec.js');
 
 location =  'specs/html/index.html';
