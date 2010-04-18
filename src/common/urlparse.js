@@ -149,7 +149,7 @@ urlparse.urlnormalize = function(url)
         // remove default port
         if ((parts.scheme === 'http' && parts.port == 80) ||
             (parts.scheme === 'https' && parts.port == 443)) {
-            delete parts.port;
+            parts.port = null;
             // hostname is already lower case
             parts.netloc = parts.hostname;
         }

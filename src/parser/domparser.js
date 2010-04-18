@@ -39,17 +39,13 @@ XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     }
 
     while(xmldoc.firstChild != null){
-        tmpNode = xmldoc.removeChild( xmldoc.firstChild );
-        delete tmpNode;
+        xmldoc.removeChild( xmldoc.firstChild );
     }
     while(parent.firstChild != null){
         tmpNode  = parent.removeChild( parent.firstChild );
         importedNode = xmldoc.importNode( tmpNode, true);
         xmldoc.appendChild( importedNode );
-        delete tmpNode;
     }
-    delete tmpdoc,
-           xmlstring;
     return xmldoc;
 };
 
@@ -111,8 +107,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
     parent = tmpdoc.body.childNodes[0];
     while(element.firstChild != null){
         //zap the elements children so we can import
-        tmpNode = element.removeChild( element.firstChild );
-        delete tmpNode;
+        element.removeChild( element.firstChild );
     }
 
     if(tmpdoc.cached){
@@ -126,10 +121,7 @@ HTMLParser.parseFragment = function(htmlstring, element){
             tmpNode  = parent.removeChild( parent.firstChild );
             importedNode = element.importNode( tmpNode, true);
             element.appendChild( importedNode );
-            delete tmpNode;
         }
-        delete tmpdoc;
-        delete htmlstring;
     }
 
     // console.log('finished fragment: %s', element.outerHTML);
