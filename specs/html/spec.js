@@ -363,7 +363,6 @@ test('HTMLDocument.createElement(script)', function(){
 
 });
 
-/*
 test('HTMLBaseElement', function() {
     var element;
 
@@ -375,8 +374,7 @@ test('HTMLBaseElement', function() {
     ok(element, 'element created');
     equals(element.toString(), '[object HTMLBaseElement]', 'toString');
 });
-*/
-/*
+
 test('HTMLLabelElement', function() {
     var element;
 
@@ -387,9 +385,7 @@ test('HTMLLabelElement', function() {
     ok(element, 'element created');
     equals(element.toString(), '[object HTMLLabelElement]', 'toString');
 });
-*/
 
-/*
 test('HTMLMapElement', function() {
     var element;
 
@@ -403,8 +399,7 @@ test('HTMLMapElement', function() {
     equals(element.name, 'foo', 'get name()');
     equals(element.getAttribute('name'), 'foo', 'get name via attribute');
 });
-*/
-/*
+
 test('HTMLMetaElement', function() {
     var element;
 
@@ -428,9 +423,7 @@ test('HTMLMetaElement', function() {
     equals(element.content, 'foo', 'get content()');
     equals(element.getAttribute('content'), 'foo', 'get content via attribute');
 });
-*/
 
-/*
 test('HTMLParamElement', function() {
     var element;
 
@@ -460,8 +453,8 @@ test('HTMLQuoteElement', function() {
     // TODO: cite is a relative link, then it needs to be made absolute
     // See http://dev.w3.org/html5/spec/Overview.html#dom-quote-cite
 });
-*/
-/*
+
+
 test('HTMLTitleElement', function() {
     var element;
 
@@ -471,7 +464,7 @@ test('HTMLTitleElement', function() {
     ok(element, 'element created');
     equals(element.toString(), '[object HTMLTitleElement]', 'toString');
 });
-*/
+
 
 // TODO: forms, input radio
 //http://envjs.lighthouseapp.com/projects/21590/tickets/91-radio-button-value-attribute-output-as-defaultvalue-in-html

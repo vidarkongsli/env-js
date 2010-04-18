@@ -1,6 +1,7 @@
 
 /**
- * HTMLMapElement - DOM Level 2
+ * HTMLMapElement
+ *
  * 4.8.12 The map element
  * http://dev.w3.org/html5/spec/Overview.html#the-map-element
  */
@@ -13,7 +14,7 @@ __extend__(HTMLMapElement.prototype, {
         return this.getElementsByTagName('area');
     },
     get name(){
-        return this.getAttribute('name');
+        return this.getAttribute('name') || '';
     },
     set name(value){
         this.setAttribute('name',value);
