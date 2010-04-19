@@ -25,25 +25,42 @@ test("Basic window object/global scope identity", function(){
         '"var" variables defined in external files are window members' );
 });
 
-test("Basic iframe behaviors", function(){
+asyncTest("Basic iframe behaviors", function(){
+    var adjustExpect = runningUnderEnvjs() ? 0 : -3;
 /* should be this
-    expect( 8+8+8 + 0 );
+    expect( 8+8+8 + 0 + adjustExpect );
  * but asserts commented out in ok_accessToIFrame1x() mean we do this for now:
-*/  expect( 7+7+7 + 0 );
+*/  expect( 7+7+7 + 0 + adjustExpect );
 
+
+        // check for things loaded directly by index.html
     // iframe1a.html loaded via src= attribute when index.html was parsed
     var iframe = document.getElementById('loaded-iframe');
     ok_accessToIFrame1x(iframe, contentOfIFrameA,
         'iframe loads with page load');
 
-    iframe = document.getElementById('empty-iframe');
-    iframe.src = "../fixtures/scope/iframe1a.html";
-    ok_accessToIFrame1x(iframe, contentOfIFrameA,
-        'empty iframe loads on .src=');
 
+        // for dynamically-loaded iframes, we need to use QUnit's
+        // async testing features
+    // test dynamic loading of an empty iframe
+    var emptyIFrame = document.getElementById('empty-iframe');
+    emptyIFrame.onload = function(){
+	ok_accessToIFrame1x(emptyIFrame, contentOfIFrameA,
+	    'empty iframe loads on .src=');
+    };
+    emptyIFrame.src = "../fixtures/scope/iframe1a.html";
+
+    // test dynamic reloading of an already-populated iframe
+    iframe.onload = function(){
+	ok_accessToIFrame1x(iframe, contentOfIFrameB,
+	    'iframe reloads on .src=');
+    }
     iframe.src = "../fixtures/scope/iframe1b.html";
-    ok_accessToIFrame1x(iframe, contentOfIFrameB,
-        'iframe reloads on .src=');
+
+    setTimeout(function(){
+        start();
+    }, 300);     // short should be fine as long as tests are always
+                 // run via "file:" or from a web server on same host
 });
 
 // iframe1a and iframe1b are identical in structure (so we can use the
@@ -64,7 +81,7 @@ contentOfIFrameB = {
 };
 
 
-// add 8 to your expect() call's argument for each call to this function
+// add 7-or-8 to your expect() call's argument for each call to this function
 function ok_accessToIFrame1x(iframe, contentOf, message) {
     ok( iframe.src.match(contentOf.urlRE),
         message + ": Initial iframe src matches test page source" );
@@ -80,12 +97,21 @@ function ok_accessToIFrame1x(iframe, contentOf, message) {
         message + ": iframe's conent is correct" );
 
 
-    equals( iframe.contentWindow.top, window, message +
-        ": '.top' from iframe does point to top window");
-    equals( idoc.parentWindow, iframe.contentWindow, message +
-        ": iframe doc's .parentWindow points to iframe's .contentWindow");
+    if (window.top.allTestsAreBeingRunWithinAnExtraIFrame)
+	equals( iframe.contentWindow.top, window.parent, message +
+	    ": '.top' from iframe does point to top window" );
+    else
+	equals( iframe.contentWindow.top, window, message +
+	    ": '.top' from iframe does point to top window" );
+
+
+    // document.parentWindow is IE-specific extension implemented by env.js
+    if (runningUnderEnvjs()){
+	equals( idoc.parentWindow, iframe.contentWindow, message +
+	    ": iframe doc's .parentWindow points to iframe's .contentWindow");
 /* re-enable this once the preceding passes
-    equals( idoc.parentWindow.parent, window, message +
-        ": Can follow chain from iframe's doc to containing window");
+	equals( idoc.parentWindow.parent, window, message +
+	    ": Can follow chain from iframe's doc to containing window");
 */
+    }
 };
