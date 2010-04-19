@@ -536,14 +536,20 @@ test('HTMLTableDataCellElement', function() {
     var element;
     element = document.createElement('td');
     ok(element, 'element created');
-    equals(element.toString(), '[object HTMLTableDataCellElement]', 'toString');
+    if (runningUnderEnvjs())
+        equals(element.toString(), '[object HTMLTableDataCellElement]',
+            'toString');
+        // don't run in-browser, FF uses HTMLTableCellElement
 });
 
 test('HTMLTableHeaderCellElement', function() {
     var element;
     element = document.createElement('th');
     ok(element, 'element created');
-    equals(element.toString(), '[object HTMLTableHeaderCellElement]', 'toString');
+    if (runningUnderEnvjs())
+        equals(element.toString(), '[object HTMLTableHeaderCellElement]',
+            'toString');
+        // don't run in-browser, FF uses HTMLTableCellElement
 });
 
 test('HTMLTableRowElement', function() {
