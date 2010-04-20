@@ -3,11 +3,15 @@
  * CSSRule - DOM Level 2
  */
 CSSRule = function(options) {
+
+
+
     var $style,
     $selectorText = options.selectorText ? options.selectorText : '';
     $style = new CSS2Properties({
         cssText: options.cssText ? options.cssText : null
     });
+
     return __extend__(this, {
         get style(){
             return $style;
@@ -52,9 +56,9 @@ CSSPageRule = function() {
 };
 
 
-CSSRuleList = function() {
+CSSRuleList = function(data) {
     this.length = 0;
-    __setArray__(this, []);
+    __setArray__(this, data);
 };
 
 __extend__(CSSRuleList.prototype, {

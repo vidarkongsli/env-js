@@ -30,7 +30,7 @@ StyleSheet = function() {
 CSSStyleSheet = function(options){
     var $cssRules,
         $disabled = options.disabled ? options.disabled : false,
-        $href = options.href ?options.href : null,
+        $href = options.href ? options.href : null,
         $parentStyleSheet = options.parentStyleSheet ? options.parentStyleSheet : null,
         $title = options.title ? options.title : "",
         $type = "text/css";
@@ -40,30 +40,30 @@ CSSStyleSheet = function(options){
         //this is pretty ugly, but text is the entire text of a stylesheet
         var cssRules = [];
         if (!text) {
-            text = "";
+            text = '';
         }
         text = __trim__(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
-        // TODO: @import ?
+        // TODO: @import
         var blocks = text.split("}");
         blocks.pop();
         var i, j, len = blocks.length;
         var definition_block, properties, selectors;
-        for (i=0; i<len; i++){
+        for (i=0; i<len; i++) {
             definition_block = blocks[i].split("{");
-            if(definition_block.length === 2){
+            if (definition_block.length === 2) {
                 selectors = definition_block[0].split(",");
-                for(j=0;j<selectors.length;j++){
+                for (j=0; j<selectors.length; j++) {
                     cssRules.push(new CSSRule({
-                        selectorText:selectors[j],
-                        cssText:definition_block[1]
+                        selectorText : __trim__(selectors[j]),
+                        cssText      : definition_block[1]
                     }));
                 }
-                __setArray__($cssRules, cssRules);
             }
         }
+        return cssRules;
     }
 
-    parseStyleSheet(options.text);
+    $cssRules = new CSSRuleList(parseStyleSheet(options.textContent));
 
     return __extend__(this, {
         get cssRules(){
@@ -95,10 +95,8 @@ CSSStyleSheet = function(options){
 };
 
 StyleSheetList = function() {
-    this.length = 0;
-    __setArray__(this, []);
 }
-
+StyleSheetList.prototype = new Array();
 __extend__(StyleSheetList.prototype, {
     item : function(index) {
         if ((index >= 0) && (index < this.length)) {

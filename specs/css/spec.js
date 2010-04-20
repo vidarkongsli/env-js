@@ -94,3 +94,49 @@ test('document.styleSheets', function() {
     //equals(document.styleSheets.length, 1, 'StyleSheetList.length');
 });
 
+test('adding style element', function() {
+    // hack to make this work in both server & firefox
+    var head = document.head;
+    if (! head) {
+        // FF doesn't seem to have the doc.head accessor??
+        head = document.getElementsByTagName('head')[0];
+    }
+    var ss_len = document.styleSheets.length;
+
+    var element = document.createElement('style');
+    element.textContent = 'h1 {color: red; background-color: black}\n' +
+        'div {background-image: url("foo");}\n';
+    head.appendChild(element);
+    equals(document.styleSheets.length, ss_len+1, 'added stylesheet');
+
+    var ss = document.styleSheets.item(document.styleSheets.length -1);
+    var rules = ss.cssRules;
+    equals(rules.toString(), '[object CSSRuleList]');
+    equals(rules.length, 2);
+
+
+    var arule;
+	/*
+    arule = rules.item(0);
+    equals(arule.toString(), '[object CSSImportRule]');
+    equals(arule.href, 'foo.css', 'href returns css value');
+    */
+    arule = rules.item(0);
+//    equals(arule.toString(), '[object CSSStyleRule]');
+    equals(arule.selectorText, 'h1');
+    //equals(arule.cssText, 'h1 { color: red; background-color: black; }');
+    equals(arule.style.length, 2);
+    equals(arule.style[0], 'color');
+    equals(arule.style.item(0), 'color');
+    equals(arule.style[1], 'background-color');
+    equals(arule.style.item(1), 'background-color');
+    //    equals(arule.style.toString(), '[object CSSStyleDeclaration]');
+
+    arule = rules.item(1);
+//    equals(arule.toString(), '[object CSSStyleRule]');
+    //equals(arule.cssText,      'div { background-image: url("foo"); }');
+    equals(arule.selectorText, 'div');
+    equals(arule.style.length, 1);
+    //equals(arule.style.toString(), '[object CSSStyleDeclaration]');
+
+});
