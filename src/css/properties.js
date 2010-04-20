@@ -1,5 +1,6 @@
 /*
  * CSS2Properties - DOM Level 2 CSS
+ * Renamed to CSSStyleDeclaration??
  */
 
 var __toCamelCase__ = function(name) {
@@ -25,7 +26,7 @@ CSS2Properties = function(element){
     this.styleIndex = __supportedStyles__;//non-standard
     this.type = element.tagName;//non-standard
     __setArray__(this, []);
-    __cssTextToStyles__(this, element.getAttribute('style') || '');
+    __cssTextToStyles__(this, element.cssText || '');
 };
 __extend__(CSS2Properties.prototype, {
     get cssText() {

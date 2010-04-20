@@ -4,5 +4,13 @@
  */
 var CSS2Properties,
     CSSRule,
-    CSSStyleSheet;
-    
+    CSSStyleRule,
+    CSSImportRule,
+    CSSMediaRule,
+    CSSFontFaceRule,
+    CSSPageRule,
+    CSSRuleList,
+    CSSStyleSheet,
+    StyleSheet,
+    StyleSheetList;
+;

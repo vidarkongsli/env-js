@@ -1,25 +1,60 @@
+QUnit.module('css');
 
 // mock the global document object if not available
-try{
+try {
     document;
-}catch(e){
+} catch(e) {
     console.log('mocking global document object.');
     document = new HTMLDocument(new DOMImplementation());
 }
 
-QUnit.module('css');
 
 test('CSS Interfaces Available', function(){
-    
-    expect(3);
-    ok(CSS2Properties,      'CSS2Properties');
+
+    expect(11);
     ok(CSSRule,             'CSSRule');
+    ok(CSSStyleRule,        'CSSStyleRule');
+    ok(CSSImportRule,       'CSSImportRule');
+    ok(CSSMediaRule,        'CSSMediaRule');
+    ok(CSSPageRule,         'CSSPageRule');
+    ok(CSSFontFaceRule,     'CSSFontFaceRule');
+
+    ok(CSSRuleList,         'CSSRuleList');
+
+    ok(CSS2Properties,      'CSS2Properties');
+
+    // http://dev.w3.org/csswg/cssom/#cssstylesheet
     ok(CSSStyleSheet,       'CSSStyleSheet');
-    
+
+    // XML Base Interfaces
+
+    // http://dev.w3.org/csswg/cssom/#the-stylesheet-interface
+    // http://www.w3.org/TR/2000/REC-DOM-Level-2-Style-20001113/stylesheets.html#StyleSheets-StyleSheet
+    ok(StyleSheet,       'StyleSheet');
+
+    // http://dev.w3.org/csswg/cssom/#stylesheetlist
+    // http://www.w3.org/TR/2000/REC-DOM-Level-2-Style-20001113/stylesheets.html#StyleSheets-StyleSheetList
+    ok(StyleSheetList,       'StyleSheetList');
+
+    // http://www.w3.org/TR/2000/REC-DOM-Level-2-Style-20001113/stylesheets.html#StyleSheets-MediaList
+    // TBD
+    //ok(MediaList,       'MediaList');
+
+});
+
+test('CSSRule', function() {
+    equals(CSSRule.STYLE_RULE,      1, 'CSSRule.STYLE_RULE');
+    equals(CSSRule.IMPORT_RULE,     3, 'CSSRule.IMPORT_RULE');
+    equals(CSSRule.MEDIA_RULE,      4, 'CSSRule.MEDIA_RULE');
+    equals(CSSRule.FONT_FACE_RULE,  5, 'CSSRule.FONT_FACE_RULE');
+    equals(CSSRule.PAGE_RULE,       6, 'CSSRule.PAGE_RULE');
+
+    // not in FF
+    //equals(CSSRule.NAMESPACE_RULE, 10, 'CSSRule.NAMESPACE_RULE');
 });
 
 test('CSS2Properties', function(){
-    
+
 
     var div = document.createElement('div');
 
@@ -42,7 +77,7 @@ test('CSS2Properties', function(){
     equals(div.style.getPropertyValue('height'), '300px', ".style.getPropertyValue('height')");
     equals(div.style.getPropertyValue('width'), '400px', ".style.getPropertyValue('width')");
     equals(div.style.cssText, 'display: block; height: 300px; width: 400px; opacity: 0.5;', '.style.cssText');
-    
+
     div.style.setProperty('position','absolute', '');
     equals(div.style.length, 5, '.style.length');
     equals(div.style[4], 'position', '.style[4]');
@@ -51,4 +86,57 @@ test('CSS2Properties', function(){
     equals(div.style.cssText, 'display: block; height: 300px; width: 400px; opacity: 0.5; position: absolute;', '.style.cssText');
 });
 
+test('document.styleSheets', function() {
+    ok(document.styleSheets, 'document.styleSheets exists');
+    equals(document.styleSheets.toString(), '[object StyleSheetList]', 'StyleSheetsList.toString()');
+    equals(document.styleSheets.item(999), null, 'StyleSheetList.item out-of-range');
 
+    //equals(document.styleSheets.length, 1, 'StyleSheetList.length');
+});
+
+test('adding style element', function() {
+    // hack to make this work in both server & firefox
+    var head = document.head;
+    if (! head) {
+        // FF doesn't seem to have the doc.head accessor??
+        head = document.getElementsByTagName('head')[0];
+    }
+    var ss_len = document.styleSheets.length;
+
+    var element = document.createElement('style');
+    element.textContent = 'h1 {color: red; background-color: black}\n' +
+        'div {background-image: url("foo");}\n';
+    head.appendChild(element);
+    equals(document.styleSheets.length, ss_len+1, 'added stylesheet');
+
+    var ss = document.styleSheets.item(document.styleSheets.length -1);
+    var rules = ss.cssRules;
+    equals(rules.toString(), '[object CSSRuleList]');
+    equals(rules.length, 2);
+
+
+    var arule;
+	/*
+    arule = rules.item(0);
+    equals(arule.toString(), '[object CSSImportRule]');
+    equals(arule.href, 'foo.css', 'href returns css value');
+    */
+    arule = rules.item(0);
+//    equals(arule.toString(), '[object CSSStyleRule]');
+    equals(arule.selectorText, 'h1');
+    //equals(arule.cssText, 'h1 { color: red; background-color: black; }');
+    equals(arule.style.length, 2);
+    equals(arule.style[0], 'color');
+    equals(arule.style.item(0), 'color');
+    equals(arule.style[1], 'background-color');
+    equals(arule.style.item(1), 'background-color');
+    //    equals(arule.style.toString(), '[object CSSStyleDeclaration]');
+
+    arule = rules.item(1);
+//    equals(arule.toString(), '[object CSSStyleRule]');
+    //equals(arule.cssText,      'div { background-image: url("foo"); }');
+    equals(arule.selectorText, 'div');
+    equals(arule.style.length, 1);
+    //equals(arule.style.toString(), '[object CSSStyleDeclaration]');
+
+});

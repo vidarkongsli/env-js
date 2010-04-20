@@ -451,6 +451,9 @@ Aspect.around({
             //fall through
         case "http://www.w3.org/1999/xhtml":
             switch(node.tagName.toLowerCase()){
+            case 'style':
+                document.styleSheets.push(CSSStyleSheet(node));
+                break;
             case 'script':
                 if((this.nodeName.toLowerCase() === 'head')){
                     try{
