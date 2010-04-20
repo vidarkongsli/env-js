@@ -46,7 +46,7 @@ asyncTest("Basic iframe behaviors", function(){
 
 
         // check for things loaded directly by index.html
-    // iframe1a.html loaded via src= attribute when index.html was parsed
+    // iframeXa.html loaded via src= attribute when index.html was parsed
     var iframe = document.getElementById('loaded-iframe');
     ok_accessToIFrame1x(iframe, contentOfIFrameA,
         'iframe loads with page load');
@@ -60,14 +60,14 @@ asyncTest("Basic iframe behaviors", function(){
         ok_accessToIFrame1x(emptyIFrame, contentOfIFrameA,
             'empty iframe loads on .src=');
     };
-    emptyIFrame.src = "../fixtures/scope/iframe1a.html";
+    emptyIFrame.src = "../fixtures/scope/iframeXa.html";
 
     // test dynamic reloading of an already-populated iframe
     iframe.onload = function(){
         ok_accessToIFrame1x(iframe, contentOfIFrameB,
             'iframe reloads on .src=');
     }
-    iframe.src = "../fixtures/scope/iframe1b.html";
+    iframe.src = "../fixtures/scope/iframeXb.html";
 
     setTimeout(function(){
         start();
@@ -80,14 +80,14 @@ asyncTest("Basic iframe behaviors", function(){
 //   that we can tell which one is currently loaded).  So, create an
 //   object (associative array) that is specific to the content of each.
 contentOfIFrameA = {
-    urlRE : /scope.iframe1a.html$/,
+    urlRE : /scope.iframeXa.html$/,
     titleRE : /IFRAME/,
     elementId : 'anElementWithText',
     elementRE : /content of a paragraph/
 };
 contentOfIFrameB = {
-    urlRE : /scope.iframe1b.html$/,
-    titleRE : /iframe1b.html/,
+    urlRE : /scope.iframeXb.html$/,
+    titleRE : /iframeXb.html/,
     elementId : 'anotherElementWithText',
     elementRE : /block-quote element/
 };
@@ -141,9 +141,9 @@ asyncTest("Iframe nesting", function(){
 
     var topNestingIFrame = document.getElementById('nesting-iframe');
     topNestingIFrame.onload = function(){
-// iframe2.html contains a static <iframe> element that loads iframe3.html,
+// iframe1.html contains a static <iframe> element that loads iframe2.html,
 // now we should have both loaded, with the structure that
-//     index.html --contains--> iframe2.html --contains--> iframe3.html
+//     index.html --contains--> iframe1.html --contains--> iframe2.html
 // w/ id's =     nesting-iframe              nested1Level
 
         // verify we have as described above
@@ -161,7 +161,7 @@ asyncTest("Iframe nesting", function(){
         // now, we'll programatically extend the nesting depth from 2 to many
         recursivelyInsertIFrames(startingDepth, endingDepth, iframeNested1);
     };
-    topNestingIFrame.src = "../fixtures/scope/iframe2.html";
+    topNestingIFrame.src = "../fixtures/scope/iframe1.html";
 
     setTimeout(function(){
         start();
@@ -175,7 +175,7 @@ function recursivelyInsertIFrames(depth, finalDepth, existingIframe){
     newIframe.setAttribute("id", "iframe_of_depth_" + depth);
     newIframe.setAttribute("style", "border: 3px solid blue; padding: 1em; " +
         "width: 95%; height: " + (1100-(140*depth)) + "px;");
-    newIframe.src = "/env-js/specs/fixtures/scope/iframe" + (depth+1) + ".html";
+    newIframe.src = "/env-js/specs/fixtures/scope/iframe" + depth + ".html";
 
     if (depth < finalDepth)
         newIframe.onload = function(){

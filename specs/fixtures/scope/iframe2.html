@@ -12,15 +12,31 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
       lang="en" dir="ltr" id="html">
   <head>
-    <title>Content document for nested-IFRAME testing in env.js</title>
+    <title>Content document for IFRAME loading in env.js unit test suite</title>
   </head>
   <body>
-    <p id="firstPara">
-      First paragraph in <code>iframe2.html</code>.</p>
-    <iframe id="nested1Level" src="iframe3.html"
-style='border: 3px solid yellow; padding: 1em; width: 95%; height: 870px;'>
-     </iframe>
-    <p id="lastPara">
-      Last paragraph in <code>iframe2.html</code>.</p>
+    <p id="aParaInAnIframe">
+      Here is a short paragraph in <code>iframe2.html</code>.</p>
+    <p>Nesting level: <span id="nestingLevel">2</span></p>
+    <!--
+      The preceding is the seed value for the automatic iframe-nesting
+      count generation in <code>iframeN.html</code>, used by the nesting
+      test in <code>../../scope/spec.js</code>.  Value must be equal to the
+      test's 'startingDepth' variable, minus 1, for things to work.
+      -->
+
+    <!-- matches code in iframeN.html -->
+    <script>
+      window.onload = function(){
+        var p = document.createElement('p');
+        p.setAttribute('id', "pCreatedIframeOnload" +
+          window.top.numberNestedIframeLoads);
+        var t = document.createTextNode("para window onload " +
+          window.top.numberNestedIframeLoads);
+        p.appendChild(t);
+        document.getElementsByTagName('body')[0].appendChild(p);
+        window.top.windowLoadCount++;
+      }
+    </script>
   </body>
 </html>
