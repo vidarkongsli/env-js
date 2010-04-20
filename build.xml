@@ -569,6 +569,7 @@
             <fileset dir="${SRC_DIR}" includes="common/__extend__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__setArray__.js" />
             <fileset dir="${SRC_DIR}" includes="common/__trim__.js" />
+            <fileset dir="${SRC_DIR}" includes="css/document.js" />
             <fileset dir="${SRC_DIR}" includes="css/properties.js" />
             <fileset dir="${SRC_DIR}" includes="css/rule.js" />
             <fileset dir="${SRC_DIR}" includes="css/stylesheet.js" />

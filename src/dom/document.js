@@ -225,10 +225,6 @@ __extend__(Document.prototype,{
             return window.getComputedStyle(elem);
         }};
     },
-    get styleSheets(){
-        /*TODO*/
-        return [];
-    }
 });
 
 /*

@@ -1,6 +1,31 @@
 
+/**
+ * StyleSheet
+ * http://dev.w3.org/csswg/cssom/#stylesheet
+ *
+ * interface StyleSheet {
+ *   readonly attribute DOMString type;
+ *   readonly attribute DOMString href;
+ *   readonly attribute Node ownerNode;
+ *   readonly attribute StyleSheet parentStyleSheet;
+ *   readonly attribute DOMString title;
+ *   [PutForwards=mediaText] readonly attribute MediaList media;
+ *          attribute boolean disabled;
+ * };
+ */
+StyleSheet = function() {
+}
+
 /*
- * CSSStyleSheet - DOM Level 2
+ * CSSStyleSheet
+ * http://dev.w3.org/csswg/cssom/#cssstylesheet
+ *
+ * interface CSSStyleSheet : StyleSheet {
+ *   readonly attribute CSSRule ownerRule;
+ *   readonly attribute CSSRuleList cssRules;
+ *   unsigned long insertRule(DOMString rule, unsigned long index);
+ *   void deleteRule(unsigned long index);
+ * };
  */
 CSSStyleSheet = function(options){
     var $cssRules,
@@ -68,3 +93,21 @@ CSSStyleSheet = function(options){
         }
     });
 };
+
+StyleSheetList = function() {
+    this.length = 0;
+    __setArray__(this, []);
+}
+
+__extend__(StyleSheetList.prototype, {
+    item : function(index) {
+        if ((index >= 0) && (index < this.length)) {
+            // bounds check
+            return this[index];
+        }
+        return null;
+    },
+    toString: function() {
+        return '[object StyleSheetList]';
+    }
+});
