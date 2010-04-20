@@ -89,4 +89,8 @@ test('CSS2Properties', function(){
 test('document.styleSheets', function() {
     ok(document.styleSheets, 'document.styleSheets exists');
     equals(document.styleSheets.toString(), '[object StyleSheetList]', 'StyleSheetsList.toString()');
+    equals(document.styleSheets.item(999), null, 'StyleSheetList.item out-of-range');
+
+    //equals(document.styleSheets.length, 1, 'StyleSheetList.length');
 });
+
