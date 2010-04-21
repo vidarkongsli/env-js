@@ -3,7 +3,7 @@
  * Get 'Current Working Directory'
  */
 Envjs.getcwd = function() {
-    return java.lang.System.getProperty('user.dir');
+    return java.lang.System.getProperty('user.dir').replace('\\','/');
 }
 
 /**
